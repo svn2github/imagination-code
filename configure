@@ -2059,7 +2059,7 @@ fi
 
 
 # Define the identity of the package.
- PACKAGE=fantasy
+ PACKAGE=imagination
  VERSION=0.1
 
 

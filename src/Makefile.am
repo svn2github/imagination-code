@@ -5,13 +5,13 @@ INCLUDES = \
 	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" \
 	@PACKAGE_CFLAGS@
 
-bin_PROGRAMS = fantasy
+bin_PROGRAMS = imagination
 
-fantasy_SOURCES = \
+imagination_SOURCES = \
 	main.c \
 	support.c support.h \
 	interface.c interface.h \
 	callbacks.c callbacks.h
 
-fantasy_LDADD = @PACKAGE_LIBS@ $(INTLLIBS)
+imagination_LDADD = @PACKAGE_LIBS@ $(INTLLIBS)
 

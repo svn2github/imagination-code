@@ -13,7 +13,7 @@
 #   Makefile.in.in and po2tbl.sed.in for use with glib-gettextize
 
 GETTEXT_PACKAGE = fantasy
-PACKAGE = fantasy
+PACKAGE = imagination
 VERSION = 0.1
 
 SHELL = /bin/sh
@@ -23,7 +23,7 @@ srcdir = .
 top_srcdir = ..
 
 
-prefix = /usr/local
+prefix = /usr
 exec_prefix = ${prefix}
 datarootdir = ${prefix}/share
 datadir = ${datarootdir}
