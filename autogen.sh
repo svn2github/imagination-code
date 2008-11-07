@@ -101,7 +101,7 @@ xlc )
   am_opt=--include-deps;;
 esac
 
-for coin in `find $srcdir -name configure.in -print`
+for coin in `find $srcdir -path $srcdir/CVS -prune -o -name configure.in -print`
 do 
   dr=`dirname $coin`
   if test -f $dr/NO-AUTO-GEN; then
@@ -141,14 +141,14 @@ do
 	autoheader
       fi
       echo "Running automake --gnu $am_opt ..."
-      automake --add-missing --gnu $am_opt
+      automake --add-missing --copy --gnu $am_opt
       echo "Running autoconf ..."
       autoconf
     )
   fi
 done
 
-conf_flags="--enable-maintainer-mode"
+#conf_flags="--enable-maintainer-mode"
 
 if test x$NOCONFIGURE = x; then
   echo Running $srcdir/configure $conf_flags "$@" ...
