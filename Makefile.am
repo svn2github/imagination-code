@@ -4,8 +4,7 @@ SUBDIRS = src po
 
 EXTRA_DIST = \
 	autogen.sh \
-	fantasy.glade \
-	fantasy.gladep
+	imagination.glade
 
 install-data-local:
 	@$(NORMAL_INSTALL)
