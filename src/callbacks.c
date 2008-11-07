@@ -5,6 +5,6 @@
 #include <gtk/gtk.h>
 
 #include "callbacks.h"
-#include "interface.h"
+#include "main-window.h"
 #include "support.h"
 

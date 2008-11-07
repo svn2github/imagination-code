@@ -8,9 +8,9 @@ INCLUDES = \
 bin_PROGRAMS = imagination
 
 imagination_SOURCES = \
-	main.c \
+	imagination.c \
 	support.c support.h \
-	interface.c interface.h \
+	main-window.c main-window.h \
 	callbacks.c callbacks.h
 
 imagination_LDADD = @PACKAGE_LIBS@ $(INTLLIBS)
