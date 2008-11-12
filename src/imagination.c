@@ -43,6 +43,7 @@ int main (int argc, char *argv[])
 
 	img_window = img_create_window();
 	gtk_widget_show (img_window->imagination_window);
+	gtk_statusbar_push((GtkStatusbar*)img_window->statusbar,img_window->message_id,_("Welcome to Imagination " VERSION));
 
 	gtk_main ();
 	g_free(img_window);

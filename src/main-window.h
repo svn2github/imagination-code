@@ -29,6 +29,8 @@ struct _img_window_struct
 	GtkWidget *duration;
   	GtkWidget *thumbnail_iconview;
   	GtkWidget *statusbar;
+  	GtkWidget *event_box;
+  	guint message_id;
 };
 
 img_window_struct *img_create_window(void);

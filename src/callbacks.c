@@ -50,7 +50,7 @@ void img_show_about_dialog (GtkMenuItem *menuitem,img_window_struct *img_struct)
 			"name", "Imagination",
 			"version",PACKAGE_VERSION,
 			"copyright","Copyright \xC2\xA9 2008 Giuseppe Torelli",
-			"comments","A simple and lightweight DVD Slideshow maker",
+			"comments","A simple and lightweight DVD slideshow maker",
 			"authors",authors,
 			"documenters",documenters,
 			"translator_credits",_("translator-credits"),
