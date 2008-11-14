@@ -96,7 +96,7 @@ img_window_struct *img_create_window (void)
 
 	/* Create the menu items */
 	menubar = gtk_menu_bar_new ();
-	gtk_box_pack_start (GTK_BOX (vbox1), menubar, FALSE, TRUE, 0);
+	gtk_box_pack_start ((GtkBox *)vbox1, menubar, FALSE, TRUE, 0);
 
 	menuitem1 = gtk_menu_item_new_with_mnemonic (_("_Slideshow"));
 	gtk_container_add (GTK_CONTAINER (menubar), menuitem1);
@@ -186,7 +186,7 @@ img_window_struct *img_create_window (void)
 
 	/* Create the toolbar */
 	toolbar = gtk_toolbar_new ();
-	gtk_box_pack_start (GTK_BOX (vbox1), toolbar, FALSE, FALSE, 0);
+	gtk_box_pack_start ((GtkBox *)vbox1, toolbar, FALSE, FALSE, 0);
 	gtk_toolbar_set_style (GTK_TOOLBAR (toolbar), GTK_TOOLBAR_ICONS);
 	tmp_toolbar_icon_size = gtk_toolbar_get_icon_size (GTK_TOOLBAR (toolbar));
 
@@ -200,7 +200,7 @@ img_window_struct *img_create_window (void)
 	/* Create the image area and the other widgets */
 	hbox = gtk_hbox_new (FALSE, 0);
 	gtk_widget_show (hbox);
-	gtk_box_pack_start (GTK_BOX (vbox1), hbox, TRUE, TRUE, 0);
+	gtk_box_pack_start ((GtkBox*)vbox1, hbox, TRUE, TRUE, 0);
 
 	/* Code from gpicview with some modifications by me */
 	img_struct->event_box = gtk_event_box_new();
@@ -218,30 +218,29 @@ img_window_struct *img_create_window (void)
 	gtk_box_pack_start( (GtkBox*)hbox,scrolledwindow,TRUE,TRUE,0);
 	/* End code from gpicview */
 
-	vbox_info_slide = gtk_vbox_new (FALSE, 5);
-	gtk_box_pack_start (GTK_BOX (hbox),vbox_info_slide,TRUE,TRUE,0);
+	vbox_info_slide = gtk_vbox_new (FALSE,1);
+	gtk_box_pack_start ((GtkBox *)hbox,vbox_info_slide,FALSE,FALSE,0);
 
 	transition_label = gtk_label_new(_("Transition type:"));
-	gtk_box_pack_start (GTK_BOX (vbox_info_slide),transition_label, FALSE, FALSE, 0);
-	gtk_misc_set_alignment((GtkMisc *) transition_label,0,0);
+	gtk_misc_set_alignment((GtkMisc *) transition_label,0,-1);
+	gtk_box_pack_start ((GtkBox *)vbox_info_slide,transition_label,FALSE,FALSE,0);
 	img_struct->transition_type = gtk_combo_box_entry_new_text ();
-	gtk_widget_show (img_struct->transition_type);
-	gtk_box_pack_start (GTK_BOX (vbox_info_slide), img_struct->transition_type, TRUE, TRUE, 0);
+	gtk_box_pack_start ((GtkBox *)vbox_info_slide, img_struct->transition_type,FALSE,TRUE,0);
 
 	hbox_duration = gtk_hbox_new (TRUE, 0);
-	gtk_box_pack_start (GTK_BOX (vbox_info_slide), hbox_duration, FALSE, FALSE, 0);
+	gtk_box_pack_start ((GtkBox *)vbox_info_slide, hbox_duration, FALSE, FALSE, 0);
 
 	duration_label = gtk_label_new (_("Slide duration in sec:"));
-	gtk_box_pack_start (GTK_BOX (hbox_duration), duration_label, FALSE, FALSE, 0);
+	gtk_box_pack_start ((GtkBox *)hbox_duration,duration_label, FALSE, FALSE, 0);
 
-	spinbutton1_adj = gtk_adjustment_new (1, 0, 60, 1, 10, 10);
+	spinbutton1_adj = gtk_adjustment_new (1, 1, 120, 1, 10, 10);
 	img_struct->duration = gtk_spin_button_new (GTK_ADJUSTMENT (spinbutton1_adj), 1, 0);
-	gtk_box_pack_start (GTK_BOX (hbox_duration), img_struct->duration, TRUE, TRUE, 0);
+	gtk_box_pack_start ((GtkBox *)hbox_duration, img_struct->duration, FALSE, FALSE, 0);
 
 	/* Create the thumbnail viewer */
 	thumb_scrolledwindow = gtk_scrolled_window_new (NULL, NULL);
 	gtk_widget_show_all(thumb_scrolledwindow);
-	gtk_box_pack_start (GTK_BOX (vbox1), thumb_scrolledwindow, FALSE, TRUE, 0);
+	gtk_box_pack_start ((GtkBox *)vbox1, thumb_scrolledwindow, FALSE, TRUE, 0);
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (thumb_scrolledwindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (thumb_scrolledwindow), GTK_SHADOW_IN);
 
@@ -254,7 +253,7 @@ img_window_struct *img_create_window (void)
 	/* Create the status bar */
 	img_struct->statusbar = gtk_statusbar_new ();
 	gtk_widget_show (img_struct->statusbar);
-	gtk_box_pack_start (GTK_BOX (vbox1), img_struct->statusbar, FALSE, TRUE, 0);
+	gtk_box_pack_start ((GtkBox *)vbox1, img_struct->statusbar, FALSE, TRUE, 0);
 	img_struct->message_id = gtk_statusbar_get_context_id (GTK_STATUSBAR (img_struct->statusbar), "statusbar");
 	
 	gtk_widget_show_all(hbox);
