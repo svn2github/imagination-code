@@ -65,6 +65,15 @@ img_window_struct *img_create_window (void)
 	GtkWidget *imagemenuitem10;
 	GtkWidget *imagemenuitem11;
 	GtkWidget *toolbar;
+	GtkWidget *new_button;
+	GtkWidget *open_button;
+	GtkWidget *save_button;
+	GtkWidget *generate_button;
+	GtkWidget *import_button;
+	GtkWidget *remove_button;
+	GtkWidget *separatortoolitem;
+	GtkWidget *left_button;
+	GtkWidget *right_button;
 	GtkWidget *viewport;
 	GtkIconSize tmp_toolbar_icon_size;
 	GtkWidget *hbox;
@@ -79,7 +88,6 @@ img_window_struct *img_create_window (void)
 	GtkObject *spinbutton1_adj;
 	GtkAccelGroup *accel_group;
 	
-	GtkWidget *new_button;
 	GdkColor background_color = {0, 65535, 65535, 65535};
 
 	img_struct = g_new0(img_window_struct,1);
@@ -148,7 +156,6 @@ img_window_struct *img_create_window (void)
 
 	separator_slide_menu = gtk_separator_menu_item_new ();
 	gtk_container_add (GTK_CONTAINER (slide_menu),separator_slide_menu);
-	gtk_widget_set_sensitive (separator_slide_menu,FALSE);
 
 	import_menu = gtk_image_menu_item_new_with_mnemonic (_("_Import"));
 	gtk_container_add (GTK_CONTAINER (slide_menu),import_menu);
@@ -164,6 +171,9 @@ img_window_struct *img_create_window (void)
 
 	tmp_image = gtk_image_new_from_stock ("gtk-remove",GTK_ICON_SIZE_MENU);
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (remove_menu),tmp_image);
+
+	separator_slide_menu = gtk_separator_menu_item_new ();
+	gtk_container_add (GTK_CONTAINER (slide_menu),separator_slide_menu);
 
 	move_left_menu = gtk_image_menu_item_new_with_mnemonic (_("Move to _left"));
 	gtk_widget_add_accelerator (move_left_menu,"activate",accel_group,GDK_l,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
@@ -197,10 +207,52 @@ img_window_struct *img_create_window (void)
 	tmp_toolbar_icon_size = gtk_toolbar_get_icon_size (GTK_TOOLBAR (toolbar));
 
 	tmp_image = gtk_image_new_from_stock ("gtk-new",tmp_toolbar_icon_size);
-	new_button = (GtkWidget*) gtk_tool_button_new (tmp_image,_("New"));
-	gtk_tool_item_set_homogeneous (GTK_TOOL_ITEM (new_button),FALSE);
+	new_button = (GtkWidget*) gtk_tool_button_new (tmp_image,"");
 	gtk_container_add (GTK_CONTAINER (toolbar),new_button);
-	gtk_widget_set_tooltip_text(new_button, "Create a new slideshow"); 
+	gtk_widget_set_tooltip_text(new_button, _("Create a new slideshow"));
+
+	tmp_image = gtk_image_new_from_stock ("gtk-open",tmp_toolbar_icon_size);
+	open_button = (GtkWidget*) gtk_tool_button_new (tmp_image,"");
+	gtk_container_add (GTK_CONTAINER (toolbar),open_button);
+	gtk_widget_set_tooltip_text(open_button, _("Open a slideshow"));
+
+	tmp_image = gtk_image_new_from_stock ("gtk-save",tmp_toolbar_icon_size);
+	save_button = (GtkWidget*) gtk_tool_button_new (tmp_image,"");
+	gtk_container_add (GTK_CONTAINER (toolbar),save_button);
+	gtk_widget_set_tooltip_text(save_button, _("Save the slideshow"));
+
+	tmp_image = gtk_image_new_from_stock ("gtk-execute",tmp_toolbar_icon_size);
+	generate_button = (GtkWidget*) gtk_tool_button_new (tmp_image,"");
+	gtk_container_add (GTK_CONTAINER (toolbar),generate_button);
+	gtk_widget_set_tooltip_text(generate_button, _("Generate the DVD slideshow"));
+
+	separatortoolitem = (GtkWidget *)gtk_separator_tool_item_new();
+	gtk_widget_show (separatortoolitem);
+	gtk_container_add (GTK_CONTAINER (toolbar),separatortoolitem);
+
+	tmp_image = gtk_image_new_from_stock ("gtk-add",tmp_toolbar_icon_size);
+	import_button = (GtkWidget*) gtk_tool_button_new (tmp_image,"");
+	gtk_container_add (GTK_CONTAINER (toolbar),import_button);
+	gtk_widget_set_tooltip_text(import_button, _("Import one or more pictures"));
+
+	tmp_image = gtk_image_new_from_stock ("gtk-remove",tmp_toolbar_icon_size);
+	remove_button = (GtkWidget*) gtk_tool_button_new (tmp_image,"");
+	gtk_container_add (GTK_CONTAINER (toolbar),remove_button);
+	gtk_widget_set_tooltip_text(remove_button, _("Remove the selected slides"));
+
+	separatortoolitem = (GtkWidget *)gtk_separator_tool_item_new();
+	gtk_widget_show (separatortoolitem);
+	gtk_container_add (GTK_CONTAINER (toolbar),separatortoolitem);
+
+	tmp_image = gtk_image_new_from_stock ("gtk-go-back",tmp_toolbar_icon_size);
+	left_button = (GtkWidget*) gtk_tool_button_new (tmp_image,"");
+	gtk_container_add (GTK_CONTAINER (toolbar),left_button);
+	gtk_widget_set_tooltip_text(left_button, _("Move the selected slide to left"));
+
+	tmp_image = gtk_image_new_from_stock ("gtk-go-forward",tmp_toolbar_icon_size);
+	right_button = (GtkWidget*) gtk_tool_button_new (tmp_image,"");
+	gtk_container_add (GTK_CONTAINER (toolbar),right_button);
+	gtk_widget_set_tooltip_text(right_button, _("Move the selected slide to right"));
 	gtk_widget_show_all (toolbar);
 
 	/* Create the image area and the other widgets */
