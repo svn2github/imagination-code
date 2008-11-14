@@ -27,6 +27,7 @@ struct _img_window_struct
 	GtkWidget *imagination_window;
 	GtkWidget *transition_type;
 	GtkWidget *duration;
+  	GtkListStore *thumbnail_model;
   	GtkWidget *thumbnail_iconview;
   	GtkWidget *statusbar;
   	GtkWidget *event_box;

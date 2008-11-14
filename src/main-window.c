@@ -81,6 +81,7 @@ img_window_struct *img_create_window (void)
 	
 	GtkWidget *new_button;
 	GdkColor background_color = {0, 65535, 65535, 65535};
+	GtkTreeIter iter;
 
 	img_struct = g_new0(img_window_struct,1);
 	
@@ -90,7 +91,7 @@ img_window_struct *img_create_window (void)
 	gtk_window_set_default_size( (GtkWindow*)img_struct->imagination_window, 840, 580 );
 	g_signal_connect (G_OBJECT (img_struct->imagination_window),"delete-event",G_CALLBACK (img_quit_application),img_struct);
 
-	vbox1 = gtk_vbox_new (FALSE,5);
+	vbox1 = gtk_vbox_new (FALSE,2);
 	gtk_widget_show (vbox1);
 	gtk_container_add (GTK_CONTAINER (img_struct->imagination_window), vbox1);
 
@@ -151,6 +152,7 @@ img_window_struct *img_create_window (void)
 
 	import_menu = gtk_image_menu_item_new_with_mnemonic (_("Import"));
 	gtk_container_add (GTK_CONTAINER (slide_menu),import_menu);
+	g_signal_connect ((gpointer) import_menu,"activate",G_CALLBACK (img_add_slides_thumbnails),img_struct);
 
 	tmp_image = gtk_image_new_from_stock ("gtk-add",GTK_ICON_SIZE_MENU);
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (import_menu),tmp_image);
@@ -213,21 +215,22 @@ img_window_struct *img_create_window (void)
     
 	gtk_scrolled_window_add_with_viewport( (GtkScrolledWindow*)scrolledwindow,img_struct->event_box);
 	viewport = gtk_bin_get_child( (GtkBin*)scrolledwindow);
-	gtk_viewport_set_shadow_type( (GtkViewport*)viewport, GTK_SHADOW_NONE );
-	gtk_container_set_border_width( (GtkContainer*)viewport, 20 );
+	gtk_viewport_set_shadow_type( (GtkViewport*)viewport, GTK_SHADOW_IN);
+	gtk_container_set_border_width( (GtkContainer*)viewport,10);
 	gtk_box_pack_start( (GtkBox*)hbox,scrolledwindow,TRUE,TRUE,0);
 	/* End code from gpicview */
 
 	vbox_info_slide = gtk_vbox_new (FALSE,1);
 	gtk_box_pack_start ((GtkBox *)hbox,vbox_info_slide,FALSE,FALSE,0);
 
+	/* Create the combo box and the spinbutton */
 	transition_label = gtk_label_new(_("Transition type:"));
 	gtk_misc_set_alignment((GtkMisc *) transition_label,0,-1);
 	gtk_box_pack_start ((GtkBox *)vbox_info_slide,transition_label,FALSE,FALSE,0);
 	img_struct->transition_type = gtk_combo_box_entry_new_text ();
 	gtk_box_pack_start ((GtkBox *)vbox_info_slide, img_struct->transition_type,FALSE,TRUE,0);
 
-	hbox_duration = gtk_hbox_new (TRUE, 0);
+	hbox_duration = gtk_hbox_new (FALSE, 0);
 	gtk_box_pack_start ((GtkBox *)vbox_info_slide, hbox_duration, FALSE, FALSE, 0);
 
 	duration_label = gtk_label_new (_("Slide duration in sec:"));
@@ -237,6 +240,10 @@ img_window_struct *img_create_window (void)
 	img_struct->duration = gtk_spin_button_new (GTK_ADJUSTMENT (spinbutton1_adj), 1, 0);
 	gtk_box_pack_start ((GtkBox *)hbox_duration, img_struct->duration, FALSE, FALSE, 0);
 
+	/* Create the model */
+	img_struct->thumbnail_model = gtk_list_store_new (2,GDK_TYPE_PIXBUF,G_TYPE_POINTER);
+	gtk_list_store_append (img_struct->thumbnail_model,&iter);
+
 	/* Create the thumbnail viewer */
 	thumb_scrolledwindow = gtk_scrolled_window_new (NULL, NULL);
 	gtk_widget_show_all(thumb_scrolledwindow);
@@ -244,10 +251,11 @@ img_window_struct *img_create_window (void)
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (thumb_scrolledwindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (thumb_scrolledwindow), GTK_SHADOW_IN);
 
-	img_struct->thumbnail_iconview = gtk_icon_view_new ();
+	img_struct->thumbnail_iconview = gtk_icon_view_new_with_model((GtkTreeModel *)img_struct->thumbnail_model);
 	gtk_widget_show (img_struct->thumbnail_iconview);
 	gtk_icon_view_set_selection_mode (GTK_ICON_VIEW (img_struct->thumbnail_iconview), GTK_SELECTION_MULTIPLE);
 	gtk_icon_view_set_orientation (GTK_ICON_VIEW (img_struct->thumbnail_iconview), GTK_ORIENTATION_HORIZONTAL);
+	gtk_icon_view_set_pixbuf_column (GTK_ICON_VIEW (img_struct->thumbnail_iconview), 0);
 	gtk_container_add (GTK_CONTAINER (thumb_scrolledwindow), img_struct->thumbnail_iconview);
 
 	/* Create the status bar */

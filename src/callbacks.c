@@ -27,12 +27,58 @@
 #include "callbacks.h"
 #include "support.h"
 
+void img_add_slides_thumbnails(GtkMenuItem *item,img_window_struct *img)
+{
+	GSList *slides = NULL;
+	GdkPixbuf *thumb;
+	GtkTreeIter iter;
+
+	slides = img_import_slides_file_chooser(img);
+	if (slides == NULL)
+		return;
+
+	//img->progress_window = img_create_progress_window(img);
+	gtk_tree_model_get_iter_first((GtkTreeModel *)img->thumbnail_model,&iter);
+	while (slides)
+	{
+		thumb = gdk_pixbuf_new_from_file_at_scale(slides->data, 93, 70, TRUE, NULL);
+		gtk_list_store_set (img->thumbnail_model, &iter, 0, thumb, 1, NULL,-1);
+		slides = slides->next;
+	}
+	g_slist_foreach(slides,(GFunc) g_free,NULL);
+	g_slist_free(slides);
+}
+
+GSList *img_import_slides_file_chooser(img_window_struct *img)
+{
+	GtkWidget *import_slide;
+	GSList *slides = NULL;
+	gchar *filename;
+	int response;
+
+	import_slide = gtk_file_chooser_dialog_new (_("Import pictures, use SHIFT key for multiple select"),
+						GTK_WINDOW (img->imagination_window),
+						GTK_FILE_CHOOSER_ACTION_OPEN,
+						GTK_STOCK_CANCEL,
+						GTK_RESPONSE_CANCEL,
+						"gtk-open",
+						GTK_RESPONSE_ACCEPT,
+						NULL);
+	gtk_file_chooser_set_select_multiple((GtkFileChooser *)import_slide,TRUE);
+	response = gtk_dialog_run ((GtkDialog *)import_slide);
+	if (response == GTK_RESPONSE_ACCEPT)
+		slides = gtk_file_chooser_get_filenames((GtkFileChooser *)import_slide);
+
+	gtk_widget_destroy (import_slide);
+	return slides;
+}
+
 void img_quit_application(GtkMenuItem *menuitem,gpointer user_data)
 {
 	gtk_main_quit();
 }
 
-void img_show_about_dialog (GtkMenuItem *menuitem,img_window_struct *img_struct)
+void img_show_about_dialog (GtkMenuItem *item,img_window_struct *img_struct)
 {
 	static GtkWidget *about = NULL;
     const char *authors[] = {"\nMain developer:\nGiuseppe Torelli <colossus73@gmail.com>\n",NULL};
