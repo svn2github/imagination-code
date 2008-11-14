@@ -42,7 +42,9 @@ void img_add_slides_thumbnails(GtkMenuItem *item,img_window_struct *img)
 	while (slides)
 	{
 		thumb = gdk_pixbuf_new_from_file_at_scale(slides->data, 93, 70, TRUE, NULL);
+		//g_print ("%d %d\n",gdk_pixbuf_get_width(thumb),gdk_pixbuf_get_height(thumb));
 		gtk_list_store_set (img->thumbnail_model, &iter, 0, thumb, 1, NULL,-1);
+		g_object_unref (thumb);
 		slides = slides->next;
 	}
 	g_slist_foreach(slides,(GFunc) g_free,NULL);

@@ -150,8 +150,9 @@ img_window_struct *img_create_window (void)
 	gtk_container_add (GTK_CONTAINER (slide_menu),separator_slide_menu);
 	gtk_widget_set_sensitive (separator_slide_menu,FALSE);
 
-	import_menu = gtk_image_menu_item_new_with_mnemonic (_("Import"));
+	import_menu = gtk_image_menu_item_new_with_mnemonic (_("_Import"));
 	gtk_container_add (GTK_CONTAINER (slide_menu),import_menu);
+	gtk_widget_add_accelerator (import_menu,"activate",accel_group,GDK_i,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
 	g_signal_connect ((gpointer) import_menu,"activate",G_CALLBACK (img_add_slides_thumbnails),img_struct);
 
 	tmp_image = gtk_image_new_from_stock ("gtk-add",GTK_ICON_SIZE_MENU);

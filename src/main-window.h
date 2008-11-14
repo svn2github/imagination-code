@@ -20,18 +20,28 @@
 #ifndef __IMAGINATION_INTERFACE_H__
 #define __IMAGINATION_INTERFACE_H__
 
+typedef struct _slide_struct slide_struct;
+
+struct _slide_struct
+{
+	gchar	*filename;
+	guint	duration;
+	//transition_effect;
+};
+
 typedef struct _img_window_struct img_window_struct;
 
 struct _img_window_struct
 {
-	GtkWidget *imagination_window;
-	GtkWidget *transition_type;
-	GtkWidget *duration;
+	GtkWidget	*imagination_window;
+	GtkWidget	*transition_type;
+	GtkWidget	*duration;
   	GtkListStore *thumbnail_model;
-  	GtkWidget *thumbnail_iconview;
-  	GtkWidget *statusbar;
-  	GtkWidget *event_box;
-  	guint message_id;
+  	GtkWidget	*thumbnail_iconview;
+  	GtkWidget	*statusbar;
+  	GtkWidget	*event_box;
+  	gint		slides_nr;
+  	guint		message_id;
 };
 
 img_window_struct *img_create_window(void);
