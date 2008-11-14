@@ -38,13 +38,16 @@ void img_add_slides_thumbnails(GtkMenuItem *item,img_window_struct *img)
 		return;
 
 	//img->progress_window = img_create_progress_window(img);
-	gtk_tree_model_get_iter_first((GtkTreeModel *)img->thumbnail_model,&iter);
 	while (slides)
 	{
 		thumb = gdk_pixbuf_new_from_file_at_scale(slides->data, 93, 70, TRUE, NULL);
-		//g_print ("%d %d\n",gdk_pixbuf_get_width(thumb),gdk_pixbuf_get_height(thumb));
-		gtk_list_store_set (img->thumbnail_model, &iter, 0, thumb, 1, NULL,-1);
-		g_object_unref (thumb);
+		if (thumb)
+		{
+			gtk_list_store_append (img->thumbnail_model,&iter);
+			gtk_list_store_set (img->thumbnail_model, &iter, 0, thumb, 1, NULL,-1);
+			g_object_unref (thumb);
+			img->slides_nr++;
+		}
 		slides = slides->next;
 	}
 	g_slist_foreach(slides,(GFunc) g_free,NULL);
@@ -67,15 +70,21 @@ GSList *img_import_slides_file_chooser(img_window_struct *img)
 						GTK_RESPONSE_ACCEPT,
 						NULL);
 	gtk_file_chooser_set_select_multiple((GtkFileChooser *)import_slide,TRUE);
+	if (img->current_dir)
+		gtk_file_chooser_set_current_folder((GtkFileChooser*)import_slide,img->current_dir);
 	response = gtk_dialog_run ((GtkDialog *)import_slide);
 	if (response == GTK_RESPONSE_ACCEPT)
+	{
 		slides = gtk_file_chooser_get_filenames((GtkFileChooser *)import_slide);
-
+		if (img->current_dir)
+			g_free(img->current_dir);
+		img->current_dir = gtk_file_chooser_get_current_folder((GtkFileChooser*)import_slide);
+	}
 	gtk_widget_destroy (import_slide);
 	return slides;
 }
 
-void img_quit_application(GtkMenuItem *menuitem,gpointer user_data)
+void img_quit_application(GtkMenuItem *menuitem,img_window_struct *img_struct)
 {
 	gtk_main_quit();
 }

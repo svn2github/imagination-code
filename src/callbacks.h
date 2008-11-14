@@ -21,6 +21,6 @@
 
 void img_add_slides_thumbnails(GtkMenuItem *,img_window_struct *);
 GSList *img_import_slides_file_chooser(img_window_struct *);
-void img_quit_application(GtkMenuItem *,gpointer );
+void img_quit_application(GtkMenuItem *,img_window_struct *);
 void img_show_about_dialog (GtkMenuItem *,img_window_struct *);
 

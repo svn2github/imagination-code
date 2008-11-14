@@ -81,7 +81,6 @@ img_window_struct *img_create_window (void)
 	
 	GtkWidget *new_button;
 	GdkColor background_color = {0, 65535, 65535, 65535};
-	GtkTreeIter iter;
 
 	img_struct = g_new0(img_window_struct,1);
 	
@@ -118,6 +117,7 @@ img_window_struct *img_create_window (void)
 	gtk_container_add (GTK_CONTAINER (menu1), imagemenuitem4);
 	  
 	generate_menu = gtk_image_menu_item_new_with_mnemonic (_("Generate"));
+	gtk_widget_add_accelerator (generate_menu,"activate",accel_group,GDK_g,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
 	gtk_container_add (GTK_CONTAINER (menu1), generate_menu);
 	  
 	tmp_image = gtk_image_new_from_stock ("gtk-execute",GTK_ICON_SIZE_MENU);
@@ -129,7 +129,7 @@ img_window_struct *img_create_window (void)
 
 	imagemenuitem5 = gtk_image_menu_item_new_from_stock ("gtk-quit", accel_group);
 	gtk_container_add (GTK_CONTAINER (menu1), imagemenuitem5);
-	g_signal_connect ((gpointer) imagemenuitem5,"activate",G_CALLBACK (img_quit_application),NULL);
+	g_signal_connect ((gpointer) imagemenuitem5,"activate",G_CALLBACK (img_quit_application),img_struct);
 
 	menuitem2 = gtk_menu_item_new_with_mnemonic (_("_Slide"));
 	gtk_container_add (GTK_CONTAINER (menubar), menuitem2);
@@ -158,19 +158,22 @@ img_window_struct *img_create_window (void)
 	tmp_image = gtk_image_new_from_stock ("gtk-add",GTK_ICON_SIZE_MENU);
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (import_menu),tmp_image);
 
-	remove_menu = gtk_image_menu_item_new_with_mnemonic (_("Delete"));
+	remove_menu = gtk_image_menu_item_new_with_mnemonic (_("_Delete"));
+	gtk_widget_add_accelerator (remove_menu,"activate",accel_group,GDK_d,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
 	gtk_container_add (GTK_CONTAINER (slide_menu), remove_menu);
 
 	tmp_image = gtk_image_new_from_stock ("gtk-remove",GTK_ICON_SIZE_MENU);
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (remove_menu),tmp_image);
 
-	move_left_menu = gtk_image_menu_item_new_with_mnemonic (_("Move to left"));
+	move_left_menu = gtk_image_menu_item_new_with_mnemonic (_("Move to _left"));
+	gtk_widget_add_accelerator (move_left_menu,"activate",accel_group,GDK_l,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
 	gtk_container_add (GTK_CONTAINER (slide_menu), move_left_menu);
 
 	tmp_image = gtk_image_new_from_stock ("gtk-go-back",GTK_ICON_SIZE_MENU);
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (move_left_menu),tmp_image);
 
-	move_right_menu = gtk_image_menu_item_new_with_mnemonic (_("Move to right"));
+	move_right_menu = gtk_image_menu_item_new_with_mnemonic (_("Move to _right"));
+	gtk_widget_add_accelerator (move_right_menu,"activate",accel_group,GDK_r,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
 	gtk_container_add (GTK_CONTAINER (slide_menu), move_right_menu);
 
 	tmp_image = gtk_image_new_from_stock ("gtk-go-forward",GTK_ICON_SIZE_MENU);
@@ -243,13 +246,12 @@ img_window_struct *img_create_window (void)
 
 	/* Create the model */
 	img_struct->thumbnail_model = gtk_list_store_new (2,GDK_TYPE_PIXBUF,G_TYPE_POINTER);
-	gtk_list_store_append (img_struct->thumbnail_model,&iter);
 
 	/* Create the thumbnail viewer */
 	thumb_scrolledwindow = gtk_scrolled_window_new (NULL, NULL);
 	gtk_widget_show_all(thumb_scrolledwindow);
 	gtk_box_pack_start ((GtkBox *)vbox1, thumb_scrolledwindow, FALSE, TRUE, 0);
-	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (thumb_scrolledwindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (thumb_scrolledwindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_NEVER);
 	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (thumb_scrolledwindow), GTK_SHADOW_IN);
 
 	img_struct->thumbnail_iconview = gtk_icon_view_new_with_model((GtkTreeModel *)img_struct->thumbnail_model);
