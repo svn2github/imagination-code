@@ -55,6 +55,7 @@ img_window_struct *img_create_window (void)
 	GtkWidget *imagemenuitem7;
 	GtkWidget *imagemenuitem8;
 	GtkWidget *import_menu;
+	GtkWidget *image_menu;
 	GtkWidget *remove_menu;
 	GtkWidget *move_left_menu;
 	GtkWidget *move_right_menu;
@@ -128,8 +129,8 @@ img_window_struct *img_create_window (void)
 	gtk_widget_add_accelerator (generate_menu,"activate",accel_group,GDK_g,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
 	gtk_container_add (GTK_CONTAINER (menu1), generate_menu);
 	  
-	tmp_image = gtk_image_new_from_stock ("gtk-execute",GTK_ICON_SIZE_MENU);
-	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (generate_menu),tmp_image);
+	image_menu = img_load_icon ("imagination-generate.png",GTK_ICON_SIZE_MENU);
+	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (generate_menu),image_menu);
 
 	separatormenuitem1 = gtk_separator_menu_item_new ();
 	gtk_container_add (GTK_CONTAINER (menu1), separatormenuitem1);
@@ -162,14 +163,14 @@ img_window_struct *img_create_window (void)
 	gtk_widget_add_accelerator (import_menu,"activate",accel_group,GDK_i,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
 	g_signal_connect ((gpointer) import_menu,"activate",G_CALLBACK (img_add_slides_thumbnails),img_struct);
 
-	tmp_image = gtk_image_new_from_stock ("gtk-add",GTK_ICON_SIZE_MENU);
-	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (import_menu),tmp_image);
+	image_menu = img_load_icon ("imagination-import.png",GTK_ICON_SIZE_MENU);
+	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (import_menu),image_menu);
 
 	remove_menu = gtk_image_menu_item_new_with_mnemonic (_("_Delete"));
 	gtk_widget_add_accelerator (remove_menu,"activate",accel_group,GDK_d,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
 	gtk_container_add (GTK_CONTAINER (slide_menu), remove_menu);
 
-	tmp_image = gtk_image_new_from_stock ("gtk-remove",GTK_ICON_SIZE_MENU);
+	tmp_image = gtk_image_new_from_stock ("gtk-delete",GTK_ICON_SIZE_MENU);
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (remove_menu),tmp_image);
 
 	separator_slide_menu = gtk_separator_menu_item_new ();
@@ -221,7 +222,7 @@ img_window_struct *img_create_window (void)
 	gtk_container_add (GTK_CONTAINER (toolbar),save_button);
 	gtk_widget_set_tooltip_text(save_button, _("Save the slideshow"));
 
-	tmp_image = gtk_image_new_from_stock ("gtk-execute",tmp_toolbar_icon_size);
+	tmp_image = img_load_icon("imagination-generate.png",GTK_ICON_SIZE_LARGE_TOOLBAR);
 	generate_button = (GtkWidget*) gtk_tool_button_new (tmp_image,"");
 	gtk_container_add (GTK_CONTAINER (toolbar),generate_button);
 	gtk_widget_set_tooltip_text(generate_button, _("Generate the DVD slideshow"));
@@ -230,15 +231,16 @@ img_window_struct *img_create_window (void)
 	gtk_widget_show (separatortoolitem);
 	gtk_container_add (GTK_CONTAINER (toolbar),separatortoolitem);
 
-	tmp_image = gtk_image_new_from_stock ("gtk-add",tmp_toolbar_icon_size);
+	tmp_image = img_load_icon("imagination-import.png",GTK_ICON_SIZE_LARGE_TOOLBAR);
 	import_button = (GtkWidget*) gtk_tool_button_new (tmp_image,"");
 	gtk_container_add (GTK_CONTAINER (toolbar),import_button);
 	gtk_widget_set_tooltip_text(import_button, _("Import one or more pictures"));
+	g_signal_connect ((gpointer) import_button,"clicked",G_CALLBACK (img_add_slides_thumbnails),img_struct);
 
-	tmp_image = gtk_image_new_from_stock ("gtk-remove",tmp_toolbar_icon_size);
+	tmp_image = gtk_image_new_from_stock ("gtk-delete",tmp_toolbar_icon_size);
 	remove_button = (GtkWidget*) gtk_tool_button_new (tmp_image,"");
 	gtk_container_add (GTK_CONTAINER (toolbar),remove_button);
-	gtk_widget_set_tooltip_text(remove_button, _("Remove the selected slides"));
+	gtk_widget_set_tooltip_text(remove_button, _("Delete the selected slides"));
 
 	separatortoolitem = (GtkWidget *)gtk_separator_tool_item_new();
 	gtk_widget_show (separatortoolitem);
@@ -301,7 +303,7 @@ img_window_struct *img_create_window (void)
 
 	/* Create the thumbnail viewer */
 	thumb_scrolledwindow = gtk_scrolled_window_new (NULL, NULL);
-	gtk_widget_show_all(thumb_scrolledwindow);
+	gtk_widget_show(thumb_scrolledwindow);
 	gtk_box_pack_start ((GtkBox *)vbox1, thumb_scrolledwindow, FALSE, TRUE, 0);
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (thumb_scrolledwindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_NEVER);
 	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (thumb_scrolledwindow), GTK_SHADOW_IN);
@@ -311,6 +313,7 @@ img_window_struct *img_create_window (void)
 	gtk_icon_view_set_selection_mode (GTK_ICON_VIEW (img_struct->thumbnail_iconview), GTK_SELECTION_MULTIPLE);
 	gtk_icon_view_set_orientation (GTK_ICON_VIEW (img_struct->thumbnail_iconview), GTK_ORIENTATION_HORIZONTAL);
 	gtk_icon_view_set_pixbuf_column (GTK_ICON_VIEW (img_struct->thumbnail_iconview), 0);
+	gtk_icon_view_set_columns (GTK_ICON_VIEW (img_struct->thumbnail_iconview), 100);
 	gtk_container_add (GTK_CONTAINER (thumb_scrolledwindow), img_struct->thumbnail_iconview);
 
 	/* Create the status bar */

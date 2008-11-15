@@ -57,6 +57,7 @@ void img_add_slides_thumbnails(GtkMenuItem *item,img_window_struct *img)
 GSList *img_import_slides_file_chooser(img_window_struct *img)
 {
 	GtkWidget *import_slide;
+	GtkFileFilter *image_filter;
 	GSList *slides = NULL;
 	gchar *filename;
 	int response;
@@ -69,6 +70,22 @@ GSList *img_import_slides_file_chooser(img_window_struct *img)
 						"gtk-open",
 						GTK_RESPONSE_ACCEPT,
 						NULL);
+	image_filter = gtk_file_filter_new ();
+	gtk_file_filter_set_name(image_filter,_("All image files"));
+	gtk_file_filter_add_pattern(image_filter,"*.png");
+	gtk_file_filter_add_pattern(image_filter,"*.jpg");
+	gtk_file_filter_add_pattern(image_filter,"*.gif");
+	gtk_file_filter_add_pattern(image_filter,"*.tif");
+	gtk_file_filter_add_pattern(image_filter,"*.tiff");
+	gtk_file_filter_add_pattern(image_filter,"*.bmp");
+	gtk_file_filter_add_pattern(image_filter,"*.pnm");
+	gtk_file_chooser_add_filter((GtkFileChooser*)import_slide,image_filter);
+
+	image_filter = gtk_file_filter_new ();
+	gtk_file_filter_set_name(image_filter,_("All files"));
+	gtk_file_filter_add_pattern(image_filter,"*");
+	gtk_file_chooser_add_filter((GtkFileChooser*)import_slide,image_filter);
+
 	gtk_file_chooser_set_select_multiple((GtkFileChooser *)import_slide,TRUE);
 	if (img->current_dir)
 		gtk_file_chooser_set_current_folder((GtkFileChooser*)import_slide,img->current_dir);

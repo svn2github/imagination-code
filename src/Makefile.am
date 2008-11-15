@@ -13,5 +13,8 @@ imagination_SOURCES = \
 	main-window.c main-window.h \
 	callbacks.c callbacks.h
 
+imagination_CFLAGS = \
+	-DDATADIR=\"$(datadir)\"
+
 imagination_LDADD = @PACKAGE_LIBS@ $(INTLLIBS)
 

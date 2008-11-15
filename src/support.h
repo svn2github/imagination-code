@@ -45,5 +45,5 @@
 #  define N_(String) (String)
 #endif
 
-void add_pixmap_directory (const gchar *directory);
-void img_set_window_title(img_window_struct *img,gchar *text);
+GtkWidget *img_load_icon(gchar *, GtkIconSize );
+void img_set_window_title(img_window_struct *,gchar *);

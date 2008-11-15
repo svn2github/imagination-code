@@ -39,8 +39,6 @@ int main (int argc, char *argv[])
 	gtk_set_locale ();
 	gtk_init (&argc, &argv);
 
-	add_pixmap_directory (PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps");
-
 	img_window = img_create_window();
 	gtk_widget_show (img_window->imagination_window);
 	gtk_statusbar_push((GtkStatusbar*)img_window->statusbar,img_window->message_id,_("Welcome to Imagination " VERSION));

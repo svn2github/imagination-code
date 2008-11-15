@@ -23,11 +23,23 @@
 
 #include "support.h"
 
-static GList *pixmaps_directories = NULL;
-
-void add_pixmap_directory (const gchar *directory)
+GtkWidget *img_load_icon(gchar *filename, GtkIconSize size)
 {
-  pixmaps_directories = g_list_prepend (pixmaps_directories,g_strdup (directory));
+    GtkWidget *file_image;
+	gchar *path;
+	GdkPixbuf *file_pixbuf = NULL;
+	path = g_strconcat(DATADIR, "/pixmaps/imagination/",filename,NULL);
+	file_pixbuf = gdk_pixbuf_new_from_file(path,NULL);
+	g_free (path);
+
+	if (file_pixbuf == NULL)
+		file_image = gtk_image_new_from_stock(GTK_STOCK_MISSING_IMAGE, size);
+    else
+	{
+		file_image = gtk_image_new_from_pixbuf(file_pixbuf);
+	    g_object_unref (file_pixbuf);
+	}
+    return file_image;
 }
 
 void img_set_window_title(img_window_struct *img,gchar *text)
