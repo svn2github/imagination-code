@@ -20,6 +20,13 @@
 #ifndef __IMAGINATION_INTERFACE_H__
 #define __IMAGINATION_INTERFACE_H__
 
+typedef enum 
+{
+	IMG_CURRENT_SLIDE = 0,
+	IMG_CURRENT_LEFT,
+	IMG_CURRENT_RIGHT
+} Img_Thumbnail_Selection_Mode;
+
 typedef struct _slide_struct slide_struct;
 
 struct _slide_struct

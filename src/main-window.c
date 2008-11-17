@@ -34,6 +34,8 @@
 #include "main-window.h"
 #include "support.h"
 
+static gint img_button_press_event (GtkWidget *, GdkEventButton *, img_window_struct *);
+
 img_window_struct *img_create_window (void)
 {
 	img_window_struct *img_struct = NULL;
@@ -87,9 +89,10 @@ img_window_struct *img_create_window (void)
 	GtkWidget *hbox_duration;
 	GtkWidget *duration_label;
 	GtkObject *spinbutton1_adj;
+
 	GtkAccelGroup *accel_group;
-	
 	GdkColor background_color = {0, 65535, 65535, 65535};
+	GtkCellRenderer *pixbuf_cell;
 
 	img_struct = g_new0(img_window_struct,1);
 	
@@ -307,24 +310,54 @@ img_window_struct *img_create_window (void)
 	gtk_box_pack_start ((GtkBox *)vbox1, thumb_scrolledwindow, FALSE, TRUE, 0);
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (thumb_scrolledwindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_NEVER);
 	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (thumb_scrolledwindow), GTK_SHADOW_IN);
-
 	img_struct->thumbnail_iconview = gtk_icon_view_new_with_model((GtkTreeModel *)img_struct->thumbnail_model);
 	gtk_widget_show (img_struct->thumbnail_iconview);
+
+	/* Create the cell layout */
+	pixbuf_cell = gtk_cell_renderer_pixbuf_new();
+	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (img_struct->thumbnail_iconview), pixbuf_cell, FALSE);
+	g_object_set (pixbuf_cell, "width", 115, "xalign", 0.5, "yalign", 0.5, NULL);
+	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (img_struct->thumbnail_iconview), pixbuf_cell, "pixbuf", 0, NULL);
+
+	/* Set some iconview properties */
 	gtk_icon_view_set_selection_mode (GTK_ICON_VIEW (img_struct->thumbnail_iconview), GTK_SELECTION_MULTIPLE);
 	gtk_icon_view_set_orientation (GTK_ICON_VIEW (img_struct->thumbnail_iconview), GTK_ORIENTATION_HORIZONTAL);
-	gtk_icon_view_set_pixbuf_column (GTK_ICON_VIEW (img_struct->thumbnail_iconview), 0);
-	gtk_icon_view_set_columns (GTK_ICON_VIEW (img_struct->thumbnail_iconview), 100);
+	gtk_icon_view_set_column_spacing (GTK_ICON_VIEW (img_struct->thumbnail_iconview),0);
+	gtk_icon_view_set_row_spacing (GTK_ICON_VIEW (img_struct->thumbnail_iconview),0);
+	gtk_icon_view_set_columns (GTK_ICON_VIEW (img_struct->thumbnail_iconview), G_MAXINT);
 	gtk_container_add (GTK_CONTAINER (thumb_scrolledwindow), img_struct->thumbnail_iconview);
+	g_signal_connect (G_OBJECT (img_struct->thumbnail_iconview),"button-press-event",G_CALLBACK (img_button_press_event),img_struct);
 
 	/* Create the status bar */
 	img_struct->statusbar = gtk_statusbar_new ();
 	gtk_widget_show (img_struct->statusbar);
 	gtk_box_pack_start ((GtkBox *)vbox1, img_struct->statusbar, FALSE, TRUE, 0);
 	img_struct->message_id = gtk_statusbar_get_context_id (GTK_STATUSBAR (img_struct->statusbar), "statusbar");
-	
+
 	gtk_widget_show_all(hbox);
 	gtk_window_add_accel_group (GTK_WINDOW (img_struct->imagination_window), accel_group);
 
 	return img_struct;
 }
 
+static gint img_button_press_event (GtkWidget *widget, GdkEventButton *event, img_window_struct *img)
+{
+	gboolean result = FALSE;
+
+	if (event->type == GDK_BUTTON_PRESS)
+	{
+		switch (event->button)
+		{
+			case 1:
+				img_thumb_view_select_slide(img,IMG_CURRENT_SLIDE);
+				result = TRUE;
+		    break;
+		    
+		    case 3:
+				//img_thumb_view_show_popupmenu();
+				result = TRUE;
+		    break;
+		}
+	}
+	return result;
+}

@@ -27,6 +27,10 @@
 #include "callbacks.h"
 #include "support.h"
 
+/* pixbuf = img.get_pixbuf()
+    pixbuf.save(filename, "jpeg", {"quality":"100"})
+*/
+
 void img_add_slides_thumbnails(GtkMenuItem *item,img_window_struct *img)
 {
 	GSList *slides = NULL;
@@ -104,6 +108,38 @@ GSList *img_import_slides_file_chooser(img_window_struct *img)
 void img_quit_application(GtkMenuItem *menuitem,img_window_struct *img_struct)
 {
 	gtk_main_quit();
+}
+
+void img_thumb_view_select_slide(img_window_struct *img_struct, Img_Thumbnail_Selection_Mode mode)
+{
+	GtkTreePath *path = NULL;
+	GtkTreeModel *model;
+	GList *list;
+	gint n_slides;
+
+	model = gtk_icon_view_get_model ((GtkIconView*) img_struct->thumbnail_iconview);
+	n_slides = gtk_tree_model_iter_n_children ((GtkTreeModel*) model, NULL);
+
+	if (n_slides == 0)
+		return;
+
+	switch (mode)
+	{
+		case IMG_CURRENT_SLIDE:
+			path = gtk_tree_path_new_from_indices (n_slides - 1, -1);
+			//path = gtk_icon_view_get_path_at_pos((GtkIconView*) img_struct->thumbnail_iconview,gdk_pointer_grab(,y);
+		break;
+		
+		case IMG_CURRENT_LEFT:
+		break;
+		
+		case IMG_CURRENT_RIGHT:
+		break;
+	}
+	gtk_icon_view_select_path ((GtkIconView*) img_struct->thumbnail_iconview, path);
+	gtk_icon_view_set_cursor ((GtkIconView*) img_struct->thumbnail_iconview, path, NULL, FALSE);
+	gtk_icon_view_scroll_to_path ((GtkIconView*) img_struct->thumbnail_iconview, path, FALSE, 0, 0);
+	gtk_tree_path_free (path);
 }
 
 void img_show_about_dialog (GtkMenuItem *item,img_window_struct *img_struct)
