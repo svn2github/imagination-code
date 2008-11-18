@@ -66,10 +66,8 @@ img_window_struct *img_create_window (void)
 	GtkWidget *move_left_menu;
 	GtkWidget *move_right_menu;
 	GtkWidget *menuitem3;
-	GtkWidget *menuitem4;
 	GtkWidget *tmp_image;
 	GtkWidget *menu3;
-	GtkWidget *imagemenuitem10;
 	GtkWidget *imagemenuitem11;
 	GtkWidget *toolbar;
 	GtkWidget *new_button;
@@ -86,8 +84,6 @@ img_window_struct *img_create_window (void)
 	GtkWidget *hbox;
 	GtkWidget *thumb_scrolledwindow;
 	GtkWidget *scrolledwindow;
-	GtkWidget *picture_win;
-	GtkWidget *image1;
 	GtkWidget *transition_label;
 	GtkWidget *vbox_info_slide;
 	GtkWidget *hbox_duration;
