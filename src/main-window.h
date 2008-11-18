@@ -47,7 +47,11 @@ struct _img_window_struct
   	GtkWidget	*thumbnail_iconview;
   	GtkWidget	*statusbar;
   	GtkWidget	*event_box;
-  	gchar 		*current_dir;
+  	GtkWidget	*import_slide_chooser;
+	GtkWidget	*dim_label;
+	GtkWidget	*size_label;
+  	GtkWidget	*preview_image;
+  	gchar		*current_dir;
   	gint		slides_nr;
   	guint		message_id;
 };

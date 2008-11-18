@@ -35,6 +35,8 @@
 #include "support.h"
 
 static gint img_button_press_event (GtkWidget *, GdkEventButton *, img_window_struct *);
+static void img_select_all_thumbnails(GtkMenuItem *,img_window_struct *);
+static void img_unselect_all_thumbnails(GtkMenuItem *,img_window_struct *);
 
 img_window_struct *img_create_window (void)
 {
@@ -58,6 +60,8 @@ img_window_struct *img_create_window (void)
 	GtkWidget *imagemenuitem8;
 	GtkWidget *import_menu;
 	GtkWidget *image_menu;
+	GtkWidget *select_all_menu;
+	GtkWidget *deselect_all_menu;
 	GtkWidget *remove_menu;
 	GtkWidget *move_left_menu;
 	GtkWidget *move_right_menu;
@@ -161,6 +165,19 @@ img_window_struct *img_create_window (void)
 	separator_slide_menu = gtk_separator_menu_item_new ();
 	gtk_container_add (GTK_CONTAINER (slide_menu),separator_slide_menu);
 
+	select_all_menu = gtk_image_menu_item_new_from_stock ("gtk-select-all", accel_group);
+	gtk_container_add (GTK_CONTAINER (slide_menu),select_all_menu);
+	gtk_widget_add_accelerator (select_all_menu,"activate",accel_group,GDK_a,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
+	g_signal_connect ((gpointer) select_all_menu,"activate",G_CALLBACK (img_select_all_thumbnails),img_struct);
+
+	deselect_all_menu = gtk_image_menu_item_new_with_mnemonic (_("De_select all"));
+	gtk_container_add (GTK_CONTAINER (slide_menu),deselect_all_menu);
+	gtk_widget_add_accelerator (deselect_all_menu,"activate",accel_group,GDK_e,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
+	g_signal_connect ((gpointer) deselect_all_menu,"activate",G_CALLBACK (img_unselect_all_thumbnails),img_struct);
+	
+	separator_slide_menu = gtk_separator_menu_item_new ();
+	gtk_container_add (GTK_CONTAINER (slide_menu),separator_slide_menu);
+
 	import_menu = gtk_image_menu_item_new_with_mnemonic (_("_Import"));
 	gtk_container_add (GTK_CONTAINER (slide_menu),import_menu);
 	gtk_widget_add_accelerator (import_menu,"activate",accel_group,GDK_i,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
@@ -249,12 +266,12 @@ img_window_struct *img_create_window (void)
 	gtk_widget_show (separatortoolitem);
 	gtk_container_add (GTK_CONTAINER (toolbar),separatortoolitem);
 
-	tmp_image = gtk_image_new_from_stock ("gtk-go-back",tmp_toolbar_icon_size);
+	tmp_image = gtk_image_new_from_stock ("gtk-goto-first",tmp_toolbar_icon_size);
 	left_button = (GtkWidget*) gtk_tool_button_new (tmp_image,"");
 	gtk_container_add (GTK_CONTAINER (toolbar),left_button);
 	gtk_widget_set_tooltip_text(left_button, _("Move the selected slide to left"));
 
-	tmp_image = gtk_image_new_from_stock ("gtk-go-forward",tmp_toolbar_icon_size);
+	tmp_image = gtk_image_new_from_stock ("gtk-goto-last",tmp_toolbar_icon_size);
 	right_button = (GtkWidget*) gtk_tool_button_new (tmp_image,"");
 	gtk_container_add (GTK_CONTAINER (toolbar),right_button);
 	gtk_widget_set_tooltip_text(right_button, _("Move the selected slide to right"));
@@ -316,7 +333,7 @@ img_window_struct *img_create_window (void)
 	/* Create the cell layout */
 	pixbuf_cell = gtk_cell_renderer_pixbuf_new();
 	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (img_struct->thumbnail_iconview), pixbuf_cell, FALSE);
-	g_object_set (pixbuf_cell, "width", 115, "xalign", 0.5, "yalign", 0.5, NULL);
+	g_object_set (pixbuf_cell, "follow-state", TRUE, "width", 115, "xalign", 0.5, "yalign", 0.5, NULL);
 	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (img_struct->thumbnail_iconview), pixbuf_cell, "pixbuf", 0, NULL);
 
 	/* Set some iconview properties */
@@ -342,22 +359,24 @@ img_window_struct *img_create_window (void)
 
 static gint img_button_press_event (GtkWidget *widget, GdkEventButton *event, img_window_struct *img)
 {
-	gboolean result = FALSE;
-
 	if (event->type == GDK_BUTTON_PRESS)
 	{
 		switch (event->button)
 		{
-			case 1:
-				img_thumb_view_select_slide(img,IMG_CURRENT_SLIDE);
-				result = TRUE;
-		    break;
-		    
 		    case 3:
 				//img_thumb_view_show_popupmenu();
-				result = TRUE;
 		    break;
 		}
 	}
-	return result;
+	return FALSE;
+}
+
+static void img_select_all_thumbnails(GtkMenuItem *item,img_window_struct *img)
+{
+	gtk_icon_view_select_all((GtkIconView *)img->thumbnail_iconview);
+}
+
+static void img_unselect_all_thumbnails(GtkMenuItem *item,img_window_struct *img)
+{
+	gtk_icon_view_unselect_all((GtkIconView *)img->thumbnail_iconview);
 }
