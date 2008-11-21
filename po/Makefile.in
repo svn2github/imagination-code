@@ -19,7 +19,7 @@
 
 GETTEXT_PACKAGE = imagination
 PACKAGE = imagination
-VERSION = 0.1
+VERSION = 1.0
 
 SHELL = /bin/sh
 

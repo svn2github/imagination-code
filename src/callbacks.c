@@ -36,28 +36,36 @@ static void	img_update_preview_file_chooser(GtkFileChooser *,img_window_struct *
 
 void img_add_slides_thumbnails(GtkMenuItem *item,img_window_struct *img)
 {
-	GSList *slides = NULL;
+	GSList	*slides = NULL;
 	GdkPixbuf *thumb;
 	GtkTreeIter iter;
+	slide_struct *slide_info;
 
 	slides = img_import_slides_file_chooser(img);
 	if (slides == NULL)
 		return;
 
-	//img->progress_window = img_create_progress_window(img);
+	/*img->progress_window = img_create_progress_window(img);*/
 	while (slides)
 	{
 		thumb = gdk_pixbuf_new_from_file_at_scale(slides->data, 93, 70, TRUE, NULL);
 		if (thumb)
 		{
-			gtk_list_store_append (img->thumbnail_model,&iter);
-			gtk_list_store_set (img->thumbnail_model, &iter, 0, thumb, 1, NULL,-1);
-			g_object_unref (thumb);
-			img->slides_nr++;
+			slide_info = g_new0(slide_struct,1);
+			if (slide_info)
+			{
+				img->slides_list = g_list_append(img->slides_list,slide_info);
+				slide_info->filename = g_strdup(slides->data);
+				slide_info->duration = gtk_spin_button_get_value_as_int ((GtkSpinButton*) img->duration);
+				gtk_list_store_append (img->thumbnail_model,&iter);
+				gtk_list_store_set (img->thumbnail_model, &iter, 0, thumb, 1, &slide_info, -1);
+				g_object_unref (thumb);
+				img->slides_nr++;
+			}
+			g_free(slides->data);
 		}
 		slides = slides->next;
 	}
-	g_slist_foreach(slides,(GFunc) g_free,NULL);
 	g_slist_free(slides);
 }
 
@@ -113,16 +121,34 @@ GSList *img_import_slides_file_chooser(img_window_struct *img)
 	return slides;
 }
 
-void img_quit_application(GtkMenuItem *menuitem,img_window_struct *img_struct)
+gboolean img_quit_application(GtkWidget *widget, GdkEvent *event, img_window_struct *img_struct)
 {
+	GtkTreeModel *model;
+	gint n_slides;
+	GList *_slides_list = img_struct->slides_list;
+
+	if (img_struct->current_dir)
+		g_free(img_struct->current_dir);
+
+	while (_slides_list)
+	{
+		slide_struct *slide_info = _slides_list->data;
+		g_free(slide_info->filename);
+		g_free(slide_info);
+		_slides_list = _slides_list->next;
+	}
 	gtk_main_quit();
+	return FALSE;
+	
+	/*model = gtk_icon_view_get_model ((GtkIconView*) img_struct->thumbnail_iconview);
+	n_slides = gtk_tree_model_iter_n_children ((GtkTreeModel*) model, NULL);
+	g_print ("%d\n",n_slides);*/
 }
 
 void img_thumb_view_select_slide(img_window_struct *img_struct, Img_Thumbnail_Selection_Mode mode)
 {
 	GtkTreePath *path = NULL;
 	GtkTreeModel *model;
-	GList *list;
 	gint n_slides;
 
 	model = gtk_icon_view_get_model ((GtkIconView*) img_struct->thumbnail_iconview);
@@ -133,15 +159,15 @@ void img_thumb_view_select_slide(img_window_struct *img_struct, Img_Thumbnail_Se
 
 	switch (mode)
 	{
-		case IMG_CURRENT_SLIDE:
+		case IMG_GOTO_SLIDE:
 			path = gtk_tree_path_new_from_indices (n_slides - 1, -1);
-			//path = gtk_icon_view_get_path_at_pos((GtkIconView*) img_struct->thumbnail_iconview,gdk_pointer_grab(,y);
+			/*path = gtk_icon_view_get_path_at_pos((GtkIconView*) img_struct->thumbnail_iconview,gdk_pointer_grab(,y);*/
 		break;
 		
-		case IMG_CURRENT_LEFT:
+		case IMG_MOVE_LEFT:
 		break;
 		
-		case IMG_CURRENT_RIGHT:
+		case IMG_MOVE_RIGHT:
 		break;
 	}
 	gtk_icon_view_select_path ((GtkIconView*) img_struct->thumbnail_iconview, path);
@@ -200,11 +226,32 @@ static void	img_update_preview_file_chooser(GtkFileChooser *file_chooser,img_win
 		gtk_image_set_from_pixbuf ((GtkImage*)img_struct->preview_image, pixbuf_scaled);
 		g_object_unref (pixbuf_scaled);
 
-		size = g_strdup_printf("%d x %d",width,height);
+		size = g_strdup_printf("%d x %d pixels",width,height);
 		gtk_label_set_text((GtkLabel*)img_struct->dim_label,size);
 		g_free(size);
 	}
 	gtk_file_chooser_set_preview_widget_active (file_chooser, has_preview);
+}
+
+void img_delete_selected_slides(GtkMenuItem *item,img_window_struct *img_struct)
+{
+	GList *selected;
+	GtkTreeIter iter;
+	GtkTreeModel *model;
+
+	model = gtk_icon_view_get_model((GtkIconView *)img_struct->thumbnail_iconview);
+	selected = gtk_icon_view_get_selected_items ((GtkIconView *)img_struct->thumbnail_iconview);
+	if (selected == NULL)
+		return;
+	while (selected)
+	{
+		gtk_tree_model_get_iter((GtkTreeModel*) model, &iter,selected->data);
+		gtk_list_store_remove((GtkListStore*) img_struct->thumbnail_model,&iter);
+		img_struct->slides_nr--;
+		selected = selected->next;
+	}
+	g_list_foreach (selected, (GFunc)gtk_tree_path_free, NULL);
+	g_list_free(selected);
 }
 
 void img_show_about_dialog (GtkMenuItem *item,img_window_struct *img_struct)
@@ -216,8 +263,8 @@ void img_show_about_dialog (GtkMenuItem *item,img_window_struct *img_struct)
 	if (about == NULL)
 	{
 		about = gtk_about_dialog_new ();
-		/*gtk_about_dialog_set_email_hook (xa_activate_link,NULL,NULL);
-		gtk_about_dialog_set_url_hook (xa_activate_link,NULL,NULL);*/
+		/*gtk_about_dialog_set_email_hook (img_activate_link,NULL,NULL);
+		gtk_about_dialog_set_url_hook (img_activate_link,NULL,NULL);*/
 		gtk_window_set_position (GTK_WINDOW (about),GTK_WIN_POS_CENTER_ON_PARENT);
 		gtk_window_set_transient_for (GTK_WINDOW (about),GTK_WINDOW (img_struct->imagination_window));
 		gtk_window_set_destroy_with_parent (GTK_WINDOW (about),TRUE);

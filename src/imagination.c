@@ -44,8 +44,7 @@ int main (int argc, char *argv[])
 	gtk_statusbar_push((GtkStatusbar*)img_window->statusbar,img_window->message_id,_("Welcome to Imagination " VERSION));
 
 	gtk_main ();
-	if (img_window->current_dir)
-		g_free(img_window->current_dir);
+
 	g_free(img_window);
 	return 0;
 }

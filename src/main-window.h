@@ -22,9 +22,9 @@
 
 typedef enum 
 {
-	IMG_CURRENT_SLIDE = 0,
-	IMG_CURRENT_LEFT,
-	IMG_CURRENT_RIGHT
+	IMG_GOTO_SLIDE = 0,
+	IMG_MOVE_LEFT,
+	IMG_MOVE_RIGHT
 } Img_Thumbnail_Selection_Mode;
 
 typedef struct _slide_struct slide_struct;
@@ -33,7 +33,8 @@ struct _slide_struct
 {
 	gchar	*filename;
 	guint	duration;
-	//transition_effect;
+	gint	position;
+	/*transition_effect;*/
 };
 
 typedef struct _img_window_struct img_window_struct;
@@ -51,6 +52,7 @@ struct _img_window_struct
 	GtkWidget	*dim_label;
 	GtkWidget	*size_label;
   	GtkWidget	*preview_image;
+  	GList		*slides_list;
   	gchar		*current_dir;
   	gint		slides_nr;
   	guint		message_id;

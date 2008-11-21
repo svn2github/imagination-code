@@ -100,6 +100,7 @@ img_window_struct *img_create_window (void)
 
 	img_struct->imagination_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_default_size( (GtkWindow*)img_struct->imagination_window, 840, 580 );
+	img_set_window_title(img_struct,NULL);
 	g_signal_connect (G_OBJECT (img_struct->imagination_window),"delete-event",G_CALLBACK (img_quit_application),img_struct);
 
 	vbox1 = gtk_vbox_new (FALSE,2);
@@ -183,8 +184,9 @@ img_window_struct *img_create_window (void)
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (import_menu),image_menu);
 
 	remove_menu = gtk_image_menu_item_new_with_mnemonic (_("_Delete"));
-	gtk_widget_add_accelerator (remove_menu,"activate",accel_group,GDK_d,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
 	gtk_container_add (GTK_CONTAINER (slide_menu), remove_menu);
+	gtk_widget_add_accelerator (remove_menu,"activate",accel_group,GDK_d,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
+	g_signal_connect ((gpointer) remove_menu,"activate",G_CALLBACK (img_delete_selected_slides),img_struct);
 
 	tmp_image = gtk_image_new_from_stock ("gtk-delete",GTK_ICON_SIZE_MENU);
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (remove_menu),tmp_image);
@@ -257,6 +259,7 @@ img_window_struct *img_create_window (void)
 	remove_button = (GtkWidget*) gtk_tool_button_new (tmp_image,"");
 	gtk_container_add (GTK_CONTAINER (toolbar),remove_button);
 	gtk_widget_set_tooltip_text(remove_button, _("Delete the selected slides"));
+	g_signal_connect ((gpointer) remove_button,"clicked",G_CALLBACK (img_delete_selected_slides),img_struct);
 
 	separatortoolitem = (GtkWidget *)gtk_separator_tool_item_new();
 	gtk_widget_show (separatortoolitem);
@@ -324,6 +327,7 @@ img_window_struct *img_create_window (void)
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (thumb_scrolledwindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_NEVER);
 	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (thumb_scrolledwindow), GTK_SHADOW_IN);
 	img_struct->thumbnail_iconview = gtk_icon_view_new_with_model((GtkTreeModel *)img_struct->thumbnail_model);
+	gtk_widget_set_size_request(img_struct->thumbnail_iconview,-1,72);
 	gtk_widget_show (img_struct->thumbnail_iconview);
 
 	/* Create the cell layout */
@@ -360,7 +364,7 @@ static gint img_button_press_event (GtkWidget *widget, GdkEventButton *event, im
 		switch (event->button)
 		{
 		    case 3:
-				//img_thumb_view_show_popupmenu();
+				/*img_thumb_view_show_popupmenu();*/
 		    break;
 		}
 	}
