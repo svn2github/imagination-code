@@ -52,7 +52,6 @@ struct _img_window_struct
 	GtkWidget	*size_label;
   	GtkWidget	*preview_image;
   	GtkWidget	*goto_window;
-  	GList		*slides_list;
   	gchar		*current_dir;
   	gint		slides_nr;
   	guint		message_id;

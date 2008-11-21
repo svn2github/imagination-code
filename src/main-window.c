@@ -407,6 +407,7 @@ static void img_goto_line_entry_activate(GtkEntry *entry, img_window_struct *img
 	slide = strtol(gtk_entry_get_text(entry), NULL, 10);
 	if (slide > 0 && slide <= img->slides_nr)
 	{
+		gtk_icon_view_unselect_all((GtkIconView*) img->thumbnail_iconview);
 		path = gtk_tree_path_new_from_indices(slide-1,-1);
 		gtk_icon_view_select_path ((GtkIconView*) img->thumbnail_iconview, path);
 		gtk_icon_view_set_cursor ((GtkIconView*) img->thumbnail_iconview, path, NULL, FALSE);

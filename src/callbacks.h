@@ -22,7 +22,6 @@
 void img_add_slides_thumbnails(GtkMenuItem *,img_window_struct *);
 GSList *img_import_slides_file_chooser(img_window_struct *);
 gboolean img_quit_application(GtkWidget *, GdkEvent *, img_window_struct *);
-void img_thumb_view_select_slide(img_window_struct *, Img_Thumbnail_Selection_Mode );
 void img_delete_selected_slides(GtkMenuItem *,img_window_struct *);
 void img_show_about_dialog (GtkMenuItem *,img_window_struct *);
 
