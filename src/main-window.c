@@ -21,12 +21,7 @@
 #  include <config.h>
 #endif
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <string.h>
-#include <stdio.h>
-
+#include <stdlib.h>
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
 
@@ -37,6 +32,8 @@
 static gint img_button_press_event (GtkWidget *, GdkEventButton *, img_window_struct *);
 static void img_select_all_thumbnails(GtkMenuItem *,img_window_struct *);
 static void img_unselect_all_thumbnails(GtkMenuItem *,img_window_struct *);
+static void img_goto_slide(GtkMenuItem *,img_window_struct *);
+static void img_goto_line_entry_activate(GtkEntry *, img_window_struct *);
 
 img_window_struct *img_create_window (void)
 {
@@ -63,8 +60,7 @@ img_window_struct *img_create_window (void)
 	GtkWidget *select_all_menu;
 	GtkWidget *deselect_all_menu;
 	GtkWidget *remove_menu;
-	GtkWidget *move_left_menu;
-	GtkWidget *move_right_menu;
+	GtkWidget *goto_menu;
 	GtkWidget *menuitem3;
 	GtkWidget *tmp_image;
 	GtkWidget *menu3;
@@ -77,8 +73,7 @@ img_window_struct *img_create_window (void)
 	GtkWidget *import_button;
 	GtkWidget *remove_button;
 	GtkWidget *separatortoolitem;
-	GtkWidget *left_button;
-	GtkWidget *right_button;
+	GtkWidget *goto_button;
 	GtkWidget *viewport;
 	GtkIconSize tmp_toolbar_icon_size;
 	GtkWidget *hbox;
@@ -171,7 +166,7 @@ img_window_struct *img_create_window (void)
 	gtk_container_add (GTK_CONTAINER (slide_menu),deselect_all_menu);
 	gtk_widget_add_accelerator (deselect_all_menu,"activate",accel_group,GDK_e,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
 	g_signal_connect ((gpointer) deselect_all_menu,"activate",G_CALLBACK (img_unselect_all_thumbnails),img_struct);
-	
+
 	separator_slide_menu = gtk_separator_menu_item_new ();
 	gtk_container_add (GTK_CONTAINER (slide_menu),separator_slide_menu);
 
@@ -194,19 +189,13 @@ img_window_struct *img_create_window (void)
 	separator_slide_menu = gtk_separator_menu_item_new ();
 	gtk_container_add (GTK_CONTAINER (slide_menu),separator_slide_menu);
 
-	move_left_menu = gtk_image_menu_item_new_with_mnemonic (_("Move to _left"));
-	gtk_widget_add_accelerator (move_left_menu,"activate",accel_group,GDK_l,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
-	gtk_container_add (GTK_CONTAINER (slide_menu), move_left_menu);
+	goto_menu = gtk_image_menu_item_new_with_mnemonic (_("Go to s_lide"));
+	gtk_widget_add_accelerator (goto_menu,"activate",accel_group,GDK_l,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
+	gtk_container_add (GTK_CONTAINER (slide_menu), goto_menu);
+	g_signal_connect ((gpointer) goto_menu,"activate",G_CALLBACK (img_goto_slide),img_struct);
 
-	tmp_image = gtk_image_new_from_stock ("gtk-go-back",GTK_ICON_SIZE_MENU);
-	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (move_left_menu),tmp_image);
-
-	move_right_menu = gtk_image_menu_item_new_with_mnemonic (_("Move to _right"));
-	gtk_widget_add_accelerator (move_right_menu,"activate",accel_group,GDK_r,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
-	gtk_container_add (GTK_CONTAINER (slide_menu), move_right_menu);
-
-	tmp_image = gtk_image_new_from_stock ("gtk-go-forward",GTK_ICON_SIZE_MENU);
-	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (move_right_menu),tmp_image);
+	tmp_image = gtk_image_new_from_stock ("gtk-jump-to",GTK_ICON_SIZE_MENU);
+	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (goto_menu),tmp_image);
 
 	menuitem3 = gtk_menu_item_new_with_mnemonic (_("_Help"));
 	gtk_container_add (GTK_CONTAINER (menubar), menuitem3);
@@ -265,38 +254,33 @@ img_window_struct *img_create_window (void)
 	gtk_widget_show (separatortoolitem);
 	gtk_container_add (GTK_CONTAINER (toolbar),separatortoolitem);
 
-	tmp_image = gtk_image_new_from_stock ("gtk-goto-first",tmp_toolbar_icon_size);
-	left_button = (GtkWidget*) gtk_tool_button_new (tmp_image,"");
-	gtk_container_add (GTK_CONTAINER (toolbar),left_button);
-	gtk_widget_set_tooltip_text(left_button, _("Move the selected slide to left"));
+	tmp_image = gtk_image_new_from_stock ("gtk-jump-to",tmp_toolbar_icon_size);
+	goto_button = (GtkWidget*) gtk_tool_button_new (tmp_image,"");
+	gtk_container_add (GTK_CONTAINER (toolbar),goto_button);
+	gtk_widget_set_tooltip_text(goto_button, _("Jump to the entered slide number"));
+	g_signal_connect ((gpointer) goto_button,"clicked",G_CALLBACK (img_goto_slide),img_struct);
 
-	tmp_image = gtk_image_new_from_stock ("gtk-goto-last",tmp_toolbar_icon_size);
-	right_button = (GtkWidget*) gtk_tool_button_new (tmp_image,"");
-	gtk_container_add (GTK_CONTAINER (toolbar),right_button);
-	gtk_widget_set_tooltip_text(right_button, _("Move the selected slide to right"));
 	gtk_widget_show_all (toolbar);
 
 	/* Create the image area and the other widgets */
 	hbox = gtk_hbox_new (FALSE, 0);
 	gtk_widget_show (hbox);
 	gtk_box_pack_start ((GtkBox*)vbox1, hbox, TRUE, TRUE, 0);
+		/* Code from gpicview with some modifications by me */
+		img_struct->event_box = gtk_event_box_new();
+		GTK_WIDGET_SET_FLAGS(img_struct->event_box,GTK_CAN_FOCUS);
+		gtk_widget_add_events(img_struct->event_box,GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK);
+		scrolledwindow = gtk_scrolled_window_new(NULL,NULL);
+		gtk_scrolled_window_set_shadow_type( (GtkScrolledWindow*)scrolledwindow, GTK_SHADOW_NONE );
+		gtk_scrolled_window_set_policy((GtkScrolledWindow*)scrolledwindow,GTK_POLICY_NEVER, GTK_POLICY_NEVER);
+    	gtk_widget_modify_bg(img_struct->event_box,GTK_STATE_NORMAL,&background_color);
 
-	/* Code from gpicview with some modifications by me */
-	img_struct->event_box = gtk_event_box_new();
-	GTK_WIDGET_SET_FLAGS(img_struct->event_box,GTK_CAN_FOCUS);
-	gtk_widget_add_events(img_struct->event_box,GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK);
-	scrolledwindow = gtk_scrolled_window_new(NULL,NULL);
-	gtk_scrolled_window_set_shadow_type( (GtkScrolledWindow*)scrolledwindow, GTK_SHADOW_NONE );
-	gtk_scrolled_window_set_policy((GtkScrolledWindow*)scrolledwindow,GTK_POLICY_NEVER, GTK_POLICY_NEVER);
-    gtk_widget_modify_bg(img_struct->event_box,GTK_STATE_NORMAL,&background_color);
-    
-	gtk_scrolled_window_add_with_viewport( (GtkScrolledWindow*)scrolledwindow,img_struct->event_box);
-	viewport = gtk_bin_get_child( (GtkBin*)scrolledwindow);
-	gtk_viewport_set_shadow_type( (GtkViewport*)viewport, GTK_SHADOW_IN);
-	gtk_container_set_border_width( (GtkContainer*)viewport,10);
-	gtk_box_pack_start( (GtkBox*)hbox,scrolledwindow,TRUE,TRUE,0);
-	/* End code from gpicview */
-
+		gtk_scrolled_window_add_with_viewport( (GtkScrolledWindow*)scrolledwindow,img_struct->event_box);
+		viewport = gtk_bin_get_child( (GtkBin*)scrolledwindow);
+		gtk_viewport_set_shadow_type( (GtkViewport*)viewport, GTK_SHADOW_IN);
+		gtk_container_set_border_width( (GtkContainer*)viewport,10);
+		gtk_box_pack_start( (GtkBox*)hbox,scrolledwindow,TRUE,TRUE,0);
+		/* End code from gpicview */
 	vbox_info_slide = gtk_vbox_new (FALSE,1);
 	gtk_box_pack_start ((GtkBox *)hbox,vbox_info_slide,FALSE,FALSE,0);
 
@@ -337,6 +321,7 @@ img_window_struct *img_create_window (void)
 	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (img_struct->thumbnail_iconview), pixbuf_cell, "pixbuf", 0, NULL);
 
 	/* Set some iconview properties */
+	//gtk_icon_view_enable_model_drag_source ((GtkIconView*)img_struct->thumbnail_iconview, 0, target_table, G_N_ELEMENTS (target_table), GDK_ACTION_MOVE);
 	gtk_icon_view_set_selection_mode (GTK_ICON_VIEW (img_struct->thumbnail_iconview), GTK_SELECTION_MULTIPLE);
 	gtk_icon_view_set_orientation (GTK_ICON_VIEW (img_struct->thumbnail_iconview), GTK_ORIENTATION_HORIZONTAL);
 	gtk_icon_view_set_column_spacing (GTK_ICON_VIEW (img_struct->thumbnail_iconview),0);
@@ -379,4 +364,54 @@ static void img_select_all_thumbnails(GtkMenuItem *item,img_window_struct *img)
 static void img_unselect_all_thumbnails(GtkMenuItem *item,img_window_struct *img)
 {
 	gtk_icon_view_unselect_all((GtkIconView *)img->thumbnail_iconview);
+}
+
+static void img_goto_slide(GtkMenuItem *item,img_window_struct *img_struct)
+{
+	GtkWidget *vbox;
+	GtkWidget *text_label;
+	GtkWidget *slide_number_entry;
+	gint response;
+
+	img_struct->goto_window = gtk_dialog_new_with_buttons(_("Go to slide"),(GtkWindow*)img_struct->imagination_window,
+										GTK_DIALOG_DESTROY_WITH_PARENT,
+										GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+										GTK_STOCK_JUMP_TO, GTK_RESPONSE_ACCEPT, NULL);
+	vbox = gtk_vbox_new(FALSE,12);
+	gtk_container_set_border_width((GtkContainer*)vbox, 5);
+	gtk_container_add((GtkContainer*)((GtkDialog*)(img_struct->goto_window))->vbox, vbox);
+
+	text_label = gtk_label_new_with_mnemonic(_("Enter the slide number you want to go to:"));
+	gtk_misc_set_alignment((GtkMisc*)text_label, 0, 0.5);
+	slide_number_entry = gtk_entry_new();
+	gtk_entry_set_max_length((GtkEntry*) slide_number_entry, 4);
+	gtk_entry_set_width_chars((GtkEntry*)slide_number_entry, 30);
+	g_signal_connect(slide_number_entry, "activate", G_CALLBACK(img_goto_line_entry_activate), img_struct);
+
+	gtk_container_add((GtkContainer*)vbox, text_label);
+	gtk_container_add((GtkContainer*)vbox, slide_number_entry);
+	gtk_widget_show_all(img_struct->goto_window);
+	
+	response = gtk_dialog_run((GtkDialog*)img_struct->goto_window);
+	if (response == GTK_RESPONSE_ACCEPT)
+		img_goto_line_entry_activate((GtkEntry*)slide_number_entry,img_struct);
+	else if (response == GTK_RESPONSE_CANCEL)
+		gtk_widget_destroy(img_struct->goto_window);
+}
+
+static void img_goto_line_entry_activate(GtkEntry *entry, img_window_struct *img)
+{
+	gint slide;
+	GtkTreePath *path;
+
+	slide = strtol(gtk_entry_get_text(entry), NULL, 10);
+	if (slide > 0 && slide <= img->slides_nr)
+	{
+		path = gtk_tree_path_new_from_indices(slide-1,-1);
+		gtk_icon_view_select_path ((GtkIconView*) img->thumbnail_iconview, path);
+		gtk_icon_view_set_cursor ((GtkIconView*) img->thumbnail_iconview, path, NULL, FALSE);
+		gtk_icon_view_scroll_to_path ((GtkIconView*) img->thumbnail_iconview, path, FALSE, 0, 0);
+		gtk_tree_path_free (path);
+	}
+	gtk_widget_destroy(img->goto_window);
 }

@@ -44,7 +44,7 @@ GtkWidget *img_load_icon(gchar *filename, GtkIconSize size)
 
 void img_set_window_title(img_window_struct *img,gchar *text)
 {
-	gchar *title;
+	gchar *title = NULL;
 
 	if (text == NULL)
 		title = g_strconcat("Imagination " VERSION,NULL);

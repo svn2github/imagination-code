@@ -33,7 +33,6 @@ struct _slide_struct
 {
 	gchar	*filename;
 	guint	duration;
-	gint	position;
 	/*transition_effect;*/
 };
 
@@ -52,6 +51,7 @@ struct _img_window_struct
 	GtkWidget	*dim_label;
 	GtkWidget	*size_label;
   	GtkWidget	*preview_image;
+  	GtkWidget	*goto_window;
   	GList		*slides_list;
   	gchar		*current_dir;
   	gint		slides_nr;
