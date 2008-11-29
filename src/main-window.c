@@ -84,7 +84,12 @@ img_window_struct *img_create_window (void)
 	GtkWidget *hbox_duration;
 	GtkWidget *duration_label;
 	GtkObject *spinbutton1_adj;
-
+	GtkWidget *frame1;
+	GtkWidget *frame_label;
+	GtkWidget *table1;
+	GtkWidget *resolution;
+	GtkWidget *filename;
+	GtkWidget *slide_selected;
 	GtkAccelGroup *accel_group;
 	GdkColor background_color = {0, 65535, 65535, 65535};
 	GtkCellRenderer *pixbuf_cell;
@@ -271,17 +276,17 @@ img_window_struct *img_create_window (void)
 		GTK_WIDGET_SET_FLAGS(img_struct->event_box,GTK_CAN_FOCUS);
 		gtk_widget_add_events(img_struct->event_box,GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK);
 		scrolledwindow = gtk_scrolled_window_new(NULL,NULL);
-		gtk_scrolled_window_set_shadow_type( (GtkScrolledWindow*)scrolledwindow, GTK_SHADOW_NONE );
+		gtk_scrolled_window_set_shadow_type((GtkScrolledWindow*)scrolledwindow, GTK_SHADOW_NONE );
 		gtk_scrolled_window_set_policy((GtkScrolledWindow*)scrolledwindow,GTK_POLICY_NEVER, GTK_POLICY_NEVER);
     	gtk_widget_modify_bg(img_struct->event_box,GTK_STATE_NORMAL,&background_color);
 
-		gtk_scrolled_window_add_with_viewport( (GtkScrolledWindow*)scrolledwindow,img_struct->event_box);
-		viewport = gtk_bin_get_child( (GtkBin*)scrolledwindow);
-		gtk_viewport_set_shadow_type( (GtkViewport*)viewport, GTK_SHADOW_IN);
-		gtk_container_set_border_width( (GtkContainer*)viewport,10);
+		gtk_scrolled_window_add_with_viewport((GtkScrolledWindow*)scrolledwindow,img_struct->event_box);
+		viewport = gtk_bin_get_child((GtkBin*)scrolledwindow);
+		gtk_viewport_set_shadow_type((GtkViewport*)viewport, GTK_SHADOW_IN);
+		gtk_container_set_border_width((GtkContainer*)viewport,10);
 		gtk_box_pack_start( (GtkBox*)hbox,scrolledwindow,TRUE,TRUE,0);
 		/* End code from gpicview */
-	vbox_info_slide = gtk_vbox_new (FALSE,1);
+	vbox_info_slide = gtk_vbox_new (FALSE,5);
 	gtk_box_pack_start ((GtkBox *)hbox,vbox_info_slide,FALSE,FALSE,0);
 
 	/* Create the combo box and the spinbutton */
@@ -301,8 +306,51 @@ img_window_struct *img_create_window (void)
 	img_struct->duration = gtk_spin_button_new (GTK_ADJUSTMENT (spinbutton1_adj), 1, 0);
 	gtk_box_pack_start ((GtkBox *)hbox_duration, img_struct->duration, FALSE, FALSE, 0);
 
+	/* Create the frame with the current selected slide info */
+	frame1 = gtk_frame_new (NULL);
+	gtk_box_pack_start ((GtkBox *)vbox_info_slide, frame1, FALSE, FALSE, 5);
+	gtk_widget_set_size_request (frame1, -1, 100);
+	frame_label = gtk_label_new (_("<b>Slide info</b>"));
+	gtk_frame_set_label_widget (GTK_FRAME (frame1), frame_label);
+	gtk_label_set_use_markup (GTK_LABEL (frame_label), TRUE);
+	gtk_frame_set_shadow_type (GTK_FRAME (frame1), GTK_SHADOW_OUT);
+
+	table1 = gtk_table_new (3, 2, TRUE);
+	gtk_container_add ((GtkContainer*)frame1, table1);
+	gtk_table_set_row_spacings (GTK_TABLE (table1), 6);
+	img_struct->resolution_data = gtk_label_new ("");
+	gtk_table_attach (GTK_TABLE (table1), img_struct->resolution_data, 1, 2, 2, 3,
+					  (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
+					  (GtkAttachOptions) (GTK_EXPAND | GTK_FILL), 0, 0);
+	gtk_misc_set_alignment ((GtkMisc *)img_struct->resolution_data, 0, 0.5);
+	resolution = gtk_label_new (_("Resolution:"));
+	gtk_table_attach (GTK_TABLE (table1), resolution, 0, 1, 2, 3,
+					  (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
+					  (GtkAttachOptions) (GTK_EXPAND | GTK_FILL), 0, 0);
+	gtk_misc_set_alignment ((GtkMisc *)resolution, 0, 0.5);
+	img_struct->filename_data = gtk_label_new ("");
+	gtk_table_attach (GTK_TABLE (table1), img_struct->filename_data, 1, 2, 1, 2,
+					  (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
+					  (GtkAttachOptions) (GTK_EXPAND | GTK_FILL), 0, 0);
+	gtk_misc_set_alignment ((GtkMisc *)img_struct->filename_data, 0, 0.5);
+	filename = gtk_label_new (_("Filename:"));
+	gtk_table_attach (GTK_TABLE (table1), filename, 0, 1, 1, 2,
+					  (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
+					  (GtkAttachOptions) (GTK_EXPAND | GTK_FILL), 0, 0);
+	gtk_misc_set_alignment ((GtkMisc *)filename, 0, 0.5);
+	img_struct->slide_selected_data = gtk_label_new ("");
+	gtk_table_attach (GTK_TABLE (table1), img_struct->slide_selected_data, 1, 2, 0, 1,
+					  (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
+					  (GtkAttachOptions) (GTK_EXPAND | GTK_FILL), 0, 0);
+	gtk_misc_set_alignment ((GtkMisc *)img_struct->slide_selected_data, 0, 0.5);
+	slide_selected = gtk_label_new (_("Slide selected:"));
+	gtk_table_attach (GTK_TABLE (table1), slide_selected, 0, 1, 0, 1,
+					  (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
+					  (GtkAttachOptions) (GTK_EXPAND | GTK_FILL), 0, 0);
+	gtk_misc_set_alignment ((GtkMisc *)slide_selected, 0, 0.5);
+
 	/* Create the model */
-	img_struct->thumbnail_model = gtk_list_store_new (2,GDK_TYPE_PIXBUF,G_TYPE_POINTER);
+	img_struct->thumbnail_model = gtk_list_store_new (2, GDK_TYPE_PIXBUF, G_TYPE_POINTER);
 
 	/* Create the thumbnail viewer */
 	thumb_scrolledwindow = gtk_scrolled_window_new (NULL, NULL);
@@ -327,17 +375,17 @@ img_window_struct *img_create_window (void)
 	gtk_icon_view_set_column_spacing (GTK_ICON_VIEW (img_struct->thumbnail_iconview),0);
 	gtk_icon_view_set_row_spacing (GTK_ICON_VIEW (img_struct->thumbnail_iconview),0);
 	gtk_icon_view_set_columns (GTK_ICON_VIEW (img_struct->thumbnail_iconview), G_MAXINT);
-	gtk_container_add (GTK_CONTAINER (thumb_scrolledwindow), img_struct->thumbnail_iconview);
+	gtk_container_add ((GtkContainer*)thumb_scrolledwindow, img_struct->thumbnail_iconview);
 	g_signal_connect (G_OBJECT (img_struct->thumbnail_iconview),"button-press-event",G_CALLBACK (img_button_press_event),img_struct);
 
 	/* Create the status bar */
 	img_struct->statusbar = gtk_statusbar_new ();
 	gtk_widget_show (img_struct->statusbar);
 	gtk_box_pack_start ((GtkBox *)vbox1, img_struct->statusbar, FALSE, TRUE, 0);
-	img_struct->message_id = gtk_statusbar_get_context_id (GTK_STATUSBAR (img_struct->statusbar), "statusbar");
+	img_struct->message_id = gtk_statusbar_get_context_id ((GtkStatusbar*)img_struct->statusbar, "statusbar");
 
 	gtk_widget_show_all(hbox);
-	gtk_window_add_accel_group (GTK_WINDOW (img_struct->imagination_window), accel_group);
+	gtk_window_add_accel_group ((GtkWindow*)img_struct->imagination_window, accel_group);
 
 	return img_struct;
 }
