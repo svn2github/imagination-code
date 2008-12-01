@@ -33,12 +33,14 @@
 
 static void img_file_chooser_add_preview(img_window_struct *);
 static void	img_update_preview_file_chooser(GtkFileChooser *,img_window_struct *);
+static void img_set_statusbar_message(img_window_struct *);
 
 void img_add_slides_thumbnails(GtkMenuItem *item,img_window_struct *img)
 {
-	gchar *message = NULL;
 	GSList	*slides = NULL;
+	GdkPixbuf *pixbuf;
 	GdkPixbuf *thumb;
+	GdkPixbufFormat *pixbuf_format;
 	GtkTreeIter iter;
 	slide_struct *slide_info;
 
@@ -49,15 +51,22 @@ void img_add_slides_thumbnails(GtkMenuItem *item,img_window_struct *img)
 	/*img->progress_window = img_create_progress_window(img);*/
 	while (slides)
 	{
-		thumb = gdk_pixbuf_new_from_file_at_scale(slides->data, 93, 70, TRUE, NULL);
-		if (thumb)
+		pixbuf = gdk_pixbuf_new_from_file(slides->data,NULL);
+		if (pixbuf)
 		{
 			slide_info = g_new0(slide_struct,1);
 			if (slide_info)
 			{
+				/* Get some slide info */
 				slide_info->filename = g_strdup(slides->data);
-				slide_info->duration = gtk_spin_button_get_value_as_int ((GtkSpinButton*) img->duration);
+				pixbuf_format = gdk_pixbuf_get_file_info(slides->data,NULL,NULL);
+				slide_info->resolution = g_strdup_printf("%d X %d",gdk_pixbuf_get_width (pixbuf),gdk_pixbuf_get_height(pixbuf));
+				slide_info->type = gdk_pixbuf_format_get_name(pixbuf_format);
 				gtk_list_store_append (img->thumbnail_model,&iter);
+
+				/* Get the slide thumbnail from the pixbuf */
+				thumb = gdk_pixbuf_scale_simple(pixbuf,93,70,GDK_INTERP_BILINEAR);
+				g_object_unref (pixbuf);
 				gtk_list_store_set (img->thumbnail_model, &iter, 0, thumb, 1, slide_info, -1);
 				g_object_unref (thumb);
 				img->slides_nr++;
@@ -67,9 +76,7 @@ void img_add_slides_thumbnails(GtkMenuItem *item,img_window_struct *img)
 		slides = slides->next;
 	}
 	g_slist_free(slides);
-	message = g_strdup_printf(ngettext("%d slide %s" ,"%d slides %s",img->slides_nr),img->slides_nr,"successfully loaded");
-	gtk_statusbar_push((GtkStatusbar*)img->statusbar,img->message_id,message);
-	g_free(message);
+	img_set_statusbar_message(img);
 }
 
 GSList *img_import_slides_file_chooser(img_window_struct *img)
@@ -141,6 +148,8 @@ gboolean img_quit_application(GtkWidget *widget, GdkEvent *event, img_window_str
 	{
 		gtk_tree_model_get(model, &iter,1,&entry,-1);
 		g_free(entry->filename);
+		g_free(entry->resolution);
+		g_free(entry->type);
 		g_free(entry);
 		
 	}
@@ -212,6 +221,15 @@ static void	img_update_preview_file_chooser(GtkFileChooser *file_chooser,img_win
 	gtk_file_chooser_set_preview_widget_active (file_chooser, has_preview);
 }
 
+static void img_set_statusbar_message(img_window_struct *img_struct)
+{
+	gchar *message = NULL;
+
+	message = g_strdup_printf(ngettext("%d slide %s" ,"%d slides %s",img_struct->slides_nr),img_struct->slides_nr,"imported");
+	gtk_statusbar_push((GtkStatusbar*)img_struct->statusbar,img_struct->message_id,message);
+	g_free(message);
+}
+
 void img_delete_selected_slides(GtkMenuItem *item,img_window_struct *img_struct)
 {
 	GList *selected;
@@ -230,6 +248,8 @@ void img_delete_selected_slides(GtkMenuItem *item,img_window_struct *img_struct)
 		gtk_tree_model_get_iter(model, &iter,selected->data);
 		gtk_tree_model_get(model, &iter,1,&entry,-1);
 		g_free(entry->filename);
+		g_free(entry->resolution);
+		g_free(entry->type);
 		g_free(entry);
 		gtk_list_store_remove((GtkListStore*) img_struct->thumbnail_model,&iter);
 		img_struct->slides_nr--;
@@ -239,6 +259,8 @@ void img_delete_selected_slides(GtkMenuItem *item,img_window_struct *img_struct)
 	g_list_free(selected);
 	if (img_struct->slides_nr == 0)
 		gtk_statusbar_pop((GtkStatusbar*)img_struct->statusbar,img_struct->message_id);
+	else
+		img_set_statusbar_message(img_struct);
 }
 
 void img_show_about_dialog (GtkMenuItem *item,img_window_struct *img_struct)

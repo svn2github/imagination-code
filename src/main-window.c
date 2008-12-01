@@ -29,7 +29,7 @@
 #include "main-window.h"
 #include "support.h"
 
-static gint img_button_press_event (GtkWidget *, GdkEventButton *, img_window_struct *);
+static gboolean img_button_press_event (GtkWidget *, GdkEventButton *, img_window_struct *);
 static void img_select_all_thumbnails(GtkMenuItem *,img_window_struct *);
 static void img_unselect_all_thumbnails(GtkMenuItem *,img_window_struct *);
 static void img_goto_slide(GtkMenuItem *,img_window_struct *);
@@ -394,17 +394,21 @@ img_window_struct *img_create_window (void)
 	return img_struct;
 }
 
-static gint img_button_press_event (GtkWidget *widget, GdkEventButton *event, img_window_struct *img)
+static gboolean img_button_press_event (GtkWidget *widget, GdkEventButton *event, img_window_struct *img)
 {
-	if (event->type == GDK_BUTTON_PRESS)
-	{
-		switch (event->button)
-		{
-		    case 3:
-				/*img_thumb_view_show_popupmenu();*/
-		    break;
-		}
-	}
+	GtkTreeModel *model;
+	GtkTreeIter iter;
+	GtkTreePath *path;
+	slide_struct *info_slide;
+
+	model = gtk_icon_view_get_model((GtkIconView*)widget);
+	path = gtk_icon_view_get_path_at_pos((GtkIconView*)widget, event->x, event->y);
+	gtk_tree_model_get_iter(model,&iter,path);
+	gtk_tree_path_free(path);
+	gtk_tree_model_get(model,&iter,1,&info_slide,-1);
+	gtk_spin_button_set_value((GtkSpinButton*)img->duration, info_slide->duration);
+	gtk_label_set_text((GtkLabel*)img->type_data,info_slide->type);
+	gtk_label_set_text((GtkLabel*)img->resolution_data,info_slide->resolution);
 	return FALSE;
 }
 

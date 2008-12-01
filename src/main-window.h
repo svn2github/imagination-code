@@ -33,6 +33,8 @@ struct _slide_struct
 {
 	gchar	*filename;
 	guint	duration;
+	gchar	*resolution;
+	gchar	*type;
 	/*transition_effect;*/
 };
 
