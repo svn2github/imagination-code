@@ -411,6 +411,7 @@ static gboolean img_button_press_event (GtkWidget *widget, GdkEventButton *event
 	gtk_spin_button_set_value((GtkSpinButton*)img->duration, info_slide->duration);
 	gtk_label_set_text((GtkLabel*)img->type_data,info_slide->type);
 	gtk_label_set_text((GtkLabel*)img->resolution_data,info_slide->resolution);
+	gtk_statusbar_push((GtkStatusbar*)img->statusbar,img->context_id,info_slide->filename);
 	return FALSE;
 }
 
