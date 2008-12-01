@@ -86,10 +86,12 @@ img_window_struct *img_create_window (void)
 	GtkObject *spinbutton1_adj;
 	GtkWidget *frame1;
 	GtkWidget *frame_label;
-	GtkWidget *table1;
+	GtkWidget *hbox_slide_selected;
+	GtkWidget *selected_slide;
+	GtkWidget *hbox_resolution;
 	GtkWidget *resolution;
-	GtkWidget *filename;
-	GtkWidget *slide_selected;
+	GtkWidget *hbox_type;
+	GtkWidget *type;
 	GtkAccelGroup *accel_group;
 	GdkColor background_color = {0, 65535, 65535, 65535};
 	GtkCellRenderer *pixbuf_cell;
@@ -269,7 +271,6 @@ img_window_struct *img_create_window (void)
 
 	/* Create the image area and the other widgets */
 	hbox = gtk_hbox_new (FALSE, 0);
-	gtk_widget_show (hbox);
 	gtk_box_pack_start ((GtkBox*)vbox1, hbox, TRUE, TRUE, 0);
 		/* Code from gpicview with some modifications by me */
 		img_struct->event_box = gtk_event_box_new();
@@ -286,69 +287,72 @@ img_window_struct *img_create_window (void)
 		gtk_container_set_border_width((GtkContainer*)viewport,10);
 		gtk_box_pack_start( (GtkBox*)hbox,scrolledwindow,TRUE,TRUE,0);
 		/* End code from gpicview */
-	vbox_info_slide = gtk_vbox_new (FALSE,5);
-	gtk_box_pack_start ((GtkBox *)hbox,vbox_info_slide,FALSE,FALSE,0);
 
-	/* Create the combo box and the spinbutton */
-	transition_label = gtk_label_new(_("Transition type:"));
-	gtk_misc_set_alignment((GtkMisc *) transition_label,0,-1);
-	gtk_box_pack_start ((GtkBox *)vbox_info_slide,transition_label,FALSE,FALSE,0);
-	img_struct->transition_type = gtk_combo_box_entry_new_text ();
-	gtk_box_pack_start ((GtkBox *)vbox_info_slide, img_struct->transition_type,FALSE,TRUE,0);
-
-	hbox_duration = gtk_hbox_new (FALSE, 0);
-	gtk_box_pack_start ((GtkBox *)vbox_info_slide, hbox_duration, FALSE, FALSE, 0);
-
-	duration_label = gtk_label_new (_("Slide duration in sec:"));
-	gtk_box_pack_start ((GtkBox *)hbox_duration,duration_label, FALSE, FALSE, 0);
-
-	spinbutton1_adj = gtk_adjustment_new (1, 1, 120, 1, 10, 10);
-	img_struct->duration = gtk_spin_button_new (GTK_ADJUSTMENT (spinbutton1_adj), 1, 0);
-	gtk_box_pack_start ((GtkBox *)hbox_duration, img_struct->duration, FALSE, FALSE, 0);
-
-	/* Create the frame with the current selected slide info */
 	frame1 = gtk_frame_new (NULL);
-	gtk_box_pack_start ((GtkBox *)vbox_info_slide, frame1, FALSE, FALSE, 5);
-	gtk_widget_set_size_request (frame1, -1, 100);
-	frame_label = gtk_label_new (_("<b>Slide info</b>"));
+	gtk_box_pack_start ((GtkBox*)hbox, frame1, FALSE, FALSE, 5);
+	gtk_frame_set_shadow_type (GTK_FRAME (frame1), GTK_SHADOW_OUT);
+	
+	frame_label = gtk_label_new (_("<b>Slide settings</b>"));
 	gtk_frame_set_label_widget (GTK_FRAME (frame1), frame_label);
 	gtk_label_set_use_markup (GTK_LABEL (frame_label), TRUE);
-	gtk_frame_set_shadow_type (GTK_FRAME (frame1), GTK_SHADOW_OUT);
 
-	table1 = gtk_table_new (3, 2, TRUE);
-	gtk_container_add ((GtkContainer*)frame1, table1);
-	gtk_table_set_row_spacings (GTK_TABLE (table1), 6);
-	img_struct->resolution_data = gtk_label_new ("");
-	gtk_table_attach (GTK_TABLE (table1), img_struct->resolution_data, 1, 2, 2, 3,
-					  (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
-					  (GtkAttachOptions) (GTK_EXPAND | GTK_FILL), 0, 0);
-	gtk_misc_set_alignment ((GtkMisc *)img_struct->resolution_data, 0, 0.5);
-	resolution = gtk_label_new (_("Resolution:"));
-	gtk_table_attach (GTK_TABLE (table1), resolution, 0, 1, 2, 3,
-					  (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
-					  (GtkAttachOptions) (GTK_EXPAND | GTK_FILL), 0, 0);
-	gtk_misc_set_alignment ((GtkMisc *)resolution, 0, 0.5);
-	img_struct->filename_data = gtk_label_new ("");
-	gtk_table_attach (GTK_TABLE (table1), img_struct->filename_data, 1, 2, 1, 2,
-					  (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
-					  (GtkAttachOptions) (GTK_EXPAND | GTK_FILL), 0, 0);
-	gtk_misc_set_alignment ((GtkMisc *)img_struct->filename_data, 0, 0.5);
-	filename = gtk_label_new (_("Filename:"));
-	gtk_table_attach (GTK_TABLE (table1), filename, 0, 1, 1, 2,
-					  (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
-					  (GtkAttachOptions) (GTK_EXPAND | GTK_FILL), 0, 0);
-	gtk_misc_set_alignment ((GtkMisc *)filename, 0, 0.5);
+	vbox_info_slide = gtk_vbox_new (FALSE, 2);
+	gtk_container_add (GTK_CONTAINER (frame1), vbox_info_slide);
+	gtk_container_set_border_width (GTK_CONTAINER (vbox_info_slide), 2);
+	
+	/* Create the combo box and the spinbutton */
+	transition_label = gtk_label_new (_("Transition type:"));
+	gtk_box_pack_start ((GtkBox*)vbox_info_slide, transition_label, FALSE, FALSE, 0);
+	gtk_misc_set_alignment ((GtkMisc*)transition_label, 0, -1);
+	img_struct->transition_type = gtk_combo_box_entry_new_text ();
+	gtk_box_pack_start ((GtkBox*)vbox_info_slide, img_struct->transition_type, FALSE, TRUE, 0);
+
+	hbox_duration = gtk_hbox_new (FALSE, 0);
+	gtk_box_pack_start ((GtkBox*)vbox_info_slide, hbox_duration, FALSE, TRUE, 0);
+
+	duration_label = gtk_label_new (_("Duration in sec:"));
+	gtk_box_pack_start ((GtkBox*)hbox_duration, duration_label, FALSE, FALSE, 0);
+
+	spinbutton1_adj = gtk_adjustment_new (1, 1, 300, 1, 10, 10);
+	img_struct->duration = gtk_spin_button_new ((GtkAdjustment*)spinbutton1_adj, 1, 0);
+	gtk_box_pack_end ((GtkBox*)hbox_duration, img_struct->duration, FALSE, TRUE, 0);
+
+	/* Slide Selected */
+	hbox_slide_selected = gtk_hbox_new (TRUE, 0);
+	gtk_box_pack_start ((GtkBox*)vbox_info_slide, hbox_slide_selected, FALSE, TRUE, 0);
+
+	selected_slide = gtk_label_new (_("Selected:"));
+	gtk_box_pack_start ((GtkBox*)hbox_slide_selected, selected_slide, FALSE, TRUE, 0);
+	gtk_misc_set_alignment ((GtkMisc*)selected_slide, 0, 0.5);
+
 	img_struct->slide_selected_data = gtk_label_new ("");
-	gtk_table_attach (GTK_TABLE (table1), img_struct->slide_selected_data, 1, 2, 0, 1,
-					  (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
-					  (GtkAttachOptions) (GTK_EXPAND | GTK_FILL), 0, 0);
-	gtk_misc_set_alignment ((GtkMisc *)img_struct->slide_selected_data, 0, 0.5);
-	slide_selected = gtk_label_new (_("Slide selected:"));
-	gtk_table_attach (GTK_TABLE (table1), slide_selected, 0, 1, 0, 1,
-					  (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
-					  (GtkAttachOptions) (GTK_EXPAND | GTK_FILL), 0, 0);
-	gtk_misc_set_alignment ((GtkMisc *)slide_selected, 0, 0.5);
+	gtk_box_pack_start ((GtkBox*)hbox_slide_selected, img_struct->slide_selected_data, TRUE, TRUE, 0);
+	gtk_misc_set_alignment ((GtkMisc*)img_struct->slide_selected_data, 0, 0.5);
 
+	/* Slide Resolution */
+	hbox_resolution = gtk_hbox_new (TRUE, 0);
+	gtk_box_pack_start ((GtkBox*)vbox_info_slide, hbox_resolution, FALSE, TRUE, 0);
+
+	resolution = gtk_label_new (_("Resolution:"));
+	gtk_box_pack_start ((GtkBox*)hbox_resolution, resolution, FALSE, TRUE, 0);
+	gtk_misc_set_alignment ((GtkMisc*)resolution, 0, 0.5);
+
+	img_struct->resolution_data = gtk_label_new ("");
+	gtk_box_pack_start ((GtkBox*)hbox_resolution, img_struct->resolution_data, TRUE, TRUE, 0);
+	gtk_misc_set_alignment ((GtkMisc*)img_struct->resolution_data, 0, 0.5);
+	
+	/* Slide Type */
+	hbox_type = gtk_hbox_new (TRUE, 0);
+	gtk_box_pack_start ((GtkBox*)vbox_info_slide, hbox_type, FALSE, TRUE, 0);
+
+	type = gtk_label_new (_("Type:"));
+	gtk_box_pack_start ((GtkBox*)hbox_type, type, FALSE, TRUE, 0);
+	gtk_misc_set_alignment ((GtkMisc*)type, 0, 0.5);
+
+	img_struct->type_data = gtk_label_new ("");
+	gtk_box_pack_start ((GtkBox*)hbox_type, img_struct->type_data, TRUE, TRUE, 0);
+	gtk_misc_set_alignment ((GtkMisc*)img_struct->type_data, 0, 0.5);
+	
 	/* Create the model */
 	img_struct->thumbnail_model = gtk_list_store_new (2, GDK_TYPE_PIXBUF, G_TYPE_POINTER);
 

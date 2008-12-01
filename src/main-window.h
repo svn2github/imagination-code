@@ -44,6 +44,7 @@ struct _img_window_struct
 	GtkWidget	*transition_type;
 	GtkWidget	*duration;
 	GtkWidget	*slide_selected_data;
+	GtkWidget	*type_data;
 	GtkWidget	*filename_data;
 	GtkWidget	*resolution_data;	
   	GtkListStore *thumbnail_model;
