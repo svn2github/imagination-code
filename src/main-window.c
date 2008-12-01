@@ -405,6 +405,11 @@ static gboolean img_button_press_event (GtkWidget *widget, GdkEventButton *event
 	path = gtk_icon_view_get_path_at_pos((GtkIconView*)widget, event->x, event->y);
 	if (path == NULL)
 		return FALSE;
+	if (gtk_icon_view_path_is_selected((GtkIconView*)widget,path))
+	{
+		gtk_icon_view_unselect_path((GtkIconView*)widget,path);
+		return TRUE;
+	}
 	gtk_tree_model_get_iter(model,&iter,path);
 	gtk_tree_path_free(path);
 	gtk_tree_model_get(model,&iter,1,&info_slide,-1);
