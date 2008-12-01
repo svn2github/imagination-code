@@ -33,7 +33,6 @@
 
 static void img_file_chooser_add_preview(img_window_struct *);
 static void	img_update_preview_file_chooser(GtkFileChooser *,img_window_struct *);
-static void img_set_statusbar_message(img_window_struct *);
 
 void img_add_slides_thumbnails(GtkMenuItem *item,img_window_struct *img)
 {
@@ -221,13 +220,18 @@ static void	img_update_preview_file_chooser(GtkFileChooser *file_chooser,img_win
 	gtk_file_chooser_set_preview_widget_active (file_chooser, has_preview);
 }
 
-static void img_set_statusbar_message(img_window_struct *img_struct)
+void img_set_statusbar_message(img_window_struct *img_struct)
 {
 	gchar *message = NULL;
 
-	message = g_strdup_printf(ngettext("%d slide %s" ,"%d slides %s",img_struct->slides_nr),img_struct->slides_nr,"imported");
-	gtk_statusbar_push((GtkStatusbar*)img_struct->statusbar,img_struct->message_id,message);
-	g_free(message);
+	if (img_struct->slides_nr == 0)
+		gtk_statusbar_push((GtkStatusbar*)img_struct->statusbar,img_struct->context_id,_("Welcome to Imagination " VERSION));
+	else
+	{
+		message = g_strdup_printf(ngettext("%d slide %s" ,"%d slides %s",img_struct->slides_nr),img_struct->slides_nr,"imported");
+		gtk_statusbar_push((GtkStatusbar*)img_struct->statusbar,img_struct->context_id,message);
+		g_free(message);
+	}
 }
 
 void img_delete_selected_slides(GtkMenuItem *item,img_window_struct *img_struct)
@@ -257,10 +261,7 @@ void img_delete_selected_slides(GtkMenuItem *item,img_window_struct *img_struct)
 	}
 	g_list_foreach (selected, (GFunc)gtk_tree_path_free, NULL);
 	g_list_free(selected);
-	if (img_struct->slides_nr == 0)
-		gtk_statusbar_pop((GtkStatusbar*)img_struct->statusbar,img_struct->message_id);
-	else
-		img_set_statusbar_message(img_struct);
+	img_set_statusbar_message(img_struct);
 }
 
 void img_show_about_dialog (GtkMenuItem *item,img_window_struct *img_struct)

@@ -386,7 +386,7 @@ img_window_struct *img_create_window (void)
 	img_struct->statusbar = gtk_statusbar_new ();
 	gtk_widget_show (img_struct->statusbar);
 	gtk_box_pack_start ((GtkBox *)vbox1, img_struct->statusbar, FALSE, TRUE, 0);
-	img_struct->message_id = gtk_statusbar_get_context_id ((GtkStatusbar*)img_struct->statusbar, "statusbar");
+	img_struct->context_id = gtk_statusbar_get_context_id ((GtkStatusbar*)img_struct->statusbar, "statusbar");
 
 	gtk_widget_show_all(hbox);
 	gtk_window_add_accel_group ((GtkWindow*)img_struct->imagination_window, accel_group);
@@ -403,6 +403,8 @@ static gboolean img_button_press_event (GtkWidget *widget, GdkEventButton *event
 
 	model = gtk_icon_view_get_model((GtkIconView*)widget);
 	path = gtk_icon_view_get_path_at_pos((GtkIconView*)widget, event->x, event->y);
+	if (path == NULL)
+		return FALSE;
 	gtk_tree_model_get_iter(model,&iter,path);
 	gtk_tree_path_free(path);
 	gtk_tree_model_get(model,&iter,1,&info_slide,-1);

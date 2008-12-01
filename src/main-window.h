@@ -60,7 +60,7 @@ struct _img_window_struct
   	GtkWidget	*goto_window;
   	gchar		*current_dir;
   	gint		slides_nr;
-  	guint		message_id;
+  	guint		context_id;
 };
 
 img_window_struct *img_create_window(void);
