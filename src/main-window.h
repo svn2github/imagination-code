@@ -54,6 +54,7 @@ struct _img_window_struct
   	GtkWidget	*statusbar;
   	GtkWidget	*event_box;
   	GtkWidget	*image_area;
+  	GdkPixbuf	*slide_pixbuf;
   	GtkWidget	*import_slide_chooser;
 	GtkWidget	*dim_label;
 	GtkWidget	*size_label;

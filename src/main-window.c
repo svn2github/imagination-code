@@ -273,27 +273,23 @@ img_window_struct *img_create_window (void)
 	/* Create the image area and the other widgets */
 	hbox = gtk_hbox_new (FALSE, 0);
 	gtk_box_pack_start ((GtkBox*)vbox1, hbox, TRUE, TRUE, 0);
-		/* Code from gpicview with some modifications by me */
-		img_struct->event_box = gtk_event_box_new();
-		GTK_WIDGET_SET_FLAGS(img_struct->event_box,GTK_CAN_FOCUS);
-		gtk_widget_add_events(img_struct->event_box,GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK);
-		scrolledwindow = gtk_scrolled_window_new(NULL,NULL);
-		gtk_scrolled_window_set_shadow_type((GtkScrolledWindow*)scrolledwindow, GTK_SHADOW_NONE );
-		gtk_scrolled_window_set_policy((GtkScrolledWindow*)scrolledwindow,GTK_POLICY_NEVER, GTK_POLICY_NEVER);
-    	gtk_widget_modify_bg(img_struct->event_box,GTK_STATE_NORMAL,&background_color);
-		img_struct->image_area = gtk_image_new();
 
-		gtk_scrolled_window_add_with_viewport((GtkScrolledWindow*)scrolledwindow,img_struct->event_box);
-		viewport = gtk_bin_get_child((GtkBin*)scrolledwindow);
-		gtk_viewport_set_shadow_type((GtkViewport*)viewport, GTK_SHADOW_IN);
-		gtk_container_set_border_width((GtkContainer*)viewport,10);
-		gtk_box_pack_start( (GtkBox*)hbox,scrolledwindow,TRUE,TRUE,0);
-		/* End code from gpicview */
+	scrolledwindow = gtk_scrolled_window_new(NULL,NULL);
+	gtk_scrolled_window_set_shadow_type((GtkScrolledWindow*)scrolledwindow, GTK_SHADOW_NONE );
+	gtk_scrolled_window_set_policy((GtkScrolledWindow*)scrolledwindow,GTK_POLICY_NEVER, GTK_POLICY_NEVER);
+	img_struct->image_area = gtk_image_new();
+
+	gtk_scrolled_window_add_with_viewport((GtkScrolledWindow*)scrolledwindow,(GtkWidget*)img_struct->image_area);
+	viewport = gtk_bin_get_child((GtkBin*)scrolledwindow);
+	gtk_widget_modify_bg(viewport,GTK_STATE_NORMAL,&background_color);
+	gtk_viewport_set_shadow_type((GtkViewport*)viewport, GTK_SHADOW_IN);
+	gtk_container_set_border_width((GtkContainer*)viewport,10);
+	gtk_box_pack_start( (GtkBox*)hbox,scrolledwindow,TRUE,TRUE,0);
 
 	frame1 = gtk_frame_new (NULL);
 	gtk_box_pack_start ((GtkBox*)hbox, frame1, FALSE, FALSE, 5);
 	gtk_frame_set_shadow_type (GTK_FRAME (frame1), GTK_SHADOW_OUT);
-	
+
 	frame_label = gtk_label_new (_("<b>Slide settings</b>"));
 	gtk_frame_set_label_widget (GTK_FRAME (frame1), frame_label);
 	gtk_label_set_use_markup (GTK_LABEL (frame_label), TRUE);
@@ -400,6 +396,7 @@ img_window_struct *img_create_window (void)
 
 static void img_iconview_selection_changed (GtkIconView *iconview, img_window_struct *img)
 {
+	GdkPixbuf *scaled_pixbuf;
 	GtkTreeModel *model;
 	GtkTreeIter iter;
 	GtkTreePath *path = NULL;
@@ -420,8 +417,15 @@ static void img_iconview_selection_changed (GtkIconView *iconview, img_window_st
 	gtk_statusbar_push((GtkStatusbar*)img->statusbar,img->context_id,info_slide->filename);
 
 	/* Load the slide and display it */
-	img->image_area = gtk_image_new_from_file(info_slide->filename);
-	gtk_container_add((GtkContainer*)img->event_box,img->image_area);
+	img->slide_pixbuf = gdk_pixbuf_new_from_file(info_slide->filename,NULL);
+	if (gdk_pixbuf_get_width(img->slide_pixbuf) > 615 && gdk_pixbuf_get_width(img->slide_pixbuf) > 378)
+	{
+		scaled_pixbuf = gdk_pixbuf_scale_simple(img->slide_pixbuf, 615, 378, GDK_INTERP_BILINEAR);
+		g_object_unref(img->slide_pixbuf);
+		img->slide_pixbuf = scaled_pixbuf;
+	}
+	gtk_image_set_from_pixbuf((GtkImage*)img->image_area,img->slide_pixbuf);
+	g_object_unref(img->slide_pixbuf);
 }
 
 static void img_spinbutton_value_changed (GtkSpinButton *spinbutton, img_window_struct *img)
