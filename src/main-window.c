@@ -29,10 +29,11 @@
 #include "main-window.h"
 #include "support.h"
 
-static gboolean img_button_press_event (GtkWidget *, GdkEventButton *, img_window_struct *);
-static void img_select_all_thumbnails(GtkMenuItem *,img_window_struct *);
-static void img_unselect_all_thumbnails(GtkMenuItem *,img_window_struct *);
-static void img_goto_slide(GtkMenuItem *,img_window_struct *);
+static void img_iconview_selection_changed (GtkIconView *, img_window_struct *);
+static void img_spinbutton_value_changed (GtkSpinButton *, img_window_struct *);
+static void img_select_all_thumbnails(GtkMenuItem *, img_window_struct *);
+static void img_unselect_all_thumbnails(GtkMenuItem *, img_window_struct *);
+static void img_goto_slide(GtkMenuItem *, img_window_struct *);
 static void img_goto_line_entry_activate(GtkEntry *, img_window_struct *);
 
 img_window_struct *img_create_window (void)
@@ -299,7 +300,7 @@ img_window_struct *img_create_window (void)
 	vbox_info_slide = gtk_vbox_new (FALSE, 2);
 	gtk_container_add (GTK_CONTAINER (frame1), vbox_info_slide);
 	gtk_container_set_border_width (GTK_CONTAINER (vbox_info_slide), 2);
-	
+
 	/* Create the combo box and the spinbutton */
 	transition_label = gtk_label_new (_("Transition type:"));
 	gtk_box_pack_start ((GtkBox*)vbox_info_slide, transition_label, FALSE, FALSE, 0);
@@ -315,7 +316,9 @@ img_window_struct *img_create_window (void)
 
 	spinbutton1_adj = gtk_adjustment_new (1, 1, 300, 1, 10, 10);
 	img_struct->duration = gtk_spin_button_new ((GtkAdjustment*)spinbutton1_adj, 1, 0);
+	gtk_spin_button_set_numeric((GtkSpinButton*)img_struct->duration,TRUE);
 	gtk_box_pack_end ((GtkBox*)hbox_duration, img_struct->duration, FALSE, TRUE, 0);
+	g_signal_connect (G_OBJECT (img_struct->duration),"value-changed",G_CALLBACK (img_spinbutton_value_changed),img_struct);
 
 	/* Slide Selected */
 	hbox_slide_selected = gtk_hbox_new (TRUE, 0);
@@ -380,7 +383,7 @@ img_window_struct *img_create_window (void)
 	gtk_icon_view_set_row_spacing (GTK_ICON_VIEW (img_struct->thumbnail_iconview),0);
 	gtk_icon_view_set_columns (GTK_ICON_VIEW (img_struct->thumbnail_iconview), G_MAXINT);
 	gtk_container_add ((GtkContainer*)thumb_scrolledwindow, img_struct->thumbnail_iconview);
-	g_signal_connect (G_OBJECT (img_struct->thumbnail_iconview),"button-press-event",G_CALLBACK (img_button_press_event),img_struct);
+	g_signal_connect (G_OBJECT (img_struct->thumbnail_iconview),"selection-changed",G_CALLBACK (img_iconview_selection_changed),img_struct);
 
 	/* Create the status bar */
 	img_struct->statusbar = gtk_statusbar_new ();
@@ -394,22 +397,19 @@ img_window_struct *img_create_window (void)
 	return img_struct;
 }
 
-static gboolean img_button_press_event (GtkWidget *widget, GdkEventButton *event, img_window_struct *img)
+static void img_iconview_selection_changed (GtkIconView *iconview, img_window_struct *img)
 {
 	GtkTreeModel *model;
 	GtkTreeIter iter;
-	GtkTreePath *path;
+	GtkTreePath *path = NULL;
 	slide_struct *info_slide;
 
-	model = gtk_icon_view_get_model((GtkIconView*)widget);
-	path = gtk_icon_view_get_path_at_pos((GtkIconView*)widget, event->x, event->y);
+	model = gtk_icon_view_get_model(iconview);
+	gtk_icon_view_get_cursor(iconview,&path,NULL);
+
 	if (path == NULL)
-		return FALSE;
-	if (gtk_icon_view_path_is_selected((GtkIconView*)widget,path))
-	{
-		gtk_icon_view_unselect_path((GtkIconView*)widget,path);
-		return TRUE;
-	}
+		return;
+
 	gtk_tree_model_get_iter(model,&iter,path);
 	gtk_tree_path_free(path);
 	gtk_tree_model_get(model,&iter,1,&info_slide,-1);
@@ -417,20 +417,44 @@ static gboolean img_button_press_event (GtkWidget *widget, GdkEventButton *event
 	gtk_label_set_text((GtkLabel*)img->type_data,info_slide->type);
 	gtk_label_set_text((GtkLabel*)img->resolution_data,info_slide->resolution);
 	gtk_statusbar_push((GtkStatusbar*)img->statusbar,img->context_id,info_slide->filename);
-	return FALSE;
 }
 
-static void img_select_all_thumbnails(GtkMenuItem *item,img_window_struct *img)
+static void img_spinbutton_value_changed (GtkSpinButton *spinbutton, img_window_struct *img)
+{
+	gint duration = 0;
+	GList *selected;
+	GtkTreeIter iter;
+	GtkTreeModel *model;
+	slide_struct *info_slide;
+
+	model = gtk_icon_view_get_model((GtkIconView *)img->thumbnail_iconview);
+	selected = gtk_icon_view_get_selected_items((GtkIconView *)img->thumbnail_iconview);
+	if (selected == NULL)
+		return;
+
+	duration = gtk_spin_button_get_value_as_int(spinbutton);
+	while (selected)
+	{
+		gtk_tree_model_get_iter(model, &iter,selected->data);
+		gtk_tree_model_get(model, &iter,1,&info_slide,-1);
+		info_slide->duration = duration;
+		selected = selected->next;
+	}
+	g_list_foreach (selected, (GFunc)gtk_tree_path_free, NULL);
+	g_list_free(selected);
+}
+
+static void img_select_all_thumbnails(GtkMenuItem *item, img_window_struct *img)
 {
 	gtk_icon_view_select_all((GtkIconView *)img->thumbnail_iconview);
 }
 
-static void img_unselect_all_thumbnails(GtkMenuItem *item,img_window_struct *img)
+static void img_unselect_all_thumbnails(GtkMenuItem *item, img_window_struct *img)
 {
 	gtk_icon_view_unselect_all((GtkIconView *)img->thumbnail_iconview);
 }
 
-static void img_goto_slide(GtkMenuItem *item,img_window_struct *img_struct)
+static void img_goto_slide(GtkMenuItem *item, img_window_struct *img_struct)
 {
 	GtkWidget *vbox;
 	GtkWidget *text_label;

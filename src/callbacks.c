@@ -57,6 +57,7 @@ void img_add_slides_thumbnails(GtkMenuItem *item,img_window_struct *img)
 			if (slide_info)
 			{
 				/* Get some slide info */
+				slide_info->duration = 1;
 				slide_info->filename = g_strdup(slides->data);
 				pixbuf_format = gdk_pixbuf_get_file_info(slides->data,&width,&height);
 				slide_info->resolution = g_strdup_printf("%d x %d",width,height);
