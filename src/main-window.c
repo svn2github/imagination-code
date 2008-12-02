@@ -281,6 +281,7 @@ img_window_struct *img_create_window (void)
 		gtk_scrolled_window_set_shadow_type((GtkScrolledWindow*)scrolledwindow, GTK_SHADOW_NONE );
 		gtk_scrolled_window_set_policy((GtkScrolledWindow*)scrolledwindow,GTK_POLICY_NEVER, GTK_POLICY_NEVER);
     	gtk_widget_modify_bg(img_struct->event_box,GTK_STATE_NORMAL,&background_color);
+		img_struct->image_area = gtk_image_new();
 
 		gtk_scrolled_window_add_with_viewport((GtkScrolledWindow*)scrolledwindow,img_struct->event_box);
 		viewport = gtk_bin_get_child((GtkBin*)scrolledwindow);
@@ -417,6 +418,10 @@ static void img_iconview_selection_changed (GtkIconView *iconview, img_window_st
 	gtk_label_set_text((GtkLabel*)img->type_data,info_slide->type);
 	gtk_label_set_text((GtkLabel*)img->resolution_data,info_slide->resolution);
 	gtk_statusbar_push((GtkStatusbar*)img->statusbar,img->context_id,info_slide->filename);
+
+	/* Load the slide and display it */
+	img->image_area = gtk_image_new_from_file(info_slide->filename);
+	gtk_container_add((GtkContainer*)img->event_box,img->image_area);
 }
 
 static void img_spinbutton_value_changed (GtkSpinButton *spinbutton, img_window_struct *img)
