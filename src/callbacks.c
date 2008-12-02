@@ -37,9 +37,9 @@ static void	img_update_preview_file_chooser(GtkFileChooser *,img_window_struct *
 void img_add_slides_thumbnails(GtkMenuItem *item,img_window_struct *img)
 {
 	GSList	*slides = NULL;
-	GdkPixbuf *pixbuf;
 	GdkPixbuf *thumb;
 	GdkPixbufFormat *pixbuf_format;
+	gint width, height;
 	GtkTreeIter iter;
 	slide_struct *slide_info;
 
@@ -50,22 +50,18 @@ void img_add_slides_thumbnails(GtkMenuItem *item,img_window_struct *img)
 	/*img->progress_window = img_create_progress_window(img);*/
 	while (slides)
 	{
-		pixbuf = gdk_pixbuf_new_from_file(slides->data,NULL);
-		if (pixbuf)
+		thumb = gdk_pixbuf_new_from_file_at_scale(slides->data, 93, 70, TRUE, NULL);
+		if (thumb)
 		{
 			slide_info = g_new0(slide_struct,1);
 			if (slide_info)
 			{
 				/* Get some slide info */
 				slide_info->filename = g_strdup(slides->data);
-				pixbuf_format = gdk_pixbuf_get_file_info(slides->data,NULL,NULL);
-				slide_info->resolution = g_strdup_printf("%d X %d",gdk_pixbuf_get_width (pixbuf),gdk_pixbuf_get_height(pixbuf));
+				pixbuf_format = gdk_pixbuf_get_file_info(slides->data,&width,&height);
+				slide_info->resolution = g_strdup_printf("%d x %d",width,height);
 				slide_info->type = gdk_pixbuf_format_get_name(pixbuf_format);
 				gtk_list_store_append (img->thumbnail_model,&iter);
-
-				/* Get the slide thumbnail from the pixbuf */
-				thumb = gdk_pixbuf_scale_simple(pixbuf,93,70,GDK_INTERP_BILINEAR);
-				g_object_unref (pixbuf);
 				gtk_list_store_set (img->thumbnail_model, &iter, 0, thumb, 1, slide_info, -1);
 				g_object_unref (thumb);
 				img->slides_nr++;
