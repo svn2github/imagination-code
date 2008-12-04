@@ -27,19 +27,15 @@
 #include "callbacks.h"
 #include "support.h"
 
-/* pixbuf = img.get_pixbuf()
-    pixbuf.save(filename, "jpeg", {"quality":"100"})
-*/
-
 static void img_file_chooser_add_preview(img_window_struct *);
-static void	img_update_preview_file_chooser(GtkFileChooser *,img_window_struct *);
+static void img_update_preview_file_chooser(GtkFileChooser *,img_window_struct *);
 
 void img_add_slides_thumbnails(GtkMenuItem *item,img_window_struct *img)
 {
 	GSList	*slides = NULL;
 	GdkPixbuf *thumb;
 	GdkPixbufFormat *pixbuf_format;
-	gint width, height;
+	gint width,height;
 	GtkTreeIter iter;
 	slide_struct *slide_info;
 
@@ -168,7 +164,6 @@ static void img_file_chooser_add_preview(img_window_struct *img_struct)
 	gtk_container_set_border_width ((GtkContainer *)vbox, 10);
 
 	img_struct->preview_image = gtk_image_new ();
-	gtk_widget_set_size_request (img_struct->preview_image, 128, 128);
 
 	img_struct->dim_label  = gtk_label_new (NULL);
 	img_struct->size_label = gtk_label_new (NULL);
@@ -189,7 +184,8 @@ static void	img_update_preview_file_chooser(GtkFileChooser *file_chooser,img_win
 	gchar *filename,*size;
 	gboolean has_preview = FALSE;
 	gint width,height;
-	GdkPixbuf *pixbuf,*pixbuf_scaled;
+	GdkPixbuf *pixbuf;
+	GdkPixbufFormat *pixbuf_format;
 
 	filename = gtk_file_chooser_get_filename(file_chooser);
 	if (filename == NULL)
@@ -197,23 +193,19 @@ static void	img_update_preview_file_chooser(GtkFileChooser *file_chooser,img_win
 		gtk_file_chooser_set_preview_widget_active (file_chooser, has_preview);
 		return;
 	}
-	pixbuf = gdk_pixbuf_new_from_file(filename, NULL);
-	g_free(filename);	
+	pixbuf = gdk_pixbuf_new_from_file_at_scale(filename, 93, 70, TRUE, NULL);
 	has_preview = (pixbuf != NULL);
 	if (has_preview)
 	{
-		width  = gdk_pixbuf_get_width (pixbuf);
-		height = gdk_pixbuf_get_height(pixbuf);
-		pixbuf_scaled = gdk_pixbuf_scale_simple(pixbuf, 128, 96, GDK_INTERP_BILINEAR);
+		pixbuf_format = gdk_pixbuf_get_file_info(filename,&width,&height);
+		gtk_image_set_from_pixbuf ((GtkImage*)img_struct->preview_image, pixbuf);
 		g_object_unref (pixbuf);
-
-		gtk_image_set_from_pixbuf ((GtkImage*)img_struct->preview_image, pixbuf_scaled);
-		g_object_unref (pixbuf_scaled);
 
 		size = g_strdup_printf("%d x %d pixels",width,height);
 		gtk_label_set_text((GtkLabel*)img_struct->dim_label,size);
 		g_free(size);
 	}
+	g_free(filename);
 	gtk_file_chooser_set_preview_widget_active (file_chooser, has_preview);
 }
 
