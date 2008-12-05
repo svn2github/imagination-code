@@ -321,7 +321,7 @@ img_window_struct *img_create_window (void)
 	hbox_slide_selected = gtk_hbox_new (TRUE, 0);
 	gtk_box_pack_start ((GtkBox*)vbox_info_slide, hbox_slide_selected, FALSE, TRUE, 0);
 
-	selected_slide = gtk_label_new (_("Selected:"));
+	selected_slide = gtk_label_new (_("Slide number:"));
 	gtk_box_pack_start ((GtkBox*)hbox_slide_selected, selected_slide, FALSE, TRUE, 0);
 	gtk_misc_set_alignment ((GtkMisc*)selected_slide, 0, 0.5);
 
@@ -374,6 +374,7 @@ img_window_struct *img_create_window (void)
 
 	/* Set some iconview properties */
 	//gtk_icon_view_enable_model_drag_source ((GtkIconView*)img_struct->thumbnail_iconview, 0, target_table, G_N_ELEMENTS (target_table), GDK_ACTION_MOVE);
+	gtk_icon_view_set_reorderable(GTK_ICON_VIEW (img_struct->thumbnail_iconview),TRUE);
 	gtk_icon_view_set_selection_mode (GTK_ICON_VIEW (img_struct->thumbnail_iconview), GTK_SELECTION_MULTIPLE);
 	gtk_icon_view_set_orientation (GTK_ICON_VIEW (img_struct->thumbnail_iconview), GTK_ORIENTATION_HORIZONTAL);
 	gtk_icon_view_set_column_spacing (GTK_ICON_VIEW (img_struct->thumbnail_iconview),0);
@@ -402,11 +403,10 @@ static void img_iconview_selection_changed (GtkIconView *iconview, img_window_st
 	GtkTreePath *path = NULL;
 	slide_struct *info_slide;
 
-	g_print ("%p\n",img);
 	model = gtk_icon_view_get_model(iconview);
 	gtk_icon_view_get_cursor(iconview,&path,NULL);
 
-	if (path == NULL)
+	if (path == NULL || gtk_icon_view_path_is_selected(iconview,path) == FALSE)
 		return;
 
 	gtk_tree_model_get_iter(model,&iter,path);
@@ -501,34 +501,16 @@ static void img_goto_line_entry_activate(GtkEntry *entry, img_window_struct *img
 {
 	gint slide;
 	GtkTreePath *path;
-	slide_struct *info_slide;
-	GdkPixbuf *scaled_pixbuf;
-	GtkTreeModel *model;
-	GtkTreeIter iter;
 
 	slide = strtol(gtk_entry_get_text(entry), NULL, 10);
 	if (slide > 0 && slide <= img->slides_nr)
 	{
 		gtk_icon_view_unselect_all((GtkIconView*) img->thumbnail_iconview);
 		path = gtk_tree_path_new_from_indices(slide-1,-1);
-		gtk_icon_view_select_path ((GtkIconView*) img->thumbnail_iconview, path);
 		gtk_icon_view_set_cursor ((GtkIconView*) img->thumbnail_iconview, path, NULL, FALSE);
+		gtk_icon_view_select_path ((GtkIconView*) img->thumbnail_iconview, path);
 		gtk_icon_view_scroll_to_path ((GtkIconView*) img->thumbnail_iconview, path, FALSE, 0, 0);
-		
-		/* Load the picture and display it */
-		model = gtk_icon_view_get_model((GtkIconView*)img->thumbnail_iconview);
-		gtk_tree_model_get_iter(model,&iter,path);
 		gtk_tree_path_free (path);
-		gtk_tree_model_get(model,&iter,1,&info_slide,-1);
-		img->slide_pixbuf = gdk_pixbuf_new_from_file(info_slide->filename,NULL);
-		if (gdk_pixbuf_get_width(img->slide_pixbuf) > 615 && gdk_pixbuf_get_width(img->slide_pixbuf) > 378)
-		{
-			scaled_pixbuf = gdk_pixbuf_scale_simple(img->slide_pixbuf, 615, 378, GDK_INTERP_BILINEAR);
-			g_object_unref(img->slide_pixbuf);
-			img->slide_pixbuf = scaled_pixbuf;
-		}
-		gtk_image_set_from_pixbuf((GtkImage*)img->image_area,img->slide_pixbuf);
-		g_object_unref(img->slide_pixbuf);
 	}
 	gtk_widget_destroy(img->goto_window);
 }
