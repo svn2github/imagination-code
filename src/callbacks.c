@@ -126,9 +126,12 @@ GSList *img_import_slides_file_chooser(img_window_struct *img)
 gboolean img_quit_application(GtkWidget *widget, GdkEvent *event, img_window_struct *img_struct)
 {
 	GtkTreeModel *model;
-	GtkTreePath  *path;
+	GtkTreePath  *path = NULL;
 	GtkTreeIter iter;
 	slide_struct *entry;
+
+	if (img_struct->slides_nr == 0)
+		goto quit;
 
 	model = gtk_icon_view_get_model ((GtkIconView*) img_struct->thumbnail_iconview);
 	path = gtk_tree_path_new_first();

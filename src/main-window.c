@@ -31,6 +31,7 @@
 
 static void img_iconview_selection_changed (GtkIconView *, img_window_struct *);
 static void img_spinbutton_value_changed (GtkSpinButton *, img_window_struct *);
+static void img_quit_menu(GtkMenuItem *, img_window_struct *);
 static void img_select_all_thumbnails(GtkMenuItem *, img_window_struct *);
 static void img_unselect_all_thumbnails(GtkMenuItem *, img_window_struct *);
 static void img_goto_slide(GtkMenuItem *, img_window_struct *);
@@ -153,7 +154,7 @@ img_window_struct *img_create_window (void)
 
 	imagemenuitem5 = gtk_image_menu_item_new_from_stock ("gtk-quit", accel_group);
 	gtk_container_add ((GtkContainer*)menu1, imagemenuitem5);
-	g_signal_connect ((gpointer) imagemenuitem5,"activate",G_CALLBACK (img_quit_application),img_struct);
+	g_signal_connect ((gpointer) imagemenuitem5,"activate",G_CALLBACK (img_quit_menu),img_struct);
 
 	menuitem2 = gtk_menu_item_new_with_mnemonic (_("_Slide"));
 	gtk_container_add ((GtkContainer*)menubar, menuitem2);
@@ -412,6 +413,13 @@ img_window_struct *img_create_window (void)
 	return img_struct;
 }
 
+static void img_quit_menu(GtkMenuItem *menuitem, img_window_struct *img)
+{
+	gboolean value;
+
+	g_signal_emit_by_name(img->imagination_window,"delete-event", img, &value);
+}
+
 static void img_iconview_selection_changed (GtkIconView *iconview, img_window_struct *img)
 {
 	GdkPixbuf *scaled_pixbuf;
@@ -419,6 +427,10 @@ static void img_iconview_selection_changed (GtkIconView *iconview, img_window_st
 	GtkTreeIter iter;
 	GtkTreePath *path = NULL;
 	slide_struct *info_slide;
+	GtkWidget *swin;
+	gint max_width, max_height;
+	gint width, height;
+	gdouble scalefactor;
 
 	model = gtk_icon_view_get_model(iconview);
 	gtk_icon_view_get_cursor(iconview,&path,NULL);
@@ -434,11 +446,19 @@ static void img_iconview_selection_changed (GtkIconView *iconview, img_window_st
 	gtk_label_set_text((GtkLabel*)img->resolution_data,info_slide->resolution);
 	gtk_statusbar_push((GtkStatusbar*)img->statusbar,img->context_id,info_slide->filename);
 
+	/* Get the size of the parent */
+	swin = gtk_widget_get_parent(img->image_area);
+	max_width = swin->allocation.width;
+	max_height = swin->allocation.height;
+
 	/* Load the slide and display it */
 	img->slide_pixbuf = gdk_pixbuf_new_from_file(info_slide->filename,NULL);
-	if (gdk_pixbuf_get_width(img->slide_pixbuf) > 615 && gdk_pixbuf_get_width(img->slide_pixbuf) > 378)
+	width = gdk_pixbuf_get_width(img->slide_pixbuf);
+	height = gdk_pixbuf_get_height(img->slide_pixbuf);
+	if (width > max_width || height > max_height)
 	{
-		scaled_pixbuf = gdk_pixbuf_scale_simple(img->slide_pixbuf, 615, 378, GDK_INTERP_BILINEAR);
+		scalefactor = (max_width < max_height) ? (gdouble)max_width/width : (gdouble)max_height/height;
+		scaled_pixbuf = gdk_pixbuf_scale_simple(img->slide_pixbuf, (width*scalefactor)-(swin->allocation.x/4), (height*scalefactor)-(swin->allocation.y/4), GDK_INTERP_BILINEAR);
 		g_object_unref(img->slide_pixbuf);
 		img->slide_pixbuf = scaled_pixbuf;
 	}
