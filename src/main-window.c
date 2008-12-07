@@ -29,6 +29,7 @@
 #include "main-window.h"
 #include "support.h"
 
+static void img_window_size_allocate (GtkWindow *win, GtkAllocation *allocation, img_window_struct *img);
 static void img_iconview_selection_changed (GtkIconView *, img_window_struct *);
 static void img_spinbutton_value_changed (GtkSpinButton *, img_window_struct *);
 static void img_quit_menu(GtkMenuItem *, img_window_struct *);
@@ -107,6 +108,7 @@ img_window_struct *img_create_window (void)
 	gtk_window_set_default_size( (GtkWindow*)img_struct->imagination_window, 840, 580 );
 	img_set_window_title(img_struct,NULL);
 	g_signal_connect (G_OBJECT (img_struct->imagination_window),"delete-event",G_CALLBACK (img_quit_application),img_struct);
+	g_signal_connect (G_OBJECT (img_struct->imagination_window), "size-allocate", G_CALLBACK (img_window_size_allocate), img_struct);
 
 	vbox1 = gtk_vbox_new (FALSE,2);
 	gtk_widget_show (vbox1);
@@ -420,22 +422,22 @@ static void img_quit_menu(GtkMenuItem *menuitem, img_window_struct *img)
 	g_signal_emit_by_name(img->imagination_window,"delete-event", img, &value);
 }
 
-static void img_iconview_selection_changed (GtkIconView *iconview, img_window_struct *img)
+static void img_image_area_update(img_window_struct *img)
 {
-	GdkPixbuf *scaled_pixbuf;
+	GdkPixbufFormat *pixbuf_format;
 	GtkTreeModel *model;
 	GtkTreeIter iter;
 	GtkTreePath *path = NULL;
 	slide_struct *info_slide;
-	GtkWidget *swin;
+	GtkWidget *viewport;
 	gint max_width, max_height;
 	gint width, height;
 	gdouble scalefactor;
 
-	model = gtk_icon_view_get_model(iconview);
-	gtk_icon_view_get_cursor(iconview,&path,NULL);
+	model = gtk_icon_view_get_model(GTK_ICON_VIEW(img->thumbnail_iconview));
+	gtk_icon_view_get_cursor(GTK_ICON_VIEW(img->thumbnail_iconview),&path,NULL);
 
-	if (path == NULL || gtk_icon_view_path_is_selected(iconview,path) == FALSE)
+	if (path == NULL || gtk_icon_view_path_is_selected(GTK_ICON_VIEW(img->thumbnail_iconview),path) == FALSE)
 		return;
 
 	gtk_tree_model_get_iter(model,&iter,path);
@@ -447,23 +449,54 @@ static void img_iconview_selection_changed (GtkIconView *iconview, img_window_st
 	gtk_statusbar_push((GtkStatusbar*)img->statusbar,img->context_id,info_slide->filename);
 
 	/* Get the size of the parent */
-	swin = gtk_widget_get_parent(img->image_area);
-	max_width = swin->allocation.width;
-	max_height = swin->allocation.height;
-
+	viewport = gtk_widget_get_parent(img->image_area);
+	max_width = viewport->allocation.width;
+	max_height = viewport->allocation.height;
+	
 	/* Load the slide and display it */
-	img->slide_pixbuf = gdk_pixbuf_new_from_file(info_slide->filename,NULL);
-	width = gdk_pixbuf_get_width(img->slide_pixbuf);
-	height = gdk_pixbuf_get_height(img->slide_pixbuf);
+	pixbuf_format = gdk_pixbuf_get_file_info(info_slide->filename,&width,&height);
 	if (width > max_width || height > max_height)
 	{
-		scalefactor = (max_width < max_height) ? (gdouble)max_width/width : (gdouble)max_height/height;
-		scaled_pixbuf = gdk_pixbuf_scale_simple(img->slide_pixbuf, (width*scalefactor)-(swin->allocation.x/4), (height*scalefactor)-(swin->allocation.y/4), GDK_INTERP_BILINEAR);
-		g_object_unref(img->slide_pixbuf);
-		img->slide_pixbuf = scaled_pixbuf;
+		scalefactor = ((max_width < max_height) ? (gdouble)max_width/width : (gdouble)max_height/height) / 1.15;
+		width *= scalefactor;
+		height *= scalefactor;
+		img->slide_pixbuf = gdk_pixbuf_new_from_file_at_scale(info_slide->filename, width, height, TRUE, NULL);
 	}
 	gtk_image_set_from_pixbuf((GtkImage*)img->image_area,img->slide_pixbuf);
 	g_object_unref(img->slide_pixbuf);
+}
+
+static void img_window_size_allocate (GtkWindow *win, GtkAllocation *allocation, img_window_struct *img)
+{
+	static gint oldw = -1, oldh = -1;
+	
+	if(oldw == -1 || oldh == -1)
+	{
+		oldw = allocation->width;
+		oldh = allocation->height;
+	}
+	else
+	{
+		if(oldw == allocation->width && oldh == allocation->height)
+			return;
+	}
+	
+	oldw = allocation->width;
+	oldh = allocation->height;
+	
+	gtk_image_set_from_pixbuf(GTK_IMAGE(img->image_area), NULL);
+	
+	if(allocation->width < oldw || allocation->height < oldh)
+		return;
+
+	g_signal_handlers_block_by_func(win, img_window_size_allocate, img);
+	img_image_area_update(img);
+	g_signal_handlers_unblock_by_func(win, img_window_size_allocate, img);
+}
+
+static void img_iconview_selection_changed (GtkIconView *iconview, img_window_struct *img)
+{
+	img_image_area_update(img);
 }
 
 static void img_spinbutton_value_changed (GtkSpinButton *spinbutton, img_window_struct *img)
