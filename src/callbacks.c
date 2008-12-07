@@ -21,11 +21,7 @@
 #  include <config.h>
 #endif
 
-#include <gtk/gtk.h>
-
-#include "main-window.h"
 #include "callbacks.h"
-#include "support.h"
 
 static void img_file_chooser_add_preview(img_window_struct *);
 static void img_update_preview_file_chooser(GtkFileChooser *,img_window_struct *);

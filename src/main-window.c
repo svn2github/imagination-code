@@ -21,13 +21,9 @@
 #  include <config.h>
 #endif
 
-#include <stdlib.h>
-#include <gdk/gdkkeysyms.h>
-#include <gtk/gtk.h>
-
-#include "callbacks.h"
 #include "main-window.h"
 #include "support.h"
+#include "callbacks.h"
 
 static void img_window_size_allocate (GtkWindow *win, GtkAllocation *allocation, img_window_struct *img);
 static void img_iconview_selection_changed (GtkIconView *, img_window_struct *);

@@ -1,5 +1,7 @@
 ## Process this file with automake to produce Makefile.in
 
+EXTRA_DIST = transition_data.h
+
 INCLUDES = \
 	$(DEVELOPMENT_CFLAGS) \
 	-DPACKAGE_DATA_DIR=\""$(datadir)"\" \

@@ -20,6 +20,10 @@
 #ifndef __IMAGINATION_INTERFACE_H__
 #define __IMAGINATION_INTERFACE_H__
 
+#include <stdlib.h>
+#include <gdk/gdkkeysyms.h>
+#include <gtk/gtk.h>
+
 typedef enum 
 {
 	IMG_GOTO_SLIDE = 0,
