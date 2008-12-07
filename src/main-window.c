@@ -199,7 +199,7 @@ img_window_struct *img_create_window (void)
 
 	remove_menu = gtk_image_menu_item_new_with_mnemonic (_("_Delete"));
 	gtk_container_add ((GtkContainer*)slide_menu, remove_menu);
-	gtk_widget_add_accelerator (remove_menu,"activate",accel_group,GDK_d,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
+	gtk_widget_add_accelerator (remove_menu,"activate",accel_group, GDK_Delete,GDK_MODE_DISABLED,GTK_ACCEL_VISIBLE);
 	g_signal_connect ((gpointer) remove_menu,"activate",G_CALLBACK (img_delete_selected_slides),img_struct);
 
 	tmp_image = gtk_image_new_from_stock ("gtk-delete",GTK_ICON_SIZE_MENU);
@@ -322,7 +322,7 @@ img_window_struct *img_create_window (void)
 	transition_label = gtk_label_new (_("Transition type:"));
 	gtk_box_pack_start ((GtkBox*)vbox_info_slide, transition_label, FALSE, FALSE, 0);
 	gtk_misc_set_alignment ((GtkMisc*)transition_label, 0, -1);
-	img_struct->transition_type = gtk_combo_box_entry_new_text ();
+	img_struct->transition_type = gtk_combo_box_new();
 	gtk_box_pack_start ((GtkBox*)vbox_info_slide, img_struct->transition_type, FALSE, TRUE, 0);
 
 	hbox_duration = gtk_hbox_new (FALSE, 0);

@@ -254,6 +254,7 @@ void img_delete_selected_slides(GtkMenuItem *item,img_window_struct *img_struct)
 	g_list_foreach (selected, (GFunc)gtk_tree_path_free, NULL);
 	g_list_free(selected);
 	img_set_statusbar_message(img_struct);
+	gtk_image_set_from_pixbuf((GtkImage*)img_struct->image_area,NULL);
 }
 
 void img_show_about_dialog (GtkMenuItem *item,img_window_struct *img_struct)
