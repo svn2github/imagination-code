@@ -327,6 +327,7 @@ img_window_struct *img_create_window (void)
 	frame_label = gtk_label_new (_("<b>Slide settings</b>"));
 	gtk_frame_set_label_widget (GTK_FRAME (frame1), frame_label);
 	gtk_label_set_use_markup (GTK_LABEL (frame_label), TRUE);
+	gtk_misc_set_padding (GTK_MISC (frame_label), 2, 2);
 
 	vbox_info_slide = gtk_vbox_new (FALSE, 2);
 	gtk_container_add (GTK_CONTAINER (frame1_alignment), vbox_info_slide);
