@@ -82,6 +82,9 @@ img_window_struct *img_create_window (void)
 	GtkWidget *viewport;
 	GtkIconSize tmp_toolbar_icon_size;
 	GtkWidget *hbox;
+	GtkWidget *valign;
+	GtkWidget *halign;
+	GtkWidget *frame1_alignment;
 	GtkWidget *thumb_scrolledwindow;
 	GtkWidget *scrolledwindow;
 	GtkWidget *transition_label;
@@ -306,16 +309,27 @@ img_window_struct *img_create_window (void)
 	gtk_container_set_border_width((GtkContainer*)viewport,10);
 	gtk_box_pack_start( (GtkBox*)hbox,scrolledwindow,TRUE,TRUE,0);
 
+	valign = gtk_alignment_new (1, 0, 0, 0);
+	gtk_box_pack_start (GTK_BOX (hbox), valign, FALSE, FALSE, 0);
+
+	halign = gtk_alignment_new (0, 0, 0, 0);
+	gtk_container_add (GTK_CONTAINER (valign), halign);
+	gtk_alignment_set_padding (GTK_ALIGNMENT (halign), 10, 10, 10, 10);
+
 	frame1 = gtk_frame_new (NULL);
-	gtk_box_pack_start ((GtkBox*)hbox, frame1, FALSE, FALSE, 5);
+	gtk_container_add (GTK_CONTAINER (halign), frame1);
 	gtk_frame_set_shadow_type (GTK_FRAME (frame1), GTK_SHADOW_OUT);
+
+	frame1_alignment = gtk_alignment_new (0.5, 0.5, 1, 1);
+	gtk_container_add (GTK_CONTAINER (frame1), frame1_alignment);
+	gtk_alignment_set_padding (GTK_ALIGNMENT (frame1_alignment), 2, 2, 5, 5);
 
 	frame_label = gtk_label_new (_("<b>Slide settings</b>"));
 	gtk_frame_set_label_widget (GTK_FRAME (frame1), frame_label);
 	gtk_label_set_use_markup (GTK_LABEL (frame_label), TRUE);
 
 	vbox_info_slide = gtk_vbox_new (FALSE, 2);
-	gtk_container_add ((GtkContainer*)frame1, vbox_info_slide);
+	gtk_container_add (GTK_CONTAINER (frame1_alignment), vbox_info_slide);
 	gtk_container_set_border_width (GTK_CONTAINER (vbox_info_slide), 2);
 
 	/* Create the combo box and the spinbutton */
@@ -383,7 +397,6 @@ img_window_struct *img_create_window (void)
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (thumb_scrolledwindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_NEVER);
 	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (thumb_scrolledwindow), GTK_SHADOW_IN);
 	img_struct->thumbnail_iconview = gtk_icon_view_new_with_model((GtkTreeModel *)img_struct->thumbnail_model);
-	gtk_widget_set_size_request(img_struct->thumbnail_iconview,-1,72);
 	gtk_widget_show (img_struct->thumbnail_iconview);
 
 	/* Create the cell layout */
