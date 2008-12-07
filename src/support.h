@@ -17,12 +17,14 @@
  *
  */
 
+#ifndef __IMAGINATION_SUPPORT_H
+#define __IMAGINATION_SUPPORT_H
+
 #ifdef HAVE_CONFIG_H
 #  include <config.h>
 #endif
 
 #include <gtk/gtk.h>
-#include "main-window.h"
 
 #ifdef ENABLE_NLS
 #  include <libintl.h>
@@ -46,4 +48,5 @@
 #endif
 
 GtkWidget *img_load_icon(gchar *, GtkIconSize );
-void img_set_window_title(img_window_struct *,gchar *);
+
+#endif

@@ -22,7 +22,6 @@
 #endif
 
 #include "main-window.h"
-#include "support.h"
 #include "callbacks.h"
 
 static void img_window_size_allocate (GtkWindow *win, GtkAllocation *allocation, img_window_struct *img);
@@ -33,6 +32,16 @@ static void img_select_all_thumbnails(GtkMenuItem *, img_window_struct *);
 static void img_unselect_all_thumbnails(GtkMenuItem *, img_window_struct *);
 static void img_goto_slide(GtkMenuItem *, img_window_struct *);
 static void img_goto_line_entry_activate(GtkEntry *, img_window_struct *);
+
+void img_set_window_title(img_window_struct *img,gchar *text)
+{
+	gchar *title = NULL;
+
+	if (text == NULL)
+		title = g_strconcat("Imagination " VERSION,NULL);
+	gtk_window_set_title ((GtkWindow *)img->imagination_window,title);
+	g_free(title);
+}
 
 img_window_struct *img_create_window (void)
 {

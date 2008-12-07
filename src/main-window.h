@@ -23,6 +23,8 @@
 #include <stdlib.h>
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
+#include "support.h"
+#include "transition_data.h"
 
 typedef enum 
 {
@@ -39,7 +41,7 @@ struct _slide_struct
 	guint	duration;
 	gchar	*resolution;
 	gchar	*type;
-	/*transition_effect;*/
+	img_trans_type	transition_type;
 };
 
 typedef struct _img_window_struct img_window_struct;
@@ -68,5 +70,6 @@ struct _img_window_struct
   	guint		context_id;
 };
 
+void img_set_window_title(img_window_struct *,gchar *);
 img_window_struct *img_create_window(void);
 #endif
