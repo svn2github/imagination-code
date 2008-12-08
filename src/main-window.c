@@ -54,8 +54,9 @@ img_window_struct *img_create_window (void)
 	GtkWidget *imagemenuitem2;
 	GtkWidget *imagemenuitem3;
 	GtkWidget *imagemenuitem4;
-	GtkWidget *separatormenuitem1;
 	GtkWidget *imagemenuitem5;
+	GtkWidget *close_menu;
+	GtkWidget *separatormenuitem1;
 	GtkWidget *menuitem2;
 	GtkWidget *slide_menu;
 	GtkWidget *separator_slide_menu;
@@ -143,7 +144,14 @@ img_window_struct *img_create_window (void)
 
 	imagemenuitem4 = gtk_image_menu_item_new_from_stock ("gtk-save-as", accel_group);
 	gtk_container_add ((GtkContainer*)menu1, imagemenuitem4);
-	
+
+	close_menu = gtk_image_menu_item_new_from_stock ("gtk-close", accel_group);
+	gtk_container_add ((GtkContainer*)menu1, close_menu);
+
+	separatormenuitem1 = gtk_separator_menu_item_new ();
+	gtk_container_add ((GtkContainer*)menu1, separatormenuitem1);
+	gtk_widget_set_sensitive (separatormenuitem1, FALSE);
+
 	preview_menu = gtk_image_menu_item_new_with_mnemonic (_("_Preview"));
 	gtk_container_add ((GtkContainer*)menu1, preview_menu);
 	gtk_widget_add_accelerator (preview_menu,"activate",accel_group,GDK_p,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
