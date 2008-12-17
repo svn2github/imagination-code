@@ -152,6 +152,7 @@ gboolean img_quit_application(GtkWidget *widget, GdkEvent *event, img_window_str
 	while (gtk_tree_model_iter_next (model,&iter));
 
 quit:
+	//TODO: free sliseshow_title
 	gtk_tree_path_free(path);
 	if (img_struct->current_dir)
 		g_free(img_struct->current_dir);

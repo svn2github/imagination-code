@@ -33,8 +33,8 @@ void img_new_slideshow_settings_dialog(img_window_struct *img)
 	GtkWidget *frame2;
 	GtkWidget *alignment_frame2;
 	GtkWidget *vbox_video_format;
-	GtkWidget *radiobutton1;
-	GtkWidget *radiobutton2;
+	GtkWidget *pal;
+	GtkWidget *ntsc;
 	GtkWidget *label_frame2;
 	GtkWidget *label1;
 	GtkWidget *dialog_action_area1;
@@ -88,17 +88,17 @@ void img_new_slideshow_settings_dialog(img_window_struct *img)
 	vbox_video_format = gtk_vbox_new (FALSE, 0);
 	gtk_container_add (GTK_CONTAINER (alignment_frame2), vbox_video_format);
 
-	radiobutton1 = gtk_radio_button_new_with_mnemonic (NULL, _("PAL 720x576"));
-	gtk_box_pack_start (GTK_BOX (vbox_video_format), radiobutton1, TRUE, TRUE, 0);
-	gtk_radio_button_set_group (GTK_RADIO_BUTTON (radiobutton1), radiobutton1_group);
-	radiobutton1_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (radiobutton1));
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (radiobutton1), TRUE);
+	pal = gtk_radio_button_new_with_mnemonic (NULL, _("PAL 720x576"));
+	gtk_box_pack_start (GTK_BOX (vbox_video_format), pal, TRUE, TRUE, 0);
+	gtk_radio_button_set_group (GTK_RADIO_BUTTON (pal), radiobutton1_group);
+	radiobutton1_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (pal));
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pal), TRUE);
 
-	radiobutton2 = gtk_radio_button_new_with_mnemonic (NULL, _("NTSC 720x480"));
-	gtk_box_pack_start (GTK_BOX (vbox_video_format), radiobutton2, TRUE, TRUE, 0);
-	gtk_radio_button_set_group (GTK_RADIO_BUTTON (radiobutton2), radiobutton1_group);
-	radiobutton1_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (radiobutton2));
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (radiobutton2), TRUE);
+	ntsc = gtk_radio_button_new_with_mnemonic (NULL, _("NTSC 720x480"));
+	gtk_box_pack_start (GTK_BOX (vbox_video_format), ntsc, TRUE, TRUE, 0);
+	gtk_radio_button_set_group (GTK_RADIO_BUTTON (ntsc), radiobutton1_group);
+	radiobutton1_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (ntsc));
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (ntsc), TRUE);
 
 	label_frame2 = gtk_label_new (_("<b>Video Format</b>"));
 	gtk_frame_set_label_widget (GTK_FRAME (frame2), label_frame2);
@@ -112,16 +112,19 @@ void img_new_slideshow_settings_dialog(img_window_struct *img)
 	gtk_button_box_set_layout (GTK_BUTTON_BOX (dialog_action_area1), GTK_BUTTONBOX_SPREAD);
 
 	button1 = gtk_button_new_from_stock ("gtk-ok");
-	gtk_dialog_add_action_widget (GTK_DIALOG (dialog1), button1, 0);
-
+	gtk_dialog_add_action_widget (GTK_DIALOG (dialog1), button1, GTK_RESPONSE_OK);
+	
 	button2 = gtk_button_new_from_stock ("gtk-cancel");
-	gtk_dialog_add_action_widget (GTK_DIALOG (dialog1), button2, 0);
+	gtk_dialog_add_action_widget (GTK_DIALOG (dialog1), button2, GTK_RESPONSE_CANCEL);
 	gtk_widget_show_all(dialog_vbox1);
 	response = gtk_dialog_run(GTK_DIALOG(dialog1));
 	if (response == GTK_RESPONSE_OK || response == GTK_RESPONSE_ACCEPT)
 	{
 		img->slideshow_title = g_strdup(gtk_entry_get_text(GTK_ENTRY(slideshow_title_entry)));
-		//img->slideshoow_height = ;
+		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON (pal)))
+			img->slideshow_height = 576;
+		else
+			img->slideshow_height = 480;
 	}
 	gtk_widget_destroy(dialog1);
 }
