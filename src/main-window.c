@@ -24,7 +24,6 @@
 #include "main-window.h"
 #include "callbacks.h"
 
-static void img_size_allocate_event (GtkWidget *, GtkAllocation *, img_window_struct *img);
 static void img_iconview_selection_changed (GtkIconView *, img_window_struct *);
 static void img_spinbutton_value_changed (GtkSpinButton *, img_window_struct *);
 static void img_quit_menu(GtkMenuItem *, img_window_struct *);
@@ -251,6 +250,7 @@ img_window_struct *img_create_window (void)
 	new_button = (GtkWidget*) gtk_tool_button_new (tmp_image,"");
 	gtk_container_add ((GtkContainer*)toolbar,new_button);
 	gtk_widget_set_tooltip_text(new_button, _("Create a new slideshow"));
+	g_signal_connect ((gpointer) new_button,"clicked",G_CALLBACK (img_new_slideshow),img_struct);
 
 	tmp_image = gtk_image_new_from_stock ("gtk-open",tmp_toolbar_icon_size);
 	open_button = (GtkWidget*) gtk_tool_button_new (tmp_image,"");
@@ -308,16 +308,15 @@ img_window_struct *img_create_window (void)
 	hbox = gtk_hbox_new (FALSE, 0);
 	gtk_box_pack_start ((GtkBox*)vbox1, hbox, TRUE, TRUE, 0);
 
-	fixed = gtk_fixed_new ();
+	fixed = gtk_alignment_new (0.5, 0.5, 0, 0);
 	gtk_box_pack_start (GTK_BOX (hbox), fixed, TRUE, TRUE, 0);
 
 	img_struct->viewport = gtk_viewport_new(NULL,NULL);
-	gtk_fixed_put (GTK_FIXED (fixed), img_struct->viewport, 0, 0);
+	gtk_container_add( GTK_CONTAINER(fixed), img_struct->viewport ); 
 	gtk_widget_set_size_request (img_struct->viewport, 720, 576);
 	gtk_widget_modify_bg(img_struct->viewport,GTK_STATE_NORMAL,&background_color);
 	gtk_viewport_set_shadow_type((GtkViewport*)img_struct->viewport, GTK_SHADOW_IN);
 	gtk_container_set_border_width((GtkContainer*)img_struct->viewport,10);
-	g_signal_connect (G_OBJECT (fixed), "size-allocate", G_CALLBACK (img_size_allocate_event), img_struct);
 
 	img_struct->image_area = gtk_image_new();
 	gtk_container_add (GTK_CONTAINER (img_struct->viewport), img_struct->image_area);
@@ -479,23 +478,6 @@ static void img_iconview_selection_changed(GtkIconView *iconview, img_window_str
 		img->slide_pixbuf = gdk_pixbuf_new_from_file(info_slide->filename,NULL);
 	gtk_image_set_from_pixbuf((GtkImage*)img->image_area,img->slide_pixbuf);
 	g_object_unref(img->slide_pixbuf);
-}
-
-static void img_size_allocate_event (GtkWidget *widget, GtkAllocation *allocation, img_window_struct *img)
-{
-	gint x,y;
-
-	x = (widget->allocation.width - 720) / 2;
-	y = (widget->allocation.height - 576) / 2;
-
-	if (x == 0 || y == 0)
-		return;
-
-	g_signal_handlers_block_by_func(widget, img_size_allocate_event, img);
-	gtk_fixed_move(GTK_FIXED(widget),img->viewport,x,y);
-	while(gtk_events_pending())
-		gtk_main_iteration();
-	g_signal_handlers_unblock_by_func(widget, img_size_allocate_event, img);
 }
 
 static void img_spinbutton_value_changed (GtkSpinButton *spinbutton, img_window_struct *img)

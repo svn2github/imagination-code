@@ -26,6 +26,11 @@
 static void img_file_chooser_add_preview(img_window_struct *);
 static void img_update_preview_file_chooser(GtkFileChooser *,img_window_struct *);
 
+void img_new_slideshow(GtkMenuItem *item,img_window_struct *img_struct)
+{
+	img_new_slideshow_settings_dialog(img_struct);
+}
+
 void img_add_slides_thumbnails(GtkMenuItem *item,img_window_struct *img)
 {
 	GSList	*slides = NULL;
@@ -74,7 +79,7 @@ GSList *img_import_slides_file_chooser(img_window_struct *img)
 	GSList *slides = NULL, *formats = NULL, *_formats = NULL;
 	int response,i;
 
-	img->import_slide_chooser = gtk_file_chooser_dialog_new (_("Import pictures, use SHIFT key for multiple select"),
+	img->import_slide_chooser = gtk_file_chooser_dialog_new (_("Import slides, use SHIFT key for multiple select"),
 						GTK_WINDOW (img->imagination_window),
 						GTK_FILE_CHOOSER_ACTION_OPEN,
 						GTK_STOCK_CANCEL,

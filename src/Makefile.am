@@ -14,7 +14,8 @@ imagination_SOURCES = \
 	imagination.c \
 	support.c support.h \
 	main-window.c main-window.h \
-	callbacks.c callbacks.h
+	callbacks.c callbacks.h \
+	new_slideshow.c new_slideshow.h
 
 imagination_CFLAGS = \
 	-DDATADIR=\"$(datadir)\"

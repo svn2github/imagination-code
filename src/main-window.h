@@ -67,7 +67,9 @@ struct _img_window_struct
   	GtkWidget	*goto_window;
   	GtkListStore *thumbnail_model;
   	gchar		*current_dir;
+  	gchar		*slideshow_title;
   	gint		slides_nr;
+  	gint		slideshow_height;
   	guint		context_id;
 };
 
