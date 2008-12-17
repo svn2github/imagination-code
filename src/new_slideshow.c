@@ -122,9 +122,15 @@ void img_new_slideshow_settings_dialog(img_window_struct *img)
 	{
 		img->slideshow_title = g_strdup(gtk_entry_get_text(GTK_ENTRY(slideshow_title_entry)));
 		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON (pal)))
+		{
+			gtk_widget_set_size_request(img->viewport,720,576);
 			img->slideshow_height = 576;
+		}
 		else
+		{
+			gtk_widget_set_size_request(img->viewport,720,480);
 			img->slideshow_height = 480;
+		}
 	}
 	gtk_widget_destroy(dialog1);
 }

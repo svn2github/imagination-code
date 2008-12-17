@@ -132,6 +132,7 @@ img_window_struct *img_create_window (void)
 
 	imagemenuitem1 = gtk_image_menu_item_new_from_stock ("gtk-new", accel_group);
 	gtk_container_add ((GtkContainer*)menu1, imagemenuitem1);
+	g_signal_connect ((gpointer) imagemenuitem1,"activate",G_CALLBACK (img_new_slideshow),img_struct);
 
 	imagemenuitem2 = gtk_image_menu_item_new_from_stock ("gtk-open", accel_group);
 	gtk_container_add ((GtkContainer*)menu1, imagemenuitem2);
