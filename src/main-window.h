@@ -41,7 +41,7 @@ struct _slide_struct
 	guint	duration;
 	gchar	*resolution;
 	gchar	*type;
-	img_trans_type	transition_type;
+	img_trans_type transition_type;
 };
 
 typedef struct _img_window_struct img_window_struct;
@@ -55,9 +55,9 @@ struct _img_window_struct
 	GtkWidget	*type_data;
 	GtkWidget	*filename_data;
 	GtkWidget	*resolution_data;	
-  	GtkListStore *thumbnail_model;
   	GtkWidget	*thumbnail_iconview;
   	GtkWidget	*statusbar;
+  	GtkWidget	*viewport;
   	GtkWidget	*image_area;
   	GdkPixbuf	*slide_pixbuf;
   	GtkWidget	*import_slide_chooser;
@@ -65,6 +65,7 @@ struct _img_window_struct
 	GtkWidget	*size_label;
   	GtkWidget	*preview_image;
   	GtkWidget	*goto_window;
+  	GtkListStore *thumbnail_model;
   	gchar		*current_dir;
   	gint		slides_nr;
   	guint		context_id;

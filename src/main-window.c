@@ -24,7 +24,7 @@
 #include "main-window.h"
 #include "callbacks.h"
 
-static void img_window_size_allocate (GtkWindow *win, GtkAllocation *allocation, img_window_struct *img);
+static void img_size_allocate_event (GtkWidget *, GtkAllocation *, img_window_struct *img);
 static void img_iconview_selection_changed (GtkIconView *, img_window_struct *);
 static void img_spinbutton_value_changed (GtkSpinButton *, img_window_struct *);
 static void img_quit_menu(GtkMenuItem *, img_window_struct *);
@@ -85,14 +85,12 @@ img_window_struct *img_create_window (void)
 	GtkWidget *remove_button;
 	GtkWidget *separatortoolitem;
 	GtkWidget *goto_button;
-	GtkWidget *viewport;
-	GtkIconSize tmp_toolbar_icon_size;
 	GtkWidget *hbox;
+	GtkWidget *fixed;
 	GtkWidget *valign;
 	GtkWidget *halign;
 	GtkWidget *frame1_alignment;
 	GtkWidget *thumb_scrolledwindow;
-	GtkWidget *scrolledwindow;
 	GtkWidget *transition_label;
 	GtkWidget *vbox_info_slide;
 	GtkWidget *hbox_duration;
@@ -109,6 +107,7 @@ img_window_struct *img_create_window (void)
 	GtkAccelGroup *accel_group;
 	GdkColor background_color = {0, 65535, 65535, 65535};
 	GtkCellRenderer *pixbuf_cell;
+	GtkIconSize tmp_toolbar_icon_size;
 
 	accel_group = gtk_accel_group_new ();
 
@@ -117,7 +116,6 @@ img_window_struct *img_create_window (void)
 	gtk_window_set_default_size( (GtkWindow*)img_struct->imagination_window, 840, 580 );
 	img_set_window_title(img_struct,NULL);
 	g_signal_connect (G_OBJECT (img_struct->imagination_window),"delete-event",G_CALLBACK (img_quit_application),img_struct);
-	g_signal_connect (G_OBJECT (img_struct->imagination_window), "size-allocate", G_CALLBACK (img_window_size_allocate), img_struct);
 
 	vbox1 = gtk_vbox_new (FALSE,2);
 	gtk_widget_show (vbox1);
@@ -285,7 +283,7 @@ img_window_struct *img_create_window (void)
 	tmp_image = img_load_icon("imagination-import.png",GTK_ICON_SIZE_LARGE_TOOLBAR);
 	import_button = (GtkWidget*) gtk_tool_button_new (tmp_image,"");
 	gtk_container_add ((GtkContainer*)toolbar,import_button);
-	gtk_widget_set_tooltip_text(import_button, _("Import one or more pictures"));
+	gtk_widget_set_tooltip_text(import_button, _("Import the slides"));
 	g_signal_connect ((gpointer) import_button,"clicked",G_CALLBACK (img_add_slides_thumbnails),img_struct);
 
 	tmp_image = gtk_image_new_from_stock ("gtk-delete",tmp_toolbar_icon_size);
@@ -310,17 +308,19 @@ img_window_struct *img_create_window (void)
 	hbox = gtk_hbox_new (FALSE, 0);
 	gtk_box_pack_start ((GtkBox*)vbox1, hbox, TRUE, TRUE, 0);
 
-	scrolledwindow = gtk_scrolled_window_new(NULL,NULL);
-	gtk_scrolled_window_set_shadow_type((GtkScrolledWindow*)scrolledwindow, GTK_SHADOW_NONE );
-	gtk_scrolled_window_set_policy((GtkScrolledWindow*)scrolledwindow,GTK_POLICY_NEVER, GTK_POLICY_NEVER);
-	img_struct->image_area = gtk_image_new();
+	fixed = gtk_fixed_new ();
+	gtk_box_pack_start (GTK_BOX (hbox), fixed, TRUE, TRUE, 0);
 
-	gtk_scrolled_window_add_with_viewport((GtkScrolledWindow*)scrolledwindow,(GtkWidget*)img_struct->image_area);
-	viewport = gtk_bin_get_child((GtkBin*)scrolledwindow);
-	gtk_widget_modify_bg(viewport,GTK_STATE_NORMAL,&background_color);
-	gtk_viewport_set_shadow_type((GtkViewport*)viewport, GTK_SHADOW_IN);
-	gtk_container_set_border_width((GtkContainer*)viewport,10);
-	gtk_box_pack_start( (GtkBox*)hbox,scrolledwindow,TRUE,TRUE,0);
+	img_struct->viewport = gtk_viewport_new(NULL,NULL);
+	gtk_fixed_put (GTK_FIXED (fixed), img_struct->viewport, 0, 0);
+	gtk_widget_set_size_request (img_struct->viewport, 720, 576);
+	gtk_widget_modify_bg(img_struct->viewport,GTK_STATE_NORMAL,&background_color);
+	gtk_viewport_set_shadow_type((GtkViewport*)img_struct->viewport, GTK_SHADOW_IN);
+	gtk_container_set_border_width((GtkContainer*)img_struct->viewport,10);
+	g_signal_connect (G_OBJECT (fixed), "size-allocate", G_CALLBACK (img_size_allocate_event), img_struct);
+
+	img_struct->image_area = gtk_image_new();
+	gtk_container_add (GTK_CONTAINER (img_struct->viewport), img_struct->image_area);
 
 	valign = gtk_alignment_new (1, 0, 0, 0);
 	gtk_box_pack_start (GTK_BOX (hbox), valign, FALSE, FALSE, 0);
@@ -449,22 +449,19 @@ static void img_quit_menu(GtkMenuItem *menuitem, img_window_struct *img)
 	g_signal_emit_by_name(img->imagination_window,"delete-event", img, &value);
 }
 
-static void img_image_area_update(img_window_struct *img)
+static void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *img)
 {
-	GdkPixbufFormat *pixbuf_format;
+	GdkPixbufFormat *slide_format;
 	GtkTreeModel *model;
 	GtkTreeIter iter;
 	GtkTreePath *path = NULL;
 	slide_struct *info_slide;
-	GtkWidget *viewport;
-	gint max_width, max_height;
-	gint width, height;
-	gdouble scalefactor;
+	gint width,height;
 
-	model = gtk_icon_view_get_model(GTK_ICON_VIEW(img->thumbnail_iconview));
-	gtk_icon_view_get_cursor(GTK_ICON_VIEW(img->thumbnail_iconview),&path,NULL);
+	model = gtk_icon_view_get_model(iconview);
+	gtk_icon_view_get_cursor(iconview,&path,NULL);
 
-	if (path == NULL || gtk_icon_view_path_is_selected(GTK_ICON_VIEW(img->thumbnail_iconview),path) == FALSE)
+	if (path == NULL || gtk_icon_view_path_is_selected(iconview,path) == FALSE)
 		return;
 
 	gtk_tree_model_get_iter(model,&iter,path);
@@ -475,55 +472,30 @@ static void img_image_area_update(img_window_struct *img)
 	gtk_label_set_text((GtkLabel*)img->resolution_data,info_slide->resolution);
 	gtk_statusbar_push((GtkStatusbar*)img->statusbar,img->context_id,info_slide->filename);
 
-	/* Get the size of the parent */
-	viewport = gtk_widget_get_parent(img->image_area);
-	max_width = viewport->allocation.width;
-	max_height = viewport->allocation.height;
-	
-	/* Load the slide and display it */
-	pixbuf_format = gdk_pixbuf_get_file_info(info_slide->filename,&width,&height);
-	if (width > max_width || height > max_height)
-	{
-		scalefactor = ((max_width < max_height) ? (gdouble)max_width/width : (gdouble)max_height/height) / 1.15;
-		width *= scalefactor;
-		height *= scalefactor;
-		img->slide_pixbuf = gdk_pixbuf_new_from_file_at_scale(info_slide->filename, width, height, TRUE, NULL);
-	}
+	slide_format = gdk_pixbuf_get_file_info(info_slide->filename,&width,&height);
+	if (width > (img->viewport)->allocation.width || height > (img->viewport)->allocation.height)
+		img->slide_pixbuf = gdk_pixbuf_new_from_file_at_scale(info_slide->filename, (img->viewport)->allocation.width, (img->viewport)->allocation.height, TRUE, NULL);
+	else
+		img->slide_pixbuf = gdk_pixbuf_new_from_file(info_slide->filename,NULL);
 	gtk_image_set_from_pixbuf((GtkImage*)img->image_area,img->slide_pixbuf);
 	g_object_unref(img->slide_pixbuf);
 }
 
-static void img_window_size_allocate (GtkWindow *win, GtkAllocation *allocation, img_window_struct *img)
+static void img_size_allocate_event (GtkWidget *widget, GtkAllocation *allocation, img_window_struct *img)
 {
-	static gint oldw = -1, oldh = -1;
-	
-	if(oldw == -1 || oldh == -1)
-	{
-		oldw = allocation->width;
-		oldh = allocation->height;
-	}
-	else
-	{
-		if(oldw == allocation->width && oldh == allocation->height)
-			return;
-	}
-	
-	oldw = allocation->width;
-	oldh = allocation->height;
-	
-	gtk_image_set_from_pixbuf(GTK_IMAGE(img->image_area), NULL);
-	
-	if(allocation->width < oldw || allocation->height < oldh)
+	gint x,y;
+
+	x = (widget->allocation.width - 720) / 2;
+	y = (widget->allocation.height - 576) / 2;
+
+	if (x == 0 || y == 0)
 		return;
 
-	g_signal_handlers_block_by_func(win, img_window_size_allocate, img);
-	img_image_area_update(img);
-	g_signal_handlers_unblock_by_func(win, img_window_size_allocate, img);
-}
-
-static void img_iconview_selection_changed (GtkIconView *iconview, img_window_struct *img)
-{
-	img_image_area_update(img);
+	g_signal_handlers_block_by_func(widget, img_size_allocate_event, img);
+	gtk_fixed_move(GTK_FIXED(widget),img->viewport,x,y);
+	while(gtk_events_pending())
+		gtk_main_iteration();
+	g_signal_handlers_unblock_by_func(widget, img_size_allocate_event, img);
 }
 
 static void img_spinbutton_value_changed (GtkSpinButton *spinbutton, img_window_struct *img)
