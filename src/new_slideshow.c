@@ -37,24 +37,22 @@ void img_new_slideshow_settings_dialog(img_window_struct *img)
 	GtkWidget *ntsc;
 	GtkWidget *label_frame2;
 	GtkWidget *label1;
-	GtkWidget *dialog_action_area1;
-	GtkWidget *button1;
-	GtkWidget *button2;
 	GSList *radiobutton1_group = NULL;
 	gint response;
 
-	dialog1 = gtk_dialog_new ();
-	gtk_container_set_border_width (GTK_CONTAINER (dialog1), 5);
-	gtk_window_set_title (GTK_WINDOW (dialog1),_("Create a new slideshow"));
-	gtk_window_set_transient_for(GTK_WINDOW(dialog1),GTK_WINDOW(img->imagination_window));
+	dialog1 = gtk_dialog_new_with_buttons(_("Create a new slideshow"),(GtkWindow*)img->imagination_window,
+										GTK_DIALOG_DESTROY_WITH_PARENT,
+										GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+										GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, NULL);
+
+	gtk_button_box_set_layout (GTK_BUTTON_BOX (GTK_DIALOG (dialog1)->action_area), GTK_BUTTONBOX_SPREAD);
 	gtk_widget_set_size_request(dialog1,520,248);
-	gtk_window_set_position (GTK_WINDOW (dialog1), GTK_WIN_POS_CENTER_ON_PARENT);
-	gtk_window_set_type_hint (GTK_WINDOW (dialog1), GDK_WINDOW_TYPE_HINT_DIALOG);
 	gtk_dialog_set_has_separator (GTK_DIALOG (dialog1), FALSE);
 
 	dialog_vbox1 = GTK_DIALOG (dialog1)->vbox;
 
 	vbox1 = gtk_vbox_new (FALSE, 0);
+	gtk_container_set_border_width (GTK_CONTAINER (vbox1), 5);
 	gtk_box_pack_start (GTK_BOX (dialog_vbox1), vbox1, TRUE, TRUE, 0);
 
 	main_frame = gtk_frame_new (NULL);
@@ -89,13 +87,13 @@ void img_new_slideshow_settings_dialog(img_window_struct *img)
 	vbox_video_format = gtk_vbox_new (FALSE, 0);
 	gtk_container_add (GTK_CONTAINER (alignment_frame2), vbox_video_format);
 
-	pal = gtk_radio_button_new_with_mnemonic (NULL, _("PAL 720x576"));
+	pal = gtk_radio_button_new_with_mnemonic (NULL, "PAL 720 x 576");
 	gtk_box_pack_start (GTK_BOX (vbox_video_format), pal, TRUE, TRUE, 0);
 	gtk_radio_button_set_group (GTK_RADIO_BUTTON (pal), radiobutton1_group);
 	radiobutton1_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (pal));
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pal), TRUE);
 
-	ntsc = gtk_radio_button_new_with_mnemonic (NULL, _("NTSC 720x480"));
+	ntsc = gtk_radio_button_new_with_mnemonic (NULL, "NTSC 720 x 480");
 	gtk_box_pack_start (GTK_BOX (vbox_video_format), ntsc, TRUE, TRUE, 0);
 	gtk_radio_button_set_group (GTK_RADIO_BUTTON (ntsc), radiobutton1_group);
 	radiobutton1_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (ntsc));
@@ -109,14 +107,6 @@ void img_new_slideshow_settings_dialog(img_window_struct *img)
 	gtk_frame_set_label_widget (GTK_FRAME (main_frame), label1);
 	gtk_label_set_use_markup (GTK_LABEL (label1), TRUE);
 
-	dialog_action_area1 = GTK_DIALOG (dialog1)->action_area;
-	gtk_button_box_set_layout (GTK_BUTTON_BOX (dialog_action_area1), GTK_BUTTONBOX_SPREAD);
-
-	button2 = gtk_button_new_from_stock ("gtk-cancel");
-	gtk_dialog_add_action_widget (GTK_DIALOG (dialog1), button2, GTK_RESPONSE_CANCEL);
-	
-	button1 = gtk_button_new_from_stock ("gtk-ok");
-	gtk_dialog_add_action_widget (GTK_DIALOG (dialog1), button1, GTK_RESPONSE_OK);
 	gtk_widget_show_all(dialog_vbox1);
 	response = gtk_dialog_run(GTK_DIALOG(dialog1));
 	if (response == GTK_RESPONSE_OK || response == GTK_RESPONSE_ACCEPT)

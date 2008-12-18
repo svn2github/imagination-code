@@ -375,7 +375,7 @@ img_window_struct *img_create_window (void)
 
 	img_struct->slide_selected_data = gtk_label_new ("");
 	gtk_box_pack_start ((GtkBox*)hbox_slide_selected, img_struct->slide_selected_data, TRUE, TRUE, 0);
-	gtk_misc_set_alignment ((GtkMisc*)img_struct->slide_selected_data, 0, 0.5);
+	gtk_misc_set_alignment ((GtkMisc*)img_struct->slide_selected_data, 0.5, 0.5);
 
 	/* Slide Resolution */
 	hbox_resolution = gtk_hbox_new (TRUE, 0);
@@ -533,7 +533,7 @@ static void img_goto_slide(GtkMenuItem *item, img_window_struct *img_struct)
 										GTK_DIALOG_DESTROY_WITH_PARENT,
 										GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 										GTK_STOCK_JUMP_TO, GTK_RESPONSE_ACCEPT, NULL);
-	vbox = gtk_vbox_new(FALSE,12);
+	vbox = gtk_vbox_new(FALSE, 12);
 	gtk_container_set_border_width((GtkContainer*)vbox, 5);
 	gtk_container_add((GtkContainer*)((GtkDialog*)(img_struct->goto_window))->vbox, vbox);
 
@@ -551,8 +551,8 @@ static void img_goto_slide(GtkMenuItem *item, img_window_struct *img_struct)
 	response = gtk_dialog_run((GtkDialog*)img_struct->goto_window);
 	if (response == GTK_RESPONSE_ACCEPT)
 		img_goto_line_entry_activate((GtkEntry*)slide_number_entry,img_struct);
-	else if (response == GTK_RESPONSE_CANCEL)
-		gtk_widget_destroy(img_struct->goto_window);
+
+	gtk_widget_destroy(img_struct->goto_window);
 }
 
 static void img_goto_line_entry_activate(GtkEntry *entry, img_window_struct *img)
