@@ -45,6 +45,7 @@ void img_new_slideshow_settings_dialog(img_window_struct *img)
 
 	dialog1 = gtk_dialog_new ();
 	gtk_container_set_border_width (GTK_CONTAINER (dialog1), 5);
+	gtk_window_set_title (GTK_WINDOW (dialog1),_("Create a new slideshow"));
 	gtk_window_set_transient_for(GTK_WINDOW(dialog1),GTK_WINDOW(img->imagination_window));
 	gtk_widget_set_size_request(dialog1,520,248);
 	gtk_window_set_position (GTK_WINDOW (dialog1), GTK_WIN_POS_CENTER_ON_PARENT);
@@ -111,11 +112,11 @@ void img_new_slideshow_settings_dialog(img_window_struct *img)
 	dialog_action_area1 = GTK_DIALOG (dialog1)->action_area;
 	gtk_button_box_set_layout (GTK_BUTTON_BOX (dialog_action_area1), GTK_BUTTONBOX_SPREAD);
 
-	button1 = gtk_button_new_from_stock ("gtk-ok");
-	gtk_dialog_add_action_widget (GTK_DIALOG (dialog1), button1, GTK_RESPONSE_OK);
-	
 	button2 = gtk_button_new_from_stock ("gtk-cancel");
 	gtk_dialog_add_action_widget (GTK_DIALOG (dialog1), button2, GTK_RESPONSE_CANCEL);
+	
+	button1 = gtk_button_new_from_stock ("gtk-ok");
+	gtk_dialog_add_action_widget (GTK_DIALOG (dialog1), button1, GTK_RESPONSE_OK);
 	gtk_widget_show_all(dialog_vbox1);
 	response = gtk_dialog_run(GTK_DIALOG(dialog1));
 	if (response == GTK_RESPONSE_OK || response == GTK_RESPONSE_ACCEPT)

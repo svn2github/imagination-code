@@ -455,8 +455,9 @@ static void img_iconview_selection_changed(GtkIconView *iconview, img_window_str
 	GtkTreeModel *model;
 	GtkTreeIter iter;
 	GtkTreePath *path = NULL;
+	gint width,height,dummy;
+	gchar *selected_slide = NULL;
 	slide_struct *info_slide;
-	gint width,height;
 
 	model = gtk_icon_view_get_model(iconview);
 	gtk_icon_view_get_cursor(iconview,&path,NULL);
@@ -464,10 +465,15 @@ static void img_iconview_selection_changed(GtkIconView *iconview, img_window_str
 	if (path == NULL || gtk_icon_view_path_is_selected(iconview,path) == FALSE)
 		return;
 
+	dummy = gtk_tree_path_get_indices(path)[0]+1;
+	selected_slide = g_strdup_printf("%d",dummy);
 	gtk_tree_model_get_iter(model,&iter,path);
 	gtk_tree_path_free(path);
 	gtk_tree_model_get(model,&iter,1,&info_slide,-1);
+
 	gtk_spin_button_set_value((GtkSpinButton*)img->duration, info_slide->duration);
+	gtk_label_set_text((GtkLabel*)img->slide_selected_data,selected_slide);
+	g_free(selected_slide);
 	gtk_label_set_text((GtkLabel*)img->type_data,info_slide->type);
 	gtk_label_set_text((GtkLabel*)img->resolution_data,info_slide->resolution);
 	gtk_statusbar_push((GtkStatusbar*)img->statusbar,img->context_id,info_slide->filename);
