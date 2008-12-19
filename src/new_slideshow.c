@@ -74,7 +74,6 @@ void img_new_slideshow_settings_dialog(img_window_struct *img)
 
 	slideshow_title_entry = gtk_entry_new ();
 	gtk_box_pack_start (GTK_BOX (hbox_slideshow_name), slideshow_title_entry, TRUE, TRUE, 0);
-	gtk_entry_set_invisible_char (GTK_ENTRY (slideshow_title_entry), 9679);
 
 	frame2 = gtk_frame_new (NULL);
 	gtk_box_pack_start (GTK_BOX (vbox_frame1), frame2, TRUE, TRUE, 0);

@@ -55,6 +55,7 @@ void img_add_slides_thumbnails(GtkMenuItem *item,img_window_struct *img)
 			{
 				/* Get some slide info */
 				slide_info->duration = 1;
+				img->total_secs++;
 				slide_info->filename = g_strdup(slides->data);
 				pixbuf_format = gdk_pixbuf_get_file_info(slides->data,&width,&height);
 				slide_info->resolution = g_strdup_printf("%d x %d",width,height);
@@ -69,6 +70,7 @@ void img_add_slides_thumbnails(GtkMenuItem *item,img_window_struct *img)
 		slides = slides->next;
 	}
 	g_slist_free(slides);
+	img_set_total_slideshow_duration(img);
 	img_set_statusbar_message(img);
 }
 
@@ -303,4 +305,33 @@ void img_show_about_dialog (GtkMenuItem *item,img_window_struct *img_struct)
 	}
 	gtk_dialog_run ( GTK_DIALOG(about));
 	gtk_widget_hide (about);
+}
+
+void img_set_total_slideshow_duration(img_window_struct *img)
+{
+	gchar *time;
+	GtkTreePath *path;
+	GtkTreeIter iter;
+	slide_struct *entry;
+	GtkTreeModel *model;
+
+	model = gtk_icon_view_get_model(GTK_ICON_VIEW(img->thumbnail_iconview));
+	path = gtk_tree_path_new_first();
+	if (gtk_tree_model_get_iter (model,&iter,path) == FALSE)
+		goto here;
+
+	img->total_secs = 0;
+	do
+	{
+		gtk_tree_model_get(model, &iter,1,&entry,-1);
+		img->total_secs += entry->duration;
+	}
+	while (gtk_tree_model_iter_next (model,&iter));
+
+	time = g_strdup_printf("%02d:%02d:%02d",img->total_secs/3600,img->total_secs/60,img->total_secs);
+	gtk_label_set_text((GtkLabel*)img->total_time_data,time);
+	g_free(time);
+
+here:
+	gtk_tree_path_free(path);
 }

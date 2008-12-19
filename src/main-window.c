@@ -67,7 +67,6 @@ img_window_struct *img_create_window (void)
 	GtkWidget *image_menu;
 	GtkWidget *select_all_menu;
 	GtkWidget *deselect_all_menu;
-	GtkWidget *remove_menu;
 	GtkWidget *goto_menu;
 	GtkWidget *menuitem3;
 	GtkWidget *tmp_image;
@@ -81,7 +80,6 @@ img_window_struct *img_create_window (void)
 	GtkWidget *preview_button;
 	GtkWidget *generate_button;
 	GtkWidget *import_button;
-	GtkWidget *remove_button;
 	GtkWidget *separatortoolitem;
 	GtkWidget *goto_button;
 	GtkWidget *hbox;
@@ -102,6 +100,8 @@ img_window_struct *img_create_window (void)
 	GtkWidget *hbox_resolution;
 	GtkWidget *resolution;
 	GtkWidget *hbox_type;
+	GtkWidget *hbox_total;
+	GtkWidget *total_time;
 	GtkWidget *type;
 	GtkAccelGroup *accel_group;
 	GdkColor background_color = {0, 65535, 65535, 65535};
@@ -211,13 +211,14 @@ img_window_struct *img_create_window (void)
 	image_menu = img_load_icon ("imagination-import.png",GTK_ICON_SIZE_MENU);
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (import_menu),image_menu);
 
-	remove_menu = gtk_image_menu_item_new_with_mnemonic (_("_Delete"));
-	gtk_container_add ((GtkContainer*)slide_menu, remove_menu);
-	gtk_widget_add_accelerator (remove_menu,"activate",accel_group, GDK_Delete,GDK_MODE_DISABLED,GTK_ACCEL_VISIBLE);
-	g_signal_connect ((gpointer) remove_menu,"activate",G_CALLBACK (img_delete_selected_slides),img_struct);
+	img_struct->remove_menu = gtk_image_menu_item_new_with_mnemonic (_("_Delete"));
+	gtk_widget_set_sensitive(img_struct->remove_menu,FALSE);
+	gtk_container_add ((GtkContainer*)slide_menu, img_struct->remove_menu);
+	gtk_widget_add_accelerator (img_struct->remove_menu,"activate",accel_group, GDK_Delete,GDK_MODE_DISABLED,GTK_ACCEL_VISIBLE);
+	g_signal_connect ((gpointer) img_struct->remove_menu,"activate",G_CALLBACK (img_delete_selected_slides),img_struct);
 
 	tmp_image = gtk_image_new_from_stock ("gtk-delete",GTK_ICON_SIZE_MENU);
-	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (remove_menu),tmp_image);
+	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (img_struct->remove_menu),tmp_image);
 
 	separator_slide_menu = gtk_separator_menu_item_new ();
 	gtk_container_add ((GtkContainer*)slide_menu,separator_slide_menu);
@@ -288,10 +289,11 @@ img_window_struct *img_create_window (void)
 	g_signal_connect ((gpointer) import_button,"clicked",G_CALLBACK (img_add_slides_thumbnails),img_struct);
 
 	tmp_image = gtk_image_new_from_stock ("gtk-delete",tmp_toolbar_icon_size);
-	remove_button = (GtkWidget*) gtk_tool_button_new (tmp_image,"");
-	gtk_container_add ((GtkContainer*)toolbar,remove_button);
-	gtk_widget_set_tooltip_text(remove_button, _("Delete the selected slides"));
-	g_signal_connect ((gpointer) remove_button,"clicked",G_CALLBACK (img_delete_selected_slides),img_struct);
+	img_struct->remove_button = (GtkWidget*) gtk_tool_button_new (tmp_image,"");
+	gtk_widget_set_sensitive(img_struct->remove_button,FALSE);
+	gtk_container_add ((GtkContainer*)toolbar,img_struct->remove_button);
+	gtk_widget_set_tooltip_text(img_struct->remove_button, _("Delete the selected slides"));
+	g_signal_connect ((gpointer) img_struct->remove_button,"clicked",G_CALLBACK (img_delete_selected_slides),img_struct);
 
 	separatortoolitem = (GtkWidget *)gtk_separator_tool_item_new();
 	gtk_widget_show (separatortoolitem);
@@ -342,7 +344,7 @@ img_window_struct *img_create_window (void)
 	gtk_label_set_use_markup (GTK_LABEL (frame_label), TRUE);
 	gtk_misc_set_padding (GTK_MISC (frame_label), 2, 2);
 
-	vbox_info_slide = gtk_vbox_new (FALSE, 2);
+	vbox_info_slide = gtk_vbox_new (FALSE, 3);
 	gtk_container_add (GTK_CONTAINER (frame1_alignment), vbox_info_slide);
 	gtk_container_set_border_width (GTK_CONTAINER (vbox_info_slide), 2);
 
@@ -351,6 +353,7 @@ img_window_struct *img_create_window (void)
 	gtk_box_pack_start ((GtkBox*)vbox_info_slide, transition_label, FALSE, FALSE, 0);
 	gtk_misc_set_alignment ((GtkMisc*)transition_label, 0, -1);
 	img_struct->transition_type = gtk_combo_box_new();
+	gtk_widget_set_sensitive(img_struct->transition_type,FALSE);
 	gtk_box_pack_start ((GtkBox*)vbox_info_slide, img_struct->transition_type, FALSE, TRUE, 0);
 
 	hbox_duration = gtk_hbox_new (FALSE, 0);
@@ -361,6 +364,7 @@ img_window_struct *img_create_window (void)
 
 	spinbutton1_adj = gtk_adjustment_new (1, 1, 300, 1, 10, 10);
 	img_struct->duration = gtk_spin_button_new ((GtkAdjustment*)spinbutton1_adj, 1, 0);
+	gtk_widget_set_sensitive(img_struct->duration,FALSE);
 	gtk_spin_button_set_numeric((GtkSpinButton*)img_struct->duration,TRUE);
 	gtk_box_pack_end ((GtkBox*)hbox_duration, img_struct->duration, FALSE, TRUE, 0);
 	g_signal_connect (G_OBJECT (img_struct->duration),"value-changed",G_CALLBACK (img_spinbutton_value_changed),img_struct);
@@ -388,7 +392,7 @@ img_window_struct *img_create_window (void)
 	img_struct->resolution_data = gtk_label_new ("");
 	gtk_box_pack_start ((GtkBox*)hbox_resolution, img_struct->resolution_data, TRUE, TRUE, 0);
 	gtk_misc_set_alignment ((GtkMisc*)img_struct->resolution_data, 0, 0.5);
-	
+
 	/* Slide Type */
 	hbox_type = gtk_hbox_new (TRUE, 0);
 	gtk_box_pack_start ((GtkBox*)vbox_info_slide, hbox_type, FALSE, TRUE, 0);
@@ -400,6 +404,18 @@ img_window_struct *img_create_window (void)
 	img_struct->type_data = gtk_label_new ("");
 	gtk_box_pack_start ((GtkBox*)hbox_type, img_struct->type_data, TRUE, TRUE, 0);
 	gtk_misc_set_alignment ((GtkMisc*)img_struct->type_data, 0, 0.5);
+
+	/* Slide Total duration */
+	hbox_total = gtk_hbox_new (TRUE, 0);
+	gtk_box_pack_start ((GtkBox*)vbox_info_slide, hbox_total, FALSE, TRUE, 0);
+
+	total_time = gtk_label_new (_("Total Time:"));
+	gtk_box_pack_start ((GtkBox*)hbox_total, total_time, FALSE, TRUE, 0);
+	gtk_misc_set_alignment ((GtkMisc*)total_time, 0, 0.5);
+
+	img_struct->total_time_data = gtk_label_new ("00:00:00");
+	gtk_box_pack_start ((GtkBox*)hbox_total, img_struct->total_time_data, TRUE, TRUE, 0);
+	gtk_misc_set_alignment ((GtkMisc*)img_struct->total_time_data, 0, 0.5);
 	
 	/* Create the model */
 	img_struct->thumbnail_model = gtk_list_store_new (2, GDK_TYPE_PIXBUF, G_TYPE_POINTER);
@@ -463,8 +479,22 @@ static void img_iconview_selection_changed(GtkIconView *iconview, img_window_str
 	gtk_icon_view_get_cursor(iconview,&path,NULL);
 
 	if (path == NULL || gtk_icon_view_path_is_selected(iconview,path) == FALSE)
+	{
+		if (gtk_icon_view_get_selected_items(iconview) == NULL)
+		{
+			gtk_image_set_from_pixbuf(GTK_IMAGE(img->image_area),NULL);
+			gtk_widget_set_sensitive(img->remove_menu,		FALSE);
+			gtk_widget_set_sensitive(img->remove_button,	FALSE);
+			gtk_widget_set_sensitive(img->duration,			FALSE);
+			gtk_widget_set_sensitive(img->transition_type,	FALSE);
+			return;
+		}
 		return;
-
+	}
+	gtk_widget_set_sensitive(img->remove_menu,		TRUE);
+	gtk_widget_set_sensitive(img->remove_button,	TRUE);
+	gtk_widget_set_sensitive(img->duration,			TRUE);
+	gtk_widget_set_sensitive(img->transition_type,	TRUE);
 	dummy = gtk_tree_path_get_indices(path)[0]+1;
 	selected_slide = g_strdup_printf("%d",dummy);
 	gtk_tree_model_get_iter(model,&iter,path);
@@ -506,8 +536,11 @@ static void img_spinbutton_value_changed (GtkSpinButton *spinbutton, img_window_
 		gtk_tree_model_get_iter(model, &iter,selected->data);
 		gtk_tree_model_get(model, &iter,1,&info_slide,-1);
 		info_slide->duration = duration;
+		img->total_secs += duration;
 		selected = selected->next;
 	}
+	img_set_total_slideshow_duration(img);
+
 	g_list_foreach (selected, (GFunc)gtk_tree_path_free, NULL);
 	g_list_free(selected);
 }

@@ -49,10 +49,13 @@ typedef struct _img_window_struct img_window_struct;
 struct _img_window_struct
 {
 	GtkWidget	*imagination_window;
+	GtkWidget	*remove_menu;
+	GtkWidget	*remove_button;
 	GtkWidget	*transition_type;
 	GtkWidget	*duration;
 	GtkWidget	*slide_selected_data;
 	GtkWidget	*type_data;
+	GtkWidget	*total_time_data;
 	GtkWidget	*filename_data;
 	GtkWidget	*resolution_data;	
   	GtkWidget	*thumbnail_iconview;
@@ -70,6 +73,7 @@ struct _img_window_struct
   	gchar		*slideshow_title;
   	gint		slides_nr;
   	gint		slideshow_height;
+  	gint		total_secs;
   	guint		context_id;
 };
 

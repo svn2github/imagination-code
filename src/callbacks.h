@@ -31,5 +31,5 @@ gboolean img_quit_application(GtkWidget *, GdkEvent *, img_window_struct *);
 void img_delete_selected_slides(GtkMenuItem *,img_window_struct *);
 void img_show_about_dialog (GtkMenuItem *,img_window_struct *);
 void img_set_statusbar_message(img_window_struct *);
-
+void img_set_total_slideshow_duration(img_window_struct *);
 #endif
