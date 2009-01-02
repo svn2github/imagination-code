@@ -20,9 +20,9 @@
 #ifndef __TRANSITION_DATA_H__
 #define __TRANSITION_DATA_H__
 
-typedef struct _img_trans_type img_trans_type;
+typedef struct _trans_type trans_type;
 
-struct _img_trans_type
+struct _trans_type
 {
 	gchar	*name;			/* The name of the transition */
 	gchar	*description;	/* The description of the transition */

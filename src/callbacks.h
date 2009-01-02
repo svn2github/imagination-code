@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2008 Giuseppe Torelli <colossus73@gmail.com>
+ *  Copyright (c) 2009 Giuseppe Torelli <colossus73@gmail.com>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,4 +32,5 @@ void img_delete_selected_slides(GtkMenuItem *,img_window_struct *);
 void img_show_about_dialog (GtkMenuItem *,img_window_struct *);
 void img_set_statusbar_message(img_window_struct *);
 void img_set_total_slideshow_duration(img_window_struct *);
+void img_start_preview(GtkButton *, img_window_struct *);
 #endif

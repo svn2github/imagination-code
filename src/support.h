@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2008 Giuseppe Torelli <colossus73@gmail.com>
+ *  Copyright (c) 2009 Giuseppe Torelli <colossus73@gmail.com>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -48,5 +48,6 @@
 #endif
 
 GtkWidget *img_load_icon(gchar *, GtkIconSize );
+cairo_surface_t *img_get_cairo_surface_from_gdk_pixbuf(GdkPixbuf *);
 
 #endif

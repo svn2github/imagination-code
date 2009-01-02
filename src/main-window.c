@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2008 Giuseppe Torelli <colossus73@gmail.com>
+ *  Copyright (c) 2009 Giuseppe Torelli <colossus73@gmail.com>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -272,6 +272,7 @@ img_window_struct *img_create_window (void)
 	preview_button = (GtkWidget*) gtk_tool_button_new (tmp_image,"");
 	gtk_container_add ((GtkContainer*)toolbar,preview_button);
 	gtk_widget_set_tooltip_text(preview_button, _("Preview the slideshow"));
+	g_signal_connect ((gpointer) preview_button,"clicked",G_CALLBACK (img_start_preview),img_struct);
 
 	tmp_image = img_load_icon("imagination-generate.png",GTK_ICON_SIZE_LARGE_TOOLBAR);
 	generate_button = (GtkWidget*) gtk_tool_button_new (tmp_image,"");

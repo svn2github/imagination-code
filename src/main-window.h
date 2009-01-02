@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2008 Giuseppe Torelli <colossus73@gmail.com>
+ *  Copyright (c) 2009 Giuseppe Torelli <colossus73@gmail.com>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ struct _slide_struct
 	guint	duration;
 	gchar	*resolution;
 	gchar	*type;
-	img_trans_type transition_type;
+	trans_type transition_type;
 };
 
 typedef struct _img_window_struct img_window_struct;

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2008 Giuseppe Torelli <colossus73@gmail.com>
+ *  Copyright (c) 2009 Giuseppe Torelli <colossus73@gmail.com>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -40,4 +40,20 @@ GtkWidget *img_load_icon(gchar *filename, GtkIconSize size)
 	    g_object_unref (file_pixbuf);
 	}
     return file_image;
+}
+
+cairo_surface_t *img_get_cairo_surface_from_gdk_pixbuf(GdkPixbuf *pixbuf)
+{
+	cairo_surface_t *image;
+	cairo_t *cr;
+
+	image = cairo_image_surface_create (gdk_pixbuf_get_has_alpha (pixbuf) ?
+					      CAIRO_FORMAT_ARGB32 : CAIRO_FORMAT_RGB24,gdk_pixbuf_get_width (pixbuf),gdk_pixbuf_get_height (pixbuf));
+
+	cr = cairo_create (image);
+	gdk_cairo_set_source_pixbuf (cr, pixbuf, 0, 0);
+	cairo_paint (cr);
+	cairo_destroy (cr);
+	//g_object_unref(pixbuf);
+	return image;
 }
