@@ -90,9 +90,12 @@ img_window_struct *img_create_window (void)
 	GtkWidget *thumb_scrolledwindow;
 	GtkWidget *transition_label;
 	GtkWidget *vbox_info_slide;
+	GtkWidget *hbox_effect_duration;
 	GtkWidget *hbox_duration;
 	GtkWidget *duration_label;
+	GtkWidget *trans_duration_label;
 	GtkObject *spinbutton1_adj;
+	GtkObject *spinbutton2_adj;
 	GtkWidget *frame1;
 	GtkWidget *frame_label;
 	GtkWidget *hbox_slide_selected;
@@ -349,7 +352,7 @@ img_window_struct *img_create_window (void)
 	gtk_container_add (GTK_CONTAINER (frame1_alignment), vbox_info_slide);
 	gtk_container_set_border_width (GTK_CONTAINER (vbox_info_slide), 2);
 
-	/* Create the combo box and the spinbutton */
+	/* Create the combo boxex and the spinbuttons */
 	transition_label = gtk_label_new (_("Transition type:"));
 	gtk_box_pack_start ((GtkBox*)vbox_info_slide, transition_label, FALSE, FALSE, 0);
 	gtk_misc_set_alignment ((GtkMisc*)transition_label, 0, -1);
@@ -357,12 +360,23 @@ img_window_struct *img_create_window (void)
 	gtk_widget_set_sensitive(img_struct->transition_type,FALSE);
 	gtk_box_pack_start ((GtkBox*)vbox_info_slide, img_struct->transition_type, FALSE, TRUE, 0);
 
+	/* Transition duration */
+	hbox_effect_duration = gtk_hbox_new (FALSE, 0);
+	gtk_box_pack_start ((GtkBox*)vbox_info_slide, hbox_effect_duration, FALSE, TRUE, 0);
+	trans_duration_label = gtk_label_new (_("Transition Duration:"));
+	gtk_box_pack_start ((GtkBox*)hbox_effect_duration, trans_duration_label, FALSE, FALSE, 0);
+	spinbutton2_adj = gtk_adjustment_new (1, 1, 5, 1, 1, 1);
+	img_struct->trans_duration = gtk_spin_button_new ((GtkAdjustment*)spinbutton2_adj, 1, 0);
+	gtk_widget_set_sensitive(img_struct->trans_duration,FALSE);
+	gtk_spin_button_set_numeric((GtkSpinButton*)img_struct->trans_duration,TRUE);
+	gtk_box_pack_end ((GtkBox*)hbox_effect_duration, img_struct->trans_duration, FALSE, TRUE, 0);
+	g_signal_connect (G_OBJECT (img_struct->trans_duration),"value-changed",G_CALLBACK (img_spinbutton_value_changed),img_struct);
+
+	/* Slide duration */
 	hbox_duration = gtk_hbox_new (FALSE, 0);
 	gtk_box_pack_start ((GtkBox*)vbox_info_slide, hbox_duration, FALSE, TRUE, 0);
-
-	duration_label = gtk_label_new (_("Duration in sec:"));
+	duration_label = gtk_label_new (_("Slide Duration:"));
 	gtk_box_pack_start ((GtkBox*)hbox_duration, duration_label, FALSE, FALSE, 0);
-
 	spinbutton1_adj = gtk_adjustment_new (1, 1, 300, 1, 10, 10);
 	img_struct->duration = gtk_spin_button_new ((GtkAdjustment*)spinbutton1_adj, 1, 0);
 	gtk_widget_set_sensitive(img_struct->duration,FALSE);
@@ -486,6 +500,7 @@ static void img_iconview_selection_changed(GtkIconView *iconview, img_window_str
 			gtk_image_set_from_pixbuf(GTK_IMAGE(img->image_area),NULL);
 			gtk_widget_set_sensitive(img->remove_menu,		FALSE);
 			gtk_widget_set_sensitive(img->remove_button,	FALSE);
+			gtk_widget_set_sensitive(img->trans_duration,	FALSE);
 			gtk_widget_set_sensitive(img->duration,			FALSE);
 			gtk_widget_set_sensitive(img->transition_type,	FALSE);
 			return;
@@ -494,6 +509,7 @@ static void img_iconview_selection_changed(GtkIconView *iconview, img_window_str
 	}
 	gtk_widget_set_sensitive(img->remove_menu,		TRUE);
 	gtk_widget_set_sensitive(img->remove_button,	TRUE);
+	gtk_widget_set_sensitive(img->trans_duration,	TRUE);
 	gtk_widget_set_sensitive(img->duration,			TRUE);
 	gtk_widget_set_sensitive(img->transition_type,	TRUE);
 	dummy = gtk_tree_path_get_indices(path)[0]+1;
@@ -532,6 +548,8 @@ static void img_spinbutton_value_changed (GtkSpinButton *spinbutton, img_window_
 		return;
 
 	duration = gtk_spin_button_get_value_as_int(spinbutton);
+	if (spinbutton == GTK_SPIN_BUTTON(img->duration))
+		g_print ("%d\n",duration);
 	while (selected)
 	{
 		gtk_tree_model_get_iter(model, &iter,selected->data);

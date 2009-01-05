@@ -53,6 +53,7 @@ struct _img_window_struct
 	GtkWidget	*remove_button;
 	GtkWidget	*transition_type;
 	GtkWidget	*duration;
+	GtkWidget	*trans_duration;
 	GtkWidget	*slide_selected_data;
 	GtkWidget	*type_data;
 	GtkWidget	*total_time_data;
