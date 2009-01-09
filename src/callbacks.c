@@ -26,6 +26,8 @@
 static void img_file_chooser_add_preview(img_window_struct *);
 static void img_update_preview_file_chooser(GtkFileChooser *,img_window_struct *);
 static gboolean img_on_expose_event(GtkWidget *,GdkEventExpose *,img_window_struct *);
+static gboolean img_time_handler(img_window_struct *);
+double radius;
 
 void img_new_slideshow(GtkMenuItem *item,img_window_struct *img_struct)
 {
@@ -341,37 +343,74 @@ void img_start_preview(GtkButton *button, img_window_struct *img)
 {
 	GtkTreePath *path;
 	GtkTreeIter iter;
-	slide_struct *entry1, *entry2;
+	slide_struct *entry;
 	GtkTreeModel *model;
+
+	gtk_widget_set_app_paintable(img->image_area, TRUE);
+	g_signal_connect( G_OBJECT(img->image_area), "expose-event",G_CALLBACK(img_on_expose_event),img);
 
 	model = gtk_icon_view_get_model(GTK_ICON_VIEW(img->thumbnail_iconview));
 	path = gtk_tree_path_new_first();
 	if (gtk_tree_model_get_iter (model,&iter,path) == FALSE)
 		goto here;
 
-	do
-	{
-		gtk_tree_model_get(model, &iter,1,&entry1,-1);
-		gtk_tree_model_iter_next (model,&iter);
+	/* Load the first image in the pixbuf */
+	gtk_tree_model_get(model, &iter,1,&entry,-1);
+	img->pixbuf1 = gdk_pixbuf_new_from_file_at_scale(entry->filename, (img->viewport)->allocation.width, (img->viewport)->allocation.height, TRUE, NULL);
 
-		gtk_tree_model_get(model, &iter,1,&entry2,-1);
+	/* Load the second image in the pixbuf */
+	gtk_tree_model_iter_next(model,&iter);
+	gtk_tree_model_get(model, &iter,1,&entry,-1);
+	img->pixbuf2 = gdk_pixbuf_new_from_file_at_scale(entry->filename, (img->viewport)->allocation.width, (img->viewport)->allocation.height, TRUE, NULL);
+
+	g_timeout_add(15,(GSourceFunc)img_time_handler,img);
+	img_sleep(2);
+	while (gtk_tree_model_iter_next(model,&iter))
+	{
+		gtk_tree_model_get(model, &iter,1,&entry,-1);
+		img->pixbuf2 = gdk_pixbuf_new_from_file_at_scale(entry->filename, (img->viewport)->allocation.width, (img->viewport)->allocation.height, TRUE, NULL);
+
+		g_object_unref(img->pixbuf1);
+		img->pixbuf1 = gdk_pixbuf_copy(img->pixbuf2);
+		img_sleep(2);
 	}
-	while (gtk_tree_model_iter_next (model,&iter));
 
 here:
 	gtk_tree_path_free(path);
+	gtk_widget_set_app_paintable(img->image_area, FALSE);
+	g_signal_handlers_disconnect_by_func(img->image_area,img_on_expose_event,NULL);
 }
 
 static gboolean img_on_expose_event(GtkWidget *widget,GdkEventExpose *event,img_window_struct *img)
 {
-	/*cairo_t *cr;
+	cairo_t *cr;
 
-	cr = gdk_cairo_create (widget->window);
+	cr = gdk_cairo_create(widget->window);
 
-	cairo_set_source_surface(cr, image, 10, 10);
+	gdk_cairo_set_source_pixbuf(cr,img->pixbuf1,0,0);
 	cairo_paint(cr);
 
-	cairo_destroy(cr);*/
-	return FALSE;
+	gdk_cairo_set_source_pixbuf(cr,img->pixbuf2,0,0);
+	cairo_arc(cr, 270, 270, radius, 0, 2 * G_PI );
+	cairo_clip(cr);
+	cairo_paint(cr);
+
+	cairo_destroy(cr);
+	return( FALSE );
 }
 
+static gboolean img_time_handler(img_window_struct *img)
+{
+	gboolean value;
+
+	radius++;
+	if (radius <= 0)
+		value = TRUE;
+
+	gtk_widget_queue_draw(img->image_area);
+
+	if(radius > 510)
+		value = FALSE;
+
+	return value;
+}

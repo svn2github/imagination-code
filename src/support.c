@@ -57,3 +57,22 @@ cairo_surface_t *img_get_cairo_surface_from_gdk_pixbuf(GdkPixbuf *pixbuf)
 	//g_object_unref(pixbuf);
 	return image;
 }
+
+void img_sleep (gint seconds)
+{
+	GTimer *time;
+	gdouble secs;
+
+	time = g_timer_new();
+	while(1)
+	{
+		secs = g_timer_elapsed(time,NULL);
+		if ((gint)secs > seconds)
+		{
+			g_timer_stop(time);
+			break;
+		}
+		while(gtk_events_pending())
+			gtk_main_iteration();
+	}
+}
