@@ -33,4 +33,5 @@ void img_show_about_dialog (GtkMenuItem *,img_window_struct *);
 void img_set_statusbar_message(img_window_struct *);
 void img_set_total_slideshow_duration(img_window_struct *);
 void img_start_preview(GtkButton *, img_window_struct *);
+GdkPixbuf *img_scale_pixbuf (img_window_struct *, gchar *);
 #endif

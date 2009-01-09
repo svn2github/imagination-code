@@ -356,23 +356,26 @@ void img_start_preview(GtkButton *button, img_window_struct *img)
 
 	/* Load the first image in the pixbuf */
 	gtk_tree_model_get(model, &iter,1,&entry,-1);
-	img->pixbuf1 = gdk_pixbuf_new_from_file_at_scale(entry->filename, (img->viewport)->allocation.width, (img->viewport)->allocation.height, TRUE, NULL);
+	img->pixbuf1 = img_scale_pixbuf(img,entry->filename);
 
 	/* Load the second image in the pixbuf */
 	gtk_tree_model_iter_next(model,&iter);
 	gtk_tree_model_get(model, &iter,1,&entry,-1);
-	img->pixbuf2 = gdk_pixbuf_new_from_file_at_scale(entry->filename, (img->viewport)->allocation.width, (img->viewport)->allocation.height, TRUE, NULL);
+	img->pixbuf2 = img_scale_pixbuf(img,entry->filename);
 
+	gtk_widget_queue_draw(img->image_area);
+	img_idle_function(entry->duration);
+	
 	g_timeout_add(15,(GSourceFunc)img_time_handler,img);
-	img_sleep(2);
+
 	while (gtk_tree_model_iter_next(model,&iter))
 	{
 		gtk_tree_model_get(model, &iter,1,&entry,-1);
-		img->pixbuf2 = gdk_pixbuf_new_from_file_at_scale(entry->filename, (img->viewport)->allocation.width, (img->viewport)->allocation.height, TRUE, NULL);
+		img->pixbuf2 = img_scale_pixbuf(img,entry->filename);
 
 		g_object_unref(img->pixbuf1);
 		img->pixbuf1 = gdk_pixbuf_copy(img->pixbuf2);
-		img_sleep(2);
+		img_idle_function(entry->duration);
 	}
 
 here:
@@ -413,4 +416,19 @@ static gboolean img_time_handler(img_window_struct *img)
 		value = FALSE;
 
 	return value;
+}
+
+GdkPixbuf *img_scale_pixbuf (img_window_struct *img, gchar *filename)
+{
+	GdkPixbuf *pixbuf;
+	GdkPixbufFormat *image_format;
+	gint width,height;
+
+	image_format = gdk_pixbuf_get_file_info(filename,&width,&height);
+	if (width > (img->viewport)->allocation.width || height > (img->viewport)->allocation.height)
+		pixbuf = gdk_pixbuf_new_from_file_at_scale(filename, (img->viewport)->allocation.width, (img->viewport)->allocation.height, TRUE, NULL);
+	else
+		pixbuf = gdk_pixbuf_new_from_file(filename,NULL);
+
+	return pixbuf;
 }

@@ -394,7 +394,7 @@ img_window_struct *img_create_window (void)
 
 	img_struct->slide_selected_data = gtk_label_new ("");
 	gtk_box_pack_start ((GtkBox*)hbox_slide_selected, img_struct->slide_selected_data, TRUE, TRUE, 0);
-	gtk_misc_set_alignment ((GtkMisc*)img_struct->slide_selected_data, 0.5, 0.5);
+	gtk_misc_set_alignment ((GtkMisc*)img_struct->slide_selected_data, 0, 0.5);
 
 	/* Slide Resolution */
 	hbox_resolution = gtk_hbox_new (TRUE, 0);
@@ -424,7 +424,7 @@ img_window_struct *img_create_window (void)
 	hbox_total = gtk_hbox_new (TRUE, 0);
 	gtk_box_pack_start ((GtkBox*)vbox_info_slide, hbox_total, FALSE, TRUE, 0);
 
-	total_time = gtk_label_new (_("Total Time:"));
+	total_time = gtk_label_new (_("Slideshow Length:"));
 	gtk_box_pack_start ((GtkBox*)hbox_total, total_time, FALSE, TRUE, 0);
 	gtk_misc_set_alignment ((GtkMisc*)total_time, 0, 0.5);
 
@@ -482,11 +482,10 @@ static void img_quit_menu(GtkMenuItem *menuitem, img_window_struct *img)
 
 static void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *img)
 {
-	GdkPixbufFormat *slide_format;
 	GtkTreeModel *model;
 	GtkTreeIter iter;
 	GtkTreePath *path = NULL;
-	gint width,height,dummy;
+	gint dummy;
 	gchar *selected_slide = NULL;
 	slide_struct *info_slide;
 
@@ -525,11 +524,7 @@ static void img_iconview_selection_changed(GtkIconView *iconview, img_window_str
 	gtk_label_set_text((GtkLabel*)img->resolution_data,info_slide->resolution);
 	gtk_statusbar_push((GtkStatusbar*)img->statusbar,img->context_id,info_slide->filename);
 
-	slide_format = gdk_pixbuf_get_file_info(info_slide->filename,&width,&height);
-	if (width > (img->viewport)->allocation.width || height > (img->viewport)->allocation.height)
-		img->slide_pixbuf = gdk_pixbuf_new_from_file_at_scale(info_slide->filename, (img->viewport)->allocation.width, (img->viewport)->allocation.height, TRUE, NULL);
-	else
-		img->slide_pixbuf = gdk_pixbuf_new_from_file(info_slide->filename,NULL);
+	img->slide_pixbuf = img_scale_pixbuf(img,info_slide->filename);
 	gtk_image_set_from_pixbuf((GtkImage*)img->image_area,img->slide_pixbuf);
 	g_object_unref(img->slide_pixbuf);
 }

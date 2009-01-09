@@ -58,7 +58,7 @@ cairo_surface_t *img_get_cairo_surface_from_gdk_pixbuf(GdkPixbuf *pixbuf)
 	return image;
 }
 
-void img_sleep (gint seconds)
+void img_idle_function (gint seconds)
 {
 	GTimer *time;
 	gdouble secs;
