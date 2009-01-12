@@ -78,6 +78,7 @@ struct _img_window_struct
   	gint		slideshow_height;
   	gint		total_secs;
   	guint		context_id;
+  	guint		source_id;
 };
 
 void img_set_window_title(img_window_struct *,gchar *);
