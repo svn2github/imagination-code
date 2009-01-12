@@ -48,6 +48,5 @@
 #endif
 
 GtkWidget *img_load_icon(gchar *, GtkIconSize );
-cairo_surface_t *img_get_cairo_surface_from_gdk_pixbuf(GdkPixbuf *);
 void img_idle_function (int );
 #endif

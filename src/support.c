@@ -41,7 +41,7 @@ GtkWidget *img_load_icon(gchar *filename, GtkIconSize size)
 	}
     return file_image;
 }
-
+/*
 cairo_surface_t *img_get_cairo_surface_from_gdk_pixbuf(GdkPixbuf *pixbuf)
 {
 	cairo_surface_t *image;
@@ -57,13 +57,14 @@ cairo_surface_t *img_get_cairo_surface_from_gdk_pixbuf(GdkPixbuf *pixbuf)
 	//g_object_unref(pixbuf);
 	return image;
 }
-
+*/
 void img_idle_function (gint seconds)
 {
 	GTimer *time;
 	gdouble secs;
 
 	time = g_timer_new();
+	g_print ("Aspetto %d sec\n",seconds);
 	while(1)
 	{
 		secs = g_timer_elapsed(time,NULL);

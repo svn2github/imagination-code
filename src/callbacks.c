@@ -354,28 +354,28 @@ void img_start_preview(GtkButton *button, img_window_struct *img)
 	if (gtk_tree_model_get_iter (model,&iter,path) == FALSE)
 		goto here;
 
-	/* Load the first image in the pixbuf */
-	gtk_tree_model_get(model, &iter,1,&entry,-1);
-	img->pixbuf1 = img_scale_pixbuf(img,entry->filename);
+	/* Create an empty pixbuf */
+	img->pixbuf1 = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, (img->viewport)->allocation.width, (img->viewport)->allocation.height);
 
-	/* Load the second image in the pixbuf */
-	gtk_tree_model_iter_next(model,&iter);
+	/* Load the first image in the pixbuf */
 	gtk_tree_model_get(model, &iter,1,&entry,-1);
 	img->pixbuf2 = img_scale_pixbuf(img,entry->filename);
 
-	gtk_widget_queue_draw(img->image_area);
-	img_idle_function(entry->duration);
-	
 	g_timeout_add(15,(GSourceFunc)img_time_handler,img);
+	img_idle_function(entry->duration);
 
 	while (gtk_tree_model_iter_next(model,&iter))
 	{
+		gtk_widget_queue_draw(img->image_area);
 		gtk_tree_model_get(model, &iter,1,&entry,-1);
-		img->pixbuf2 = img_scale_pixbuf(img,entry->filename);
 
+		img->pixbuf2 = img_scale_pixbuf(img,entry->filename);
 		g_object_unref(img->pixbuf1);
+
 		img->pixbuf1 = gdk_pixbuf_copy(img->pixbuf2);
+
 		img_idle_function(entry->duration);
+		g_object_ref_sink(img->pixbuf2);
 	}
 
 here:
@@ -387,14 +387,18 @@ here:
 static gboolean img_on_expose_event(GtkWidget *widget,GdkEventExpose *event,img_window_struct *img)
 {
 	cairo_t *cr;
+	gint offset_x,offset_y;
 
+	offset_x = ((img->image_area)->allocation.width - gdk_pixbuf_get_width(img->pixbuf1)) / 2;
+	offset_y = ((img->image_area)->allocation.height - gdk_pixbuf_get_height(img->pixbuf1)) / 2;
 	cr = gdk_cairo_create(widget->window);
-
-	gdk_cairo_set_source_pixbuf(cr,img->pixbuf1,0,0);
+	gdk_cairo_set_source_pixbuf(cr,img->pixbuf1,offset_x,offset_y);
 	cairo_paint(cr);
 
-	gdk_cairo_set_source_pixbuf(cr,img->pixbuf2,0,0);
-	cairo_arc(cr, 270, 270, radius, 0, 2 * G_PI );
+	offset_x = ((img->image_area)->allocation.width - gdk_pixbuf_get_width(img->pixbuf2)) / 2;
+	offset_y = ((img->image_area)->allocation.height - gdk_pixbuf_get_height(img->pixbuf2)) / 2;
+	gdk_cairo_set_source_pixbuf(cr,img->pixbuf2,offset_x,offset_y);
+	cairo_arc(cr, gdk_pixbuf_get_width(img->pixbuf2)/2, gdk_pixbuf_get_height(img->pixbuf2)/2, radius, 0, 2 * G_PI );
 	cairo_clip(cr);
 	cairo_paint(cr);
 
@@ -412,8 +416,11 @@ static gboolean img_time_handler(img_window_struct *img)
 
 	gtk_widget_queue_draw(img->image_area);
 
-	if(radius > 510)
+	if(radius > 450)
+	{
+		g_print ("FALSE\n");
 		value = FALSE;
+	}
 
 	return value;
 }
