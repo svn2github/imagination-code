@@ -247,6 +247,7 @@ void img_delete_selected_slides(GtkMenuItem *item,img_window_struct *img_struct)
 		return;
 	
 	/* Free the slide struct for each slide and remove it from the iconview */
+	selected = g_list_last( selected );
 	while (selected)
 	{
 		gtk_tree_model_get_iter(model, &iter,selected->data);
@@ -257,7 +258,7 @@ void img_delete_selected_slides(GtkMenuItem *item,img_window_struct *img_struct)
 		g_free(entry);
 		gtk_list_store_remove((GtkListStore*) img_struct->thumbnail_model,&iter);
 		img_struct->slides_nr--;
-		selected = selected->next;
+		selected = selected->prev;
 	}
 	g_list_foreach (selected, (GFunc)gtk_tree_path_free, NULL);
 	g_list_free(selected);
@@ -313,15 +314,13 @@ void img_show_about_dialog (GtkMenuItem *item,img_window_struct *img_struct)
 void img_set_total_slideshow_duration(img_window_struct *img)
 {
 	gchar *time;
-	GtkTreePath *path;
 	GtkTreeIter iter;
 	slide_struct *entry;
 	GtkTreeModel *model;
 
 	model = gtk_icon_view_get_model(GTK_ICON_VIEW(img->thumbnail_iconview));
-	path = gtk_tree_path_new_first();
-	if (gtk_tree_model_get_iter (model,&iter,path) == FALSE)
-		goto here;
+	if (!gtk_tree_model_get_iter_first (model,&iter))
+		return;
 
 	img->total_secs = 0;
 	do
@@ -334,25 +333,21 @@ void img_set_total_slideshow_duration(img_window_struct *img)
 	time = g_strdup_printf("%02d:%02d:%02d",img->total_secs/3600,img->total_secs/60,img->total_secs);
 	gtk_label_set_text((GtkLabel*)img->total_time_data,time);
 	g_free(time);
-
-here:
-	gtk_tree_path_free(path);
 }
 
 void img_start_preview(GtkButton *button, img_window_struct *img)
 {
-	GtkTreePath *path;
 	GtkTreeIter iter;
 	slide_struct *entry;
 	GtkTreeModel *model;
 
+	model = gtk_icon_view_get_model(GTK_ICON_VIEW(img->thumbnail_iconview));
+
+	if( ! gtk_tree_model_get_iter_first (model,&iter))
+		return;
+
 	gtk_widget_set_app_paintable(img->image_area, TRUE);
 	g_signal_connect( G_OBJECT(img->image_area), "expose-event",G_CALLBACK(img_on_expose_event),img);
-
-	model = gtk_icon_view_get_model(GTK_ICON_VIEW(img->thumbnail_iconview));
-	path = gtk_tree_path_new_first();
-	if (gtk_tree_model_get_iter (model,&iter,path) == FALSE)
-		goto here;
 
 	/* Create an empty pixbuf */
 	img->pixbuf1 = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, (img->viewport)->allocation.width, (img->viewport)->allocation.height);
@@ -368,22 +363,18 @@ void img_start_preview(GtkButton *button, img_window_struct *img)
 	{
 		if (img->source_id == 0)
 			g_timeout_add(15,(GSourceFunc)img_time_handler,img);
+
 		gtk_widget_queue_draw(img->image_area);
 		gtk_tree_model_get(model, &iter,1,&entry,-1);
 
 		g_object_unref(img->pixbuf1);
-		img->pixbuf1 = gdk_pixbuf_copy(img->pixbuf2);
-		g_object_unref(img->pixbuf2);
+		img->pixbuf1 = img->pixbuf2;
 
 		img->pixbuf2 = img_scale_pixbuf(img,entry->filename);
 		img_idle_function(entry->duration);
-		g_object_ref_sink(img->pixbuf2);
 	}
 
-here:
-	gtk_tree_path_free(path);
 	gtk_widget_set_app_paintable(img->image_area, FALSE);
-	//g_source_remove(img->source_id);
 	g_signal_handlers_disconnect_by_func(img->image_area,img_on_expose_event,NULL);
 }
 
@@ -411,19 +402,17 @@ static gboolean img_on_expose_event(GtkWidget *widget,GdkEventExpose *event,img_
 
 static gboolean img_time_handler(img_window_struct *img)
 {
-	gboolean value = TRUE;
-
 	radius++;
-	gtk_widget_queue_draw(img->image_area);
-	
+
 	if (radius > 450)
 	{
 		radius = 0;
 		g_print ("FALSE\n");
 		img->source_id = 0;
-		value = FALSE;
+		return FALSE;
 	}
-	return value;
+	gtk_widget_queue_draw(img->image_area);
+	return TRUE;
 }
 
 GdkPixbuf *img_scale_pixbuf (img_window_struct *img, gchar *filename)
