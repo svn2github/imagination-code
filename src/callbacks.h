@@ -30,7 +30,7 @@ GSList *img_import_slides_file_chooser(img_window_struct *);
 gboolean img_quit_application(GtkWidget *, GdkEvent *, img_window_struct *);
 void img_delete_selected_slides(GtkMenuItem *,img_window_struct *);
 void img_show_about_dialog (GtkMenuItem *,img_window_struct *);
-void img_set_statusbar_message(img_window_struct *);
+void img_set_statusbar_message(img_window_struct *, gint);
 void img_set_total_slideshow_duration(img_window_struct *);
 void img_start_preview(GtkButton *, img_window_struct *);
 GdkPixbuf *img_scale_pixbuf (img_window_struct *, gchar *);

@@ -74,7 +74,7 @@ void img_add_slides_thumbnails(GtkMenuItem *item,img_window_struct *img)
 	}
 	g_slist_free(slides);
 	img_set_total_slideshow_duration(img);
-	img_set_statusbar_message(img);
+	img_set_statusbar_message(img,0);
 }
 
 GSList *img_import_slides_file_chooser(img_window_struct *img)
@@ -220,15 +220,21 @@ static void	img_update_preview_file_chooser(GtkFileChooser *file_chooser,img_win
 	gtk_file_chooser_set_preview_widget_active (file_chooser, has_preview);
 }
 
-void img_set_statusbar_message(img_window_struct *img_struct)
+void img_set_statusbar_message(img_window_struct *img_struct, gint selected)
 {
 	gchar *message = NULL;
 
 	if (img_struct->slides_nr == 0)
 		gtk_statusbar_push((GtkStatusbar*)img_struct->statusbar,img_struct->context_id,_("Welcome to Imagination " VERSION));
+	else if (selected)
+	{
+		message = g_strdup_printf(_("%d slides selected"),selected);
+		gtk_statusbar_push((GtkStatusbar*)img_struct->statusbar,img_struct->context_id,message);
+		g_free(message);
+	}
 	else
 	{
-		message = g_strdup_printf(ngettext("%d slide %s" ,"%d slides %s",img_struct->slides_nr),img_struct->slides_nr,"imported");
+		message = g_strdup_printf(ngettext("%d slide %s" ,"%d slides %s",img_struct->slides_nr),img_struct->slides_nr,_("imported - Use the CTRL key to select/unselect or SHIFT for multiple select"));
 		gtk_statusbar_push((GtkStatusbar*)img_struct->statusbar,img_struct->context_id,message);
 		g_free(message);
 	}
@@ -262,7 +268,7 @@ void img_delete_selected_slides(GtkMenuItem *item,img_window_struct *img_struct)
 	}
 	g_list_foreach (selected, (GFunc)gtk_tree_path_free, NULL);
 	g_list_free(selected);
-	img_set_statusbar_message(img_struct);
+	img_set_statusbar_message(img_struct,0);
 	gtk_image_set_from_pixbuf((GtkImage*)img_struct->image_area,NULL);
 }
 
@@ -346,7 +352,7 @@ void img_start_preview(GtkButton *button, img_window_struct *img)
 	if( ! gtk_tree_model_get_iter_first (model,&iter))
 		return;
 
-	gtk_widget_set_app_paintable(img->image_area, TRUE);
+//	gtk_widget_set_app_paintable(img->image_area, TRUE);
 	g_signal_connect( G_OBJECT(img->image_area), "expose-event",G_CALLBACK(img_on_expose_event),img);
 
 	/* Create an empty pixbuf */
@@ -374,7 +380,7 @@ void img_start_preview(GtkButton *button, img_window_struct *img)
 		img_idle_function(entry->duration);
 	}
 
-	gtk_widget_set_app_paintable(img->image_area, FALSE);
+//	gtk_widget_set_app_paintable(img->image_area, FALSE);
 	g_signal_handlers_disconnect_by_func(img->image_area,img_on_expose_event,NULL);
 }
 
@@ -404,7 +410,7 @@ static gboolean img_on_expose_event(GtkWidget *widget,GdkEventExpose *event,img_
 
 static gboolean img_time_handler(img_window_struct *img)
 {
-	radius+=VERY_FAST;
+	radius+=SLOW;
 
 	if (radius > 450)
 	{

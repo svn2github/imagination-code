@@ -26,18 +26,18 @@
 #include "support.h"
 #include "transition_data.h"
 
-#define	VERY_FAST	15
-#define	FAST		10
-#define	NORMAL		6
-#define	SLOW		3
-#define	VERY_SLOW	1
+#define	FAST	10
+#define	NORMAL	3
+#define	SLOW	1
 
+/*
 typedef enum 
 {
 	IMG_GOTO_SLIDE = 0,
 	IMG_MOVE_LEFT,
 	IMG_MOVE_RIGHT
 } Img_Thumbnail_Selection_Mode;
+*/
 
 typedef struct _slide_struct slide_struct;
 

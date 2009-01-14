@@ -197,7 +197,7 @@ img_window_struct *img_create_window (void)
 	gtk_widget_add_accelerator (select_all_menu,"activate",accel_group,GDK_a,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
 	g_signal_connect ((gpointer) select_all_menu,"activate",G_CALLBACK (img_select_all_thumbnails),img_struct);
 
-	deselect_all_menu = gtk_image_menu_item_new_with_mnemonic (_("De_select all"));
+	deselect_all_menu = gtk_image_menu_item_new_with_mnemonic (_("Un_select all"));
 	gtk_container_add ((GtkContainer*)slide_menu,deselect_all_menu);
 	gtk_widget_add_accelerator (deselect_all_menu,"activate",accel_group,GDK_e,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
 	g_signal_connect ((gpointer) deselect_all_menu,"activate",G_CALLBACK (img_unselect_all_thumbnails),img_struct);
@@ -365,12 +365,10 @@ img_window_struct *img_create_window (void)
 	trans_duration_label = gtk_label_new (_("Transition Duration:"));
 	gtk_box_pack_start ((GtkBox*)hbox_effect_duration, trans_duration_label, FALSE, FALSE, 0);
 	img_struct->trans_duration = _gtk_combo_box_new_text();
-	gtk_combo_box_append_text(GTK_COMBO_BOX(img_struct->trans_duration),_("Very Fast"));
-	gtk_combo_box_append_text(GTK_COMBO_BOX(img_struct->trans_duration),_("Fast"));
+		gtk_combo_box_append_text(GTK_COMBO_BOX(img_struct->trans_duration),_("Fast"));
 	gtk_combo_box_append_text(GTK_COMBO_BOX(img_struct->trans_duration),_("Normal"));
 	gtk_combo_box_append_text(GTK_COMBO_BOX(img_struct->trans_duration),_("Slow"));
-	gtk_combo_box_append_text(GTK_COMBO_BOX(img_struct->trans_duration),_("Very Slow"));
-	gtk_combo_box_set_active(GTK_COMBO_BOX(img_struct->trans_duration),2);
+		gtk_combo_box_set_active(GTK_COMBO_BOX(img_struct->trans_duration),1);
 	gtk_widget_set_sensitive(img_struct->trans_duration,FALSE);
 	gtk_box_pack_end ((GtkBox*)hbox_effect_duration, img_struct->trans_duration, FALSE, TRUE, 0);
 
@@ -487,17 +485,21 @@ static void img_iconview_selection_changed(GtkIconView *iconview, img_window_str
 	GtkTreeModel *model;
 	GtkTreeIter iter;
 	GtkTreePath *path = NULL;
-	gint dummy;
+	gint dummy, nr_selected = 0;
 	gchar *selected_slide = NULL;
+	GList *selected = NULL;
 	slide_struct *info_slide;
 
 	model = gtk_icon_view_get_model(iconview);
 	gtk_icon_view_get_cursor(iconview,&path,NULL);
 
+	selected = gtk_icon_view_get_selected_items(iconview);
+	nr_selected = g_list_length(selected);
 	if (path == NULL || gtk_icon_view_path_is_selected(iconview,path) == FALSE)
 	{
-		if (gtk_icon_view_get_selected_items(iconview) == NULL)
+		if (selected == NULL)
 		{
+			img_set_statusbar_message(img,nr_selected);
 			gtk_image_set_from_pixbuf(GTK_IMAGE(img->image_area),NULL);
 			gtk_widget_set_sensitive(img->remove_menu,		FALSE);
 			gtk_widget_set_sensitive(img->remove_button,	FALSE);
@@ -506,15 +508,24 @@ static void img_iconview_selection_changed(GtkIconView *iconview, img_window_str
 			gtk_widget_set_sensitive(img->transition_type,	FALSE);
 			return;
 		}
+		nr_selected = g_list_length(selected);
+		if (nr_selected > 1)
+			img_set_statusbar_message(img,nr_selected);
+		else
+			gtk_statusbar_pop(GTK_STATUSBAR(img->statusbar),img->context_id);
+		g_list_foreach (selected, (GFunc)gtk_tree_path_free, NULL);
+		g_list_free (selected);
 		return;
 	}
+	g_list_foreach (selected, (GFunc)gtk_tree_path_free, NULL);
+	g_list_free (selected);
 	gtk_widget_set_sensitive(img->remove_menu,		TRUE);
 	gtk_widget_set_sensitive(img->remove_button,	TRUE);
 	gtk_widget_set_sensitive(img->trans_duration,	TRUE);
 	gtk_widget_set_sensitive(img->duration,			TRUE);
 	gtk_widget_set_sensitive(img->transition_type,	TRUE);
+
 	dummy = gtk_tree_path_get_indices(path)[0]+1;
-	selected_slide = g_strdup_printf("%d",dummy);
 	gtk_tree_model_get_iter(model,&iter,path);
 	gtk_tree_path_free(path);
 	gtk_tree_model_get(model,&iter,1,&info_slide,-1);
@@ -524,7 +535,10 @@ static void img_iconview_selection_changed(GtkIconView *iconview, img_window_str
 	g_free(selected_slide);
 	gtk_label_set_text((GtkLabel*)img->type_data,info_slide->type);
 	gtk_label_set_text((GtkLabel*)img->resolution_data,info_slide->resolution);
-	gtk_statusbar_push((GtkStatusbar*)img->statusbar,img->context_id,info_slide->filename);
+	if (nr_selected > 1)
+		img_set_statusbar_message(img,nr_selected);
+	else
+		gtk_statusbar_push((GtkStatusbar*)img->statusbar,img->context_id,info_slide->filename);
 
 	img->slide_pixbuf = img_scale_pixbuf(img,info_slide->filename);
 	gtk_image_set_from_pixbuf((GtkImage*)img->image_area,img->slide_pixbuf);
