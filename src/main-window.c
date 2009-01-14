@@ -76,8 +76,6 @@ img_window_struct *img_create_window (void)
 	GtkWidget *new_button;
 	GtkWidget *open_button;
 	GtkWidget *save_button;
-	GtkWidget *preview_menu;
-	GtkWidget *preview_button;
 	GtkWidget *generate_button;
 	GtkWidget *import_button;
 	GtkWidget *separatortoolitem;
@@ -152,12 +150,12 @@ img_window_struct *img_create_window (void)
 	gtk_container_add ((GtkContainer*)menu1, separatormenuitem1);
 	gtk_widget_set_sensitive (separatormenuitem1, FALSE);
 
-	preview_menu = gtk_image_menu_item_new_with_mnemonic (_("_Preview"));
-	gtk_container_add ((GtkContainer*)menu1, preview_menu);
-	gtk_widget_add_accelerator (preview_menu,"activate",accel_group,GDK_p,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
+	img_struct->preview_menu = gtk_image_menu_item_new_with_mnemonic (_("_Preview"));
+	gtk_container_add ((GtkContainer*)menu1, img_struct->preview_menu);
+	gtk_widget_add_accelerator (img_struct->preview_menu,"activate",accel_group,GDK_p,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
 
 	tmp_image = gtk_image_new_from_stock ("gtk-media-play",GTK_ICON_SIZE_MENU);
-	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (preview_menu),tmp_image);
+	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (img_struct->preview_menu),tmp_image);
 
 	generate_menu = gtk_image_menu_item_new_with_mnemonic (_("Generate"));
 	gtk_widget_add_accelerator (generate_menu,"activate",accel_group,GDK_g,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
@@ -250,19 +248,16 @@ img_window_struct *img_create_window (void)
 	gtk_toolbar_set_style (GTK_TOOLBAR (toolbar), GTK_TOOLBAR_ICONS);
 	tmp_toolbar_icon_size = gtk_toolbar_get_icon_size (GTK_TOOLBAR (toolbar));
 
-	tmp_image = gtk_image_new_from_stock ("gtk-new",tmp_toolbar_icon_size);
-	new_button = (GtkWidget*) gtk_tool_button_new (tmp_image,"");
+	new_button = (GtkWidget*) gtk_tool_button_new_from_stock ("gtk-new");
 	gtk_container_add ((GtkContainer*)toolbar,new_button);
 	gtk_widget_set_tooltip_text(new_button, _("Create a new slideshow"));
 	g_signal_connect ((gpointer) new_button,"clicked",G_CALLBACK (img_new_slideshow),img_struct);
 
-	tmp_image = gtk_image_new_from_stock ("gtk-open",tmp_toolbar_icon_size);
-	open_button = (GtkWidget*) gtk_tool_button_new (tmp_image,"");
+	open_button = (GtkWidget*) gtk_tool_button_new_from_stock ("gtk-open");
 	gtk_container_add ((GtkContainer*)toolbar,open_button);
 	gtk_widget_set_tooltip_text(open_button, _("Open a slideshow"));
 
-	tmp_image = gtk_image_new_from_stock ("gtk-save",tmp_toolbar_icon_size);
-	save_button = (GtkWidget*) gtk_tool_button_new (tmp_image,"");
+	save_button = (GtkWidget*) gtk_tool_button_new_from_stock ("gtk-save");
 	gtk_container_add ((GtkContainer*)toolbar,save_button);
 	gtk_widget_set_tooltip_text(save_button, _("Save the slideshow"));
 
@@ -270,11 +265,10 @@ img_window_struct *img_create_window (void)
 	gtk_widget_show (separatortoolitem);
 	gtk_container_add ((GtkContainer*)toolbar,separatortoolitem);
 
-	tmp_image = gtk_image_new_from_stock ("gtk-media-play",tmp_toolbar_icon_size);
-	preview_button = (GtkWidget*) gtk_tool_button_new (tmp_image,"");
-	gtk_container_add ((GtkContainer*)toolbar,preview_button);
-	gtk_widget_set_tooltip_text(preview_button, _("Preview the slideshow"));
-	g_signal_connect ((gpointer) preview_button,"clicked",G_CALLBACK (img_start_preview),img_struct);
+	img_struct->preview_button = (GtkWidget*) gtk_tool_button_new_from_stock ("gtk-media-play");
+	gtk_container_add ((GtkContainer*)toolbar,img_struct->preview_button);
+	gtk_widget_set_tooltip_text(img_struct->preview_button, _("Preview the slideshow"));
+	g_signal_connect ((gpointer) img_struct->preview_button,"clicked",G_CALLBACK (img_start_stop_preview),img_struct);
 
 	tmp_image = img_load_icon("imagination-generate.png",GTK_ICON_SIZE_LARGE_TOOLBAR);
 	generate_button = (GtkWidget*) gtk_tool_button_new (tmp_image,"");
@@ -291,8 +285,7 @@ img_window_struct *img_create_window (void)
 	gtk_widget_set_tooltip_text(import_button, _("Import the slides"));
 	g_signal_connect ((gpointer) import_button,"clicked",G_CALLBACK (img_add_slides_thumbnails),img_struct);
 
-	tmp_image = gtk_image_new_from_stock ("gtk-delete",tmp_toolbar_icon_size);
-	img_struct->remove_button = (GtkWidget*) gtk_tool_button_new (tmp_image,"");
+	img_struct->remove_button = (GtkWidget*) gtk_tool_button_new_from_stock ("gtk-delete");
 	gtk_widget_set_sensitive(img_struct->remove_button,FALSE);
 	gtk_container_add ((GtkContainer*)toolbar,img_struct->remove_button);
 	gtk_widget_set_tooltip_text(img_struct->remove_button, _("Delete the selected slides"));
@@ -302,8 +295,7 @@ img_window_struct *img_create_window (void)
 	gtk_widget_show (separatortoolitem);
 	gtk_container_add ((GtkContainer*)toolbar,separatortoolitem);
 
-	tmp_image = gtk_image_new_from_stock ("gtk-jump-to",tmp_toolbar_icon_size);
-	goto_button = (GtkWidget*) gtk_tool_button_new (tmp_image,"");
+	goto_button = (GtkWidget*) gtk_tool_button_new_from_stock ("gtk-jump-to");
 	gtk_container_add ((GtkContainer*)toolbar,goto_button);
 	gtk_widget_set_tooltip_text(goto_button, _("Jump to the entered slide number"));
 	g_signal_connect ((gpointer) goto_button,"clicked",G_CALLBACK (img_goto_slide),img_struct);
@@ -506,6 +498,9 @@ static void img_iconview_selection_changed(GtkIconView *iconview, img_window_str
 			gtk_widget_set_sensitive(img->trans_duration,	FALSE);
 			gtk_widget_set_sensitive(img->duration,			FALSE);
 			gtk_widget_set_sensitive(img->transition_type,	FALSE);
+			gtk_label_set_text((GtkLabel*)img->type_data,"");
+			gtk_label_set_text((GtkLabel*)img->resolution_data,"");
+			gtk_label_set_text((GtkLabel*)img->slide_selected_data,"");
 			return;
 		}
 		nr_selected = g_list_length(selected);
@@ -526,6 +521,7 @@ static void img_iconview_selection_changed(GtkIconView *iconview, img_window_str
 	gtk_widget_set_sensitive(img->transition_type,	TRUE);
 
 	dummy = gtk_tree_path_get_indices(path)[0]+1;
+	selected_slide = g_strdup_printf("%d",dummy);
 	gtk_tree_model_get_iter(model,&iter,path);
 	gtk_tree_path_free(path);
 	gtk_tree_model_get(model,&iter,1,&info_slide,-1);

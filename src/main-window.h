@@ -58,6 +58,8 @@ struct _img_window_struct
 	GtkWidget	*imagination_window;
 	GtkWidget	*remove_menu;
 	GtkWidget	*remove_button;
+	GtkWidget	*preview_menu;
+	GtkWidget 	*preview_button;
 	GtkWidget	*transition_type;
 	GtkWidget	*duration;
 	GtkWidget	*trans_duration;
@@ -87,6 +89,7 @@ struct _img_window_struct
   	gint		nr_transitions_loaded;
   	guint		context_id;
   	guint		source_id;
+  	gboolean	preview_is_running;
 };
 
 void img_set_window_title(img_window_struct *,gchar *);

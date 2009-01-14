@@ -341,22 +341,43 @@ void img_set_total_slideshow_duration(img_window_struct *img)
 	g_free(time);
 }
 
-void img_start_preview(GtkButton *button, img_window_struct *img)
+void img_start_stop_preview(GtkButton *button, img_window_struct *img)
 {
 	GtkTreeIter iter;
 	slide_struct *entry;
 	GtkTreeModel *model;
+	GtkWidget *tmp_image;
 
 	model = gtk_icon_view_get_model(GTK_ICON_VIEW(img->thumbnail_iconview));
 
 	if( ! gtk_tree_model_get_iter_first (model,&iter))
 		return;
 
-//	gtk_widget_set_app_paintable(img->image_area, TRUE);
+	if (img->preview_is_running)
+	{
+		img->preview_is_running = FALSE;
+		if (img->source_id)
+		{
+			g_source_remove(img->source_id);
+			img->source_id = -1;
+		}
+		g_signal_handlers_disconnect_by_func(img->image_area,img_on_expose_event,NULL);
+		tmp_image = gtk_image_new_from_stock ("gtk-media-play",3);
+		g_object_set(img->preview_button,"icon-widget",tmp_image,NULL);
+		gtk_widget_set_tooltip_text(img->preview_button, _("Starts the preview"));
+		return;
+	}
+	tmp_image = gtk_image_new_from_stock ("gtk-media-stop",3);
+	g_object_set(img->preview_button,"icon-widget",tmp_image,NULL);
+	gtk_widget_set_tooltip_text(img->preview_button, _("Stops the preview"));
+
+	img->preview_is_running = TRUE;
+	gtk_widget_set_app_paintable(img->image_area, TRUE);
 	g_signal_connect( G_OBJECT(img->image_area), "expose-event",G_CALLBACK(img_on_expose_event),img);
 
 	/* Create an empty pixbuf */
 	img->pixbuf1 = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, (img->viewport)->allocation.width, (img->viewport)->allocation.height);
+	gdk_pixbuf_fill(img->pixbuf1,0xffffffff);
 
 	/* Load the first image in the pixbuf */
 	gtk_tree_model_get(model, &iter,1,&entry,-1);
@@ -367,6 +388,9 @@ void img_start_preview(GtkButton *button, img_window_struct *img)
 
 	while (gtk_tree_model_iter_next(model,&iter))
 	{
+		if (img->preview_is_running == FALSE)
+			break;
+
 		if (img->source_id == 0)
 			g_timeout_add(15,(GSourceFunc)img_time_handler,img);
 
@@ -380,7 +404,8 @@ void img_start_preview(GtkButton *button, img_window_struct *img)
 		img_idle_function(entry->duration);
 	}
 
-//	gtk_widget_set_app_paintable(img->image_area, FALSE);
+	img->preview_is_running = FALSE;
+	gtk_widget_set_app_paintable(img->image_area, FALSE);
 	g_signal_handlers_disconnect_by_func(img->image_area,img_on_expose_event,NULL);
 }
 
