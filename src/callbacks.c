@@ -385,6 +385,7 @@ static gboolean img_on_expose_event(GtkWidget *widget,GdkEventExpose *event,img_
 
 	offset_x = ((img->image_area)->allocation.width  - gdk_pixbuf_get_width (img->pixbuf1)) / 2;
 	offset_y = ((img->image_area)->allocation.height - gdk_pixbuf_get_height(img->pixbuf1)) / 2;
+
 	cr = gdk_cairo_create(widget->window);
 	gdk_cairo_set_source_pixbuf(cr,img->pixbuf1,offset_x,offset_y);
 	cairo_paint(cr);
@@ -392,6 +393,7 @@ static gboolean img_on_expose_event(GtkWidget *widget,GdkEventExpose *event,img_
 	offset_x = ((img->image_area)->allocation.width  - gdk_pixbuf_get_width (img->pixbuf2)) / 2;
 	offset_y = ((img->image_area)->allocation.height - gdk_pixbuf_get_height(img->pixbuf2)) / 2;
 	gdk_cairo_set_source_pixbuf(cr,img->pixbuf2,offset_x,offset_y);
+
 	cairo_arc(cr, gdk_pixbuf_get_width(img->pixbuf2)/2, gdk_pixbuf_get_height(img->pixbuf2)/2, radius, 0, 2 * G_PI );
 	cairo_clip(cr);
 	cairo_paint(cr);
@@ -402,7 +404,7 @@ static gboolean img_on_expose_event(GtkWidget *widget,GdkEventExpose *event,img_
 
 static gboolean img_time_handler(img_window_struct *img)
 {
-	radius++;
+	radius+=VERY_FAST;
 
 	if (radius > 450)
 	{

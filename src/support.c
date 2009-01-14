@@ -77,3 +77,20 @@ void img_idle_function (gint seconds)
 			gtk_main_iteration();
 	}
 }
+
+GtkWidget *_gtk_combo_box_new_text()
+{
+	GtkWidget *combo_box;
+	GtkCellRenderer *cell;
+	GtkListStore *store;
+
+	store = gtk_list_store_new (1, G_TYPE_STRING);
+	combo_box = gtk_combo_box_new_with_model (GTK_TREE_MODEL (store));
+	g_object_unref (store);
+
+	cell = gtk_cell_renderer_text_new ();
+	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (combo_box), cell, TRUE);
+	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (combo_box), cell,"text", 0, NULL);
+	g_object_set(cell,"ypad", 0.0, NULL);
+	return combo_box;
+}

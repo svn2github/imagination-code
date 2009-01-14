@@ -26,6 +26,12 @@
 #include "support.h"
 #include "transition_data.h"
 
+#define	VERY_FAST	15
+#define	FAST		10
+#define	NORMAL		6
+#define	SLOW		3
+#define	VERY_SLOW	1
+
 typedef enum 
 {
 	IMG_GOTO_SLIDE = 0,
@@ -77,6 +83,7 @@ struct _img_window_struct
   	gint		slides_nr;
   	gint		slideshow_height;
   	gint		total_secs;
+  	gint		nr_transitions_loaded;
   	guint		context_id;
   	guint		source_id;
 };

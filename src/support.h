@@ -49,4 +49,5 @@
 
 GtkWidget *img_load_icon(gchar *, GtkIconSize );
 void img_idle_function (int );
+GtkWidget *_gtk_combo_box_new_text();
 #endif
