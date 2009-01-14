@@ -445,9 +445,9 @@ img_window_struct *img_create_window (void)
 	gtk_widget_show (img_struct->thumbnail_iconview);
 
 	/* Create the cell layout */
-	pixbuf_cell = gtk_cell_renderer_pixbuf_new();
+	pixbuf_cell = eog_pixbuf_cell_renderer_new();
 	gtk_cell_layout_pack_start ((GtkCellLayout*)img_struct->thumbnail_iconview, pixbuf_cell, FALSE);
-	g_object_set (pixbuf_cell, "follow-state", TRUE, "width", 115, "xalign", 0.5, "yalign", 0.5, NULL);
+	g_object_set (pixbuf_cell, "follow-state", FALSE, "width", 115, "xalign", 0.5, "yalign", 0.5, NULL);
 	gtk_cell_layout_set_attributes ((GtkCellLayout*)img_struct->thumbnail_iconview, pixbuf_cell, "pixbuf", 0, NULL);
 
 	/* Set some iconview properties */

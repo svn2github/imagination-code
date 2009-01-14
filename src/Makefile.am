@@ -13,6 +13,7 @@ bin_PROGRAMS = imagination
 imagination_SOURCES = \
 	imagination.c \
 	support.c support.h \
+	eog-pixbuf-cell-renderer.c eog-pixbuf-cell-renderer.h \
 	main-window.c main-window.h \
 	callbacks.c callbacks.h \
 	new_slideshow.c new_slideshow.h

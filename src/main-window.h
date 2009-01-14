@@ -25,6 +25,7 @@
 #include <gtk/gtk.h>
 #include "support.h"
 #include "transition_data.h"
+#include "eog-pixbuf-cell-renderer.h"
 
 #define	FAST	10
 #define	NORMAL	3
