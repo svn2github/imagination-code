@@ -362,12 +362,20 @@ void img_start_stop_preview(GtkButton *button, img_window_struct *img)
 			img->source_id = -1;
 		}
 		g_signal_handlers_disconnect_by_func(img->image_area,img_on_expose_event,NULL);
+		tmp_image = gtk_image_new_from_stock ("gtk-media-play",GTK_ICON_SIZE_MENU);
+		gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (img->preview_menu),tmp_image);
+	
 		tmp_image = gtk_image_new_from_stock ("gtk-media-play",3);
+		gtk_widget_show(tmp_image);
 		g_object_set(img->preview_button,"icon-widget",tmp_image,NULL);
 		gtk_widget_set_tooltip_text(img->preview_button, _("Starts the preview"));
 		return;
 	}
+	tmp_image = gtk_image_new_from_stock ("gtk-media-stop",GTK_ICON_SIZE_MENU);
+	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (img->preview_menu),tmp_image);
+
 	tmp_image = gtk_image_new_from_stock ("gtk-media-stop",3);
+	gtk_widget_show(tmp_image);
 	g_object_set(img->preview_button,"icon-widget",tmp_image,NULL);
 	gtk_widget_set_tooltip_text(img->preview_button, _("Stops the preview"));
 

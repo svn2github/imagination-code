@@ -153,6 +153,7 @@ img_window_struct *img_create_window (void)
 	img_struct->preview_menu = gtk_image_menu_item_new_with_mnemonic (_("_Preview"));
 	gtk_container_add ((GtkContainer*)menu1, img_struct->preview_menu);
 	gtk_widget_add_accelerator (img_struct->preview_menu,"activate",accel_group,GDK_p,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
+	g_signal_connect ((gpointer) img_struct->preview_menu,"activate",G_CALLBACK (img_start_stop_preview),img_struct);
 
 	tmp_image = gtk_image_new_from_stock ("gtk-media-play",GTK_ICON_SIZE_MENU);
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (img_struct->preview_menu),tmp_image);
@@ -503,7 +504,6 @@ static void img_iconview_selection_changed(GtkIconView *iconview, img_window_str
 			gtk_label_set_text((GtkLabel*)img->slide_selected_data,"");
 			return;
 		}
-		nr_selected = g_list_length(selected);
 		if (nr_selected > 1)
 			img_set_statusbar_message(img,nr_selected);
 		else
