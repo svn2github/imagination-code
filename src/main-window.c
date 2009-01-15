@@ -604,12 +604,10 @@ static void img_goto_slide(GtkMenuItem *item, img_window_struct *img_struct)
 	gtk_container_add((GtkContainer*)vbox, text_label);
 	gtk_container_add((GtkContainer*)vbox, slide_number_entry);
 	gtk_widget_show_all(img_struct->goto_window);
-	
+	g_signal_connect(img_struct->goto_window, "delete-event", G_CALLBACK(gtk_widget_destroy), NULL);	
 	response = gtk_dialog_run((GtkDialog*)img_struct->goto_window);
 	if (response == GTK_RESPONSE_ACCEPT)
 		img_goto_line_entry_activate((GtkEntry*)slide_number_entry,img_struct);
-
-	gtk_widget_destroy(img_struct->goto_window);
 }
 
 static void img_goto_line_entry_activate(GtkEntry *entry, img_window_struct *img)
