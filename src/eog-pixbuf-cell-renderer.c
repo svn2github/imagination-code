@@ -1,7 +1,7 @@
 /* Eye Of Gnome - Pixbuf Cellrenderer 
  * 
  * Copyright (C) 2009 Giuseppe Torelli <colossus73@gmail.com>
- * Modified cairo code to achieve the green coloured frame around the slides
+ * Modified cairo code to achieve the green coloured border around the slides
  * and reduced redundant code regarding the GTK state.
  * 
  * Copyright (C) 2007 The GNOME Foundation
@@ -65,31 +65,30 @@ eog_pixbuf_cell_renderer_new (void)
 	return g_object_new (eog_pixbuf_cell_renderer_get_type (), NULL);
 }
 
-static void
-eog_pixbuf_cell_renderer_render (GtkCellRenderer *cell,
-                                 GdkWindow *window,
-                                 GtkWidget *widget,
-                                 GdkRectangle *background_area,
-                                 GdkRectangle *cell_area,
-                                 GdkRectangle *expose_area,
-                                 GtkCellRendererState flags)
+static void eog_pixbuf_cell_renderer_render (GtkCellRenderer *cell,
+								GdkWindow *window,
+								GtkWidget *widget,
+								GdkRectangle *background_area,
+								GdkRectangle *cell_area,
+								GdkRectangle *expose_area,
+								GtkCellRendererState flags)
 {
 	if ((flags & (GTK_CELL_RENDERER_SELECTED|GTK_CELL_RENDERER_PRELIT)) != 0) {
 		cairo_t *cr;
 		gint x, y, w, h;
 
-		x = background_area->x;
-		y = background_area->y;
-		w = background_area->width;
-		h = background_area->height;
+		x = cell_area->x;
+		y = cell_area->y;
+		w = cell_area->width;
+		h = cell_area->height;
 
 		/* draw the selection indicator */
 		cr = gdk_cairo_create (GDK_DRAWABLE (window));
 
 		cairo_set_source_rgb (cr, 0, 0.7, 0);
-		cairo_rectangle (cr, x + 4, y -4 , w - 8, h + 8 );
-		cairo_set_fill_rule (cr, CAIRO_FILL_RULE_EVEN_ODD);
-		cairo_fill (cr);
+		cairo_set_line_width (cr, 5);
+		cairo_rectangle (cr, x+8, y+3, w-16, h-6);
+		cairo_stroke(cr);
 		cairo_destroy (cr);
 	}
 
