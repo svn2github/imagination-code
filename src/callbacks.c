@@ -392,7 +392,7 @@ void img_start_stop_preview(GtkButton *button, img_window_struct *img)
 	img->pixbuf2 = img_scale_pixbuf(img,entry->filename);
 
 	img->source_id = g_timeout_add(15,(GSourceFunc)img_time_handler,img);
-	img_idle_function(entry->duration);
+	img_idle_function(entry->duration,img);
 
 	while (gtk_tree_model_iter_next(model,&iter))
 	{
@@ -409,7 +409,7 @@ void img_start_stop_preview(GtkButton *button, img_window_struct *img)
 		img->pixbuf1 = img->pixbuf2;
 
 		img->pixbuf2 = img_scale_pixbuf(img,entry->filename);
-		img_idle_function(entry->duration);
+		img_idle_function(entry->duration,img);
 	}
 
 	img->preview_is_running = FALSE;

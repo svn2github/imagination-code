@@ -11,7 +11,7 @@ INCLUDES = \
 bin_PROGRAMS = imagination
 
 imagination_SOURCES = \
-	imagination.c \
+	imagination.c imagination.h \
 	support.c support.h \
 	eog-pixbuf-cell-renderer.c eog-pixbuf-cell-renderer.h \
 	main-window.c main-window.h \

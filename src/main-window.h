@@ -24,7 +24,7 @@
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
 #include "support.h"
-#include "transition_data.h"
+#include "imagination.h"
 #include "eog-pixbuf-cell-renderer.h"
 
 #define	FAST	10
@@ -39,58 +39,6 @@ typedef enum
 	IMG_MOVE_RIGHT
 } Img_Thumbnail_Selection_Mode;
 */
-
-typedef struct _slide_struct slide_struct;
-
-struct _slide_struct
-{
-	gchar	*filename;
-	guint	duration;
-	gchar	*resolution;
-	gchar	*type;
-	trans_type transition_type;
-};
-
-typedef struct _img_window_struct img_window_struct;
-
-struct _img_window_struct
-{
-	GtkWidget	*imagination_window;
-	GtkWidget	*remove_menu;
-	GtkWidget	*remove_button;
-	GtkWidget	*preview_menu;
-	GtkWidget 	*preview_button;
-	GtkWidget	*transition_type;
-	GtkWidget	*duration;
-	GtkWidget	*trans_duration;
-	GtkWidget	*slide_selected_data;
-	GtkWidget	*type_data;
-	GtkWidget	*total_time_data;
-	GtkWidget	*filename_data;
-	GtkWidget	*resolution_data;	
-  	GtkWidget	*thumbnail_iconview;
-  	GtkWidget	*statusbar;
-  	GtkWidget	*viewport;
-  	GtkWidget	*image_area;
-  	GdkPixbuf	*slide_pixbuf;
-  	GdkPixbuf	*pixbuf1;
-  	GdkPixbuf	*pixbuf2;
-  	GtkWidget	*import_slide_chooser;
-	GtkWidget	*dim_label;
-	GtkWidget	*size_label;
-  	GtkWidget	*preview_image;
-  	GtkWidget	*goto_window;
-  	GtkListStore *thumbnail_model;
-  	gchar		*current_dir;
-  	gchar		*slideshow_title;
-  	gint		slides_nr;
-  	gint		slideshow_height;
-  	gint		total_secs;
-  	gint		nr_transitions_loaded;
-  	guint		context_id;
-  	guint		source_id;
-  	gboolean	preview_is_running;
-};
 
 void img_set_window_title(img_window_struct *,gchar *);
 img_window_struct *img_create_window(void);

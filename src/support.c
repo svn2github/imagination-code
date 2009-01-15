@@ -22,6 +22,7 @@
 #endif
 
 #include "support.h"
+#include "imagination.h"
 
 GtkWidget *img_load_icon(gchar *filename, GtkIconSize size)
 {
@@ -58,7 +59,7 @@ cairo_surface_t *img_get_cairo_surface_from_gdk_pixbuf(GdkPixbuf *pixbuf)
 	return image;
 }
 */
-void img_idle_function (gint seconds)
+void img_idle_function (gint seconds, img_window_struct *img)
 {
 	GTimer *time;
 	gdouble secs;
@@ -68,7 +69,7 @@ void img_idle_function (gint seconds)
 	while(1)
 	{
 		secs = g_timer_elapsed(time,NULL);
-		if ((gint)secs > seconds)
+		if ((gint)secs > seconds || img->preview_is_running == FALSE)
 		{
 			g_timer_stop(time);
 			break;

@@ -25,6 +25,7 @@
 #endif
 
 #include <gtk/gtk.h>
+#include "imagination.h"
 
 #ifdef ENABLE_NLS
 #  include <libintl.h>
@@ -48,6 +49,6 @@
 #endif
 
 GtkWidget *img_load_icon(gchar *, GtkIconSize );
-void img_idle_function (int );
+void img_idle_function (int, img_window_struct *);
 GtkWidget *_gtk_combo_box_new_text();
 #endif
