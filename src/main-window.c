@@ -434,12 +434,13 @@ img_window_struct *img_create_window (void)
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (thumb_scrolledwindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_NEVER);
 	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (thumb_scrolledwindow), GTK_SHADOW_IN);
 	img_struct->thumbnail_iconview = gtk_icon_view_new_with_model((GtkTreeModel *)img_struct->thumbnail_model);
+	gtk_widget_set_size_request(img_struct->thumbnail_iconview,-1,70);
 	gtk_widget_show (img_struct->thumbnail_iconview);
 
 	/* Create the cell layout */
 	pixbuf_cell = eog_pixbuf_cell_renderer_new();
 	gtk_cell_layout_pack_start ((GtkCellLayout*)img_struct->thumbnail_iconview, pixbuf_cell, FALSE);
-	g_object_set (pixbuf_cell, "follow-state", FALSE, "width", 115, "xalign", 0.5, "yalign", 0.5, NULL);
+	g_object_set (pixbuf_cell, "width", 115, "ypad", 2, NULL);
 	gtk_cell_layout_set_attributes ((GtkCellLayout*)img_struct->thumbnail_iconview, pixbuf_cell, "pixbuf", 0, NULL);
 
 	/* Set some iconview properties */

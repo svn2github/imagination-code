@@ -2,6 +2,7 @@
  * 
  * Copyright (C) 2009 Giuseppe Torelli <colossus73@gmail.com>
  * Modified cairo code to achieve the green coloured frame around the slides
+ * and reduced redundant code regarding the GTK state.
  * 
  * Copyright (C) 2007 The GNOME Foundation
  *
@@ -76,27 +77,14 @@ eog_pixbuf_cell_renderer_render (GtkCellRenderer *cell,
 	if ((flags & (GTK_CELL_RENDERER_SELECTED|GTK_CELL_RENDERER_PRELIT)) != 0) {
 		cairo_t *cr;
 		gint x, y, w, h;
-		GtkStateType state;
 
 		x = background_area->x;
 		y = background_area->y;
 		w = background_area->width;
 		h = background_area->height;
-		
-		/* Sometimes width is -1 - not sure what to do here */
-		if (w == -1) return;
-		
-		if ((flags & GTK_CELL_RENDERER_SELECTED) != 0) {
-			if (GTK_WIDGET_HAS_FOCUS (widget))
-				state = GTK_STATE_SELECTED;
-			else
-				state = GTK_STATE_ACTIVE;
-		} else
-			state = GTK_STATE_PRELIGHT;
 
 		/* draw the selection indicator */
 		cr = gdk_cairo_create (GDK_DRAWABLE (window));
-		gdk_cairo_set_source_color (cr, &widget->style->base[state]);
 
 		cairo_set_source_rgb (cr, 0, 0.7, 0);
 		cairo_rectangle (cr, x + 4, y -4 , w - 8, h + 8 );
