@@ -289,14 +289,14 @@ void img_show_about_dialog (GtkMenuItem *item,img_window_struct *img_struct)
 		g_object_set (about,
 			"name", "Imagination",
 			"version",PACKAGE_VERSION,
-			"copyright","Copyright \xC2\xA9 2008 Giuseppe Torelli",
+			"copyright","Copyright \xC2\xA9 2009 Giuseppe Torelli",
 			"comments","A simple and lightweight DVD slideshow maker",
 			"authors",authors,
 			"documenters",documenters,
 			"translator_credits",_("translator-credits"),
 			"logo_icon_name","imagination",
 			"website","http://imagination.sf.net",
-			"license","Copyright \xC2\xA9 2008 Giuseppe Torelli - Colossus <colossus73@gmail.com>\n\n"
+			"license","Copyright \xC2\xA9 2009 Giuseppe Torelli - Colossus <colossus73@gmail.com>\n\n"
 		    			"This is free software; you can redistribute it and/or\n"
     					"modify it under the terms of the GNU Library General Public License as\n"
     					"published by the Free Software Foundation; either version 2 of the\n"

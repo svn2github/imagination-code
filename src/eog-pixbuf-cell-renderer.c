@@ -2,7 +2,7 @@
  * 
  * Copyright (C) 2009 Giuseppe Torelli <colossus73@gmail.com>
  * Modified cairo code to achieve the green coloured border around the slides
- * and reduced redundant code regarding the GTK state.
+ * and reduced superfluous code regarding the GTK state.
  * 
  * Copyright (C) 2007 The GNOME Foundation
  *
@@ -73,7 +73,11 @@ static void eog_pixbuf_cell_renderer_render (GtkCellRenderer *cell,
 								GdkRectangle *expose_area,
 								GtkCellRendererState flags)
 {
-	if ((flags & (GTK_CELL_RENDERER_SELECTED|GTK_CELL_RENDERER_PRELIT)) != 0) {
+	(* GTK_CELL_RENDERER_CLASS (eog_pixbuf_cell_renderer_parent_class)->render)
+	    (cell, window, widget, background_area, cell_area, expose_area, flags);
+
+	if ((flags & (GTK_CELL_RENDERER_SELECTED|GTK_CELL_RENDERER_PRELIT)) != 0)
+	{
 		cairo_t *cr;
 		gint x, y, w, h;
 
@@ -91,7 +95,4 @@ static void eog_pixbuf_cell_renderer_render (GtkCellRenderer *cell,
 		cairo_stroke(cr);
 		cairo_destroy (cr);
 	}
-
-	(* GTK_CELL_RENDERER_CLASS (eog_pixbuf_cell_renderer_parent_class)->render)
-	    (cell, window, widget, background_area, cell_area, expose_area, flags);
 }
