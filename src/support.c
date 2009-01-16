@@ -59,17 +59,17 @@ cairo_surface_t *img_get_cairo_surface_from_gdk_pixbuf(GdkPixbuf *pixbuf)
 	return image;
 }
 */
-void img_idle_function (gint seconds, img_window_struct *img)
+void img_idle_function (img_window_struct *img)
 {
 	GTimer *time;
 	gdouble secs;
 
 	time = g_timer_new();
-	g_print ("Aspetto %d sec\n",seconds);
+	g_print ("Wait for %d sec\n",(img->current_slide)->duration);
 	while(1)
 	{
 		secs = g_timer_elapsed(time,NULL);
-		if ((gint)secs > seconds || img->preview_is_running == FALSE)
+		if ((gint)secs > (img->current_slide)->duration || img->preview_is_running == FALSE)
 		{
 			g_timer_stop(time);
 			break;
@@ -94,4 +94,24 @@ GtkWidget *_gtk_combo_box_new_text()
 	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (combo_box), cell,"text", 0, NULL);
 	g_object_set(cell,"ypad", 0.0, NULL);
 	return combo_box;
+}
+
+void img_set_statusbar_message(img_window_struct *img_struct, gint selected)
+{
+	gchar *message = NULL;
+
+	if (img_struct->slides_nr == 0)
+		gtk_statusbar_push((GtkStatusbar*)img_struct->statusbar,img_struct->context_id,_("Welcome to Imagination " VERSION));
+	else if (selected)
+	{
+		message = g_strdup_printf(_("%d slides selected"),selected);
+		gtk_statusbar_push((GtkStatusbar*)img_struct->statusbar,img_struct->context_id,message);
+		g_free(message);
+	}
+	else
+	{
+		message = g_strdup_printf(ngettext("%d slide %s" ,"%d slides %s",img_struct->slides_nr),img_struct->slides_nr,_("imported - Use the CTRL key to select/unselect or SHIFT for multiple select"));
+		gtk_statusbar_push((GtkStatusbar*)img_struct->statusbar,img_struct->context_id,message);
+		g_free(message);
+	}
 }

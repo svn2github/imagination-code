@@ -56,8 +56,9 @@ void img_add_slides_thumbnails(GtkMenuItem *item,img_window_struct *img)
 			slide_info = g_new0(slide_struct,1);
 			if (slide_info)
 			{
-				/* Get some slide info */
+				/* Set some slide info */
 				slide_info->duration = 1;
+				slide_info->speed = NORMAL;
 				img->total_secs++;
 				slide_info->filename = g_strdup(slides->data);
 				pixbuf_format = gdk_pixbuf_get_file_info(slides->data,&width,&height);
@@ -220,26 +221,6 @@ static void	img_update_preview_file_chooser(GtkFileChooser *file_chooser,img_win
 	gtk_file_chooser_set_preview_widget_active (file_chooser, has_preview);
 }
 
-void img_set_statusbar_message(img_window_struct *img_struct, gint selected)
-{
-	gchar *message = NULL;
-
-	if (img_struct->slides_nr == 0)
-		gtk_statusbar_push((GtkStatusbar*)img_struct->statusbar,img_struct->context_id,_("Welcome to Imagination " VERSION));
-	else if (selected)
-	{
-		message = g_strdup_printf(_("%d slides selected"),selected);
-		gtk_statusbar_push((GtkStatusbar*)img_struct->statusbar,img_struct->context_id,message);
-		g_free(message);
-	}
-	else
-	{
-		message = g_strdup_printf(ngettext("%d slide %s" ,"%d slides %s",img_struct->slides_nr),img_struct->slides_nr,_("imported - Use the CTRL key to select/unselect or SHIFT for multiple select"));
-		gtk_statusbar_push((GtkStatusbar*)img_struct->statusbar,img_struct->context_id,message);
-		g_free(message);
-	}
-}
-
 void img_delete_selected_slides(GtkMenuItem *item,img_window_struct *img_struct)
 {
 	GList *selected;
@@ -349,7 +330,6 @@ void img_start_stop_preview(GtkButton *button, img_window_struct *img)
 	GtkWidget *tmp_image;
 
 	model = gtk_icon_view_get_model(GTK_ICON_VIEW(img->thumbnail_iconview));
-
 	if( ! gtk_tree_model_get_iter_first (model,&iter))
 		return;
 
@@ -384,7 +364,8 @@ void img_start_stop_preview(GtkButton *button, img_window_struct *img)
 	img->pixbuf2 = img_scale_pixbuf(img,entry->filename);
 
 	img->source_id = g_timeout_add(15,(GSourceFunc)img_time_handler,img);
-	img_idle_function(entry->duration,img);
+	img->current_slide = entry;
+	img_idle_function(img);
 
 	while (gtk_tree_model_iter_next(model,&iter))
 	{
@@ -392,7 +373,7 @@ void img_start_stop_preview(GtkButton *button, img_window_struct *img)
 			break;
 
 		if (img->source_id == 0)
-			g_timeout_add(15,(GSourceFunc)img_time_handler,img);
+			img->source_id = g_timeout_add(15,(GSourceFunc)img_time_handler,img);
 
 		gtk_widget_queue_draw(img->image_area);
 		gtk_tree_model_get(model, &iter,1,&entry,-1);
@@ -401,19 +382,20 @@ void img_start_stop_preview(GtkButton *button, img_window_struct *img)
 		img->pixbuf1 = img->pixbuf2;
 
 		img->pixbuf2 = img_scale_pixbuf(img,entry->filename);
-		img_idle_function(entry->duration,img);
+		img->current_slide = entry;
+		img_idle_function(img);
 	}
 here:
 	g_signal_handlers_disconnect_by_func(img->image_area,img_on_expose_event,NULL);
+	img->preview_is_running = FALSE;
 	gtk_widget_set_app_paintable(img->image_area, FALSE);
 	tmp_image = gtk_image_new_from_stock ("gtk-media-play",GTK_ICON_SIZE_MENU);
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (img->preview_menu),tmp_image);
-	
+
 	tmp_image = gtk_image_new_from_stock ("gtk-media-play",3);
 	gtk_widget_show(tmp_image);
 	g_object_set(img->preview_button,"icon-widget",tmp_image,NULL);
 	gtk_widget_set_tooltip_text(img->preview_button, _("Starts the preview"));
-	img->preview_is_running = FALSE;
 }
 
 static gboolean img_on_expose_event(GtkWidget *widget,GdkEventExpose *event,img_window_struct *img)
@@ -442,12 +424,11 @@ static gboolean img_on_expose_event(GtkWidget *widget,GdkEventExpose *event,img_
 
 static gboolean img_time_handler(img_window_struct *img)
 {
-	radius+=SLOW;
+	radius += (img->current_slide)->speed;
 
 	if (radius > 450)
 	{
 		radius = 0;
-		g_print ("FALSE\n");
 		img->source_id = 0;
 		return FALSE;
 	}

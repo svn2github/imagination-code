@@ -26,12 +26,17 @@
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
 
+#define	FAST	10
+#define	NORMAL	3
+#define	SLOW	1
+
 typedef struct _slide_struct slide_struct;
 
 struct _slide_struct
 {
 	gchar	*filename;
 	guint	duration;
+	gint	speed;
 	gchar	*resolution;
 	gchar	*type;
 	trans_type transition_type;
@@ -67,6 +72,7 @@ struct _img_window_struct
   	GtkWidget	*preview_image;
   	GtkWidget	*goto_window;
   	GtkListStore *thumbnail_model;
+  	slide_struct *current_slide;
   	gchar		*current_dir;
   	gchar		*slideshow_title;
   	gint		slides_nr;

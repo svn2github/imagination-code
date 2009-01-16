@@ -41,7 +41,7 @@ int main (int argc, char *argv[])
 
 	img_window = img_create_window();
 	gtk_widget_show (img_window->imagination_window);
-	img_set_statusbar_message(img_window);
+	img_set_statusbar_message(img_window,0);
 
 	gtk_main ();
 

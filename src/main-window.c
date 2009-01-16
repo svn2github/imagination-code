@@ -25,6 +25,7 @@
 #include "callbacks.h"
 
 static void img_iconview_selection_changed (GtkIconView *, img_window_struct *);
+static void img_combo_box_speed_changed (GtkComboBox *,  img_window_struct *);
 static void img_spinbutton_value_changed (GtkSpinButton *, img_window_struct *);
 static void img_quit_menu(GtkMenuItem *, img_window_struct *);
 static void img_select_all_thumbnails(GtkMenuItem *, img_window_struct *);
@@ -355,20 +356,21 @@ img_window_struct *img_create_window (void)
 	/* Transition duration */
 	hbox_effect_duration = gtk_hbox_new (FALSE, 0);
 	gtk_box_pack_start ((GtkBox*)vbox_info_slide, hbox_effect_duration, FALSE, TRUE, 0);
-	trans_duration_label = gtk_label_new (_("Transition Duration:"));
+	trans_duration_label = gtk_label_new (_("Transition Speed:"));
 	gtk_box_pack_start ((GtkBox*)hbox_effect_duration, trans_duration_label, FALSE, FALSE, 0);
 	img_struct->trans_duration = _gtk_combo_box_new_text();
-		gtk_combo_box_append_text(GTK_COMBO_BOX(img_struct->trans_duration),_("Fast"));
+	gtk_combo_box_append_text(GTK_COMBO_BOX(img_struct->trans_duration),_("Fast"));
 	gtk_combo_box_append_text(GTK_COMBO_BOX(img_struct->trans_duration),_("Normal"));
 	gtk_combo_box_append_text(GTK_COMBO_BOX(img_struct->trans_duration),_("Slow"));
-		gtk_combo_box_set_active(GTK_COMBO_BOX(img_struct->trans_duration),1);
+	gtk_combo_box_set_active(GTK_COMBO_BOX(img_struct->trans_duration),1);
 	gtk_widget_set_sensitive(img_struct->trans_duration,FALSE);
 	gtk_box_pack_end ((GtkBox*)hbox_effect_duration, img_struct->trans_duration, FALSE, TRUE, 0);
+	g_signal_connect (G_OBJECT (img_struct->trans_duration),"changed",G_CALLBACK (img_combo_box_speed_changed),img_struct);
 
 	/* Slide duration */
 	hbox_duration = gtk_hbox_new (FALSE, 0);
 	gtk_box_pack_start ((GtkBox*)vbox_info_slide, hbox_duration, FALSE, TRUE, 0);
-	duration_label = gtk_label_new (_("Slide Duration:"));
+	duration_label = gtk_label_new (_("Slide Duration in sec:"));
 	gtk_box_pack_start ((GtkBox*)hbox_duration, duration_label, FALSE, FALSE, 0);
 	spinbutton1_adj = gtk_adjustment_new (1, 1, 300, 1, 10, 10);
 	img_struct->duration = gtk_spin_button_new ((GtkAdjustment*)spinbutton1_adj, 1, 0);
@@ -504,7 +506,7 @@ static void img_iconview_selection_changed(GtkIconView *iconview, img_window_str
 			gtk_label_set_text((GtkLabel*)img->slide_selected_data,"");
 			return;
 		}
-		if (nr_selected > 1)
+		if (nr_selected >= 1)
 			img_set_statusbar_message(img,nr_selected);
 		else
 			gtk_statusbar_pop(GTK_STATUSBAR(img->statusbar),img->context_id);
@@ -526,7 +528,18 @@ static void img_iconview_selection_changed(GtkIconView *iconview, img_window_str
 	gtk_tree_path_free(path);
 	gtk_tree_model_get(model,&iter,1,&info_slide,-1);
 
+	/* Set the speed of the transition */
+	if (info_slide->speed == FAST)
+		dummy = 0;
+	else if (info_slide->speed == NORMAL)
+		dummy = 1;
+	else
+		dummy = 2;
+	gtk_combo_box_set_active(GTK_COMBO_BOX(img->trans_duration),dummy);
+
+	/* Set the duration of the transition */
 	gtk_spin_button_set_value((GtkSpinButton*)img->duration, info_slide->duration);
+
 	gtk_label_set_text((GtkLabel*)img->slide_selected_data,selected_slide);
 	g_free(selected_slide);
 	gtk_label_set_text((GtkLabel*)img->type_data,info_slide->type);
@@ -539,6 +552,41 @@ static void img_iconview_selection_changed(GtkIconView *iconview, img_window_str
 	img->slide_pixbuf = img_scale_pixbuf(img,info_slide->filename);
 	gtk_image_set_from_pixbuf((GtkImage*)img->image_area,img->slide_pixbuf);
 	g_object_unref(img->slide_pixbuf);
+}
+
+static void img_combo_box_speed_changed (GtkComboBox *combo, img_window_struct *img)
+{
+	gint speed;
+	gint duration;
+	GList *selected;
+	GtkTreeIter iter;
+	GtkTreeModel *model;
+	slide_struct *info_slide;
+
+	model = gtk_icon_view_get_model((GtkIconView *)img->thumbnail_iconview);
+	selected = gtk_icon_view_get_selected_items((GtkIconView *)img->thumbnail_iconview);
+	if (selected == NULL)
+		return;
+
+	speed = gtk_combo_box_get_active(combo);
+	if (speed == 0)
+		duration = FAST;
+	else if (speed == 1)
+		duration = NORMAL;
+	else 
+		duration = SLOW;
+	while (selected)
+	{
+		gtk_tree_model_get_iter(model, &iter,selected->data);
+		gtk_tree_model_get(model, &iter,1,&info_slide,-1);
+		info_slide->speed = duration;
+		//img->total_secs += duration;
+		selected = selected->next;
+	}
+	//img_set_total_slideshow_duration(img);
+
+	g_list_foreach (selected, (GFunc)gtk_tree_path_free, NULL);
+	g_list_free(selected);
 }
 
 static void img_spinbutton_value_changed (GtkSpinButton *spinbutton, img_window_struct *img)

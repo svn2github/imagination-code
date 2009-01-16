@@ -21,15 +21,10 @@
 #define __IMAGINATION_INTERFACE_H__
 
 #include <stdlib.h>
-#include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
 #include "support.h"
 #include "imagination.h"
 #include "eog-pixbuf-cell-renderer.h"
-
-#define	FAST	10
-#define	NORMAL	3
-#define	SLOW	1
 
 /*
 typedef enum 
