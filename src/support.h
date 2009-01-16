@@ -50,6 +50,6 @@
 
 GtkWidget *img_load_icon(gchar *, GtkIconSize );
 void img_idle_function (img_window_struct *);
-GtkWidget *_gtk_combo_box_new_text();
+GtkWidget *_gtk_combo_box_new_text(gboolean);
 void img_set_statusbar_message(img_window_struct *, gint);
 #endif

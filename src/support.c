@@ -79,13 +79,16 @@ void img_idle_function (img_window_struct *img)
 	}
 }
 
-GtkWidget *_gtk_combo_box_new_text()
+GtkWidget *_gtk_combo_box_new_text(gboolean pointer)
 {
 	GtkWidget *combo_box;
 	GtkCellRenderer *cell;
 	GtkListStore *store;
 
-	store = gtk_list_store_new (1, G_TYPE_STRING);
+	if (pointer)
+		store = gtk_list_store_new (2, G_TYPE_STRING,G_TYPE_POINTER);
+	else
+		store = gtk_list_store_new (1, G_TYPE_STRING);
 	combo_box = gtk_combo_box_new_with_model (GTK_TREE_MODEL (store));
 	g_object_unref (store);
 
