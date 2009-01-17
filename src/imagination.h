@@ -26,9 +26,12 @@
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
 
-#define	FAST	10
-#define	NORMAL	3
-#define	SLOW	1
+/* Timeout (in miliseconds) for transition effects */
+#define TRANSITION_TIMEOUT 15
+
+#define	FAST	0.05
+#define	NORMAL	0.01
+#define	SLOW	0.002
 
 typedef struct _slide_struct slide_struct;
 
@@ -36,7 +39,7 @@ struct _slide_struct
 {
 	gchar	*filename;
 	guint	duration;
-	gint	speed;
+	gdouble	speed;
 	gchar	*resolution;
 	gchar	*type;
 	trans_type transition_type;
@@ -82,5 +85,7 @@ struct _img_window_struct
   	guint		context_id;
   	guint		source_id;
   	gboolean	preview_is_running;
+	gdouble     progress;
+	GtkTreeIter *cur_ss_iter;
 };
 #endif

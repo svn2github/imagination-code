@@ -26,8 +26,10 @@
 static void img_file_chooser_add_preview(img_window_struct *);
 static void img_update_preview_file_chooser(GtkFileChooser *,img_window_struct *);
 static gboolean img_on_expose_event(GtkWidget *,GdkEventExpose *,img_window_struct *);
-static gboolean img_time_handler(img_window_struct *);
-double radius;
+/*static gboolean img_time_handler(img_window_struct *);*/
+static gboolean img_transition_timeout(img_window_struct *);
+static gboolean img_sleep_timeout(img_window_struct *);
+static void img_swap_toolbar_images( img_window_struct *, gboolean);
 
 void img_new_slideshow(GtkMenuItem *item,img_window_struct *img_struct)
 {
@@ -327,7 +329,6 @@ void img_start_stop_preview(GtkButton *button, img_window_struct *img)
 	GtkTreeIter iter;
 	slide_struct *entry;
 	GtkTreeModel *model;
-	GtkWidget *tmp_image;
 
 	model = gtk_icon_view_get_model(GTK_ICON_VIEW(img->thumbnail_iconview));
 	if( ! gtk_tree_model_get_iter_first (model,&iter))
@@ -335,73 +336,65 @@ void img_start_stop_preview(GtkButton *button, img_window_struct *img)
 
 	if (img->preview_is_running)
 	{
+		/* Preview is already running */
+		
+		/* Disconnect expose event handler */
+		g_signal_handlers_disconnect_by_func(img->image_area,img_on_expose_event,img);
+		gtk_widget_set_app_paintable(img->image_area, FALSE);
+
+		/* Swap toolbar and menu icons */
+		img_swap_toolbar_images( img, TRUE );
+
+		/* Remove timeout function from main loop */
+		g_source_remove(img->source_id);
 		img->preview_is_running = FALSE;
-		if (img->source_id)
-		{
-			g_source_remove(img->source_id);
-			img->source_id = -1;
-		}
-		goto here;
+
+		/* Clean the resources used by timeout handlers */
+		g_slice_free( GtkTreeIter, img->cur_ss_iter );
+		img->cur_ss_iter = NULL;
 	}
-	tmp_image = gtk_image_new_from_stock ("gtk-media-stop",GTK_ICON_SIZE_MENU);
-	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (img->preview_menu),tmp_image);
-
-	tmp_image = gtk_image_new_from_stock ("gtk-media-stop",3);
-	gtk_widget_show(tmp_image);
-	g_object_set(img->preview_button,"icon-widget",tmp_image,NULL);
-	gtk_widget_set_tooltip_text(img->preview_button, _("Stops the preview"));
-
-	img->preview_is_running = TRUE;
-	gtk_widget_set_app_paintable(img->image_area, TRUE);
-	g_signal_connect( G_OBJECT(img->image_area), "expose-event",G_CALLBACK(img_on_expose_event),img);
-
-	/* Create an empty pixbuf */
-	img->pixbuf1 = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, (img->viewport)->allocation.width, (img->viewport)->allocation.height);
-	gdk_pixbuf_fill(img->pixbuf1,0xffffffff);
-
-	/* Load the first image in the pixbuf */
-	gtk_tree_model_get(model, &iter,1,&entry,-1);
-	img->pixbuf2 = img_scale_pixbuf(img,entry->filename);
-
-	img->source_id = g_timeout_add(15,(GSourceFunc)img_time_handler,img);
-	img->current_slide = entry;
-	img_idle_function(img);
-
-	while (gtk_tree_model_iter_next(model,&iter))
+	else
 	{
-		if (img->preview_is_running == FALSE)
-			break;
+		/* Start the preview */
 
-		if (img->source_id == 0)
-			img->source_id = g_timeout_add(15,(GSourceFunc)img_time_handler,img);
-
-		gtk_widget_queue_draw(img->image_area);
+		/* Replace button and menu images */
+		img_swap_toolbar_images( img, FALSE );
+		
+		/* Connect expose event to handler */
+		gtk_widget_set_app_paintable(img->image_area, TRUE);
+		g_signal_connect( G_OBJECT(img->image_area), "expose-event",G_CALLBACK(img_on_expose_event),img);
+		
+		/* Create an empty pixbuf - starting white image */
+		img->pixbuf1 = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8,(img->viewport)->allocation.width,(img->viewport)->allocation.height);
+		gdk_pixbuf_fill(img->pixbuf1,0xffffffff);
+		
+		/* Load the first image in the pixbuf */
 		gtk_tree_model_get(model, &iter,1,&entry,-1);
-
-		g_object_unref(img->pixbuf1);
-		img->pixbuf1 = img->pixbuf2;
-
 		img->pixbuf2 = img_scale_pixbuf(img,entry->filename);
+		
+		/* Add transition timeout function */
+		img->preview_is_running = TRUE;
 		img->current_slide = entry;
-		img_idle_function(img);
+		img->progress = 0;
+		img->source_id = g_timeout_add(TRANSITION_TIMEOUT,(GSourceFunc)img_transition_timeout,img);
 	}
-here:
-	g_signal_handlers_disconnect_by_func(img->image_area,img_on_expose_event,NULL);
-	img->preview_is_running = FALSE;
-	gtk_widget_set_app_paintable(img->image_area, FALSE);
-	tmp_image = gtk_image_new_from_stock ("gtk-media-play",GTK_ICON_SIZE_MENU);
-	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (img->preview_menu),tmp_image);
 
-	tmp_image = gtk_image_new_from_stock ("gtk-media-play",3);
-	gtk_widget_show(tmp_image);
-	g_object_set(img->preview_button,"icon-widget",tmp_image,NULL);
-	gtk_widget_set_tooltip_text(img->preview_button, _("Starts the preview"));
+	return;
 }
 
 static gboolean img_on_expose_event(GtkWidget *widget,GdkEventExpose *event,img_window_struct *img)
 {
+	/* This is a connector for plug-in provided drawing function. */
+	/*if( img->current_slide->render )
+		img->current_slide->render( widget->window, img->pixbuf1,
+									img->pixbuf2, img->progress );
+	return( FALSE );*/
+
+	/* REMOVE THIS FROM FINAL VERSION, SINCE TRANSITIONS COME FROM PLUGINS */
 	cairo_t *cr;
-	gint offset_x,offset_y;
+	gint     offset_x,offset_y;
+	gdouble  radius = 512;
+
 
 	offset_x = ((img->image_area)->allocation.width  - gdk_pixbuf_get_width (img->pixbuf1)) / 2;
 	offset_y = ((img->image_area)->allocation.height - gdk_pixbuf_get_height(img->pixbuf1)) / 2;
@@ -414,26 +407,11 @@ static gboolean img_on_expose_event(GtkWidget *widget,GdkEventExpose *event,img_
 	offset_y = ((img->image_area)->allocation.height - gdk_pixbuf_get_height(img->pixbuf2)) / 2;
 	gdk_cairo_set_source_pixbuf(cr,img->pixbuf2,offset_x,offset_y);
 
-	cairo_arc(cr, gdk_pixbuf_get_width(img->pixbuf2)/2, gdk_pixbuf_get_height(img->pixbuf2)/2, radius, 0, 2 * G_PI );
+	cairo_arc(cr, gdk_pixbuf_get_width(img->pixbuf2)/2, gdk_pixbuf_get_height(img->pixbuf2)/2, radius * img->progress, 0, 2 * G_PI);
 	cairo_clip(cr);
 	cairo_paint(cr);
-
 	cairo_destroy(cr);
 	return( FALSE );
-}
-
-static gboolean img_time_handler(img_window_struct *img)
-{
-	radius += (img->current_slide)->speed;
-
-	if (radius > 450)
-	{
-		radius = 0;
-		img->source_id = 0;
-		return FALSE;
-	}
-	gtk_widget_queue_draw(img->image_area);
-	return TRUE;
 }
 
 GdkPixbuf *img_scale_pixbuf (img_window_struct *img, gchar *filename)
@@ -449,4 +427,101 @@ GdkPixbuf *img_scale_pixbuf (img_window_struct *img, gchar *filename)
 		pixbuf = gdk_pixbuf_new_from_file(filename,NULL);
 
 	return pixbuf;
+}
+
+static gboolean
+img_transition_timeout(img_window_struct *img)
+{
+	/* Increment progress variable (this is being passed as a parameter
+	 * to plug-in provided transition function). */
+	img->progress += (img->current_slide)->speed;
+
+	/* If the progress reached 1, the transition should be finished and
+	 * it's time to stop this timeout function and add sleep timeout
+	 * function to the main loop. */
+	if( img->progress > 1 )
+	{
+		img->progress = 0;
+		img->source_id = g_timeout_add( img->current_slide->duration * 1000,(GSourceFunc)img_sleep_timeout, img );
+		return( FALSE );
+	}
+
+	/* Schedule our image redraw */
+	gtk_widget_queue_draw( img->image_area );
+
+	return( TRUE );
+}
+
+static gboolean
+img_sleep_timeout(img_window_struct *img)
+{
+	GtkTreeModel *model = GTK_TREE_MODEL( img->thumbnail_model );
+
+	/* Get the first iter when we enter this function for the first time
+	 * in current preview cycle. */
+	if( ! img->cur_ss_iter )
+	{
+		img->cur_ss_iter = g_slice_new( GtkTreeIter );
+		gtk_tree_model_get_iter_first( model, img->cur_ss_iter );
+	}
+
+	/* Move to the next image in the model. The first image is never
+	 * reached, but that's OK since we already have first image in
+	 * img->pixbuf2 from initialization in slideshow start handler. If
+	 * the function returns FALSE, we reached the end of the model and
+	 * will not call another img_transition function again. */
+	if( gtk_tree_model_iter_next( model, img->cur_ss_iter ) )
+	{
+		g_object_unref( G_OBJECT( img->pixbuf1 ) );
+		img->pixbuf1 = img->pixbuf2;
+		gtk_tree_model_get( model, img->cur_ss_iter, 1, &img->current_slide, -1 );
+		img->pixbuf2 = img_scale_pixbuf( img, img->current_slide->filename );
+
+		img->source_id = g_timeout_add( TRANSITION_TIMEOUT,(GSourceFunc)img_transition_timeout,img );
+	}
+	else
+	{
+		/* Disconnect expose event handler */
+		g_signal_handlers_disconnect_by_func(img->image_area,img_on_expose_event,img);
+		gtk_widget_set_app_paintable(img->image_area, FALSE);
+
+		/* Swap toolbar and menu icons */
+		img_swap_toolbar_images( img, TRUE );
+
+		/* Remove timeout function from main loop */
+		g_source_remove(img->source_id);
+		img->preview_is_running = FALSE;
+
+		/* Clean the resources used by timeout handlers */
+		g_slice_free( GtkTreeIter, img->cur_ss_iter );
+		img->cur_ss_iter = NULL;
+	}
+
+	return( FALSE );
+}
+
+static void img_swap_toolbar_images( img_window_struct *img,gboolean flag )
+{
+	GtkWidget *tmp_image;
+
+	if( flag )
+	{
+		tmp_image = gtk_image_new_from_stock (GTK_STOCK_MEDIA_PLAY,GTK_ICON_SIZE_MENU);
+		gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (img->preview_menu),tmp_image);
+		
+		tmp_image = gtk_image_new_from_stock (GTK_STOCK_MEDIA_PLAY,GTK_ICON_SIZE_LARGE_TOOLBAR);
+		gtk_widget_show(tmp_image);
+		g_object_set(img->preview_button,"icon-widget",tmp_image,NULL);
+		gtk_widget_set_tooltip_text(img->preview_button,_("Starts the preview"));
+	}
+	else
+	{
+		tmp_image = gtk_image_new_from_stock (GTK_STOCK_MEDIA_STOP,GTK_ICON_SIZE_MENU);
+		gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (img->preview_menu),tmp_image);
+		
+		tmp_image = gtk_image_new_from_stock (GTK_STOCK_MEDIA_STOP,GTK_ICON_SIZE_LARGE_TOOLBAR);
+		gtk_widget_show(tmp_image);
+		g_object_set(img->preview_button,"icon-widget",tmp_image,NULL);
+		gtk_widget_set_tooltip_text(img->preview_button,_("Stops the preview"));
+	}
 }

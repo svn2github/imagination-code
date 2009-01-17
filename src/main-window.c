@@ -120,8 +120,6 @@ img_window_struct *img_create_window (void)
 	GtkCellRenderer *pixbuf_cell;
 	GtkTreeModel *model;
 	GtkIconSize tmp_toolbar_icon_size;
-	GtkTreeIter iter;
-	gint i;
 	
 	accel_group = gtk_accel_group_new ();
 
@@ -582,7 +580,7 @@ static void img_iconview_selection_changed(GtkIconView *iconview, img_window_str
 static void img_combo_box_speed_changed (GtkComboBox *combo, img_window_struct *img)
 {
 	gint speed;
-	gint duration;
+	gdouble duration;
 	GList *selected;
 	GtkTreeIter iter;
 	GtkTreeModel *model;
