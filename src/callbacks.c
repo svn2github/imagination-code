@@ -30,6 +30,7 @@ static gboolean img_on_expose_event(GtkWidget *,GdkEventExpose *,img_window_stru
 static gboolean img_transition_timeout(img_window_struct *);
 static gboolean img_sleep_timeout(img_window_struct *);
 static void img_swap_toolbar_images( img_window_struct *, gboolean);
+static void img_clean_after_preview(img_window_struct *img);
 
 void img_new_slideshow(GtkMenuItem *item,img_window_struct *img_struct)
 {
@@ -337,21 +338,13 @@ void img_start_stop_preview(GtkButton *button, img_window_struct *img)
 	if (img->preview_is_running)
 	{
 		/* Preview is already running */
-		
-		/* Disconnect expose event handler */
-		g_signal_handlers_disconnect_by_func(img->image_area,img_on_expose_event,img);
-		gtk_widget_set_app_paintable(img->image_area, FALSE);
-
-		/* Swap toolbar and menu icons */
-		img_swap_toolbar_images( img, TRUE );
 
 		/* Remove timeout function from main loop */
 		g_source_remove(img->source_id);
-		img->preview_is_running = FALSE;
 
-		/* Clean the resources used by timeout handlers */
-		g_slice_free( GtkTreeIter, img->cur_ss_iter );
-		img->cur_ss_iter = NULL;
+		/* Clean resources used by preview and prepare application for
+		 * next preview. */
+		img_clean_after_preview(img);
 	}
 	else
 	{
@@ -359,6 +352,12 @@ void img_start_stop_preview(GtkButton *button, img_window_struct *img)
 
 		/* Replace button and menu images */
 		img_swap_toolbar_images( img, FALSE );
+
+		/* Store currently displayed image and then clear image_area.
+		 * If the image is not cleared, the transition from*/
+		gtk_image_get_pixbuf(GTK_IMAGE(img->image_area));
+		g_object_ref(G_OBJECT(img->slide_pixbuf));
+		gtk_image_clear(GTK_IMAGE(img->image_area));
 		
 		/* Connect expose event to handler */
 		gtk_widget_set_app_paintable(img->image_area, TRUE);
@@ -481,20 +480,9 @@ img_sleep_timeout(img_window_struct *img)
 	}
 	else
 	{
-		/* Disconnect expose event handler */
-		g_signal_handlers_disconnect_by_func(img->image_area,img_on_expose_event,img);
-		gtk_widget_set_app_paintable(img->image_area, FALSE);
-
-		/* Swap toolbar and menu icons */
-		img_swap_toolbar_images( img, TRUE );
-
-		/* Remove timeout function from main loop */
-		g_source_remove(img->source_id);
-		img->preview_is_running = FALSE;
-
-		/* Clean the resources used by timeout handlers */
-		g_slice_free( GtkTreeIter, img->cur_ss_iter );
-		img->cur_ss_iter = NULL;
+		/* Clean resources used in preview and prepare application for
+		 * next preview. */
+		img_clean_after_preview(img);
 	}
 
 	return( FALSE );
@@ -524,4 +512,27 @@ static void img_swap_toolbar_images( img_window_struct *img,gboolean flag )
 		g_object_set(img->preview_button,"icon-widget",tmp_image,NULL);
 		gtk_widget_set_tooltip_text(img->preview_button,_("Stops the preview"));
 	}
+}
+
+static void img_clean_after_preview(img_window_struct *img)
+{
+	/* Disconnect expose event handler */
+	g_signal_handlers_disconnect_by_func(img->image_area,img_on_expose_event,img);
+	gtk_widget_set_app_paintable(img->image_area, FALSE);
+
+	/* Restore image that was used before preview */
+	gtk_image_set_from_pixbuf(GTK_IMAGE(img->image_area), img->slide_pixbuf);
+	g_object_unref(G_OBJECT(img->slide_pixbuf));
+
+	/* Swap toolbar and menu icons */
+	img_swap_toolbar_images( img, TRUE );
+
+	/* Indicate that preview is not running */
+	img->preview_is_running = FALSE;
+
+	/* Clean the resources used by timeout handlers */
+	g_slice_free( GtkTreeIter, img->cur_ss_iter );
+	img->cur_ss_iter = NULL;
+
+	return;
 }
