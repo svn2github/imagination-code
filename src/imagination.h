@@ -20,8 +20,6 @@
 #ifndef __IMAGINATION_H__
 #define __IMAGINATION_H__
 
-#include "transition_data.h"
-
 #include <stdlib.h>
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
@@ -33,6 +31,14 @@
 #define	NORMAL	0.01
 #define	SLOW	0.002
 
+typedef struct _plugin plugin;
+
+struct _plugin
+{
+	const gchar	*name;			/* The name of the transition */
+	gpointer	address;		/* The mem address of the routine */
+};
+
 typedef struct _slide_struct slide_struct;
 
 struct _slide_struct
@@ -42,7 +48,7 @@ struct _slide_struct
 	gdouble	speed;
 	gchar	*resolution;
 	gchar	*type;
-	trans_type transition_type;
+	gpointer render;
 };
 
 typedef struct _img_window_struct img_window_struct;
@@ -78,6 +84,8 @@ struct _img_window_struct
   	slide_struct *current_slide;
   	gchar		*current_dir;
   	gchar		*slideshow_title;
+  	GtkTreeIter *cur_ss_iter;
+  	GList		*transition_list;
   	gint		slides_nr;
   	gint		slideshow_height;
   	gint		total_secs;
@@ -86,6 +94,6 @@ struct _img_window_struct
   	guint		source_id;
   	gboolean	preview_is_running;
 	gdouble     progress;
-	GtkTreeIter *cur_ss_iter;
 };
+
 #endif

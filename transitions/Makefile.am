@@ -1,28 +1,24 @@
 # Adapted from Geany's plugins/Makefile.am, thanks
 
-EXTRA_DIST = \
-	macros.h
-
 plugindir = $(libdir)/imagination
 
 plugins_includedir = $(includedir)/imagination/
-plugins_include_HEADERS = macros.h
 
-fade_la_LDFLAGS  = -module -avoid-version
+circle_la_LDFLAGS  = -module -avoid-version
 
 # Plugins to be installed
 plugin_LTLIBRARIES = \
-	fade.la 
+	circle.la 
 
-fade_la_SOURCES  = fade.c
+circle_la_SOURCES  = circle.c
 
 # instead of linking against all in $(GTK_LIBS), we link only against needed libs
-fade_la_LIBADD  = $(GTK_LIBS)
+circle_la_LIBADD  = $(PACKAGE_LIBS)
 
 AM_CPPFLAGS = \
 	-DDATADIR=\"$(datadir)\" \
 	-I$(top_srcdir)/src \
-	$(GTK_CFLAGS) \
+	$(PACKAGE_CFLAGS) \
 	$(PLUGIN_CFLAGS)
 
 #

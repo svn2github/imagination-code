@@ -383,32 +383,10 @@ void img_start_stop_preview(GtkButton *button, img_window_struct *img)
 
 static gboolean img_on_expose_event(GtkWidget *widget,GdkEventExpose *event,img_window_struct *img)
 {
-	/* This is a connector for plug-in provided drawing function. */
-	/*if( img->current_slide->render )
-		img->current_slide->render( widget->window, img->pixbuf1,img->pixbuf2, img->progress );
-	return( FALSE );*/
 
-	/* REMOVE THIS FROM FINAL VERSION, SINCE TRANSITIONS COME FROM PLUGINS */
-	cairo_t *cr;
-	gint     offset_x,offset_y;
-	gdouble  radius = 512;
+	if ((img->current_slide)->render)
+		(img->current_slide)->render (widget->window, img);
 
-
-	offset_x = ((img->image_area)->allocation.width  - gdk_pixbuf_get_width (img->pixbuf1)) / 2;
-	offset_y = ((img->image_area)->allocation.height - gdk_pixbuf_get_height(img->pixbuf1)) / 2;
-
-	cr = gdk_cairo_create(widget->window);
-	gdk_cairo_set_source_pixbuf(cr,img->pixbuf1,offset_x,offset_y);
-	cairo_paint(cr);
-
-	offset_x = ((img->image_area)->allocation.width  - gdk_pixbuf_get_width (img->pixbuf2)) / 2;
-	offset_y = ((img->image_area)->allocation.height - gdk_pixbuf_get_height(img->pixbuf2)) / 2;
-	gdk_cairo_set_source_pixbuf(cr,img->pixbuf2,offset_x,offset_y);
-
-	cairo_arc(cr, gdk_pixbuf_get_width(img->pixbuf2)/2, gdk_pixbuf_get_height(img->pixbuf2)/2, radius * img->progress, 0, 2 * G_PI);
-	cairo_clip(cr);
-	cairo_paint(cr);
-	cairo_destroy(cr);
 	return( FALSE );
 }
 
@@ -427,8 +405,7 @@ GdkPixbuf *img_scale_pixbuf (img_window_struct *img, gchar *filename)
 	return pixbuf;
 }
 
-static gboolean
-img_transition_timeout(img_window_struct *img)
+static gboolean img_transition_timeout(img_window_struct *img)
 {
 	/* Increment progress variable (this is being passed as a parameter
 	 * to plug-in provided transition function). */
@@ -450,8 +427,7 @@ img_transition_timeout(img_window_struct *img)
 	return( TRUE );
 }
 
-static gboolean
-img_sleep_timeout(img_window_struct *img)
+static gboolean img_sleep_timeout(img_window_struct *img)
 {
 	GtkTreeModel *model = GTK_TREE_MODEL( img->thumbnail_model );
 

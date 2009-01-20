@@ -104,7 +104,11 @@ void img_set_statusbar_message(img_window_struct *img_struct, gint selected)
 	gchar *message = NULL;
 
 	if (img_struct->slides_nr == 0)
-		gtk_statusbar_push((GtkStatusbar*)img_struct->statusbar,img_struct->context_id,_("Welcome to Imagination " VERSION));
+	{
+		message = g_strdup_printf(_("Welcome to Imagination - %d transitions loaded."),img_struct->nr_transitions_loaded);
+		gtk_statusbar_push((GtkStatusbar*)img_struct->statusbar,img_struct->context_id,message);
+		g_free(message);
+	}
 	else if (selected)
 	{
 		message = g_strdup_printf(_("%d slides selected"),selected);
@@ -117,4 +121,42 @@ void img_set_statusbar_message(img_window_struct *img_struct, gint selected)
 		gtk_statusbar_push((GtkStatusbar*)img_struct->statusbar,img_struct->context_id,message);
 		g_free(message);
 	}
+}
+
+void img_load_available_transitions(img_window_struct *img)
+{
+	GDir *dir;
+	const gchar *transition_name;
+	gchar *path = NULL, *fname = NULL;
+	GError **error = NULL;
+	GModule *module;
+	plugin *transition;
+
+	path = g_strconcat(PACKAGE_LIB_DIR,"/imagination",NULL);
+	dir = g_dir_open(path, 0, error);
+	if (dir == NULL)
+	{
+		g_free(path);
+		img->nr_transitions_loaded = 0;
+		return;
+	}
+	while (1)
+	{
+		transition_name = g_dir_read_name(dir);
+		if (transition_name == NULL)
+			break;
+
+		fname = g_build_filename(path,transition_name, NULL);
+		module = g_module_open(fname, G_MODULE_BIND_LOCAL);
+		if (module)
+		{
+			transition = g_new0(plugin,1);
+			transition->name = g_module_name(module);
+			g_module_symbol(module, "img_transition_render", &transition->address);
+			img->transition_list = g_list_append(img->transition_list,transition);
+			img->nr_transitions_loaded++;
+		}
+		g_free(fname);
+	}
+	g_dir_close(dir);
 }

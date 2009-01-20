@@ -40,6 +40,10 @@ int main (int argc, char *argv[])
 	gtk_init (&argc, &argv);
 
 	img_window = img_create_window();
+
+	/* Load the transitions as plugins with GModule */
+	img_load_available_transitions(img_window);
+
 	gtk_widget_show (img_window->imagination_window);
 	img_set_statusbar_message(img_window,0);
 

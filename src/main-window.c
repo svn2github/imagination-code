@@ -365,7 +365,7 @@ img_window_struct *img_create_window (void)
 	img_struct->transition_type = _gtk_combo_box_new_text(TRUE);
 	model = gtk_combo_box_get_model(GTK_COMBO_BOX(img_struct->transition_type));
 	/* Populate the combo box with the data from the loaded transitions plugins
-	for(i = 0; i < MAX_TRANS; i++)
+	for(i = 0; i < img_struct->nr_transitions_loaded; i++)
 	{
 		gtk_list_store_append(GTK_LIST_STORE(model), &iter);
 		gtk_list_store_set(GTK_LIST_STORE(model), &iter,0, name,1,pointer,-1);
