@@ -675,10 +675,14 @@ static void img_goto_slide(GtkMenuItem *item, img_window_struct *img_struct)
 	gtk_container_add(GTK_CONTAINER (vbox), text_label);
 	gtk_container_add(GTK_CONTAINER (vbox), slide_number_entry);
 	gtk_widget_show_all(img_struct->goto_window);
-	g_signal_connect(G_OBJECT (img_struct->goto_window), "delete-event", G_CALLBACK(gtk_widget_destroy), NULL);	
+
 	response = gtk_dialog_run(GTK_DIALOG (img_struct->goto_window));
-	if (response == GTK_RESPONSE_ACCEPT)
-		img_goto_line_entry_activate(GTK_ENTRY (slide_number_entry),img_struct);
+	if (response == GTK_RESPONSE_CANCEL || response == GTK_RESPONSE_DELETE_EVENT)
+	{
+		gtk_widget_destroy(img_struct->goto_window);
+		return;
+	}
+	img_goto_line_entry_activate(GTK_ENTRY (slide_number_entry),img_struct);
 }
 
 static void img_goto_line_entry_activate(GtkEntry *entry, img_window_struct *img)

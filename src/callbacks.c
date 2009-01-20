@@ -26,7 +26,6 @@
 static void img_file_chooser_add_preview(img_window_struct *);
 static void img_update_preview_file_chooser(GtkFileChooser *,img_window_struct *);
 static gboolean img_on_expose_event(GtkWidget *,GdkEventExpose *,img_window_struct *);
-/*static gboolean img_time_handler(img_window_struct *);*/
 static gboolean img_transition_timeout(img_window_struct *);
 static gboolean img_sleep_timeout(img_window_struct *);
 static void img_swap_toolbar_images( img_window_struct *, gboolean);
@@ -259,7 +258,7 @@ void img_delete_selected_slides(GtkMenuItem *item,img_window_struct *img_struct)
 void img_show_about_dialog (GtkMenuItem *item,img_window_struct *img_struct)
 {
 	static GtkWidget *about = NULL;
-    const char *authors[] = {"\nMain developer:\nGiuseppe Torelli <colossus73@gmail.com>\n",NULL};
+    const char *authors[] = {"\nMain developer:\nGiuseppe Torelli <colossus73@gmail.com>\n\nCode improvements and patches:\nTadej Borovšak",NULL};
     const char *documenters[] = {NULL};
 
 	if (about == NULL)
@@ -355,8 +354,9 @@ void img_start_stop_preview(GtkButton *button, img_window_struct *img)
 
 		/* Store currently displayed image and then clear image_area.
 		 * If the image is not cleared, the transition from*/
-		gtk_image_get_pixbuf(GTK_IMAGE(img->image_area));
-		g_object_ref(G_OBJECT(img->slide_pixbuf));
+		img->slide_pixbuf = gtk_image_get_pixbuf(GTK_IMAGE(img->image_area));
+		if (img->slide_pixbuf)
+			g_object_ref(G_OBJECT(img->slide_pixbuf));
 		gtk_image_clear(GTK_IMAGE(img->image_area));
 		
 		/* Connect expose event to handler */
@@ -385,8 +385,7 @@ static gboolean img_on_expose_event(GtkWidget *widget,GdkEventExpose *event,img_
 {
 	/* This is a connector for plug-in provided drawing function. */
 	/*if( img->current_slide->render )
-		img->current_slide->render( widget->window, img->pixbuf1,
-									img->pixbuf2, img->progress );
+		img->current_slide->render( widget->window, img->pixbuf1,img->pixbuf2, img->progress );
 	return( FALSE );*/
 
 	/* REMOVE THIS FROM FINAL VERSION, SINCE TRANSITIONS COME FROM PLUGINS */
@@ -521,8 +520,11 @@ static void img_clean_after_preview(img_window_struct *img)
 	gtk_widget_set_app_paintable(img->image_area, FALSE);
 
 	/* Restore image that was used before preview */
-	gtk_image_set_from_pixbuf(GTK_IMAGE(img->image_area), img->slide_pixbuf);
-	g_object_unref(G_OBJECT(img->slide_pixbuf));
+	if (img->slide_pixbuf)
+	{	
+		gtk_image_set_from_pixbuf(GTK_IMAGE(img->image_area), img->slide_pixbuf);
+		g_object_unref(G_OBJECT(img->slide_pixbuf));
+	}
 
 	/* Swap toolbar and menu icons */
 	img_swap_toolbar_images( img, TRUE );
