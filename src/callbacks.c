@@ -383,7 +383,6 @@ void img_start_stop_preview(GtkButton *button, img_window_struct *img)
 
 static gboolean img_on_expose_event(GtkWidget *widget,GdkEventExpose *event,img_window_struct *img)
 {
-
 	if ((img->current_slide)->render)
 		(img->current_slide)->render (widget->window, img->pixbuf1,img->pixbuf2,img->progress);
 

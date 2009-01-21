@@ -48,7 +48,7 @@ struct _slide_struct
 	gdouble	speed;
 	gchar	*resolution;
 	gchar	*type;
-	void (*render) (GdkDrawable*, GdkPixbuf*, GdkPixbuf*, gdouble);
+	void	(*render) (GdkDrawable*, GdkPixbuf*, GdkPixbuf*, gdouble);
 };
 
 typedef struct _img_window_struct img_window_struct;

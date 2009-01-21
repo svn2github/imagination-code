@@ -168,7 +168,7 @@ void img_load_available_transitions(img_window_struct *img)
 			g_module_symbol(module, "img_transition_render", &address);
 			/* Fill the model of the combo box */
 			gtk_list_store_append(GTK_LIST_STORE(model), &iter);
-			gtk_list_store_set(GTK_LIST_STORE(model), &iter,0, name, 1, &address, -1);
+			gtk_list_store_set(GTK_LIST_STORE(model), &iter,0, name, 1, address, -1);
 			img->plugin_list = g_slist_append(img->plugin_list, module);
 			img->nr_transitions_loaded++;
 		}
