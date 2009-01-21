@@ -427,7 +427,7 @@ static gboolean img_transition_timeout(img_window_struct *img)
 	/* If the progress reached 1, the transition should be finished and
 	 * it's time to stop this timeout function and add sleep timeout
 	 * function to the main loop. */
-	if( img->progress > 1 )
+	if( img->progress > (1 + img->current_slide->speed / 2) )
 	{
 		img->progress = 0;
 		img->source_id = g_timeout_add( img->current_slide->duration * 1000,(GSourceFunc)img_sleep_timeout, img );
