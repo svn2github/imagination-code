@@ -4,20 +4,24 @@ plugindir = $(libdir)/imagination
 
 plugins_includedir = $(includedir)/imagination/
 
-circle_la_LDFLAGS	= -module -avoid-version
+circle_la_LDFLAGS		= -module -avoid-version
 blind_down_la_LDFLAGS	= -module -avoid-version
+blind_up_la_LDFLAGS		= -module -avoid-version
 
 # Plugins to be installed
 plugin_LTLIBRARIES = \
 	circle.la	\
-	blind_down.la
+	blind_down.la \
+	blind_up.la
 
-circle_la_SOURCES	= circle.c
+circle_la_SOURCES		= circle.c
 blind_down_la_SOURCES	= blind_down.c
+blind_up_la_SOURCES	= blind_up.c
 
 # instead of linking against all in $(GTK_LIBS), we link only against needed libs
 circle_la_LIBADD	= $(PACKAGE_LIBS)
-blind_down_la_LIBADD 	= $(PACKAGE_LIBS)
+blind_down_la_LIBADD = $(PACKAGE_LIBS)
+blind_up_la_LIBADD 	= $(PACKAGE_LIBS)
 
 AM_CPPFLAGS = \
 	-DDATADIR=\"$(datadir)\" \

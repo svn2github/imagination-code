@@ -522,7 +522,10 @@ static void img_iconview_selection_changed(GtkIconView *iconview, img_window_str
 	gtk_tree_path_free(path);
 	gtk_tree_model_get(model,&iter,1,&info_slide,-1);
 
-	/* Set the speed of the transition */
+	/* Set the transition type */
+	
+
+	/* Set the transition speed */
 	if (info_slide->speed == FAST)
 		dummy = 0;
 	else if (info_slide->speed == NORMAL)
@@ -531,7 +534,7 @@ static void img_iconview_selection_changed(GtkIconView *iconview, img_window_str
 		dummy = 2;
 	gtk_combo_box_set_active(GTK_COMBO_BOX(img->trans_duration),dummy);
 
-	/* Set the duration of the transition */
+	/* Set the transition duration */
 	gtk_spin_button_set_value((GtkSpinButton*)img->duration, info_slide->duration);
 
 	gtk_label_set_text(GTK_LABEL (img->slide_selected_data),selected_slide);
