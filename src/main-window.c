@@ -25,6 +25,7 @@
 #include "callbacks.h"
 
 static void img_iconview_selection_changed (GtkIconView *, img_window_struct *);
+static gboolean img_set_current_transition_type_iter(GtkTreeModel *,GtkTreePath *,GtkTreeIter *,gpointer );
 static void img_combo_box_transition_type_changed (GtkComboBox *, img_window_struct *);
 static void img_combo_box_speed_changed (GtkComboBox *,  img_window_struct *);
 static void img_spinbutton_value_changed (GtkSpinButton *, img_window_struct *);
@@ -523,7 +524,8 @@ static void img_iconview_selection_changed(GtkIconView *iconview, img_window_str
 	gtk_tree_model_get(model,&iter,1,&info_slide,-1);
 
 	/* Set the transition type */
-	
+	model = gtk_combo_box_get_model(GTK_COMBO_BOX(img->transition_type));
+	gtk_tree_model_foreach(GTK_TREE_MODEL(model),(GtkTreeModelForeachFunc)img_set_current_transition_type_iter,(gpointer)info_slide->render);
 
 	/* Set the transition speed */
 	if (info_slide->speed == FAST)
@@ -549,6 +551,23 @@ static void img_iconview_selection_changed(GtkIconView *iconview, img_window_str
 	img->slide_pixbuf = img_scale_pixbuf(img,info_slide->filename);
 	gtk_image_set_from_pixbuf(GTK_IMAGE (img->image_area),img->slide_pixbuf);
 	g_object_unref(img->slide_pixbuf);
+}
+
+static gboolean img_set_current_transition_type_iter(GtkTreeModel *model,GtkTreePath *path,GtkTreeIter *iter,gpointer address)
+{
+	gpointer address2;
+	gboolean value;
+
+	gtk_tree_model_get (model,iter,1,&address2,-1);
+	if (address == address2)
+	{
+		g_print ("Match\n");
+		value = TRUE;
+	}
+	else
+		value = FALSE;
+
+	return value;
 }
 
 static void img_combo_box_transition_type_changed (GtkComboBox *combo, img_window_struct *img)

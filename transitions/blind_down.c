@@ -41,7 +41,7 @@ void img_transition_render(GdkDrawable *window, GdkPixbuf *image_from, GdkPixbuf
 	offset_y = (height - gdk_pixbuf_get_height(image_to)) / 2;
 	gdk_cairo_set_source_pixbuf(cr,image_to,offset_x,offset_y);
 
-	cairo_rectangle(cr, 0, 0, gdk_pixbuf_get_width(image_to), height * progress);
+	cairo_rectangle(cr, 0, 0, width, height * progress);
 	cairo_clip(cr);
 	cairo_paint(cr);
 	cairo_destroy(cr);

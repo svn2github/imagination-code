@@ -21,13 +21,13 @@
 
 void img_transition_set_name(gchar **name)
 {
-	*name = "Blind Up";
+	*name = "Blind Left";
 }
 
 void img_transition_render(GdkDrawable *window, GdkPixbuf *image_from, GdkPixbuf *image_to, gdouble progress)
 {
 	cairo_t *cr;
-	gint offset_x,offset_y, width, height;
+	gint     offset_x,offset_y, width, height;
 
 	gdk_drawable_get_size(window, &width, &height);
 	offset_x = (width  - gdk_pixbuf_get_width (image_from)) / 2;
@@ -41,7 +41,7 @@ void img_transition_render(GdkDrawable *window, GdkPixbuf *image_from, GdkPixbuf
 	offset_y = (height - gdk_pixbuf_get_height(image_to)) / 2;
 	gdk_cairo_set_source_pixbuf(cr,image_to,offset_x,offset_y);
 
-	cairo_rectangle(cr, 0, height * (1 - progress),	width, height * progress);
+	cairo_rectangle(cr, gdk_pixbuf_get_width (image_to) * (1 - progress),0 , gdk_pixbuf_get_width (image_to), height);
 	cairo_clip(cr);
 	cairo_paint(cr);
 	cairo_destroy(cr);
