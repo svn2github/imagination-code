@@ -35,6 +35,5 @@ typedef enum
 } Img_Thumbnail_Selection_Mode;
 */
 
-void img_set_window_title(img_window_struct *,gchar *);
 img_window_struct *img_create_window(void);
 #endif

@@ -34,27 +34,6 @@ static void img_unselect_all_thumbnails(GtkMenuItem *, img_window_struct *);
 static void img_goto_slide(GtkMenuItem *, img_window_struct *);
 static void img_goto_line_entry_activate(GtkEntry *, img_window_struct *);
 
-/* I replaced all explicit pointer casts with gtk provided macros for
- * more safety. Also the stock item names are replaced with macros. */
-
-/* I edited this function to work as it was intended to. When called
- * with NULL as a second parameter, window is titled with default text.
- * If the second parameter is not NULL, the window title is set to text
- * passed in. */
-void img_set_window_title(img_window_struct *img,gchar *text)
-{
-	gchar *title = NULL;
-
-	if (text == NULL)
-	{
-		title = g_strconcat("Imagination " VERSION,NULL);
-		gtk_window_set_title (GTK_WINDOW (img->imagination_window), title);
-		g_free(title);
-	}
-	else
-		gtk_window_set_title (GTK_WINDOW (img->imagination_window), text);
-}
-
 img_window_struct *img_create_window (void)
 {
 	img_window_struct *img_struct = NULL;

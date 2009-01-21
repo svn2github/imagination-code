@@ -24,6 +24,7 @@
 #include "main-window.h"
 #include "new_slideshow.h"
 
+void img_set_window_title(img_window_struct *,gchar *);
 void img_new_slideshow(GtkMenuItem *,img_window_struct *);
 void img_add_slides_thumbnails(GtkMenuItem *,img_window_struct *);
 GSList *img_import_slides_file_chooser(img_window_struct *);

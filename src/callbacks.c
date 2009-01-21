@@ -31,6 +31,20 @@ static gboolean img_sleep_timeout(img_window_struct *);
 static void img_swap_toolbar_images( img_window_struct *, gboolean);
 static void img_clean_after_preview(img_window_struct *img);
 
+void img_set_window_title(img_window_struct *img, gchar *text)
+{
+	gchar *title = NULL;
+
+	if (text == NULL)
+	{
+		title = g_strconcat("Imagination " VERSION,NULL);
+		gtk_window_set_title (GTK_WINDOW (img->imagination_window), title);
+		g_free(title);
+	}
+	else
+		gtk_window_set_title (GTK_WINDOW (img->imagination_window), text);
+}
+
 void img_new_slideshow(GtkMenuItem *item,img_window_struct *img_struct)
 {
 	img_new_slideshow_settings_dialog(img_struct);
