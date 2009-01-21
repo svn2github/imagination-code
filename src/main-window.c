@@ -25,6 +25,7 @@
 #include "callbacks.h"
 
 static void img_iconview_selection_changed (GtkIconView *, img_window_struct *);
+static void img_combo_box_transition_type_changed (GtkComboBox *, img_window_struct *);
 static void img_combo_box_speed_changed (GtkComboBox *,  img_window_struct *);
 static void img_spinbutton_value_changed (GtkSpinButton *, img_window_struct *);
 static void img_quit_menu(GtkMenuItem *, img_window_struct *);
@@ -118,9 +119,8 @@ img_window_struct *img_create_window (void)
 	GtkAccelGroup *accel_group;
 	GdkColor background_color = {0, 65535, 65535, 65535};
 	GtkCellRenderer *pixbuf_cell;
-	GtkTreeModel *model;
 	GtkIconSize tmp_toolbar_icon_size;
-	
+
 	accel_group = gtk_accel_group_new ();
 
 	img_struct = g_new0(img_window_struct,1);
@@ -363,17 +363,9 @@ img_window_struct *img_create_window (void)
 	gtk_misc_set_alignment (GTK_MISC (transition_label), 0, -1);
 
 	img_struct->transition_type = _gtk_combo_box_new_text(TRUE);
-	model = gtk_combo_box_get_model(GTK_COMBO_BOX(img_struct->transition_type));
-	/* Populate the combo box with the data from the loaded transitions plugins
-	for(i = 0; i < img_struct->nr_transitions_loaded; i++)
-	{
-		gtk_list_store_append(GTK_LIST_STORE(model), &iter);
-		gtk_list_store_set(GTK_LIST_STORE(model), &iter,0, name,1,pointer,-1);
-	}
-	gtk_combo_box_set_active(GTK_COMBO_BOX(img_struct->transition_type),0);
-	*/
 	gtk_widget_set_sensitive(img_struct->transition_type,FALSE);
 	gtk_box_pack_start (GTK_BOX (vbox_info_slide), img_struct->transition_type, FALSE, TRUE, 0);
+	g_signal_connect (G_OBJECT (img_struct->transition_type),"changed",G_CALLBACK (img_combo_box_transition_type_changed),img_struct);
 
 	/* Transition duration */
 	hbox_effect_duration = gtk_hbox_new (FALSE, 0);
@@ -575,6 +567,35 @@ static void img_iconview_selection_changed(GtkIconView *iconview, img_window_str
 	img->slide_pixbuf = img_scale_pixbuf(img,info_slide->filename);
 	gtk_image_set_from_pixbuf(GTK_IMAGE (img->image_area),img->slide_pixbuf);
 	g_object_unref(img->slide_pixbuf);
+}
+
+static void img_combo_box_transition_type_changed (GtkComboBox *combo, img_window_struct *img)
+{
+	GList *selected;
+	GtkTreeIter iter;
+	GtkTreeModel *model;
+	gpointer address;
+	slide_struct *info_slide;
+
+	/* Get the address of the transition function stored in the model of the combo box*/
+	model = gtk_combo_box_get_model(combo);
+	gtk_combo_box_get_active_iter(combo,&iter);
+	gtk_tree_model_get(model,&iter,1,&address,-1);
+
+	model = gtk_icon_view_get_model(GTK_ICON_VIEW (img->thumbnail_iconview));
+	selected = gtk_icon_view_get_selected_items(GTK_ICON_VIEW (img->thumbnail_iconview));
+	if (selected == NULL)
+		return;
+
+	while (selected)
+	{
+		gtk_tree_model_get_iter(model, &iter,selected->data);
+		gtk_tree_model_get(model, &iter,1,&info_slide,-1);
+		info_slide->render = address;
+		selected = selected->next;
+	}
+	g_list_foreach (selected, (GFunc)gtk_tree_path_free, NULL);
+	g_list_free(selected);
 }
 
 static void img_combo_box_speed_changed (GtkComboBox *combo, img_window_struct *img)

@@ -86,7 +86,7 @@ GtkWidget *_gtk_combo_box_new_text(gboolean pointer)
 	GtkListStore *store;
 
 	if (pointer)
-		store = gtk_list_store_new (2, G_TYPE_STRING,G_TYPE_POINTER);
+		store = gtk_list_store_new (2, G_TYPE_STRING, G_TYPE_POINTER);
 	else
 		store = gtk_list_store_new (1, G_TYPE_STRING);
 	combo_box = gtk_combo_box_new_with_model (GTK_TREE_MODEL (store));
@@ -127,12 +127,23 @@ void img_load_available_transitions(img_window_struct *img)
 {
 	GDir *dir;
 	const gchar *transition_name;
-	gchar *path = NULL, *fname = NULL;
+	gchar *path = NULL, *fname = NULL,*name;
 	GError **error = NULL;
 	GModule *module;
-	plugin *transition;
+	GtkTreeIter iter;
+	GtkTreeModel *model;
+	gpointer address;
+	void (*plugin_set_name)(gchar**);
 
-	path = g_strconcat(PACKAGE_LIB_DIR,"/imagination",NULL);
+	model = gtk_combo_box_get_model(GTK_COMBO_BOX(img->transition_type));
+	
+	/* Fill the combo box with any transition */
+	gtk_list_store_append(GTK_LIST_STORE(model), &iter);
+	gtk_list_store_set(GTK_LIST_STORE(model), &iter,0, _("None"), 1, NULL, -1);
+	gtk_combo_box_set_active(GTK_COMBO_BOX(img->transition_type), 0);
+
+	path = g_strdup("/home/gt/Projects/imagination/transitions");
+	//path = g_strconcat(PACKAGE_LIB_DIR,"/imagination",NULL);
 	dir = g_dir_open(path, 0, error);
 	if (dir == NULL)
 	{
@@ -150,10 +161,15 @@ void img_load_available_transitions(img_window_struct *img)
 		module = g_module_open(fname, G_MODULE_BIND_LOCAL);
 		if (module)
 		{
-			transition = g_new0(plugin,1);
-			transition->name = g_module_name(module);
-			g_module_symbol(module, "img_transition_render", &transition->address);
-			img->transition_list = g_list_append(img->transition_list,transition);
+			/* Obtain the name from the plugin function */
+			g_module_symbol(module, "img_transition_set_name",(void *) &plugin_set_name);
+			plugin_set_name(&name);
+			/* And the memory address of the render function */
+			g_module_symbol(module, "img_transition_render", &address);
+			/* Fill the model of the combo box */
+			gtk_list_store_append(GTK_LIST_STORE(model), &iter);
+			gtk_list_store_set(GTK_LIST_STORE(model), &iter,0, name, 1, &address, -1);
+			img->plugin_list = g_slist_append(img->plugin_list, module);
 			img->nr_transitions_loaded++;
 		}
 		g_free(fname);

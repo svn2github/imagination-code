@@ -385,9 +385,9 @@ static gboolean img_on_expose_event(GtkWidget *widget,GdkEventExpose *event,img_
 {
 
 	if ((img->current_slide)->render)
-		(img->current_slide)->render (widget->window, img);
+		(img->current_slide)->render (widget->window, img->pixbuf1,img->pixbuf2,img->progress);
 
-	return( FALSE );
+	return FALSE;
 }
 
 GdkPixbuf *img_scale_pixbuf (img_window_struct *img, gchar *filename)

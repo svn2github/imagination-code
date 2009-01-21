@@ -17,26 +17,32 @@
  *
  */
 
-#include "imagination.h"
+#include <gdk/gdk.h>
 
-void img_transition_render(GtkWidget *widget, img_window_struct *img)
+void img_transition_set_name(gchar **name)
+{
+	*name = "Arc";
+}
+
+void img_transition_render(GdkDrawable *window, GdkPixbuf *image_from, GdkPixbuf *image_to, gdouble progress)
 {
 	cairo_t *cr;
-	gint     offset_x,offset_y;
+	gint     offset_x,offset_y, width, height;
 	gdouble  radius = 512;
 
-	offset_x = ((img->image_area)->allocation.width  - gdk_pixbuf_get_width (img->pixbuf1)) / 2;
-	offset_y = ((img->image_area)->allocation.height - gdk_pixbuf_get_height(img->pixbuf1)) / 2;
+	gdk_drawable_get_size(window, &width, &height);
+	offset_x = (width  - gdk_pixbuf_get_width (image_from)) / 2;
+	offset_y = (height - gdk_pixbuf_get_height(image_from)) / 2;
 
-	cr = gdk_cairo_create(widget->window);
-	gdk_cairo_set_source_pixbuf(cr,img->pixbuf1,offset_x,offset_y);
+	cr = gdk_cairo_create(window);
+	gdk_cairo_set_source_pixbuf(cr,image_from,offset_x,offset_y);
 	cairo_paint(cr);
 
-	offset_x = ((img->image_area)->allocation.width  - gdk_pixbuf_get_width (img->pixbuf2)) / 2;
-	offset_y = ((img->image_area)->allocation.height - gdk_pixbuf_get_height(img->pixbuf2)) / 2;
-	gdk_cairo_set_source_pixbuf(cr,img->pixbuf2,offset_x,offset_y);
+	offset_x = (width  - gdk_pixbuf_get_width (image_to)) / 2;
+	offset_y = (height - gdk_pixbuf_get_height(image_to)) / 2;
+	gdk_cairo_set_source_pixbuf(cr,image_to,offset_x,offset_y);
 
-	cairo_arc(cr, gdk_pixbuf_get_width(img->pixbuf2)/2, gdk_pixbuf_get_height(img->pixbuf2)/2, radius * img->progress, 0, 2 * G_PI);
+	cairo_arc(cr, gdk_pixbuf_get_width(image_to)/2, gdk_pixbuf_get_height(image_to)/2, radius * progress, 0, 2 * G_PI);
 	cairo_clip(cr);
 	cairo_paint(cr);
 	cairo_destroy(cr);

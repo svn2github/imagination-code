@@ -48,7 +48,7 @@ struct _slide_struct
 	gdouble	speed;
 	gchar	*resolution;
 	gchar	*type;
-	gpointer render;
+	void (*render) (GdkDrawable*, GdkPixbuf*, GdkPixbuf*, gdouble);
 };
 
 typedef struct _img_window_struct img_window_struct;
@@ -85,7 +85,7 @@ struct _img_window_struct
   	gchar		*current_dir;
   	gchar		*slideshow_title;
   	GtkTreeIter *cur_ss_iter;
-  	GList		*transition_list;
+  	GSList		*plugin_list;
   	gint		slides_nr;
   	gint		slideshow_height;
   	gint		total_secs;
