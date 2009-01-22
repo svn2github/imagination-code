@@ -563,7 +563,7 @@ static void img_iconview_selection_changed(GtkIconView *iconview, img_window_str
 
 static void img_combo_box_transition_type_changed (GtkComboBox *combo, img_window_struct *img)
 {
-	GList *selected, *tmp;
+	GList *selected;
 	GtkTreeIter iter;
 	GtkTreeModel *model;
 	gpointer address;
@@ -587,14 +587,13 @@ static void img_combo_box_transition_type_changed (GtkComboBox *combo, img_windo
 	if (selected == NULL)
 		return;
 
-	tmp = selected;
-	while (tmp)
+	while (selected)
 	{
-		gtk_tree_model_get_iter(model, &iter,tmp->data);
+		gtk_tree_model_get_iter(model, &iter,selected->data);
 		gtk_tree_model_get(model, &iter,1,&info_slide,-1);
 		info_slide->render = address;
 		info_slide->combo_transition_type_index = render_index;
-		tmp = tmp->next;
+		selected = selected->next;
 	}
 	g_list_foreach (selected, (GFunc)gtk_tree_path_free, NULL);
 	g_list_free(selected);
@@ -604,7 +603,7 @@ static void img_combo_box_speed_changed (GtkComboBox *combo, img_window_struct *
 {
 	gint speed;
 	gdouble duration;
-	GList *selected,*tmp;
+	GList *selected;
 	GtkTreeIter iter;
 	GtkTreeModel *model;
 	slide_struct *info_slide;
@@ -623,13 +622,12 @@ static void img_combo_box_speed_changed (GtkComboBox *combo, img_window_struct *
 	else 
 		duration = SLOW;
 
-	tmp = selected;
-	while (tmp)
+	while (selected)
 	{
 		gtk_tree_model_get_iter(model, &iter,selected->data);
 		gtk_tree_model_get(model, &iter,1,&info_slide,-1);
 		info_slide->speed = duration;
-		tmp = tmp->next;
+		selected = selected->next;
 	}
 	img_set_total_slideshow_duration(img);
 
@@ -640,7 +638,7 @@ static void img_combo_box_speed_changed (GtkComboBox *combo, img_window_struct *
 static void img_spinbutton_value_changed (GtkSpinButton *spinbutton, img_window_struct *img)
 {
 	gint duration = 0;
-	GList *selected,*tmp;
+	GList *selected;
 	GtkTreeIter iter;
 	GtkTreeModel *model;
 	slide_struct *info_slide;
@@ -652,14 +650,12 @@ static void img_spinbutton_value_changed (GtkSpinButton *spinbutton, img_window_
 
 	duration = gtk_spin_button_get_value_as_int(spinbutton);
 	
-	tmp = selected;
-	while (tmp)
+	while (selected)
 	{
 		gtk_tree_model_get_iter(model, &iter,selected->data);
 		gtk_tree_model_get(model, &iter,1,&info_slide,-1);
 		info_slide->duration = duration;
-		img->total_secs += duration;
-		tmp = tmp->next;
+		selected = selected->next;
 	}
 	img_set_total_slideshow_duration(img);
 
