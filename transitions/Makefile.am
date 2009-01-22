@@ -9,6 +9,8 @@ blind_down_la_LDFLAGS	= -module -avoid-version
 blind_up_la_LDFLAGS		= -module -avoid-version
 blind_right_la_LDFLAGS	= -module -avoid-version
 blind_left_la_LDFLAGS	= -module -avoid-version
+blind_top_right_la_LDFLAGS	= -module -avoid-version
+blind_top_left_la_LDFLAGS	= -module -avoid-version
 
 # Plugins to be installed
 plugin_LTLIBRARIES = \
@@ -16,13 +18,17 @@ plugin_LTLIBRARIES = \
 	blind_down.la	\
 	blind_up.la		\
 	blind_right.la	\
-	blind_left.la
+	blind_left.la	\
+	blind_top_right.la \
+	blind_top_left.la
 
 circle_la_SOURCES		= circle.c
 blind_down_la_SOURCES	= blind_down.c
 blind_up_la_SOURCES		= blind_up.c
 blind_right_la_SOURCES	= blind_right.c
 blind_left_la_SOURCES	= blind_left.c
+blind_top_right_la_SOURCES	= blind_top_right.c
+blind_top_left_la_SOURCES	= blind_top_left.c
 
 # instead of linking against all in $(GTK_LIBS), we link only against needed libs
 circle_la_LIBADD	 = $(PACKAGE_LIBS)
@@ -30,6 +36,8 @@ blind_down_la_LIBADD = $(PACKAGE_LIBS)
 blind_up_la_LIBADD 	 = $(PACKAGE_LIBS)
 blind_right_la_LIBADD= $(PACKAGE_LIBS)
 blind_left_la_LIBADD = $(PACKAGE_LIBS)
+blind_top_right_la_LIBADD = $(PACKAGE_LIBS)
+blind_top_left_la_LIBADD = $(PACKAGE_LIBS)
 
 AM_CPPFLAGS = \
 	-DDATADIR=\"$(datadir)\" \
