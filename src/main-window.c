@@ -479,6 +479,8 @@ static void img_iconview_selection_changed(GtkIconView *iconview, img_window_str
 	GList *selected = NULL;
 	slide_struct *info_slide;
 
+	if (img->preview_is_running)
+		return;
 	model = gtk_icon_view_get_model(iconview);
 	gtk_icon_view_get_cursor(iconview,&path,NULL);
 
