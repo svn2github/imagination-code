@@ -525,10 +525,12 @@ static void img_iconview_selection_changed(GtkIconView *iconview, img_window_str
 	/* Set the transition type */
 	model = gtk_combo_box_get_model(GTK_COMBO_BOX(img->transition_type));
 
-	/* This part received some modifications which simplify selecting
-	 * proper transition in combo box. */
-	/* Block "changed" signal from model to avoid rewriting the same
-	 * value back into current slide. */
+	if (gtk_combo_box_get_active(GTK_COMBO_BOX(img->transition_type)) == 0)
+		gtk_widget_set_sensitive(img->trans_duration,FALSE);
+	else
+		gtk_widget_set_sensitive(img->trans_duration,TRUE);
+
+	/* Block "changed" signal from model to avoid rewriting the same value back into current slide. */
 	g_signal_handlers_block_by_func((gpointer)model, (gpointer)img_combo_box_transition_type_changed, img);
 	gtk_combo_box_set_active(GTK_COMBO_BOX(img->transition_type), info_slide->combo_transition_type_index );
 	g_signal_handlers_unblock_by_func((gpointer)model, (gpointer)img_combo_box_transition_type_changed, img);
@@ -575,6 +577,10 @@ static void img_combo_box_transition_type_changed (GtkComboBox *combo, img_windo
 
 	/* Get index of currently selected item */
 	render_index = gtk_combo_box_get_active(combo);
+	if (render_index == 0)
+		gtk_widget_set_sensitive(img->trans_duration,FALSE);
+	else
+		gtk_widget_set_sensitive(img->trans_duration,TRUE);
 
 	model = gtk_icon_view_get_model(GTK_ICON_VIEW (img->thumbnail_iconview));
 	selected = gtk_icon_view_get_selected_items(GTK_ICON_VIEW (img->thumbnail_iconview));
