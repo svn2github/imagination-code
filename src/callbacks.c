@@ -75,6 +75,8 @@ void img_add_slides_thumbnails(GtkMenuItem *item,img_window_struct *img)
 				/* Set some slide info */
 				slide_info->duration = 1;
 				slide_info->speed = NORMAL;
+				slide_info->render = NULL;
+				slide_info->combo_transition_type_index = 0;
 				img->total_secs++;
 				slide_info->filename = g_strdup(slides->data);
 				pixbuf_format = gdk_pixbuf_get_file_info(slides->data,&width,&height);
@@ -399,6 +401,22 @@ static gboolean img_on_expose_event(GtkWidget *widget,GdkEventExpose *event,img_
 {
 	if ((img->current_slide)->render)
 		(img->current_slide)->render (widget->window, img->pixbuf1,img->pixbuf2,img->progress);
+	else
+	{
+		/* This is "None" transition renderer */
+		cairo_t *cr;
+		gint     offset_x,offset_y, width, height;
+
+		gdk_drawable_get_size(widget->window, &width, &height);
+		offset_x = (width  - gdk_pixbuf_get_width (img->pixbuf2)) / 2;
+		offset_y = (height - gdk_pixbuf_get_height(img->pixbuf2)) / 2;
+		
+		cr = gdk_cairo_create(widget->window);
+		gdk_cairo_set_source_pixbuf(cr,img->pixbuf2,offset_x,offset_y);
+		cairo_paint(cr);
+		
+		cairo_destroy(cr);
+	}
 
 	return FALSE;
 }
@@ -423,6 +441,17 @@ static gboolean img_transition_timeout(img_window_struct *img)
 	/* Increment progress variable (this is being passed as a parameter
 	 * to plug-in provided transition function). */
 	img->progress += (img->current_slide)->speed;
+	
+	/* if the transition render is NULL (no transition is set for this
+	 * slide), we stop this timeout function, but still invalidate
+	 * preview area so expose event gets called. */
+	if( img->current_slide->render == NULL )
+	{
+		img->progress = 0;
+		img->source_id = g_timeout_add( img->current_slide->duration * 1000, (GSourceFunc)img_sleep_timeout, img );
+		gtk_widget_queue_draw( img->image_area );
+		return( FALSE );
+	}
 
 	/* If the progress reached 1, the transition should be finished and
 	 * it's time to stop this timeout function and add sleep timeout

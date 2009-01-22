@@ -49,6 +49,7 @@ struct _slide_struct
 	gchar	*resolution;
 	gchar	*type;
 	void	(*render) (GdkDrawable*, GdkPixbuf*, GdkPixbuf*, gdouble);
+	gint    combo_transition_type_index;
 };
 
 typedef struct _img_window_struct img_window_struct;
