@@ -182,6 +182,10 @@ quit:
 	if (img_struct->current_dir)
 		g_free(img_struct->current_dir);
 
+	/* Unloads the plugins */
+	g_slist_foreach(img_struct->plugin_list,(GFunc)g_module_close,NULL);
+	g_slist_free(img_struct->plugin_list);
+
 	gtk_main_quit();
 	return FALSE;
 }

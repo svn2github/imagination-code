@@ -155,5 +155,6 @@ void img_load_available_transitions(img_window_struct *img)
 		}
 		g_free(fname);
 	}
+	g_free(path);
 	g_dir_close(dir);
 }
