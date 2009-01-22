@@ -21,7 +21,7 @@
 
 void img_transition_set_name(gchar **name)
 {
-	*name = "Arc";
+	*name = "Circular Blind From Center";
 }
 
 void img_transition_render(GdkDrawable *window, GdkPixbuf *image_from, GdkPixbuf *image_to, gdouble progress)

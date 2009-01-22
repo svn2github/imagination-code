@@ -4,7 +4,8 @@ plugindir = $(libdir)/imagination
 
 plugins_includedir = $(includedir)/imagination/
 
-circle_la_LDFLAGS		= -module -avoid-version
+circular_blind_from_center_la_LDFLAGS		= -module -avoid-version
+circular_blind_to_center_la_LDFLAGS		= -module -avoid-version
 blind_down_la_LDFLAGS	= -module -avoid-version
 blind_up_la_LDFLAGS		= -module -avoid-version
 blind_right_la_LDFLAGS	= -module -avoid-version
@@ -16,7 +17,8 @@ blind_bottom_right_la_LDFLAGS	= -module -avoid-version
 
 # Plugins to be installed
 plugin_LTLIBRARIES = \
-	circle.la		\
+	circular_blind_from_center.la		\
+	circular_blind_to_center.la		\
 	blind_down.la	\
 	blind_up.la		\
 	blind_right.la	\
@@ -26,7 +28,8 @@ plugin_LTLIBRARIES = \
 	blind_bottom_left.la \
 	blind_bottom_right.la
 
-circle_la_SOURCES		= circle.c
+circular_blind_from_center_la_SOURCES		= circular_blind_from_center.c
+circular_blind_to_center_la_SOURCES		= circular_blind_to_center.c
 blind_down_la_SOURCES	= blind_down.c
 blind_up_la_SOURCES		= blind_up.c
 blind_right_la_SOURCES	= blind_right.c
@@ -37,7 +40,8 @@ blind_bottom_left_la_SOURCES	= blind_bottom_left.c
 blind_bottom_right_la_SOURCES	= blind_bottom_right.c
 
 # instead of linking against all in $(GTK_LIBS), we link only against needed libs
-circle_la_LIBADD	 = $(PACKAGE_LIBS)
+circular_blind_from_center_la_LIBADD	 = $(PACKAGE_LIBS)
+circular_blind_to_center_la_LIBADD	 = $(PACKAGE_LIBS)
 blind_down_la_LIBADD = $(PACKAGE_LIBS)
 blind_up_la_LIBADD 	 = $(PACKAGE_LIBS)
 blind_right_la_LIBADD= $(PACKAGE_LIBS)
