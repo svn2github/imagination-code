@@ -59,25 +59,6 @@ cairo_surface_t *img_get_cairo_surface_from_gdk_pixbuf(GdkPixbuf *pixbuf)
 	return image;
 }
 */
-void img_idle_function (img_window_struct *img)
-{
-	GTimer *time;
-	gdouble secs;
-
-	time = g_timer_new();
-	g_print ("Wait for %d sec\n",(img->current_slide)->duration);
-	while(1)
-	{
-		secs = g_timer_elapsed(time,NULL);
-		if ((gint)secs > (img->current_slide)->duration || img->preview_is_running == FALSE)
-		{
-			g_timer_stop(time);
-			break;
-		}
-		while(gtk_events_pending())
-			gtk_main_iteration();
-	}
-}
 
 GtkWidget *_gtk_combo_box_new_text(gboolean pointer)
 {
@@ -142,7 +123,7 @@ void img_load_available_transitions(img_window_struct *img)
 	gtk_list_store_set(GTK_LIST_STORE(model), &iter,0, _("None"), 1, NULL, -1);
 	gtk_combo_box_set_active(GTK_COMBO_BOX(img->transition_type), 0);
 
-	path = g_strdup("/home/gt/Projects/imagination/transitions");
+	path = g_strdup("./transitions");
 	//path = g_strconcat(PACKAGE_LIB_DIR,"/imagination",NULL);
 	dir = g_dir_open(path, 0, error);
 	if (dir == NULL)
