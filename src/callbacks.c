@@ -332,10 +332,16 @@ void img_set_total_slideshow_duration(img_window_struct *img)
 	{
 		gtk_tree_model_get(model, &iter,1,&entry,-1);
 		img->total_secs += entry->duration;
+		if (entry->speed == FAST)
+			img->total_secs++;
+		else if (entry->speed == NORMAL)
+			img->total_secs += 3;
+		else
+			img->total_secs += 14;
 	}
 	while (gtk_tree_model_iter_next (model,&iter));
 
-	time = g_strdup_printf("%02d:%02d:%02d",img->total_secs/3600,img->total_secs/60,img->total_secs);
+	time = g_strdup_printf("%02d:%02d:%02d", img->total_secs/3600, img->total_secs/60, img->total_secs);
 	gtk_label_set_text((GtkLabel*)img->total_time_data,time);
 	g_free(time);
 }

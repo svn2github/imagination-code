@@ -609,23 +609,23 @@ static void img_combo_box_speed_changed (GtkComboBox *combo, img_window_struct *
 		return;
 
 	speed = gtk_combo_box_get_active(combo);
+
 	if (speed == 0)
 		duration = FAST;
 	else if (speed == 1)
 		duration = NORMAL;
 	else 
 		duration = SLOW;
-	
+
 	tmp = selected;
 	while (tmp)
 	{
 		gtk_tree_model_get_iter(model, &iter,selected->data);
 		gtk_tree_model_get(model, &iter,1,&info_slide,-1);
 		info_slide->speed = duration;
-		//img->total_secs += duration;
 		tmp = tmp->next;
 	}
-	//img_set_total_slideshow_duration(img);
+	img_set_total_slideshow_duration(img);
 
 	g_list_foreach (selected, (GFunc)gtk_tree_path_free, NULL);
 	g_list_free(selected);
