@@ -85,6 +85,7 @@ struct _img_window_struct
   	slide_struct *current_slide;
   	gchar		*current_dir;
   	gchar		*slideshow_title;
+  	gchar		*aspect_ratio;
   	GtkTreeIter *cur_ss_iter;
   	GSList		*plugin_list;
   	gint		slides_nr;
