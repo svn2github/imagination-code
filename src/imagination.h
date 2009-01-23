@@ -29,7 +29,7 @@
 
 #define	FAST	0.05
 #define	NORMAL	0.01
-#define	SLOW	0.002
+#define	SLOW	0.005
 
 typedef struct _plugin plugin;
 
