@@ -41,6 +41,7 @@ void img_new_slideshow_settings_dialog(img_window_struct *img)
 	GtkWidget *pal,*ntsc,*tv,*wide;
 	GtkWidget *label1;
 	GSList *radiobutton1_group = NULL;
+	GSList *radiobutton2_group = NULL;
 	gint response;
 
 	dialog1 = gtk_dialog_new_with_buttons(_("Create a new slideshow"),(GtkWindow*)img->imagination_window,
@@ -125,14 +126,14 @@ void img_new_slideshow_settings_dialog(img_window_struct *img)
 
 	tv = gtk_radio_button_new_with_mnemonic (NULL, _("Normal 4:3"));
 	gtk_box_pack_start (GTK_BOX (vbox_aspect_ratio), tv, TRUE, TRUE, 0);
-	gtk_radio_button_set_group (GTK_RADIO_BUTTON (tv), radiobutton1_group);
-	radiobutton1_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON(tv));
+	gtk_radio_button_set_group (GTK_RADIO_BUTTON (tv), radiobutton2_group);
+	radiobutton2_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON(tv));
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (tv), TRUE);
 
 	wide = gtk_radio_button_new_with_mnemonic (NULL, _("Widescreen 16:9"));
 	gtk_box_pack_start (GTK_BOX (vbox_aspect_ratio), wide, TRUE, TRUE, 0);
-	gtk_radio_button_set_group (GTK_RADIO_BUTTON (wide), radiobutton1_group);
-	radiobutton1_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (wide));
+	gtk_radio_button_set_group (GTK_RADIO_BUTTON (wide), radiobutton2_group);
+	radiobutton2_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (wide));
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (tv), TRUE);
 
 	label_frame2 = gtk_label_new (_("<b>Aspect Ratio</b>"));
@@ -155,9 +156,9 @@ void img_new_slideshow_settings_dialog(img_window_struct *img)
 			img->slideshow_height = 480;
 		}
 		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON (tv)))
-			img->aspect_ratio = "4:3";
+			img->aspect_ratio = " 4:3 ";
 		else
-			img->aspect_ratio = "16:9";
+			img->aspect_ratio = " 16:9 ";
 	}
 	gtk_widget_destroy(dialog1);
 }
