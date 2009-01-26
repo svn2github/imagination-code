@@ -408,7 +408,6 @@ img_window_struct *img_create_window (void)
 	img_struct->type_data = gtk_label_new ("");
 	gtk_box_pack_start (GTK_BOX (hbox_type), img_struct->type_data, TRUE, TRUE, 0);
 	gtk_misc_set_alignment (GTK_MISC (img_struct->type_data), 0, 0.5);
-
 	/* Slide Total Duration */
 	hbox_total = gtk_hbox_new (TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (vbox_info_slide), hbox_total, FALSE, TRUE, 0);
@@ -420,7 +419,7 @@ img_window_struct *img_create_window (void)
 	img_struct->total_time_data = gtk_label_new ("00:00:00");
 	gtk_box_pack_start (GTK_BOX (hbox_total), img_struct->total_time_data, TRUE, TRUE, 0);
 	gtk_misc_set_alignment (GTK_MISC (img_struct->total_time_data), 0, 0.5);
-	
+
 	/* Create the model */
 	img_struct->thumbnail_model = gtk_list_store_new (2, GDK_TYPE_PIXBUF, G_TYPE_POINTER);
 
@@ -449,6 +448,7 @@ img_window_struct *img_create_window (void)
 	gtk_icon_view_set_columns (GTK_ICON_VIEW (img_struct->thumbnail_iconview), G_MAXINT);
 	gtk_container_add (GTK_CONTAINER (thumb_scrolledwindow), img_struct->thumbnail_iconview);
 	g_signal_connect (G_OBJECT (img_struct->thumbnail_iconview),"selection-changed",G_CALLBACK (img_iconview_selection_changed),img_struct);
+	//g_signal_connect (G_OBJECT (img_struct->thumbnail_iconview),"select-all",G_CALLBACK (img_iconview_selection_changed),img_struct);
 
 	/* Create the status bar */
 	img_struct->statusbar = gtk_statusbar_new ();

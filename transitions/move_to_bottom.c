@@ -34,16 +34,16 @@ void img_transition_render(GdkDrawable *window, GdkPixbuf *image_from, GdkPixbuf
 	x = (width  - gdk_pixbuf_get_width (image_from)) / 2;
 	y = (height - gdk_pixbuf_get_height(image_from)) / 2;
 
-	y *= progress;
-
 	cr = gdk_cairo_create(window);
-	gdk_cairo_set_source_pixbuf(cr,image_from,x,y);
+	gdk_cairo_set_source_pixbuf(cr,image_from,(gint)x,(gint)y);
 	cairo_paint(cr);
 
 	x = (width  - gdk_pixbuf_get_width (image_to)) / 2;
-	y = 1024;
-	
+	y = height;
+
 	y *= (1 - progress);
+	if ( y < (height - gdk_pixbuf_get_height(image_from)) / 2)
+		y = height - gdk_pixbuf_get_height(image_from) / 2;
 	gdk_cairo_set_source_pixbuf(cr,image_to,x,y);
 
 	cairo_paint(cr);
