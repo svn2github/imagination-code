@@ -31,6 +31,8 @@
 #define	NORMAL	0.01
 #define	SLOW	0.005
 
+#define comment_string	"Imagination 1.0 Slideshow Project - http://imagination.sf.net"
+
 typedef struct _plugin plugin;
 
 struct _plugin

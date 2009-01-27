@@ -54,8 +54,6 @@ void img_add_slides_thumbnails(GtkMenuItem *item,img_window_struct *img)
 {
 	GSList	*slides = NULL;
 	GdkPixbuf *thumb;
-	GdkPixbufFormat *pixbuf_format;
-	gint width,height;
 	GtkTreeIter iter;
 	slide_struct *slide_info;
 
@@ -66,22 +64,12 @@ void img_add_slides_thumbnails(GtkMenuItem *item,img_window_struct *img)
 	/*img->progress_window = img_create_progress_window(img);*/
 	while (slides)
 	{
-		thumb = gdk_pixbuf_new_from_file_at_scale(slides->data, 93, 70, TRUE, NULL);
+		thumb = img_load_pixbuf_from_file(slides->data);
 		if (thumb)
 		{
-			slide_info = g_new0(slide_struct,1);
+			slide_info = img_set_slide_info(1, NORMAL, NULL, 0, slides->data);
 			if (slide_info)
 			{
-				/* Set some slide info */
-				slide_info->duration = 1;
-				slide_info->speed = NORMAL;
-				slide_info->render = NULL;
-				slide_info->combo_transition_type_index = 0;
-				img->total_secs++;
-				slide_info->filename = g_strdup(slides->data);
-				pixbuf_format = gdk_pixbuf_get_file_info(slides->data,&width,&height);
-				slide_info->resolution = g_strdup_printf("%d x %d",width,height);
-				slide_info->type = gdk_pixbuf_format_get_name(pixbuf_format);
 				gtk_list_store_append (img->thumbnail_model,&iter);
 				gtk_list_store_set (img->thumbnail_model, &iter, 0, thumb, 1, slide_info, -1);
 				g_object_unref (thumb);

@@ -55,4 +55,6 @@ GtkWidget *_gtk_combo_box_new_text(gboolean);
 void img_set_statusbar_message(img_window_struct *, gint);
 void img_load_available_transitions(img_window_struct *);
 void img_show_file_chooser(SexyIconEntry *, SexyIconEntryPosition, int, img_window_struct *);
+GdkPixbuf *img_load_pixbuf_from_file(gchar *);
+slide_struct *img_set_slide_info(gint , gdouble , void	(*), gint , gchar *);
 #endif

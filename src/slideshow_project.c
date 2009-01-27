@@ -21,7 +21,6 @@
 void img_save_slideshow(img_window_struct *img, gchar *filename)
 {
 	GKeyFile *img_key_file;
-	GError *error;
 	gchar *conf;
 	gint len,count = 0;
 	FILE *fp;
@@ -35,10 +34,8 @@ void img_save_slideshow(img_window_struct *img, gchar *filename)
 	if (!gtk_tree_model_get_iter_first (model,&iter))
 		return;
 
-g_print("Salvo %d - %s\n",img->slides_nr,filename);
-
 	/* Slideshow settings */
-	g_key_file_set_comment(img_key_file,NULL,NULL,"Imagination 1.0 Slideshow Project - http://imagination.sf.net",NULL);
+	g_key_file_set_comment(img_key_file, NULL, NULL, comment_string, NULL);
 
 	g_key_file_set_string(img_key_file,"slideshow settings","name",img->slideshow_filename);
 	g_key_file_set_integer(img_key_file,"slideshow settings","export format",img->slideshow_format_index);
@@ -79,29 +76,54 @@ g_print("Salvo %d - %s\n",img->slides_nr,filename);
 
 void img_load_slideshow(img_window_struct *img, gchar *filename)
 {
+	GdkPixbuf *thumb;
+	slide_struct *slide_info;
+	GtkTreeIter iter;
 	GKeyFile *img_key_file;
-	GError *error;
+	gchar *dummy,*slide_filename;
+	GtkWidget *dialog;
+	gint number,i,duration,combo_transition_type_index;
+	gdouble speed;
 
 	img_key_file = g_key_file_new();
 	g_key_file_load_from_file(img_key_file,filename,G_KEY_FILE_KEEP_COMMENTS,NULL);
 
-	/*gtk_combo_box_set_active (GTK_COMBO_BOX(prefs_data->combo_prefered_format),g_key_file_get_integer(xa_key_file,PACKAGE,"preferred_format",NULL));
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (prefs_data->confirm_deletion),g_key_file_get_boolean(xa_key_file,PACKAGE,"confirm_deletion",NULL));
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (prefs_data->store_output),g_key_file_get_boolean(xa_key_file,PACKAGE,"store_output",NULL));
+	dummy = g_key_file_get_comment(img_key_file,NULL,NULL,NULL);
 
-	gtk_combo_box_set_active (GTK_COMBO_BOX(prefs_data->combo_icon_size),g_key_file_get_integer(xa_key_file,PACKAGE,"icon_size",NULL));
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(prefs_data->check_show_comment),g_key_file_get_boolean(xa_key_file,PACKAGE,"show_archive_comment",NULL));
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(prefs_data->check_sort_filename_column),g_key_file_get_boolean(xa_key_file,PACKAGE,"sort_filename_content",NULL));
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(prefs_data->show_sidebar),g_key_file_get_boolean(xa_key_file,PACKAGE,"show_sidebar",NULL));
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(prefs_data->show_location_bar),g_key_file_get_boolean(xa_key_file,PACKAGE,"show_location_bar",NULL));
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (prefs_data->allow_sub_dir),g_key_file_get_boolean(xa_key_file,PACKAGE,"allow_sub_dir",NULL));
-	value = g_key_file_get_string(xa_key_file,PACKAGE,"preferred_editor",NULL);
-	coords = g_key_file_get_integer_list(xa_key_file, PACKAGE, "mainwindow", &coords_len, &error);
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(extract_window->overwrite_check),g_key_file_get_boolean(xa_key_file,PACKAGE,"overwrite",NULL));
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(extract_window->extract_full),g_key_file_get_boolean(xa_key_file,PACKAGE,"full_path",NULL));
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(extract_window->touch),g_key_file_get_boolean(xa_key_file,PACKAGE,"touch",NULL));
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(extract_window->fresh),g_key_file_get_boolean(xa_key_file,PACKAGE,"fresh",NULL));
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(extract_window->update),g_key_file_get_boolean(xa_key_file,PACKAGE,"update",NULL));
-	Load the options in the add dialog */
+	if (strncmp(dummy,comment_string,strlen(comment_string)) != 0)
+	{
+		dialog = gtk_message_dialog_new(GTK_WINDOW(img->imagination_window),GTK_DIALOG_MODAL,GTK_MESSAGE_ERROR,GTK_BUTTONS_OK,_("This is not an Imagination project file!"));
+		gtk_dialog_run (GTK_DIALOG (dialog));
+		gtk_widget_destroy (GTK_WIDGET (dialog));
+		g_free(dummy);
+		return;
+	}
+	g_free(dummy);
+	/* Loads the thumbnail and set the slides info */
+	number = g_key_file_get_integer(img_key_file,"images","number",NULL);
+	for (i = 1; i <= number; i++)
+	{
+		dummy = g_strdup_printf("image_%d",i);
+		slide_filename = g_key_file_get_string(img_key_file,"images",dummy,NULL);
+
+		thumb = img_load_pixbuf_from_file(slide_filename);
+		if (thumb)
+		{
+			speed 	=	g_key_file_get_integer(img_key_file,"transition speed"	,dummy,NULL);
+			duration= 	g_key_file_get_double (img_key_file,"slide duration"	,dummy,NULL);
+			combo_transition_type_index = g_key_file_get_integer(img_key_file,"transition type",dummy,NULL);
+
+			slide_info = img_set_slide_info(duration, speed, NULL, combo_transition_type_index, slide_filename);
+			if (slide_info)
+			{
+				gtk_list_store_append (img->thumbnail_model,&iter);
+				gtk_list_store_set (img->thumbnail_model, &iter, 0, thumb, 1, slide_info, -1);
+				g_object_unref (thumb);
+				img->slides_nr++;
+			}
+		}
+		g_free(slide_filename);
+		g_free(dummy);
+	}
 	g_key_file_free (img_key_file);
 }

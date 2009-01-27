@@ -163,7 +163,6 @@ void img_show_file_chooser(SexyIconEntry *entry, SexyIconEntryPosition icon_pos,
 {
 	GtkWidget *file_selector;
 	gchar *dest_dir;
-	const char *current_path;
 	gint response;
 
 	file_selector = gtk_file_chooser_dialog_new (_("Please choose the slideshow project filename"),
@@ -175,10 +174,7 @@ void img_show_file_chooser(SexyIconEntry *entry, SexyIconEntryPosition icon_pos,
 							GTK_RESPONSE_ACCEPT,
 							NULL);
 
-	current_path = gtk_entry_get_text(GTK_ENTRY(entry));
-	if (strlen(current_path) > 0)
-		gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER (file_selector),current_path);	
-
+	gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER (file_selector),TRUE);
 	response = gtk_dialog_run (GTK_DIALOG(file_selector));
 	if (response == GTK_RESPONSE_ACCEPT)
 	{
@@ -187,4 +183,33 @@ void img_show_file_chooser(SexyIconEntry *entry, SexyIconEntryPosition icon_pos,
 		g_free(dest_dir);
 	}
 	gtk_widget_destroy(file_selector);
+}
+
+GdkPixbuf *img_load_pixbuf_from_file(gchar *filename)
+{
+	GdkPixbuf *thumb = NULL;
+
+	thumb = gdk_pixbuf_new_from_file_at_scale(filename, 93, 70, TRUE, NULL);
+	return thumb;
+}
+
+slide_struct *img_set_slide_info(gint duration, gdouble speed, void	(*render), gint combo_transition_type_index, gchar *filename)
+{
+	slide_struct *slide_info;
+	GdkPixbufFormat *pixbuf_format;
+	gint width,height;
+
+	slide_info = g_new0(slide_struct,1);
+	if (slide_info)
+	{
+		slide_info->duration = duration;
+		slide_info->speed = speed;
+		slide_info->render = render;
+		slide_info->combo_transition_type_index = combo_transition_type_index;
+		slide_info->filename = g_strdup(filename);
+		pixbuf_format = gdk_pixbuf_get_file_info(filename,&width,&height);
+		slide_info->resolution = g_strdup_printf("%d x %d",width,height);
+		slide_info->type = gdk_pixbuf_format_get_name(pixbuf_format);
+	}
+	return slide_info;
 }
