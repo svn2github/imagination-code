@@ -29,7 +29,10 @@ void img_new_slideshow_settings_dialog(img_window_struct *img)
 	GtkWidget *vbox_frame1;
 	GtkWidget *hbox_slideshow_options;
 	GtkWidget *hbox_slideshow_name;
+	GtkWidget *hbox_slideshow_fmt;
 	GtkWidget *label2;
+	GtkWidget *label3;
+	GtkWidget *slideshow_fmt_combo;
 	GtkWidget *slideshow_title_entry;
 	GtkWidget *frame1;
 	GtkWidget *label_frame1;
@@ -55,7 +58,7 @@ void img_new_slideshow_settings_dialog(img_window_struct *img)
 
 	dialog_vbox1 = GTK_DIALOG (dialog1)->vbox;
 
-	vbox1 = gtk_vbox_new (FALSE, 0);
+	vbox1 = gtk_vbox_new (FALSE, 5);
 	gtk_container_set_border_width (GTK_CONTAINER (vbox1), 5);
 	gtk_box_pack_start (GTK_BOX (dialog_vbox1), vbox1, TRUE, TRUE, 0);
 
@@ -74,17 +77,33 @@ void img_new_slideshow_settings_dialog(img_window_struct *img)
 	vbox_frame1 = gtk_vbox_new (FALSE, 0);
 	gtk_container_add (GTK_CONTAINER (alignment_main_frame), vbox_frame1);
 
-	hbox_slideshow_name = gtk_hbox_new (FALSE, 50);
+	hbox_slideshow_name = gtk_hbox_new (TRUE, 0);
 	gtk_box_pack_start (GTK_BOX (vbox_frame1), hbox_slideshow_name, TRUE, TRUE, 0);
 
-	label2 = gtk_label_new (_("Title of the slideshow:"));
+	label2 = gtk_label_new (_("Filename of the slideshow:"));
 	gtk_box_pack_start (GTK_BOX (hbox_slideshow_name), label2, FALSE, TRUE, 0);
+	gtk_misc_set_alignment(GTK_MISC(label2), 0, 0.5);
 
-	slideshow_title_entry = gtk_entry_new ();
+	slideshow_title_entry = sexy_icon_entry_new();
+	sexy_icon_entry_add_clear_button( SEXY_ICON_ENTRY(slideshow_title_entry), img, img_show_file_chooser);
+    sexy_icon_entry_set_icon_highlight( SEXY_ICON_ENTRY(slideshow_title_entry), SEXY_ICON_ENTRY_PRIMARY, TRUE);
 	gtk_box_pack_start (GTK_BOX (hbox_slideshow_name), slideshow_title_entry, TRUE, TRUE, 0);
 
+	hbox_slideshow_fmt = gtk_hbox_new (TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (vbox_frame1), hbox_slideshow_fmt, FALSE, TRUE, 0);
+
+	label3 = gtk_label_new (_("Export the slideshow as:"));
+	gtk_box_pack_start (GTK_BOX (hbox_slideshow_fmt), label3, FALSE, TRUE, 0);
+	gtk_misc_set_alignment(GTK_MISC(label3), 0, 0.5);
+
+	slideshow_fmt_combo = _gtk_combo_box_new_text(FALSE);
+	gtk_box_pack_start (GTK_BOX (hbox_slideshow_fmt), slideshow_fmt_combo, TRUE, TRUE, 0);
+	gtk_combo_box_append_text(GTK_COMBO_BOX(slideshow_fmt_combo),"DVD VIDEO");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(slideshow_fmt_combo),"FLV (FLash Video)");
+	gtk_combo_box_set_active(GTK_COMBO_BOX(slideshow_fmt_combo),0);
+
 	hbox_slideshow_options = gtk_hbox_new(TRUE,10);
-	gtk_box_pack_start(GTK_BOX (vbox_frame1), hbox_slideshow_options, TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX (vbox_frame1), hbox_slideshow_options, TRUE, TRUE, 10);
 	
 	frame1 = gtk_frame_new (NULL);
 	gtk_box_pack_start (GTK_BOX (hbox_slideshow_options), frame1, TRUE, TRUE, 0);
@@ -144,7 +163,7 @@ void img_new_slideshow_settings_dialog(img_window_struct *img)
 	response = gtk_dialog_run(GTK_DIALOG(dialog1));
 	if (response == GTK_RESPONSE_OK || response == GTK_RESPONSE_ACCEPT)
 	{
-		img->slideshow_title = g_strdup(gtk_entry_get_text(GTK_ENTRY(slideshow_title_entry)));
+		img->slideshow_filename = g_strdup(gtk_entry_get_text(GTK_ENTRY(slideshow_title_entry)));
 		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON (pal)))
 		{
 			gtk_widget_set_size_request(img->viewport,720,576);
@@ -156,9 +175,10 @@ void img_new_slideshow_settings_dialog(img_window_struct *img)
 			img->slideshow_height = 480;
 		}
 		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON (tv)))
-			img->aspect_ratio = " 4:3 ";
+			img->aspect_ratio = "4:3";
 		else
-			img->aspect_ratio = " 16:9 ";
+			img->aspect_ratio = "16:9";
+		img->slideshow_format_index = gtk_combo_box_get_active(GTK_COMBO_BOX(slideshow_fmt_combo));
 	}
 	gtk_widget_destroy(dialog1);
 }

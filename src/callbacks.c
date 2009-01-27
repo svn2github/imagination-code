@@ -162,7 +162,7 @@ gboolean img_quit_application(GtkWidget *widget, GdkEvent *event, img_window_str
 	path = gtk_tree_path_new_first();
 
 	/* Free the slide struct for each slide */
-	if (gtk_tree_model_get_iter (model,&iter,path) == FALSE)
+	if (gtk_tree_model_get_iter(model,&iter,path) == FALSE)
 		goto quit;
 	do
 	{
@@ -177,8 +177,8 @@ gboolean img_quit_application(GtkWidget *widget, GdkEvent *event, img_window_str
 
 quit:
 	gtk_tree_path_free(path);
-	if (img_struct->slideshow_title)
-		g_free(img_struct->slideshow_title);
+	if (img_struct->slideshow_filename)
+		g_free(img_struct->slideshow_filename);
 	if (img_struct->current_dir)
 		g_free(img_struct->current_dir);
 
@@ -250,6 +250,8 @@ void img_delete_selected_slides(GtkMenuItem *item,img_window_struct *img_struct)
 	GtkTreeModel *model;
 	slide_struct *entry;
 
+	if (GTK_WIDGET_HAS_FOCUS(img_struct->duration))
+		return;
 	model = gtk_icon_view_get_model((GtkIconView *)img_struct->thumbnail_iconview);
 	selected = gtk_icon_view_get_selected_items ((GtkIconView *)img_struct->thumbnail_iconview);
 	if (selected == NULL)
@@ -565,4 +567,52 @@ static void img_clean_after_preview(img_window_struct *img)
 	img->cur_ss_iter = NULL;
 
 	return;
+}
+
+void img_choose_slideshow_filename(GtkWidget *widget, img_window_struct *img)
+{
+	gchar *filename = NULL;
+	GtkWidget *fc;
+	GtkFileChooserAction action = 0;
+	gint response;
+
+	if (widget == img->open_menu_item || widget == img->open_button)
+		action = GTK_FILE_CHOOSER_ACTION_OPEN;
+	else if (widget == img->save_as_menu_item || widget == img->save_menu_item || widget == img->save_button)
+		action = GTK_FILE_CHOOSER_ACTION_SAVE;
+
+	if (img->slideshow_filename == NULL || widget == img->save_as_menu_item || action == GTK_FILE_CHOOSER_ACTION_OPEN)
+	{
+		fc = gtk_file_chooser_dialog_new (action == GTK_FILE_CHOOSER_ACTION_OPEN ? _("Load an Imagination slideshow project") : 
+					_("Save an Imagination slideshow project"),
+					GTK_WINDOW (img->imagination_window),
+					action,
+					GTK_STOCK_CANCEL,
+					GTK_RESPONSE_CANCEL,
+					action == GTK_FILE_CHOOSER_ACTION_OPEN ?  "gtk-open" : "gtk-save",
+					GTK_RESPONSE_ACCEPT,NULL);
+
+		gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER (fc),TRUE);
+		response = gtk_dialog_run ((GtkDialog *)fc);
+		if (response == GTK_RESPONSE_ACCEPT)
+		{
+			filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fc));
+			gtk_widget_destroy(fc);
+		}
+		else if (response == GTK_RESPONSE_CANCEL || GTK_RESPONSE_DELETE_EVENT)
+		{
+			gtk_widget_destroy(fc);
+			return;
+		}
+	}
+	else
+		filename = g_strdup(img->slideshow_filename);
+
+	if (action == GTK_FILE_CHOOSER_ACTION_OPEN)
+		img_load_slideshow(img,filename);
+	else
+		img_save_slideshow(img,filename);
+	
+	if (filename)
+		g_free(filename);
 }

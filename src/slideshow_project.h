@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2008 Giuseppe Torelli <colossus73@gmail.com>
+ *  Copyright (c) 2009 Giuseppe Torelli <colossus73@gmail.com>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,13 +17,15 @@
  *
  */
  
- #ifndef __NEW_SLIDESHOW_H__
-#define __NEW_SLIDESHOW_H__
+#ifndef __SLIDESHOW_PROJECT_H__
+#define __SLIDESHOW_PROJECT_H__
 
+#include <glib.h>
 #include <gtk/gtk.h>
-#include "main-window.h"
-#include "sexy-icon-entry.h"
+#include <stdio.h>
+#include <string.h>
+#include "imagination.h"
 
-void img_new_slideshow_settings_dialog(img_window_struct *);
-
+void img_save_slideshow(img_window_struct *, gchar *);
+void img_load_slideshow(img_window_struct *, gchar *);
 #endif

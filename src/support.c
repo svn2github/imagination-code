@@ -158,3 +158,33 @@ void img_load_available_transitions(img_window_struct *img)
 	g_free(path);
 	g_dir_close(dir);
 }
+
+void img_show_file_chooser(SexyIconEntry *entry, SexyIconEntryPosition icon_pos,int button,img_window_struct *img)
+{
+	GtkWidget *file_selector;
+	gchar *dest_dir;
+	const char *current_path;
+	gint response;
+
+	file_selector = gtk_file_chooser_dialog_new (_("Please choose the slideshow project filename"),
+							GTK_WINDOW (img->imagination_window),
+							GTK_FILE_CHOOSER_ACTION_SAVE,
+							GTK_STOCK_CANCEL,
+							GTK_RESPONSE_CANCEL,
+							GTK_STOCK_SAVE,
+							GTK_RESPONSE_ACCEPT,
+							NULL);
+
+	current_path = gtk_entry_get_text(GTK_ENTRY(entry));
+	if (strlen(current_path) > 0)
+		gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER (file_selector),current_path);	
+
+	response = gtk_dialog_run (GTK_DIALOG(file_selector));
+	if (response == GTK_RESPONSE_ACCEPT)
+	{
+		dest_dir = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER (file_selector));
+		gtk_entry_set_text(GTK_ENTRY(entry),dest_dir);
+		g_free(dest_dir);
+	}
+	gtk_widget_destroy(file_selector);
+}

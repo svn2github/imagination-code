@@ -42,9 +42,6 @@ img_window_struct *img_create_window (void)
 	GtkWidget *menuitem1;
 	GtkWidget *menu1;
 	GtkWidget *imagemenuitem1;
-	GtkWidget *imagemenuitem2;
-	GtkWidget *imagemenuitem3;
-	GtkWidget *imagemenuitem4;
 	GtkWidget *imagemenuitem5;
 	GtkWidget *close_menu;
 	GtkWidget *separatormenuitem1;
@@ -66,8 +63,6 @@ img_window_struct *img_create_window (void)
 	GtkWidget *imagemenuitem11;
 	GtkWidget *toolbar;
 	GtkWidget *new_button;
-	GtkWidget *open_button;
-	GtkWidget *save_button;
 	GtkWidget *generate_button;
 	GtkWidget *import_button;
 	GtkWidget *separatortoolitem;
@@ -126,14 +121,17 @@ img_window_struct *img_create_window (void)
 	gtk_container_add (GTK_CONTAINER (menu1), imagemenuitem1);
 	g_signal_connect (G_OBJECT (imagemenuitem1),"activate",G_CALLBACK (img_new_slideshow),img_struct);
 
-	imagemenuitem2 = gtk_image_menu_item_new_from_stock (GTK_STOCK_OPEN, accel_group);
-	gtk_container_add (GTK_CONTAINER (menu1), imagemenuitem2);
+	img_struct->open_menu_item = gtk_image_menu_item_new_from_stock (GTK_STOCK_OPEN, accel_group);
+	gtk_container_add (GTK_CONTAINER (menu1), img_struct->open_menu_item);
+	g_signal_connect (G_OBJECT (img_struct->open_menu_item),"activate",G_CALLBACK (img_choose_slideshow_filename),img_struct);
 
-	imagemenuitem3 = gtk_image_menu_item_new_from_stock (GTK_STOCK_SAVE, accel_group);
-	gtk_container_add (GTK_CONTAINER (menu1), imagemenuitem3);
+	img_struct->save_menu_item = gtk_image_menu_item_new_from_stock (GTK_STOCK_SAVE, accel_group);
+	gtk_container_add (GTK_CONTAINER (menu1), img_struct->save_menu_item);
+	g_signal_connect (G_OBJECT (img_struct->save_menu_item),"activate",G_CALLBACK (img_choose_slideshow_filename),img_struct);
 
-	imagemenuitem4 = gtk_image_menu_item_new_from_stock (GTK_STOCK_SAVE_AS, accel_group);
-	gtk_container_add (GTK_CONTAINER (menu1), imagemenuitem4);
+	img_struct->save_as_menu_item = gtk_image_menu_item_new_from_stock (GTK_STOCK_SAVE_AS, accel_group);
+	gtk_container_add (GTK_CONTAINER (menu1), img_struct->save_as_menu_item);
+	g_signal_connect (G_OBJECT (img_struct->save_as_menu_item),"activate",G_CALLBACK (img_choose_slideshow_filename),img_struct);
 
 	close_menu = gtk_image_menu_item_new_from_stock (GTK_STOCK_CLOSE, accel_group);
 	gtk_container_add (GTK_CONTAINER (menu1), close_menu);
@@ -246,13 +244,15 @@ img_window_struct *img_create_window (void)
 	gtk_widget_set_tooltip_text(new_button, _("Create a new slideshow"));
 	g_signal_connect (G_OBJECT (new_button),"clicked",G_CALLBACK (img_new_slideshow),img_struct);
 
-	open_button = GTK_WIDGET (gtk_tool_button_new_from_stock (GTK_STOCK_OPEN));
-	gtk_container_add (GTK_CONTAINER (toolbar),open_button);
-	gtk_widget_set_tooltip_text(open_button, _("Open a slideshow"));
+	img_struct->open_button = GTK_WIDGET (gtk_tool_button_new_from_stock (GTK_STOCK_OPEN));
+	gtk_container_add (GTK_CONTAINER (toolbar),img_struct->open_button);
+	gtk_widget_set_tooltip_text(img_struct->open_button, _("Open a slideshow"));
+	g_signal_connect (G_OBJECT (img_struct->open_button),"clicked",G_CALLBACK (img_choose_slideshow_filename),img_struct);
 
-	save_button = GTK_WIDGET (gtk_tool_button_new_from_stock (GTK_STOCK_SAVE));
-	gtk_container_add (GTK_CONTAINER (toolbar),save_button);
-	gtk_widget_set_tooltip_text(save_button, _("Save the slideshow"));
+	img_struct->save_button = GTK_WIDGET (gtk_tool_button_new_from_stock (GTK_STOCK_SAVE));
+	gtk_container_add (GTK_CONTAINER (toolbar), img_struct->save_button);
+	gtk_widget_set_tooltip_text(img_struct->save_button, _("Save the slideshow"));
+	g_signal_connect (G_OBJECT (img_struct->save_button),"clicked",G_CALLBACK (img_choose_slideshow_filename),img_struct);
 
 	separatortoolitem = GTK_WIDGET (gtk_separator_tool_item_new());
 	gtk_widget_show (separatortoolitem);

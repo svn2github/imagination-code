@@ -25,7 +25,9 @@
 #endif
 
 #include <gtk/gtk.h>
+#include <string.h>
 #include "imagination.h"
+#include "sexy-icon-entry.h"
 
 #ifdef ENABLE_NLS
 #  include <libintl.h>
@@ -52,4 +54,5 @@ GtkWidget *img_load_icon(gchar *, GtkIconSize );
 GtkWidget *_gtk_combo_box_new_text(gboolean);
 void img_set_statusbar_message(img_window_struct *, gint);
 void img_load_available_transitions(img_window_struct *);
+void img_show_file_chooser(SexyIconEntry *, SexyIconEntryPosition, int, img_window_struct *);
 #endif

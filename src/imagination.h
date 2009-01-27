@@ -57,6 +57,11 @@ typedef struct _img_window_struct img_window_struct;
 struct _img_window_struct
 {
 	GtkWidget	*imagination_window;
+	GtkWidget	*open_menu_item;
+	GtkWidget	*save_menu_item;
+	GtkWidget	*save_as_menu_item;
+	GtkWidget	*open_button;
+	GtkWidget	*save_button;
 	GtkWidget	*remove_menu;
 	GtkWidget	*remove_button;
 	GtkWidget	*preview_menu;
@@ -84,10 +89,11 @@ struct _img_window_struct
   	GtkListStore *thumbnail_model;
   	slide_struct *current_slide;
   	gchar		*current_dir;
-  	gchar		*slideshow_title;
+  	gchar		*slideshow_filename;
   	gchar		*aspect_ratio;
   	GtkTreeIter *cur_ss_iter;
   	GSList		*plugin_list;
+	gint		slideshow_format_index;
   	gint		slides_nr;
   	gint		slideshow_height;
   	gint		total_secs;
