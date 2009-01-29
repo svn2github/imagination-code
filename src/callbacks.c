@@ -374,26 +374,25 @@ void img_start_stop_preview(GtkButton *button, img_window_struct *img)
 		if (img->slide_pixbuf)
 			g_object_ref(G_OBJECT(img->slide_pixbuf));
 		gtk_image_clear(GTK_IMAGE(img->image_area));
-		
+
 		/* Connect expose event to handler */
 		gtk_widget_set_app_paintable(img->image_area, TRUE);
 		g_signal_connect( G_OBJECT(img->image_area), "expose-event",G_CALLBACK(img_on_expose_event),img);
-		
+
 		/* Create an empty pixbuf - starting white image */
 		img->pixbuf1 = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8,(img->viewport)->allocation.width,(img->viewport)->allocation.height);
 		gdk_pixbuf_fill(img->pixbuf1,0xffffffff);
-		
+
 		/* Load the first image in the pixbuf */
 		gtk_tree_model_get(model, &iter,1,&entry,-1);
 		img->pixbuf2 = img_scale_pixbuf(img,entry->filename);
-		
+
 		/* Add transition timeout function */
 		img->preview_is_running = TRUE;
 		img->current_slide = entry;
 		img->progress = 0;
 		img->source_id = g_timeout_add(TRANSITION_TIMEOUT,(GSourceFunc)img_transition_timeout,img);
 	}
-
 	return;
 }
 

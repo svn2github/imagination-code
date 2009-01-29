@@ -79,11 +79,14 @@ void img_load_slideshow(img_window_struct *img, gchar *filename)
 	GdkPixbuf *thumb;
 	slide_struct *slide_info;
 	GtkTreeIter iter;
+	GtkTreePath *path;
 	GKeyFile *img_key_file;
 	gchar *dummy,*slide_filename;
 	GtkWidget *dialog;
 	gint number,i,duration,combo_transition_type_index;
 	gdouble speed;
+	GtkTreeModel *model;
+	void (*render);
 
 	img_key_file = g_key_file_new();
 	g_key_file_load_from_file(img_key_file,filename,G_KEY_FILE_KEEP_COMMENTS,NULL);
@@ -93,6 +96,7 @@ void img_load_slideshow(img_window_struct *img, gchar *filename)
 	if (strncmp(dummy,comment_string,strlen(comment_string)) != 0)
 	{
 		dialog = gtk_message_dialog_new(GTK_WINDOW(img->imagination_window),GTK_DIALOG_MODAL,GTK_MESSAGE_ERROR,GTK_BUTTONS_OK,_("This is not an Imagination project file!"));
+		gtk_window_set_title(GTK_WINDOW(dialog),"Imagination");
 		gtk_dialog_run (GTK_DIALOG (dialog));
 		gtk_widget_destroy (GTK_WIDGET (dialog));
 		g_free(dummy);
@@ -109,11 +113,16 @@ void img_load_slideshow(img_window_struct *img, gchar *filename)
 		thumb = img_load_pixbuf_from_file(slide_filename);
 		if (thumb)
 		{
-			speed 	=	g_key_file_get_integer(img_key_file,"transition speed"	,dummy,NULL);
-			duration= 	g_key_file_get_double (img_key_file,"slide duration"	,dummy,NULL);
+			speed 	=	g_key_file_get_double(img_key_file,"transition speed"	,dummy,NULL);
+			duration= 	g_key_file_get_integer (img_key_file,"slide duration"	,dummy,NULL);
 			combo_transition_type_index = g_key_file_get_integer(img_key_file,"transition type",dummy,NULL);
 
-			slide_info = img_set_slide_info(duration, speed, NULL, combo_transition_type_index, slide_filename);
+			/* Get the mem address of the transition according to the index */
+			model = gtk_combo_box_get_model(GTK_COMBO_BOX(img->transition_type));
+			path = gtk_tree_path_new_from_indices(combo_transition_type_index,-1);
+			gtk_tree_model_get_iter(model,&iter,path);
+			gtk_tree_model_get(model,&iter,1,&render,-1);
+			slide_info = img_set_slide_info(duration, speed, render, combo_transition_type_index, slide_filename);
 			if (slide_info)
 			{
 				gtk_list_store_append (img->thumbnail_model,&iter);

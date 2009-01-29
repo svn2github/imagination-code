@@ -33,6 +33,7 @@ static void img_select_all_thumbnails(GtkMenuItem *, img_window_struct *);
 static void img_unselect_all_thumbnails(GtkMenuItem *, img_window_struct *);
 static void img_goto_slide(GtkMenuItem *, img_window_struct *);
 static void img_goto_line_entry_activate(GtkEntry *, img_window_struct *);
+static gint img_sort_none_before_other(GtkTreeModel *, GtkTreeIter *, GtkTreeIter *, gpointer);
 
 img_window_struct *img_create_window (void)
 {
@@ -342,6 +343,9 @@ img_window_struct *img_create_window (void)
 	gtk_misc_set_alignment (GTK_MISC (transition_label), 0, -1);
 
 	img_struct->transition_type = _gtk_combo_box_new_text(TRUE);
+	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(img_struct->transition_type)))),
+										0,GTK_SORT_ASCENDING);
+	gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(gtk_combo_box_get_model(GTK_COMBO_BOX(img_struct->transition_type))),0,img_sort_none_before_other,NULL,NULL);										
 	gtk_widget_set_sensitive(img_struct->transition_type,FALSE);
 	gtk_box_pack_start (GTK_BOX (vbox_info_slide), img_struct->transition_type, FALSE, TRUE, 0);
 	g_signal_connect (G_OBJECT (img_struct->transition_type),"changed",G_CALLBACK (img_combo_box_transition_type_changed),img_struct);
@@ -728,3 +732,20 @@ static void img_goto_line_entry_activate(GtkEntry *entry, img_window_struct *img
 	gtk_widget_destroy(img->goto_window);
 }
 
+static gint img_sort_none_before_other(GtkTreeModel *model,GtkTreeIter *a,GtkTreeIter *b,gpointer data)
+{
+	gchar *name1, *name2;
+	gint i;
+
+	gtk_tree_model_get(model, a, 0, &name1, -1);
+	gtk_tree_model_get(model, b, 0, &name2, -1);
+
+	if (strcmp(name1,_("None")) == 0 || strcmp(name2,_("None")) == 0)
+		i = -1;
+	else
+		i = (strcasecmp (name1,name2));
+	
+	g_free(name1);
+	g_free(name2);
+	return i;	
+}

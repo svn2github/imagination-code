@@ -21,7 +21,7 @@
 
 void img_transition_set_name(gchar **name)
 {
-	*name = "Move From Bottom To Top";
+	*name = "Push From Bottom To Top";
 }
 
 void img_transition_render(GdkDrawable *window, GdkPixbuf *image_from, GdkPixbuf *image_to, gdouble progress)
