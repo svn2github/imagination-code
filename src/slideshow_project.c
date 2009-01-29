@@ -135,4 +135,6 @@ void img_load_slideshow(img_window_struct *img, gchar *filename)
 		g_free(dummy);
 	}
 	g_key_file_free (img_key_file);
+	img_set_total_slideshow_duration(img);
+	img_set_statusbar_message(img,0);
 }
