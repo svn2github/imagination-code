@@ -98,7 +98,7 @@ void img_new_slideshow_settings_dialog(img_window_struct *img)
 
 	slideshow_fmt_combo = _gtk_combo_box_new_text(FALSE);
 	gtk_box_pack_start (GTK_BOX (hbox_slideshow_fmt), slideshow_fmt_combo, TRUE, TRUE, 0);
-	gtk_combo_box_append_text(GTK_COMBO_BOX(slideshow_fmt_combo),"DVD VIDEO");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(slideshow_fmt_combo),"VOB (DVD VIDEO");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(slideshow_fmt_combo),"FLV (FLash Video)");
 	gtk_combo_box_set_active(GTK_COMBO_BOX(slideshow_fmt_combo),0);
 
@@ -160,6 +160,22 @@ void img_new_slideshow_settings_dialog(img_window_struct *img)
 	gtk_label_set_use_markup (GTK_LABEL (label_frame2), TRUE);
 
 	gtk_widget_show_all(dialog_vbox1);
+
+	/* Set parameters in case the user has loaded a project file */
+	if (img->slideshow_filename != NULL)
+	{
+		gtk_entry_set_text(GTK_ENTRY(slideshow_title_entry),img->slideshow_filename);
+		gtk_combo_box_set_active(GTK_COMBO_BOX(slideshow_fmt_combo),img->slideshow_format_index);
+		if (strcmp(img->aspect_ratio,"4:3") == 0)
+			gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (tv), TRUE);
+		else
+			gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (wide), TRUE);
+		if (img->slideshow_height == 480)
+			gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (ntsc), TRUE);
+		else
+			gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pal), TRUE);
+	}
+
 	response = gtk_dialog_run(GTK_DIALOG(dialog1));
 	if (response == GTK_RESPONSE_OK || response == GTK_RESPONSE_ACCEPT)
 	{
