@@ -26,6 +26,7 @@
 #include <string.h>
 #include "imagination.h"
 #include "support.h"
+#include "callbacks.h"
 
 void img_save_slideshow(img_window_struct *, gchar *);
 void img_load_slideshow(img_window_struct *, gchar *);

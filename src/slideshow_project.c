@@ -22,17 +22,17 @@ void img_save_slideshow(img_window_struct *img, gchar *filename)
 {
 	GKeyFile *img_key_file;
 	gchar *conf;
-	gint len,count = 0;
-	FILE *fp;
-	size_t bytes_written;
+	gint count = 0;
+	gsize len;
 	GtkTreeIter iter;
 	slide_struct *entry;
 	GtkTreeModel *model;
 
-	img_key_file = g_key_file_new();
 	model = gtk_icon_view_get_model(GTK_ICON_VIEW(img->thumbnail_iconview));
 	if (!gtk_tree_model_get_iter_first (model,&iter))
 		return;
+
+	img_key_file = g_key_file_new();
 
 	/* Slideshow settings */
 	g_key_file_set_comment(img_key_file, NULL, NULL, comment_string, NULL);
@@ -61,16 +61,11 @@ void img_save_slideshow(img_window_struct *img, gchar *filename)
 	}
 	while (gtk_tree_model_iter_next (model,&iter));
 
-	conf = g_key_file_to_data(img_key_file, NULL, NULL);
-	len = strlen(conf);
-
-	fp = fopen(filename, "w");
-	if (fp != NULL)
-	{
-		bytes_written = fwrite(conf, sizeof (gchar), len, fp);
-		fclose(fp);
-	}
+	/* Write the project file */
+	conf = g_key_file_to_data(img_key_file, &len, NULL);
+	g_file_set_contents(filename, conf, len, NULL);
 	g_free (conf);
+
 	g_key_file_free(img_key_file);
 }
 

@@ -743,7 +743,7 @@ static gint img_sort_none_before_other(GtkTreeModel *model,GtkTreeIter *a,GtkTre
 	if (strcmp(name1,_("None")) == 0 || strcmp(name2,_("None")) == 0)
 		i = -1;
 	else
-		i = (strcasecmp (name1,name2));
+		i = (g_strcmp0 (name1,name2));
 	
 	g_free(name1);
 	g_free(name2);
