@@ -21,7 +21,7 @@
 
 void img_transition_set_name(gchar **name)
 {
-	*name = "Move From Top To Bottom";
+	*name = "Move From Bottom To Top";
 }
 
 void img_transition_render(GdkDrawable *window, GdkPixbuf *image_from, GdkPixbuf *image_to, gdouble progress)
@@ -31,20 +31,20 @@ void img_transition_render(GdkDrawable *window, GdkPixbuf *image_from, GdkPixbuf
 	gint	width, height;
 
 	gdk_drawable_get_size(window, &width, &height);
-	x = (width  - gdk_pixbuf_get_width (image_to)) / 2;
-	y = (height - gdk_pixbuf_get_height(image_to)) / 2;
+	x = (width  - gdk_pixbuf_get_width (image_from)) / 2;
+	y = (height - gdk_pixbuf_get_height(image_from)) / 2;
 
 	cr = gdk_cairo_create(window);
-	gdk_cairo_set_source_pixbuf(cr,image_to,(gint)x,(gint)y);
+	gdk_cairo_set_source_pixbuf(cr,image_from,(gint)x,(gint)y);
 	cairo_paint(cr);
 
-	x = (width  - gdk_pixbuf_get_width (image_from)) / 2;
+	x = (width  - gdk_pixbuf_get_width (image_to)) / 2;
 	y = height;
 
-	y *= progress;
+	y *= (1 - progress);
 	if ( y < (height - gdk_pixbuf_get_height(image_from)) / 2)
 		y = (height - gdk_pixbuf_get_height(image_from)) / 2;
-	gdk_cairo_set_source_pixbuf(cr,image_from,x,y);
+	gdk_cairo_set_source_pixbuf(cr,image_to,x,y);
 
 	cairo_paint(cr);
 	cairo_destroy(cr);

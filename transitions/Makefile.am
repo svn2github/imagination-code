@@ -14,6 +14,7 @@ blind_top_right_la_LDFLAGS	= -module -avoid-version
 blind_top_left_la_LDFLAGS	= -module -avoid-version
 blind_bottom_left_la_LDFLAGS	= -module -avoid-version
 blind_bottom_right_la_LDFLAGS	= -module -avoid-version
+move_from_bottom_la_LDFLAGS = -module -avoid-version
 move_to_bottom_la_LDFLAGS = -module -avoid-version
 push_to_bottom_la_LDFLAGS = -module -avoid-version
 
@@ -29,6 +30,7 @@ plugin_LTLIBRARIES = \
 	blind_top_left.la	\
 	blind_bottom_left.la \
 	blind_bottom_right.la \
+	move_from_bottom.la	\
 	move_to_bottom.la	\
 	push_to_bottom.la
 
@@ -42,6 +44,7 @@ blind_top_right_la_SOURCES	= blind_top_right.c
 blind_top_left_la_SOURCES	= blind_top_left.c
 blind_bottom_left_la_SOURCES	= blind_bottom_left.c
 blind_bottom_right_la_SOURCES	= blind_bottom_right.c
+move_from_bottom_la_SOURCES	= move_from_bottom.c
 move_to_bottom_la_SOURCES	= move_to_bottom.c
 push_to_bottom_la_SOURCES	= push_to_bottom.c
 
@@ -56,6 +59,7 @@ blind_top_right_la_LIBADD = $(PACKAGE_LIBS)
 blind_top_left_la_LIBADD = $(PACKAGE_LIBS)
 blind_bottom_left_la_LIBADD = $(PACKAGE_LIBS)
 blind_bottom_right_la_LIBADD = $(PACKAGE_LIBS)
+move_from_bottom_la_LIBADD = $(PACKAGE_LIBS)
 move_to_bottom_la_LIBADD = $(PACKAGE_LIBS)
 push_to_bottom_la_LIBADD = $(PACKAGE_LIBS)
 
