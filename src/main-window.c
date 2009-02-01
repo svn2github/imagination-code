@@ -69,7 +69,10 @@ img_window_struct *img_create_window (void)
 	GtkWidget *separatortoolitem;
 	GtkWidget *goto_button;
 	GtkWidget *hbox;
-	GtkWidget *fixed;
+	GtkWidget *swindow;
+	GtkWidget *viewport;
+	GtkWidget *align;
+	GtkWidget *image_area_frame;
 	GtkWidget *valign;
 	GtkWidget *halign;
 	GtkWidget *frame1_alignment;
@@ -300,18 +303,28 @@ img_window_struct *img_create_window (void)
 	hbox = gtk_hbox_new (FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (vbox1), hbox, TRUE, TRUE, 0);
 
-	fixed = gtk_alignment_new (0.5, 0.5, 0, 0);
-	gtk_box_pack_start (GTK_BOX (hbox), fixed, TRUE, TRUE, 0);
+	swindow = gtk_scrolled_window_new(NULL, NULL);
+	gtk_container_set_border_width(GTK_CONTAINER(swindow), 10);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(swindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+	gtk_box_pack_start (GTK_BOX (hbox), swindow, TRUE, TRUE, 0);
 
-	img_struct->viewport = gtk_viewport_new(NULL,NULL);
-	gtk_container_add( GTK_CONTAINER(fixed), img_struct->viewport ); 
-	gtk_widget_set_size_request (img_struct->viewport, 720, 576);
-	gtk_widget_modify_bg(img_struct->viewport,GTK_STATE_NORMAL,&background_color);
-	gtk_viewport_set_shadow_type(GTK_VIEWPORT (img_struct->viewport), GTK_SHADOW_IN);
-	gtk_container_set_border_width(GTK_CONTAINER (img_struct->viewport),10);
+	align = gtk_alignment_new(0.5, 0.5, 0, 0);
+	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(swindow), align);
+
+	image_area_frame = gtk_frame_new(NULL);
+	gtk_frame_set_shadow_type(GTK_FRAME(image_area_frame), GTK_SHADOW_IN);
+	gtk_container_add(GTK_CONTAINER(align), image_area_frame);
+
+	align = gtk_event_box_new();
+	gtk_widget_modify_bg(align, GTK_STATE_NORMAL, &background_color);
+	gtk_container_add(GTK_CONTAINER(image_area_frame), align);
 
 	img_struct->image_area = gtk_image_new();
-	gtk_container_add (GTK_CONTAINER (img_struct->viewport), img_struct->image_area);
+	gtk_widget_set_size_request(img_struct->image_area, 720, 576);
+	gtk_container_add(GTK_CONTAINER(align), img_struct->image_area);
+
+	viewport = gtk_bin_get_child(GTK_BIN(swindow));
+	gtk_viewport_set_shadow_type(GTK_VIEWPORT(viewport), GTK_SHADOW_NONE);
 
 	valign = gtk_alignment_new (1, 0, 0, 0);
 	gtk_box_pack_start (GTK_BOX (hbox), valign, FALSE, FALSE, 0);

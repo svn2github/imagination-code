@@ -380,7 +380,7 @@ void img_start_stop_preview(GtkButton *button, img_window_struct *img)
 		g_signal_connect( G_OBJECT(img->image_area), "expose-event",G_CALLBACK(img_on_expose_event),img);
 
 		/* Create an empty pixbuf - starting white image */
-		img->pixbuf1 = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8,(img->viewport)->allocation.width,(img->viewport)->allocation.height);
+		img->pixbuf1 = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8,img->image_area->allocation.width,img->image_area->allocation.height);
 		gdk_pixbuf_fill(img->pixbuf1,0xffffffff);
 
 		/* Load the first image in the pixbuf */
@@ -423,16 +423,26 @@ static gboolean img_on_expose_event(GtkWidget *widget,GdkEventExpose *event,img_
 GdkPixbuf *img_scale_pixbuf (img_window_struct *img, gchar *filename)
 {
 	GdkPixbuf *pixbuf;
-	GdkPixbufFormat *image_format;
-	gint width,height;
+	GdkPixbuf *compose;
+	gint image_width, image_height;
+	gint width, height;
+	gint offset_x, offset_y;
 
-	image_format = gdk_pixbuf_get_file_info(filename,&width,&height);
-	if (width > (img->viewport)->allocation.width || height > (img->viewport)->allocation.height)
-		pixbuf = gdk_pixbuf_new_from_file_at_scale(filename, (img->viewport)->allocation.width, (img->viewport)->allocation.height, TRUE, NULL);
-	else
-		pixbuf = gdk_pixbuf_new_from_file(filename,NULL);
+	width  = img->image_area->allocation.width;
+	height = img->image_area->allocation.height;
 
-	return pixbuf;
+	pixbuf = gdk_pixbuf_new_from_file_at_scale(filename, width, height, TRUE, NULL);
+	image_width  = gdk_pixbuf_get_width(pixbuf);
+	image_height = gdk_pixbuf_get_height(pixbuf);
+	offset_x = (width - image_width) / 2;
+	offset_y = (height - image_height) / 2;
+
+	compose = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, width, height);
+	gdk_pixbuf_fill(compose, 0xffffffff);
+	gdk_pixbuf_composite(pixbuf, compose, offset_x, offset_y, image_width, image_height, offset_x, offset_y, 1, 1, GDK_INTERP_BILINEAR, 255 );
+	g_object_unref(G_OBJECT(pixbuf));
+
+	return compose;
 }
 
 static gboolean img_transition_timeout(img_window_struct *img)

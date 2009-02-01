@@ -27,24 +27,15 @@ void img_transition_set_name(gchar **name)
 void img_transition_render(GdkDrawable *window, GdkPixbuf *image_from, GdkPixbuf *image_to, gdouble progress)
 {
 	cairo_t *cr;
-	gdouble x,y;
 	gint	width, height;
 
 	gdk_drawable_get_size(window, &width, &height);
-	x = (width  - gdk_pixbuf_get_width (image_to)) / 2;
-	y = (height - gdk_pixbuf_get_height(image_to)) / 2;
 
 	cr = gdk_cairo_create(window);
-	gdk_cairo_set_source_pixbuf(cr,image_to,(gint)x,(gint)y);
+	gdk_cairo_set_source_pixbuf(cr,image_to,0,0);
 	cairo_paint(cr);
 
-	x = (width  - gdk_pixbuf_get_width (image_from)) / 2;
-	y = height;
-
-	y *= progress;
-	if ( y < (height - gdk_pixbuf_get_height(image_from)) / 2)
-		y = (height - gdk_pixbuf_get_height(image_from)) / 2;
-	gdk_cairo_set_source_pixbuf(cr,image_from,x,y);
+	gdk_cairo_set_source_pixbuf(cr,image_from,0,height * progress );
 
 	cairo_paint(cr);
 	cairo_destroy(cr);
