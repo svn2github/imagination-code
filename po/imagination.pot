@@ -1,0 +1,233 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2009-02-04 12:19+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: ../imagination.desktop.in.h:1
+msgid "A DVD slideshow maker"
+msgstr ""
+
+#: ../imagination.desktop.in.h:2
+msgid "A lightweight DVD slideshow maker using GTK+2"
+msgstr ""
+
+#: ../imagination.desktop.in.h:3
+msgid "Imagination"
+msgstr ""
+
+#: ../src/main-window.c:117
+msgid "_Slideshow"
+msgstr ""
+
+#: ../src/main-window.c:146
+msgid "_Preview"
+msgstr ""
+
+#: ../src/main-window.c:154
+msgid "Generate"
+msgstr ""
+
+#: ../src/main-window.c:169
+msgid "_Slide"
+msgstr ""
+
+#: ../src/main-window.c:192
+msgid "Un_select all"
+msgstr ""
+
+#: ../src/main-window.c:200
+msgid "_Import"
+msgstr ""
+
+#: ../src/main-window.c:208
+msgid "_Delete"
+msgstr ""
+
+#: ../src/main-window.c:217
+msgid "_Help"
+msgstr ""
+
+#: ../src/main-window.c:236 ../src/new_slideshow.c:50
+msgid "Create a new slideshow"
+msgstr ""
+
+#: ../src/main-window.c:241
+msgid "Open a slideshow"
+msgstr ""
+
+#: ../src/main-window.c:246
+msgid "Save the slideshow"
+msgstr ""
+
+#: ../src/main-window.c:256
+msgid "Import the slides"
+msgstr ""
+
+#: ../src/main-window.c:262
+msgid "Delete the selected slides"
+msgstr ""
+
+#: ../src/main-window.c:271
+msgid "Preview the slideshow"
+msgstr ""
+
+#: ../src/main-window.c:277
+msgid "Generate the DVD slideshow"
+msgstr ""
+
+#: ../src/main-window.c:294
+msgid "Jump to the entered slide number"
+msgstr ""
+
+#: ../src/main-window.c:341
+msgid "<b>Slide settings</b>"
+msgstr ""
+
+#. Transition types
+#: ../src/main-window.c:351
+msgid "Transition Type:"
+msgstr ""
+
+#: ../src/main-window.c:366
+msgid "Transition Speed:"
+msgstr ""
+
+#: ../src/main-window.c:370
+msgid "Fast"
+msgstr ""
+
+#: ../src/main-window.c:371
+msgid "Normal"
+msgstr ""
+
+#: ../src/main-window.c:372
+msgid "Slow"
+msgstr ""
+
+#: ../src/main-window.c:381
+msgid "Slide Duration in sec:"
+msgstr ""
+
+#: ../src/main-window.c:394
+msgid "Slide number:"
+msgstr ""
+
+#: ../src/main-window.c:406
+msgid "Resolution:"
+msgstr ""
+
+#: ../src/main-window.c:418
+msgid "Type:"
+msgstr ""
+
+#: ../src/main-window.c:429
+msgid "Slideshow Length:"
+msgstr ""
+
+#: ../src/main-window.c:717 ../src/support.c:123
+msgid "None"
+msgstr ""
+
+#: ../src/callbacks.c:90
+msgid "Import slides, use SHIFT key for multiple select"
+msgstr ""
+
+#: ../src/callbacks.c:102
+msgid "All image files"
+msgstr ""
+
+#: ../src/callbacks.c:116
+msgid "All files"
+msgstr ""
+
+#: ../src/callbacks.c:282
+msgid "translator-credits"
+msgstr ""
+
+#: ../src/callbacks.c:522
+msgid "Starts the preview"
+msgstr ""
+
+#: ../src/callbacks.c:532
+msgid "Stops the preview"
+msgstr ""
+
+#: ../src/callbacks.c:576
+msgid "Load an Imagination slideshow project"
+msgstr ""
+
+#: ../src/callbacks.c:577
+msgid "Save an Imagination slideshow project"
+msgstr ""
+
+#: ../src/new_slideshow.c:69
+msgid "<b>Slideshow Settings</b>"
+msgstr ""
+
+#: ../src/new_slideshow.c:83
+msgid "Filename of the slideshow:"
+msgstr ""
+
+#: ../src/new_slideshow.c:95
+msgid "Export the slideshow as:"
+msgstr ""
+
+#: ../src/new_slideshow.c:131
+msgid "<b>Video Format</b>"
+msgstr ""
+
+#: ../src/new_slideshow.c:146
+msgid "Normal 4:3"
+msgstr ""
+
+#: ../src/new_slideshow.c:152
+msgid "Widescreen 16:9"
+msgstr ""
+
+#: ../src/new_slideshow.c:158
+msgid "<b>Television Format</b>"
+msgstr ""
+
+#: ../src/slideshow_project.c:93
+msgid "This is not an Imagination project file!"
+msgstr ""
+
+#: ../src/support.c:89
+#, c-format
+msgid "Welcome to Imagination - %d transitions loaded."
+msgstr ""
+
+#: ../src/support.c:95
+#, c-format
+msgid "%d slides selected"
+msgstr ""
+
+#: ../src/support.c:101
+#, c-format
+msgid "%d slide %s"
+msgid_plural "%d slides %s"
+msgstr[0] ""
+msgstr[1] ""
+
+#: ../src/support.c:101
+msgid ""
+"imported - Use the CTRL key to select/unselect or SHIFT for multiple select"
+msgstr ""
+
+#: ../src/support.c:168
+msgid "Please choose the slideshow project filename"
+msgstr ""

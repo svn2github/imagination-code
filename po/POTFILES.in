@@ -1,6 +1,9 @@
 # List of source files containing translatable strings.
 
-src/main.c
-src/interface.c
+imagination.desktop.in
+src/imagination.c
+src/main-window.c
 src/callbacks.c
+src/new_slideshow.c
+src/slideshow_project.c
 src/support.c
