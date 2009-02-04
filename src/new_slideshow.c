@@ -98,7 +98,7 @@ void img_new_slideshow_settings_dialog(img_window_struct *img)
 
 	slideshow_fmt_combo = _gtk_combo_box_new_text(FALSE);
 	gtk_box_pack_start (GTK_BOX (hbox_slideshow_fmt), slideshow_fmt_combo, TRUE, TRUE, 0);
-	gtk_combo_box_append_text(GTK_COMBO_BOX(slideshow_fmt_combo),"VOB (DVD VIDEO");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(slideshow_fmt_combo),"VOB (DVD VIDEO)");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(slideshow_fmt_combo),"FLV (FLash Video)");
 	gtk_combo_box_set_active(GTK_COMBO_BOX(slideshow_fmt_combo),0);
 
@@ -155,7 +155,7 @@ void img_new_slideshow_settings_dialog(img_window_struct *img)
 	radiobutton2_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (wide));
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (tv), TRUE);
 
-	label_frame2 = gtk_label_new (_("<b>Aspect Ratio</b>"));
+	label_frame2 = gtk_label_new (_("<b>Television Format</b>"));
 	gtk_frame_set_label_widget (GTK_FRAME (frame2), label_frame2);
 	gtk_label_set_use_markup (GTK_LABEL (label_frame2), TRUE);
 
