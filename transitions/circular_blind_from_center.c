@@ -27,8 +27,8 @@ void img_transition_set_name(gchar **name)
 void img_transition_render(GdkDrawable *window, GdkPixbuf *image_from, GdkPixbuf *image_to, gdouble progress)
 {
 	cairo_t *cr;
-	gint     offset_x,offset_y, width, height;
-	gdouble  radius = 470;
+	gint    width, height;
+	gdouble radius = 470;
 
 	gdk_drawable_get_size(window, &width, &height);
 

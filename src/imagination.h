@@ -87,7 +87,7 @@ struct _img_window_struct
 	GtkWidget	*dim_label;
 	GtkWidget	*size_label;
   	GtkWidget	*preview_image;
-  	GtkWidget	*goto_window;
+  	GtkWidget	*slide_number_entry;
   	GtkListStore *thumbnail_model;
   	slide_struct *current_slide;
   	gchar		*current_dir;

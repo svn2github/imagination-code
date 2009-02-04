@@ -17,10 +17,6 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#  include <config.h>
-#endif
-
 #include "callbacks.h"
 
 static void img_file_chooser_add_preview(img_window_struct *);
@@ -238,8 +234,6 @@ void img_delete_selected_slides(GtkMenuItem *item,img_window_struct *img_struct)
 	GtkTreeModel *model;
 	slide_struct *entry;
 
-	if (GTK_WIDGET_HAS_FOCUS(img_struct->duration))
-		return;
 	model = gtk_icon_view_get_model((GtkIconView *)img_struct->thumbnail_iconview);
 	selected = gtk_icon_view_get_selected_items ((GtkIconView *)img_struct->thumbnail_iconview);
 	if (selected == NULL)
