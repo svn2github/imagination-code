@@ -49,7 +49,6 @@ img_window_struct *img_create_window (void)
 	GtkWidget *slide_menu;
 	GtkWidget *separator_slide_menu;
 	GtkWidget *imagemenuitem6;
-	GtkWidget *generate_menu;
 	GtkWidget *imagemenuitem7;
 	GtkWidget *imagemenuitem8;
 	GtkWidget *import_menu;
@@ -62,7 +61,6 @@ img_window_struct *img_create_window (void)
 	GtkWidget *imagemenuitem11;
 	GtkWidget *toolbar;
 	GtkWidget *new_button;
-	GtkWidget *generate_button;
 	GtkWidget *import_button;
 	GtkWidget *separatortoolitem;
 	GtkWidget *toolbutton_slide_goto;
@@ -94,7 +92,6 @@ img_window_struct *img_create_window (void)
 	GtkWidget *total_time;
 	GtkWidget *type;
 	GtkAccelGroup *accel_group;
-	GdkColor background_color = {0, 65535, 65535, 65535};
 	GtkCellRenderer *pixbuf_cell;
 	GtkIconSize tmp_toolbar_icon_size;
 
@@ -151,12 +148,13 @@ img_window_struct *img_create_window (void)
 	tmp_image = gtk_image_new_from_stock (GTK_STOCK_MEDIA_PLAY,GTK_ICON_SIZE_MENU);
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (img_struct->preview_menu),tmp_image);
 
-	generate_menu = gtk_image_menu_item_new_with_mnemonic (_("Generate"));
-	gtk_widget_add_accelerator (generate_menu,"activate",accel_group,GDK_g,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
-	gtk_container_add (GTK_CONTAINER (menu1), generate_menu);
+	img_struct->generate_menu = gtk_image_menu_item_new_with_mnemonic (_("Generate"));
+	gtk_widget_add_accelerator (img_struct->generate_menu,"activate",accel_group,GDK_g,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
+	gtk_container_add (GTK_CONTAINER (menu1), img_struct->generate_menu);
+	g_signal_connect(G_OBJECT(img_struct->generate_menu), "activate", G_CALLBACK(img_start_stop_export), img_struct);
 	  
 	image_menu = img_load_icon ("imagination-generate.png",GTK_ICON_SIZE_MENU);
-	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (generate_menu),image_menu);
+	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (img_struct->generate_menu),image_menu);
 
 	separatormenuitem1 = gtk_separator_menu_item_new ();
 	gtk_container_add (GTK_CONTAINER (menu1), separatormenuitem1);
@@ -272,15 +270,16 @@ img_window_struct *img_create_window (void)
 	g_signal_connect (G_OBJECT (img_struct->preview_button),"clicked",G_CALLBACK (img_start_stop_preview),img_struct);
 
 	tmp_image = img_load_icon("imagination-generate.png",GTK_ICON_SIZE_LARGE_TOOLBAR);
-	generate_button = GTK_WIDGET (gtk_tool_button_new (tmp_image,""));
-	gtk_container_add (GTK_CONTAINER (toolbar),generate_button);
-	gtk_widget_set_tooltip_text(generate_button, _("Generate the DVD slideshow"));
+	img_struct->generate_button = GTK_WIDGET (gtk_tool_button_new (tmp_image,""));
+	gtk_container_add (GTK_CONTAINER (toolbar),img_struct->generate_button);
+	gtk_widget_set_tooltip_text(img_struct->generate_button, _("Generate the DVD slideshow"));
+	g_signal_connect(G_OBJECT(img_struct->generate_button), "clicked", G_CALLBACK(img_start_stop_export), img_struct);
 
 	separatortoolitem = GTK_WIDGET (gtk_separator_tool_item_new());
 	gtk_widget_show (separatortoolitem);
 	gtk_container_add (GTK_CONTAINER (toolbar),separatortoolitem);
 
-	toolbutton_slide_goto = (GtkWidget*) gtk_tool_item_new ();
+	toolbutton_slide_goto = GTK_WIDGET(gtk_tool_item_new ());
 	gtk_container_add (GTK_CONTAINER (toolbar), toolbutton_slide_goto);
  
 	img_struct->slide_number_entry = gtk_entry_new();
@@ -313,7 +312,6 @@ img_window_struct *img_create_window (void)
 	gtk_container_add(GTK_CONTAINER(align), image_area_frame);
 
 	align = gtk_event_box_new();
-	gtk_widget_modify_bg(align, GTK_STATE_NORMAL, &background_color);
 	gtk_container_add(GTK_CONTAINER(image_area_frame), align);
 
 	img_struct->image_area = gtk_image_new();

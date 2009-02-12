@@ -18,14 +18,22 @@
  */
 
 #include "callbacks.h"
+#include <unistd.h>
 
 static void img_file_chooser_add_preview(img_window_struct *);
 static void img_update_preview_file_chooser(GtkFileChooser *,img_window_struct *);
 static gboolean img_on_expose_event(GtkWidget *,GdkEventExpose *,img_window_struct *);
 static gboolean img_transition_timeout(img_window_struct *);
 static gboolean img_sleep_timeout(img_window_struct *);
+static gboolean img_prepare_pixbufs(img_window_struct *);
 static void img_swap_toolbar_images( img_window_struct *, gboolean);
 static void img_clean_after_preview(img_window_struct *img);
+
+/* Export related functions */
+static gboolean img_export_transition(img_window_struct *);
+static gboolean img_export_still(img_window_struct *);
+static void img_clean_after_export(img_window_struct *);
+static void img_export_pixbuf_to_ppm(GdkPixbuf *, guchar **, guint *);
 
 void img_set_window_title(img_window_struct *img, gchar *text)
 {
@@ -240,6 +248,7 @@ void img_delete_selected_slides(GtkMenuItem *item,img_window_struct *img_struct)
 		return;
 	
 	/* Free the slide struct for each slide and remove it from the iconview */
+	selected = g_list_last( selected );
 	while (selected)
   	{
   		gtk_tree_model_get_iter(model, &iter,selected->data);
@@ -250,7 +259,7 @@ void img_delete_selected_slides(GtkMenuItem *item,img_window_struct *img_struct)
   		g_free(entry);
   		gtk_list_store_remove((GtkListStore*) img_struct->thumbnail_model,&iter);
   		img_struct->slides_nr--;
-  		selected = selected->next;
+  		selected = selected->prev;
   	}
 	g_list_foreach (selected, (GFunc)gtk_tree_path_free, NULL);
 	g_list_free(selected);
@@ -309,6 +318,7 @@ void img_set_total_slideshow_duration(img_window_struct *img)
 	GtkTreeIter iter;
 	slide_struct *entry;
 	GtkTreeModel *model;
+	gint h, m, s;
 
 	model = gtk_icon_view_get_model(GTK_ICON_VIEW(img->thumbnail_iconview));
 	if (!gtk_tree_model_get_iter_first (model,&iter))
@@ -319,21 +329,29 @@ void img_set_total_slideshow_duration(img_window_struct *img)
 	{
 		gtk_tree_model_get(model, &iter,1,&entry,-1);
 		img->total_secs += entry->duration;
-		if (entry->speed == FAST && entry->render)
+		/* With new fixed-time transitions we can calculate duration
+		 * more precisely. */
+		/*if (entry->speed == FAST && entry->render)
 			img->total_secs += 1;
 		else if (entry->speed == NORMAL && entry->render)
 			img->total_secs += 3;
 		else if (entry->speed == SLOW && entry->render)
-			img->total_secs += 13;
+			img->total_secs += 13;*/
+		if(entry->render)
+			img->total_secs += (1 / entry->speed) / 25;
 	}
 	while (gtk_tree_model_iter_next (model,&iter));
 
-	time = g_strdup_printf("%02d:%02d:%02d", img->total_secs/3600, img->total_secs/60, img->total_secs);
+	/* Fix secs -> hour, mins and secs conversion */
+	h =  img->total_secs / 3600;
+	m = (img->total_secs % 3600) / 60;
+	s =  img->total_secs - (h * 3600) - (m * 60);
+	time = g_strdup_printf("%02d:%02d:%02d", h, m, s);
 	gtk_label_set_text((GtkLabel*)img->total_time_data,time);
 	g_free(time);
 }
 
-void img_start_stop_preview(GtkButton *button, img_window_struct *img)
+void img_start_stop_preview(GtkWidget *button, img_window_struct *img)
 {
 	GtkTreeIter iter;
 	slide_struct *entry;
@@ -391,13 +409,15 @@ void img_start_stop_preview(GtkButton *button, img_window_struct *img)
 
 static gboolean img_on_expose_event(GtkWidget *widget,GdkEventExpose *event,img_window_struct *img)
 {
+	/* We always pass negative number as a last parameter when we want to
+	 * draw on screen. */
 	if ((img->current_slide)->render)
-		(img->current_slide)->render (widget->window, img->pixbuf1,img->pixbuf2,img->progress);
+		(img->current_slide)->render (widget->window, img->pixbuf1, img->pixbuf2,img->progress, -1);
 	else
 	{
 		/* This is "None" transition renderer */
 		cairo_t *cr;
-		gint     offset_x,offset_y, width, height;
+		gint     offset_x, offset_y, width, height;
 
 		gdk_drawable_get_size(widget->window, &width, &height);
 		offset_x = (width  - gdk_pixbuf_get_width (img->pixbuf2)) / 2;
@@ -417,6 +437,7 @@ GdkPixbuf *img_scale_pixbuf (img_window_struct *img, gchar *filename)
 {
 	GdkPixbuf *pixbuf;
 	GdkPixbuf *compose;
+	GdkPixbufFormat *format;
 	gint image_width, image_height;
 	gint width, height;
 	gint offset_x, offset_y;
@@ -424,7 +445,12 @@ GdkPixbuf *img_scale_pixbuf (img_window_struct *img, gchar *filename)
 	width  = img->image_area->allocation.width;
 	height = img->image_area->allocation.height;
 
-	pixbuf = gdk_pixbuf_new_from_file_at_scale(filename, width, height, TRUE, NULL);
+	format = gdk_pixbuf_get_file_info(filename, &image_width, &image_height);
+	if(image_width < width && image_height < height)
+		pixbuf = gdk_pixbuf_new_from_file(filename, NULL);
+	else
+		pixbuf = gdk_pixbuf_new_from_file_at_scale(filename, width, height, TRUE, NULL);
+
 	image_width  = gdk_pixbuf_get_width(pixbuf);
 	image_height = gdk_pixbuf_get_height(pixbuf);
 	offset_x = (width - image_width) / 2;
@@ -473,28 +499,8 @@ static gboolean img_transition_timeout(img_window_struct *img)
 
 static gboolean img_sleep_timeout(img_window_struct *img)
 {
-	GtkTreeModel *model = GTK_TREE_MODEL( img->thumbnail_model );
-
-	/* Get the first iter when we enter this function for the first time
-	 * in current preview cycle. */
-	if( ! img->cur_ss_iter )
+	if(img_prepare_pixbufs(img))
 	{
-		img->cur_ss_iter = g_slice_new( GtkTreeIter );
-		gtk_tree_model_get_iter_first( model, img->cur_ss_iter );
-	}
-
-	/* Move to the next image in the model. The first image is never
-	 * reached, but that's OK since we already have first image in
-	 * img->pixbuf2 from initialization in slideshow start handler. If
-	 * the function returns FALSE, we reached the end of the model and
-	 * will not call another img_transition function again. */
-	if( gtk_tree_model_iter_next( model, img->cur_ss_iter ) )
-	{
-		g_object_unref( G_OBJECT( img->pixbuf1 ) );
-		img->pixbuf1 = img->pixbuf2;
-		gtk_tree_model_get( model, img->cur_ss_iter, 1, &img->current_slide, -1 );
-		img->pixbuf2 = img_scale_pixbuf( img, img->current_slide->filename );
-
 		img->source_id = g_timeout_add( TRANSITION_TIMEOUT,(GSourceFunc)img_transition_timeout,img );
 	}
 	else
@@ -540,11 +546,8 @@ static void img_clean_after_preview(img_window_struct *img)
 	gtk_widget_set_app_paintable(img->image_area, FALSE);
 
 	/* Restore image that was used before preview */
-	if (img->slide_pixbuf)
-	{	
-		gtk_image_set_from_pixbuf(GTK_IMAGE(img->image_area), img->slide_pixbuf);
-		g_object_unref(G_OBJECT(img->slide_pixbuf));
-	}
+	gtk_image_set_from_pixbuf(GTK_IMAGE(img->image_area), img->slide_pixbuf);
+	g_object_unref(G_OBJECT(img->slide_pixbuf));
 
 	/* Swap toolbar and menu icons */
 	img_swap_toolbar_images( img, TRUE );
@@ -605,4 +608,232 @@ void img_choose_slideshow_filename(GtkWidget *widget, img_window_struct *img)
 	
 	if (filename)
 		g_free(filename);
+}
+
+void img_start_stop_export(GtkWidget *widget, img_window_struct *img)
+{
+	GtkTreeIter   iter;
+	slide_struct *entry;
+	GtkTreeModel *model;
+
+	/* If we are displaying preview, abort or bad things will happen. */
+	if(img->preview_is_running)
+		return;
+
+	model = gtk_icon_view_get_model(GTK_ICON_VIEW(img->thumbnail_iconview));
+	if(!gtk_tree_model_get_iter_first(model, &iter))
+			return;
+
+	if(img->export_is_running)
+	{
+		/* Remove idle function from main loop */
+		g_source_remove(img->source_id);
+
+		/* Clean resources used by export. */
+		img_clean_after_export(img);
+	}
+	else
+	{
+		img->file_desc = g_open("/tmp/img.fifo",O_WRONLY,0);
+
+		/* Create progress window with cancel and pause buttons, calculate the total number of frames to display (needed for progress bar).
+		 
+		/* Connect expose event handler */
+		img->slide_pixbuf = gtk_image_get_pixbuf(GTK_IMAGE(img->image_area));
+		if(img->slide_pixbuf)
+			g_object_ref(G_OBJECT(img->slide_pixbuf));
+		gtk_image_clear(GTK_IMAGE(img->image_area));
+		gtk_widget_set_app_paintable(img->image_area, TRUE);
+		g_signal_connect(G_OBJECT(img->image_area), "expose-event", G_CALLBACK(img_on_expose_event), img);
+
+		/* Create an empty pixbuf for starting image. */
+		img->pixbuf1 = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, img->image_area->allocation.width, img->image_area->allocation.height);
+		gdk_pixbuf_fill(img->pixbuf1, img->background_color);
+
+		/* Load first image from model */
+		gtk_tree_model_get(model, &iter, 1, &entry, -1);
+		img->pixbuf2 = img_scale_pixbuf(img, entry->filename);
+
+		/* Add export idle function */
+		img->export_is_running = TRUE;
+		img->current_slide = entry;
+		img->progress = 0;
+		img->source_id = g_idle_add((GSourceFunc)img_export_transition, img);
+	}
+}
+
+static gboolean img_export_transition(img_window_struct *img)
+{
+	/* Counter, used to draw every 10th frame. */
+	static guint counter = 0;
+
+	/* If no transition effect is set, just connect still export
+	 * idle function and remove itself from main loop. */
+	if(img->current_slide->render == NULL)
+	{
+		img->source_id = g_idle_add((GSourceFunc)img_export_still, img);
+		return(FALSE);
+	}
+
+	img->progress += img->current_slide->speed * (25 / 29.97);
+	if(img->progress > 1 + 0.00000005)
+	{
+		img->progress = 0;
+		counter = 0;
+		img->source_id = g_idle_add((GSourceFunc)img_export_still, img);
+
+		return(FALSE);
+	}
+
+	/* Draw one frame of transition animation */
+	img->current_slide->render(img->image_area->window, img->pixbuf1, img->pixbuf2, img->progress, img->file_desc);
+	counter++;
+
+	/* Draw every 10th frame of animation on screen */
+	if(counter % 10 == 0)
+		gtk_widget_queue_draw(img->image_area);
+
+	return(TRUE);
+}
+
+static gboolean img_export_still(img_window_struct *img)
+{
+	static guint   frame_counter;
+	static guint   lenght;
+
+	/* Initialize pixbuf data buffer */
+	if(img->pixbuf_data == NULL)
+	{
+		frame_counter = 0;
+		gtk_image_set_from_pixbuf(GTK_IMAGE(img->image_area), img->pixbuf2);
+		img_export_pixbuf_to_ppm(img->pixbuf2, &img->pixbuf_data, &lenght);
+	}
+
+	/* FIXED RATE!!!
+	 * Draw frames until we have enough of them to fill slide duration gap.
+	 * Again, output rate is fixed at 29.97 fps. */
+	if(frame_counter > img->current_slide->duration * 29.97)
+	{
+		/* Exit still rendering and continue with next transition. */
+
+		/* Clear image area for next renderer */
+		gtk_image_clear(GTK_IMAGE(img->image_area));
+
+		/* Load next image from store. */
+		if(img_prepare_pixbufs(img))
+		{
+			g_free(img->pixbuf_data);
+			img->pixbuf_data = NULL;
+			img->source_id = g_idle_add((GSourceFunc)img_export_transition, img);
+		}
+		else
+			img_clean_after_export(img);
+
+		return(FALSE);
+	}
+
+	frame_counter++;
+
+	return(TRUE);
+}
+
+static void img_clean_after_export(img_window_struct *img)
+{
+	/* Disconnect expose event */
+	g_signal_handlers_block_by_func(img->image_area, img_on_expose_event, img);
+	gtk_widget_set_app_paintable(img->image_area, FALSE);
+
+	/* Restore image that was used before export */
+	gtk_image_set_from_pixbuf(GTK_IMAGE(img->image_area), img->slide_pixbuf);
+	if(img->slide_pixbuf)
+		g_object_unref(G_OBJECT(img->slide_pixbuf));
+
+	/* Indicate that export is not running any more */
+	img->export_is_running = FALSE;
+
+	/* Clean other resources */
+	g_slice_free(GtkTreeIter, img->cur_ss_iter);
+	img->cur_ss_iter = NULL;
+	g_free(img->pixbuf_data);
+	img->pixbuf_data = NULL;
+
+	close(img->file_desc);
+	//g_unlink("/tmp/img.fifo");
+}
+
+/* Move one step forward in model and set img->pixbuf1 and img->pixbuf2
+ * to appropriate values.
+ * Return FALSE if we reached the end of the model, else TRUE. */
+static gboolean img_prepare_pixbufs(img_window_struct *img)
+{
+	GtkTreeModel *model;
+
+	model = gtk_icon_view_get_model(GTK_ICON_VIEW(img->thumbnail_iconview));
+
+	if(!img->cur_ss_iter)
+	{
+		img->cur_ss_iter = g_slice_new(GtkTreeIter);
+		gtk_tree_model_get_iter_first(model, img->cur_ss_iter);
+	}
+
+	if(gtk_tree_model_iter_next(model, img->cur_ss_iter))
+	{
+		g_object_unref(G_OBJECT(img->pixbuf1));
+		img->pixbuf1 = img->pixbuf2;
+		gtk_tree_model_get(model, img->cur_ss_iter, 1, &img->current_slide, -1);
+		img->pixbuf2 = img_scale_pixbuf(img, img->current_slide->filename);
+
+		return(TRUE);
+	}
+	else
+		return(FALSE);
+
+
+	if(gtk_tree_model_iter_next(model, img->cur_ss_iter))
+	{
+		g_object_unref(G_OBJECT(img->pixbuf1));
+		img->pixbuf1 = img->pixbuf2;
+		gtk_tree_model_get(model, img->cur_ss_iter, 1, &img->current_slide, -1);
+		img->pixbuf2 = img_scale_pixbuf(img, img->current_slide->filename);
+
+		return(TRUE);
+	}
+	else
+		return(FALSE);
+}
+
+static void img_export_pixbuf_to_ppm(GdkPixbuf *pixbuf, guchar **data, guint *lenght)
+{
+	gint      width, height, stride, channels;
+	guchar   *pixels, *tmp;
+	gint      col, row;
+	gchar    *header;
+	gint      header_lenght;
+
+	width    = gdk_pixbuf_get_width(pixbuf);
+	height   = gdk_pixbuf_get_height(pixbuf);
+	stride   = gdk_pixbuf_get_rowstride(pixbuf);
+	channels = gdk_pixbuf_get_n_channels(pixbuf);
+	pixels   = gdk_pixbuf_get_pixels(pixbuf);
+
+	header = g_strdup_printf("P6\n%d %d\n255\n", width, height);
+	header_lenght = strlen(header) * sizeof(gchar);
+
+	*lenght = sizeof(guchar) * width * height * channels + header_lenght;
+	*data = g_slice_alloc(sizeof(guchar) * *lenght);
+
+	memcpy(*data, header, header_lenght);
+	tmp = *data + header_lenght;
+	for(row = 0; row < height; row++)
+	{
+		for(col = 0; col < width; col++)
+		{
+			tmp[0] = pixels[2];
+			tmp[1] = pixels[1];
+			tmp[2] = pixels[0];
+
+			tmp    += 3;
+			pixels += channels;
+		}
+	}
 }

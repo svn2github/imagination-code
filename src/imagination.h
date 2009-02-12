@@ -24,12 +24,18 @@
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
 
-/* Timeout (in miliseconds) for transition effects */
-#define TRANSITION_TIMEOUT 15
+/* Timeout (in miliseconds) for transition effects. I increased this value
+ * to 40 to obtain 25 fps animation, which should be drawn within the same
+ * time frame on any computer (67 fps is too intensive for even most
+ * powerfull machines to handle). */
+#define TRANSITION_TIMEOUT 40
 
-#define	FAST	0.05
-#define	NORMAL	0.01
-#define	SLOW	0.005
+/* Increments are modified to accomodate 25 fps animation set above.
+ * With new lover fps anmation, we can be pretty sure that animation time
+ * will be fixed and approximatelly the same on all computers. */
+#define	FAST	0.04	/*  25 frames - 1 s */
+#define	NORMAL	0.01	/* 100 frames - 4 s */
+#define	SLOW	0.005	/* 200 frames - 8 s */
 
 #define comment_string	"Imagination 1.0 Slideshow Project - http://imagination.sf.net"
 
@@ -37,8 +43,8 @@ typedef struct _plugin plugin;
 
 struct _plugin
 {
-	const gchar	*name;			/* The name of the transition */
-	gpointer	address;		/* The mem address of the routine */
+	const gchar	*name;		/* The name of the transition */
+	gpointer	address;	/* The mem address of the routine */
 };
 
 typedef struct _slide_struct slide_struct;
@@ -50,7 +56,7 @@ struct _slide_struct
 	gdouble	speed;
 	gchar	*resolution;
 	gchar	*type;
-	void	(*render) (GdkDrawable*, GdkPixbuf*, GdkPixbuf*, gdouble);
+	void	(*render) (GdkDrawable*, GdkPixbuf*, GdkPixbuf*, gdouble, gint);
 	gint    combo_transition_type_index;
 };
 
@@ -68,6 +74,8 @@ struct _img_window_struct
 	GtkWidget	*remove_button;
 	GtkWidget	*preview_menu;
 	GtkWidget 	*preview_button;
+	GtkWidget   *generate_menu;
+	GtkWidget   *generate_button;
 	GtkWidget	*transition_type;
 	GtkWidget	*duration;
 	GtkWidget	*trans_duration;
@@ -95,6 +103,7 @@ struct _img_window_struct
   	gchar		*aspect_ratio;
   	GtkTreeIter *cur_ss_iter;
   	GSList		*plugin_list;
+	gint        file_desc;
 	gint		slideshow_format_index;
   	gint		slides_nr;
   	gint		slideshow_height;
@@ -103,7 +112,10 @@ struct _img_window_struct
   	guint		context_id;
   	guint		source_id;
   	gboolean	preview_is_running;
+	gboolean    export_is_running;
 	gdouble     progress;
+	guint32     background_color;
+	guchar      *pixbuf_data;
 };
 
 #endif

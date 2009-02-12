@@ -44,6 +44,9 @@ int main (int argc, char *argv[])
 	/* Load the transitions as plugins with GModule */
 	img_load_available_transitions(img_window);
 
+	/* Set some default values */
+	img_window->background_color = 0xffffffff;
+
 	gtk_widget_show (img_window->imagination_window);
 	img_set_statusbar_message(img_window,0);
 
