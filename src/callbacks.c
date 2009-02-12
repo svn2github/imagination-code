@@ -636,9 +636,7 @@ void img_start_stop_export(GtkWidget *widget, img_window_struct *img)
 	{
 		img->file_desc = g_open("/tmp/img.fifo",O_WRONLY,0);
 
-		/* Create progress window with cancel and pause buttons, calculate the total number of frames to display (needed for progress bar).
-		 
-		/* Connect expose event handler */
+		/* Create progress window with cancel and pause buttons, calculate the total number of frames to display */
 		img->slide_pixbuf = gtk_image_get_pixbuf(GTK_IMAGE(img->image_area));
 		if(img->slide_pixbuf)
 			g_object_ref(G_OBJECT(img->slide_pixbuf));
@@ -731,7 +729,7 @@ static gboolean img_export_still(img_window_struct *img)
 
 		return(FALSE);
 	}
-
+	write(img->file_desc, img->pixbuf_data, lenght);
 	frame_counter++;
 
 	return(TRUE);
@@ -828,9 +826,9 @@ static void img_export_pixbuf_to_ppm(GdkPixbuf *pixbuf, guchar **data, guint *le
 	{
 		for(col = 0; col < width; col++)
 		{
-			tmp[0] = pixels[2];
+			tmp[0] = pixels[0];
 			tmp[1] = pixels[1];
-			tmp[2] = pixels[0];
+			tmp[2] = pixels[2];
 
 			tmp    += 3;
 			pixels += channels;

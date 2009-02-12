@@ -272,7 +272,7 @@ img_window_struct *img_create_window (void)
 	tmp_image = img_load_icon("imagination-generate.png",GTK_ICON_SIZE_LARGE_TOOLBAR);
 	img_struct->generate_button = GTK_WIDGET (gtk_tool_button_new (tmp_image,""));
 	gtk_container_add (GTK_CONTAINER (toolbar),img_struct->generate_button);
-	gtk_widget_set_tooltip_text(img_struct->generate_button, _("Generate the DVD slideshow"));
+	gtk_widget_set_tooltip_text(img_struct->generate_button, _("Export the DVD slideshow"));
 	g_signal_connect(G_OBJECT(img_struct->generate_button), "clicked", G_CALLBACK(img_start_stop_export), img_struct);
 
 	separatortoolitem = GTK_WIDGET (gtk_separator_tool_item_new());
