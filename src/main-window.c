@@ -94,11 +94,16 @@ img_window_struct *img_create_window (void)
 	GtkAccelGroup *accel_group;
 	GtkCellRenderer *pixbuf_cell;
 	GtkIconSize tmp_toolbar_icon_size;
+	GtkIconTheme *icon_theme;
+	GdkPixbuf *icon;
 
 	accel_group = gtk_accel_group_new ();
+	icon_theme = gtk_icon_theme_get_default();
+	icon = gtk_icon_theme_load_icon(icon_theme,"imagination",24,0,NULL);
 
 	img_struct = g_new0(img_window_struct,1);
 	img_struct->imagination_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+	gtk_window_set_icon (GTK_WINDOW(img_struct->imagination_window),icon);
 	gtk_window_set_default_size (GTK_WINDOW (img_struct->imagination_window), 1030, 800);
 	img_set_window_title(img_struct,NULL);
 	g_signal_connect (G_OBJECT (img_struct->imagination_window),"delete-event",G_CALLBACK (img_quit_application),img_struct);

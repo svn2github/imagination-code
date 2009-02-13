@@ -26,6 +26,7 @@
 
 #include <gtk/gtk.h>
 #include <string.h>
+#include <unistd.h>
 #include "imagination.h"
 #include "sexy-icon-entry.h"
 

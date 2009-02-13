@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in
 
-SUBDIRS = src pixmaps transitions po
+SUBDIRS = icons src pixmaps transitions po
 
 EXTRA_DIST = \
 	autogen.sh \
