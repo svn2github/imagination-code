@@ -356,6 +356,9 @@ void img_start_stop_preview(GtkWidget *button, img_window_struct *img)
 	slide_struct *entry;
 	GtkTreeModel *model;
 
+	if(img->export_is_running)
+		return;
+		
 	model = gtk_icon_view_get_model(GTK_ICON_VIEW(img->thumbnail_iconview));
 	if( ! gtk_tree_model_get_iter_first (model,&iter))
 		return;
@@ -428,7 +431,6 @@ static gboolean img_on_expose_event(GtkWidget *widget,GdkEventExpose *event,img_
 		
 		cairo_destroy(cr);
 	}
-
 	return FALSE;
 }
 
@@ -477,7 +479,7 @@ static gboolean img_transition_timeout(img_window_struct *img)
 		img->progress = 0;
 		img->source_id = g_timeout_add( img->current_slide->duration * 1000, (GSourceFunc)img_sleep_timeout, img );
 		gtk_widget_queue_draw( img->image_area );
-		return( FALSE );
+		return FALSE;
 	}
 
 	/* If the progress reached 1, the transition should be finished and
@@ -487,13 +489,13 @@ static gboolean img_transition_timeout(img_window_struct *img)
 	{
 		img->progress = 0;
 		img->source_id = g_timeout_add( img->current_slide->duration * 1000,(GSourceFunc)img_sleep_timeout, img );
-		return( FALSE );
+		return FALSE;
 	}
 
 	/* Schedule our image redraw */
 	gtk_widget_queue_draw( img->image_area );
 
-	return( TRUE );
+	return TRUE;
 }
 
 static gboolean img_sleep_timeout(img_window_struct *img)
@@ -509,7 +511,7 @@ static gboolean img_sleep_timeout(img_window_struct *img)
 		img_clean_after_preview(img);
 	}
 
-	return( FALSE );
+	return FALSE;
 }
 
 static void img_swap_toolbar_images( img_window_struct *img,gboolean flag )
@@ -755,7 +757,7 @@ static void img_clean_after_export(img_window_struct *img)
 	img->pixbuf_data = NULL;
 
 	close(img->file_desc);
-	//g_unlink("/tmp/img.fifo");
+	g_unlink("/tmp/img.fifo");
 }
 
 /* Move one step forward in model and set img->pixbuf1 and img->pixbuf2
