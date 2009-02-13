@@ -50,6 +50,7 @@
 #  define N_(String) (String)
 #endif
 
+void img_export_cairo_to_ppm(cairo_surface_t *, gint );
 GtkWidget *img_load_icon(gchar *, GtkIconSize );
 GtkWidget *_gtk_combo_box_new_text(gboolean);
 void img_set_statusbar_message(img_window_struct *, gint);

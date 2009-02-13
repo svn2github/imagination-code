@@ -24,14 +24,24 @@ void img_transition_set_name(gchar **name)
 	*name = "Blind Bottom Left";
 }
 
-void img_transition_render(GdkDrawable *window, GdkPixbuf *image_from, GdkPixbuf *image_to, gdouble progress)
+void img_transition_render(GdkDrawable *window, GdkPixbuf *image_from, GdkPixbuf *image_to, gdouble progress, gint file_desc)
 {
 	cairo_t *cr;
+	cairo_surface_t *surface;
 	gint     width, height;
 
 	gdk_drawable_get_size(window, &width, &height);
 
-	cr = gdk_cairo_create(window);
+	if(file_desc < 0)
+	{
+		cr = gdk_cairo_create(window);
+	}
+	else
+	{
+		surface = cairo_image_surface_create(CAIRO_FORMAT_RGB24, width, height);
+		cr = cairo_create(surface);
+	}
+
 	gdk_cairo_set_source_pixbuf(cr,image_from,0,0);
 	cairo_paint(cr);
 
@@ -41,4 +51,10 @@ void img_transition_render(GdkDrawable *window, GdkPixbuf *image_from, GdkPixbuf
 	cairo_clip(cr);
 	cairo_paint(cr);
 	cairo_destroy(cr);
+	
+	if(file_desc < 0)
+		return;
+
+	img_export_cairo_to_ppm(surface, file_desc);
+	cairo_surface_destroy(surface);
 }

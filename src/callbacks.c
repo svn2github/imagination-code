@@ -248,7 +248,6 @@ void img_delete_selected_slides(GtkMenuItem *item,img_window_struct *img_struct)
 		return;
 	
 	/* Free the slide struct for each slide and remove it from the iconview */
-	selected = g_list_last( selected );
 	while (selected)
   	{
   		gtk_tree_model_get_iter(model, &iter,selected->data);
@@ -259,7 +258,7 @@ void img_delete_selected_slides(GtkMenuItem *item,img_window_struct *img_struct)
   		g_free(entry);
   		gtk_list_store_remove((GtkListStore*) img_struct->thumbnail_model,&iter);
   		img_struct->slides_nr--;
-  		selected = selected->prev;
+  		selected = selected->next;
   	}
 	g_list_foreach (selected, (GFunc)gtk_tree_path_free, NULL);
 	g_list_free(selected);

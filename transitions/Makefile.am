@@ -40,22 +40,22 @@ plugin_LTLIBRARIES = \
 	push_from_left.la	\
 	push_from_right.la
 
-circular_blind_from_center_la_SOURCES		= circular_blind_from_center.c
-circular_blind_to_center_la_SOURCES		= circular_blind_to_center.c
-blind_down_la_SOURCES	= blind_down.c
-blind_up_la_SOURCES		= blind_up.c
-blind_right_la_SOURCES	= blind_right.c
-blind_left_la_SOURCES	= blind_left.c
-blind_top_right_la_SOURCES	= blind_top_right.c
-blind_top_left_la_SOURCES	= blind_top_left.c
-blind_bottom_left_la_SOURCES	= blind_bottom_left.c
-blind_bottom_right_la_SOURCES	= blind_bottom_right.c
-move_from_bottom_la_SOURCES	= move_from_bottom.c
-move_to_bottom_la_SOURCES	= move_to_bottom.c
-push_to_bottom_la_SOURCES	= push_to_bottom.c
-push_from_bottom_la_SOURCES	= push_from_bottom.c
-push_from_left_la_SOURCES	= push_from_left.c
-push_from_right_la_SOURCES	= push_from_right.c
+circular_blind_from_center_la_SOURCES		= ../src/support.c circular_blind_from_center.c
+circular_blind_to_center_la_SOURCES			= ../src/support.c circular_blind_to_center.c
+blind_down_la_SOURCES	= ../src/support.c blind_down.c
+blind_up_la_SOURCES		= ../src/support.c blind_up.c
+blind_right_la_SOURCES	= ../src/support.c blind_right.c
+blind_left_la_SOURCES	= ../src/support.c blind_left.c
+blind_top_right_la_SOURCES	= ../src/support.c blind_top_right.c
+blind_top_left_la_SOURCES	= ../src/support.c blind_top_left.c
+blind_bottom_left_la_SOURCES	= ../src/support.c blind_bottom_left.c
+blind_bottom_right_la_SOURCES	= ../src/support.c blind_bottom_right.c
+move_from_bottom_la_SOURCES	= ../src/support.c move_from_bottom.c
+move_to_bottom_la_SOURCES	= ../src/support.c move_to_bottom.c
+push_to_bottom_la_SOURCES	= ../src/support.c push_to_bottom.c
+push_from_bottom_la_SOURCES	= ../src/support.c push_from_bottom.c
+push_from_left_la_SOURCES	= ../src/support.c push_from_left.c
+push_from_right_la_SOURCES	= ../src/support.c push_from_right.c
 
 # instead of linking against all in $(GTK_LIBS), we link only against needed libs
 circular_blind_from_center_la_LIBADD	 = $(PACKAGE_LIBS)
