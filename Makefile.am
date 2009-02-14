@@ -1,10 +1,15 @@
 ## Process this file with automake to produce Makefile.in
 
-SUBDIRS = icons src pixmaps transitions po
+SUBDIRS = icons src transitions po
 
 EXTRA_DIST = \
 	autogen.sh \
 	imagination.desktop.in
+
+uninstall-local:
+	rm -rf $(DESTDIR)$(pkgdatadir);
+	rm -f $(DESTDIR)$(datadir)/pixmaps/imagination-import.png;
+	rm -f $(DESTDIR)$(datadir)/pixmaps/imagination-generate.png;
 
 install-data-local:
 	@$(NORMAL_INSTALL)

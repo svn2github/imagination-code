@@ -243,6 +243,7 @@ void img_delete_selected_slides(GtkMenuItem *item,img_window_struct *img_struct)
 	slide_struct *entry;
 
 	model = gtk_icon_view_get_model((GtkIconView *)img_struct->thumbnail_iconview);
+	
 	selected = gtk_icon_view_get_selected_items ((GtkIconView *)img_struct->thumbnail_iconview);
 	if (selected == NULL)
 		return;
@@ -256,7 +257,11 @@ void img_delete_selected_slides(GtkMenuItem *item,img_window_struct *img_struct)
   		g_free(entry->resolution);
   		g_free(entry->type);
   		g_free(entry);
+
+		g_signal_handlers_block_by_func((gpointer)img_struct->thumbnail_iconview, (gpointer)img_iconview_selection_changed, img_struct);
   		gtk_list_store_remove((GtkListStore*) img_struct->thumbnail_model,&iter);
+		g_signal_handlers_unblock_by_func((gpointer)img_struct->thumbnail_iconview, (gpointer)img_iconview_selection_changed, img_struct);  		
+ 
   		img_struct->slides_nr--;
   		selected = selected->next;
   	}
@@ -269,7 +274,7 @@ void img_delete_selected_slides(GtkMenuItem *item,img_window_struct *img_struct)
 void img_show_about_dialog (GtkMenuItem *item,img_window_struct *img_struct)
 {
 	static GtkWidget *about = NULL;
-    const char *authors[] = {"\nMain developer:\nGiuseppe Torelli <colossus73@gmail.com>\n\nCode improvements and patches:\nTadej Borovšak",NULL};
+    const char *authors[] = {"\nMain developer:\nGiuseppe Torelli <colossus73@gmail.com>\n\nCode improvements and patches:\nTadej Borovšak\n\nImagination logo:\nDadster from http://linuxgraphicsusers.com\n\n",NULL};
     const char *documenters[] = {NULL};
 
 	if (about == NULL)

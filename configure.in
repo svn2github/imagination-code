@@ -19,6 +19,12 @@ AC_DISABLE_STATIC
 AM_PROG_LIBTOOL
 LIBTOOL="$LIBTOOL --silent"
 
+#check for ffmpeg
+AC_CHECK_PROG([have_ffmpeg], [ffmpeg], [yes], [no])
+if test "x$have_ffmpeg" = "xno"; then
+	AC_MSG_ERROR([Can't find ffmpeg executable. Please install it ffmpeg package.])
+fi
+
 pkg_modules="gtk+-2.0 >= 2.12.0"
 PKG_CHECK_MODULES(PACKAGE, [$pkg_modules])
 
@@ -37,6 +43,8 @@ AM_GLIB_GNU_GETTEXT
 
 AC_SUBST(DEVELOPMENT_CFLAGS)
 
+GTK_VERSION=`$PKG_CONFIG --modversion gtk+-2.0`
+
 AC_OUTPUT([
 Makefile
 src/Makefile
@@ -47,7 +55,15 @@ icons/16x16/Makefile
 icons/24x24/Makefile
 icons/48x48/Makefile
 icons/scalable/Makefile
-pixmaps/Makefile
 imagination.desktop.in
 ])
 
+echo "
+
+Imagination configuration:
+------------------------
+
+	Install in  :       ${prefix}/bin
+	GTK version :       ${GTK_VERSION}
+
+"

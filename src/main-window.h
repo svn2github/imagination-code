@@ -36,4 +36,5 @@ typedef enum
 */
 
 img_window_struct *img_create_window(void);
+void img_iconview_selection_changed (GtkIconView *, img_window_struct *);
 #endif

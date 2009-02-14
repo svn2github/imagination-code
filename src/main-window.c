@@ -24,7 +24,6 @@
 #include "main-window.h"
 #include "callbacks.h"
 
-static void img_iconview_selection_changed (GtkIconView *, img_window_struct *);
 static void img_combo_box_transition_type_changed (GtkComboBox *, img_window_struct *);
 static void img_combo_box_speed_changed (GtkComboBox *,  img_window_struct *);
 static void img_spinbutton_value_changed (GtkSpinButton *, img_window_struct *);
@@ -486,7 +485,7 @@ static void img_quit_menu(GtkMenuItem *menuitem, img_window_struct *img)
 	g_signal_emit_by_name(img->imagination_window,"delete-event", img, &value);
 }
 
-static void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *img)
+void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *img)
 {
 	GtkTreeModel *model;
 	GtkTreeIter iter;
