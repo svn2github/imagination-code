@@ -516,6 +516,7 @@ void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *im
 		gtk_label_set_text(GTK_LABEL (img->type_data),"");
 		gtk_label_set_text(GTK_LABEL (img->resolution_data),"");
 		gtk_label_set_text(GTK_LABEL (img->slide_selected_data),"");
+		gtk_label_set_text(GTK_LABEL (img->total_time_data),"");
 		return;
 	}
 	if (nr_selected >= 1)

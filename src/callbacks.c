@@ -150,7 +150,7 @@ gboolean img_quit_application(GtkWidget *widget, GdkEvent *event, img_window_str
 	if (img_struct->slides_nr == 0)
 		goto quit;
 
-	model = gtk_icon_view_get_model ((GtkIconView*) img_struct->thumbnail_iconview);
+	model = gtk_icon_view_get_model (GTK_ICON_VIEW(img_struct->thumbnail_iconview));
 	path = gtk_tree_path_new_first();
 
 	/* Free the slide struct for each slide */
@@ -224,11 +224,11 @@ static void	img_update_preview_file_chooser(GtkFileChooser *file_chooser,img_win
 	if (has_preview)
 	{
 		pixbuf_format = gdk_pixbuf_get_file_info(filename,&width,&height);
-		gtk_image_set_from_pixbuf ((GtkImage*)img_struct->preview_image, pixbuf);
+		gtk_image_set_from_pixbuf (GTK_IMAGE(img_struct->preview_image), pixbuf);
 		g_object_unref (pixbuf);
 
 		size = g_strdup_printf("%d x %d pixels",width,height);
-		gtk_label_set_text((GtkLabel*)img_struct->dim_label,size);
+		gtk_label_set_text(GTK_LABEL(img_struct->dim_label),size);
 		g_free(size);
 	}
 	g_free(filename);
@@ -242,9 +242,9 @@ void img_delete_selected_slides(GtkMenuItem *item,img_window_struct *img_struct)
 	GtkTreeModel *model;
 	slide_struct *entry;
 
-	model = gtk_icon_view_get_model((GtkIconView *)img_struct->thumbnail_iconview);
+	model = gtk_icon_view_get_model(GTK_ICON_VIEW(img_struct->thumbnail_iconview));
 	
-	selected = gtk_icon_view_get_selected_items ((GtkIconView *)img_struct->thumbnail_iconview);
+	selected = gtk_icon_view_get_selected_items (GTK_ICON_VIEW(img_struct->thumbnail_iconview));
 	if (selected == NULL)
 		return;
 	
@@ -259,7 +259,7 @@ void img_delete_selected_slides(GtkMenuItem *item,img_window_struct *img_struct)
   		g_free(entry);
 
 		g_signal_handlers_block_by_func((gpointer)img_struct->thumbnail_iconview, (gpointer)img_iconview_selection_changed, img_struct);
-  		gtk_list_store_remove((GtkListStore*) img_struct->thumbnail_model,&iter);
+  		gtk_list_store_remove(GTK_LIST_STORE(img_struct->thumbnail_model),&iter);
 		g_signal_handlers_unblock_by_func((gpointer)img_struct->thumbnail_iconview, (gpointer)img_iconview_selection_changed, img_struct);  		
  
   		img_struct->slides_nr--;
@@ -268,7 +268,8 @@ void img_delete_selected_slides(GtkMenuItem *item,img_window_struct *img_struct)
 	g_list_foreach (selected, (GFunc)gtk_tree_path_free, NULL);
 	g_list_free(selected);
 	img_set_statusbar_message(img_struct,0);
-	gtk_image_set_from_pixbuf((GtkImage*)img_struct->image_area,NULL);
+	gtk_image_set_from_pixbuf(GTK_IMAGE(img_struct->image_area),NULL);
+	img_iconview_selection_changed(GTK_ICON_VIEW(img_struct->thumbnail_iconview),img_struct);
 }
 
 void img_show_about_dialog (GtkMenuItem *item,img_window_struct *img_struct)
