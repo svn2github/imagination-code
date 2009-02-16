@@ -440,35 +440,62 @@ static gboolean img_on_expose_event(GtkWidget *widget,GdkEventExpose *event,img_
 	return FALSE;
 }
 
-GdkPixbuf *img_scale_pixbuf (img_window_struct *img, gchar *filename)
+GdkPixbuf *img_scale_pixbuf(img_window_struct *img, gchar *filename)
 {
-	GdkPixbuf *pixbuf;
-	GdkPixbuf *compose;
-	GdkPixbufFormat *format;
-	gint image_width, image_height;
-	gint width, height;
-	gint offset_x, offset_y;
+	GdkPixbuf *pixbuf, *compose;
+	gint       image_width, image_height;
+	gint       width, height;
+	gint       offset_x, offset_y;
+	gdouble		scale;
 
 	width  = img->image_area->allocation.width;
 	height = img->image_area->allocation.height;
 
-	format = gdk_pixbuf_get_file_info(filename, &image_width, &image_height);
-	if(image_width < width && image_height < height)
-		pixbuf = gdk_pixbuf_new_from_file(filename, NULL);
+	gdk_pixbuf_get_file_info( filename, &image_width, &image_height );
+	if( image_width > width && image_height > height )
+	{
+		/* Image is too big - scale it down */
+		gdouble x_ratio, y_ratio, factor;
+
+		x_ratio = (gdouble)width / image_width;
+		y_ratio = (gdouble)height / image_height;
+		factor = ( x_ratio < y_ratio ? y_ratio : x_ratio );
+		image_width  *= factor;
+		image_height *= factor;
+
+		pixbuf = gdk_pixbuf_new_from_file_at_scale( filename, image_width,
+													image_height, TRUE, NULL );
+	}
 	else
-		pixbuf = gdk_pixbuf_new_from_file_at_scale(filename, width, height, TRUE, NULL);
+	{
+		/* Image is too small - leave it as is */
+		pixbuf = gdk_pixbuf_new_from_file( filename, NULL );
+	}
 
-	image_width  = gdk_pixbuf_get_width(pixbuf);
-	image_height = gdk_pixbuf_get_height(pixbuf);
-	offset_x = (width - image_width) / 2;
-	offset_y = (height - image_height) / 2;
+	image_width  = gdk_pixbuf_get_width( pixbuf );
+	image_height = gdk_pixbuf_get_height( pixbuf );
+	offset_x = (width  - image_width  ) / 2;
+	offset_y = (height - image_height ) / 2;
 
-	compose = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, width, height);
+	if (height == 480)
+		scale = 1.0;
+	else
+	{
+		scale = .95;
+		offset_x += 20;
+	}
+
+	compose = gdk_pixbuf_new( GDK_COLORSPACE_RGB, FALSE, 8, width, height );
 	gdk_pixbuf_fill(compose, 0xffffffff);
-	gdk_pixbuf_composite(pixbuf, compose, offset_x, offset_y, image_width, image_height, offset_x, offset_y, 1, 1, GDK_INTERP_BILINEAR, 255 );
-	g_object_unref(G_OBJECT(pixbuf));
+	gdk_pixbuf_composite( pixbuf, compose,
+						  offset_x < 0 ? 0 : offset_x,
+						  offset_y < 0 ? 0 : offset_y,
+						  image_width < width ? image_width : width,
+						  image_height < height ? image_height : height,
+						  offset_x, offset_y, scale, 1, GDK_INTERP_BILINEAR, 255 );
+	g_object_unref( G_OBJECT( pixbuf ) );
 
-	return compose;
+	return( compose );
 }
 
 static gboolean img_transition_timeout(img_window_struct *img)
@@ -842,3 +869,35 @@ static void img_export_pixbuf_to_ppm(GdkPixbuf *pixbuf, guchar **data, guint *le
 		}
 	}
 }
+
+/*
+// In GdkPixbuf 2.12 or above, this returns the EXIF orientation value.
+const char* exif_orientation = gdk_pixbuf_get_option(thumb->pixbuf, "orientation");
+if (exif_orientation != NULL) {
+switch (exif_orientation[0]) {
+case '3':
+thumb->rotation = 180;
+          break;
+       case '6':
+         thumb->rotation = 270;
+          break;
+       case '8':
+         thumb->rotation = 90;
+          break;
+       // '1' means no rotation.  The other four values are all various
+          transpositions, which are rare in real photos so we don't
+          implement them. 
+      }
+    }
+  }
+
+  // Rotate if necessary 
+  if (thumb->rotation != 0)
+  {
+      GdkPixbuf *new_pixbuf = gdk_pixbuf_rotate_simple (thumb->pixbuf, thumb->rotation);
+      g_object_unref (thumb->pixbuf);
+      thumb->pixbuf = new_pixbuf;
+      // Clean up 
+      thumb->rotation = 0;
+ }
+ */

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-02-04 12:19+0100\n"
+"POT-Creation-Date: 2009-02-16 10:48+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -29,148 +29,148 @@ msgstr ""
 msgid "Imagination"
 msgstr ""
 
-#: ../src/main-window.c:117
+#: ../src/main-window.c:118
 msgid "_Slideshow"
 msgstr ""
 
-#: ../src/main-window.c:146
+#: ../src/main-window.c:147
 msgid "_Preview"
 msgstr ""
 
-#: ../src/main-window.c:154
-msgid "Generate"
+#: ../src/main-window.c:155
+msgid "Export"
 msgstr ""
 
-#: ../src/main-window.c:169
+#: ../src/main-window.c:171
 msgid "_Slide"
 msgstr ""
 
-#: ../src/main-window.c:192
+#: ../src/main-window.c:194
 msgid "Un_select all"
 msgstr ""
 
-#: ../src/main-window.c:200
+#: ../src/main-window.c:202
 msgid "_Import"
 msgstr ""
 
-#: ../src/main-window.c:208
+#: ../src/main-window.c:210
 msgid "_Delete"
 msgstr ""
 
-#: ../src/main-window.c:217
+#: ../src/main-window.c:219
 msgid "_Help"
 msgstr ""
 
-#: ../src/main-window.c:236 ../src/new_slideshow.c:50
+#: ../src/main-window.c:238 ../src/new_slideshow.c:50
 msgid "Create a new slideshow"
 msgstr ""
 
-#: ../src/main-window.c:241
+#: ../src/main-window.c:243
 msgid "Open a slideshow"
 msgstr ""
 
-#: ../src/main-window.c:246
+#: ../src/main-window.c:248
 msgid "Save the slideshow"
 msgstr ""
 
-#: ../src/main-window.c:256
+#: ../src/main-window.c:258
 msgid "Import the slides"
 msgstr ""
 
-#: ../src/main-window.c:262
+#: ../src/main-window.c:264
 msgid "Delete the selected slides"
 msgstr ""
 
-#: ../src/main-window.c:271
+#: ../src/main-window.c:273
 msgid "Preview the slideshow"
 msgstr ""
 
-#: ../src/main-window.c:277
-msgid "Generate the DVD slideshow"
+#: ../src/main-window.c:279
+msgid "Export the DVD slideshow"
 msgstr ""
 
-#: ../src/main-window.c:294
+#: ../src/main-window.c:297
 msgid "Jump to the entered slide number"
 msgstr ""
 
-#: ../src/main-window.c:341
+#: ../src/main-window.c:343
 msgid "<b>Slide settings</b>"
 msgstr ""
 
 #. Transition types
-#: ../src/main-window.c:351
+#: ../src/main-window.c:353
 msgid "Transition Type:"
 msgstr ""
 
-#: ../src/main-window.c:366
+#: ../src/main-window.c:368
 msgid "Transition Speed:"
 msgstr ""
 
-#: ../src/main-window.c:370
+#: ../src/main-window.c:372
 msgid "Fast"
 msgstr ""
 
-#: ../src/main-window.c:371
+#: ../src/main-window.c:373
 msgid "Normal"
 msgstr ""
 
-#: ../src/main-window.c:372
+#: ../src/main-window.c:374
 msgid "Slow"
 msgstr ""
 
-#: ../src/main-window.c:381
+#: ../src/main-window.c:383
 msgid "Slide Duration in sec:"
 msgstr ""
 
-#: ../src/main-window.c:394
+#: ../src/main-window.c:396
 msgid "Slide number:"
 msgstr ""
 
-#: ../src/main-window.c:406
+#: ../src/main-window.c:408
 msgid "Resolution:"
 msgstr ""
 
-#: ../src/main-window.c:418
+#: ../src/main-window.c:420
 msgid "Type:"
 msgstr ""
 
-#: ../src/main-window.c:429
+#: ../src/main-window.c:431
 msgid "Slideshow Length:"
 msgstr ""
 
-#: ../src/main-window.c:717 ../src/support.c:123
+#: ../src/main-window.c:716 ../src/support.c:188
 msgid "None"
 msgstr ""
 
-#: ../src/callbacks.c:90
+#: ../src/callbacks.c:98
 msgid "Import slides, use SHIFT key for multiple select"
 msgstr ""
 
-#: ../src/callbacks.c:102
+#: ../src/callbacks.c:110
 msgid "All image files"
 msgstr ""
 
-#: ../src/callbacks.c:116
+#: ../src/callbacks.c:124
 msgid "All files"
 msgstr ""
 
-#: ../src/callbacks.c:282
+#: ../src/callbacks.c:296
 msgid "translator-credits"
 msgstr ""
 
-#: ../src/callbacks.c:522
+#: ../src/callbacks.c:535
 msgid "Starts the preview"
 msgstr ""
 
-#: ../src/callbacks.c:532
+#: ../src/callbacks.c:545
 msgid "Stops the preview"
 msgstr ""
 
-#: ../src/callbacks.c:576
+#: ../src/callbacks.c:586
 msgid "Load an Imagination slideshow project"
 msgstr ""
 
-#: ../src/callbacks.c:577
+#: ../src/callbacks.c:587
 msgid "Save an Imagination slideshow project"
 msgstr ""
 
@@ -206,28 +206,28 @@ msgstr ""
 msgid "This is not an Imagination project file!"
 msgstr ""
 
-#: ../src/support.c:89
+#: ../src/support.c:154
 #, c-format
 msgid "Welcome to Imagination - %d transitions loaded."
 msgstr ""
 
-#: ../src/support.c:95
+#: ../src/support.c:160
 #, c-format
 msgid "%d slides selected"
 msgstr ""
 
-#: ../src/support.c:101
+#: ../src/support.c:166
 #, c-format
 msgid "%d slide %s"
 msgid_plural "%d slides %s"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ../src/support.c:101
+#: ../src/support.c:166
 msgid ""
 "imported - Use the CTRL key to select/unselect or SHIFT for multiple select"
 msgstr ""
 
-#: ../src/support.c:168
+#: ../src/support.c:233
 msgid "Please choose the slideshow project filename"
 msgstr ""

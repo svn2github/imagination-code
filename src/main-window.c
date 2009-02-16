@@ -152,7 +152,7 @@ img_window_struct *img_create_window (void)
 	tmp_image = gtk_image_new_from_stock (GTK_STOCK_MEDIA_PLAY,GTK_ICON_SIZE_MENU);
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (img_struct->preview_menu),tmp_image);
 
-	img_struct->generate_menu = gtk_image_menu_item_new_with_mnemonic (_("Generate"));
+	img_struct->generate_menu = gtk_image_menu_item_new_with_mnemonic (_("Export"));
 	gtk_widget_add_accelerator (img_struct->generate_menu,"activate",accel_group,GDK_g,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
 	gtk_container_add (GTK_CONTAINER (menu1), img_struct->generate_menu);
 	g_signal_connect(G_OBJECT(img_struct->generate_menu), "activate", G_CALLBACK(img_start_stop_export), img_struct);
