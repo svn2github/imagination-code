@@ -446,8 +446,8 @@ GdkPixbuf *img_scale_pixbuf(img_window_struct *img, gchar *filename)
 	gint       a_width, a_height;		/* Display dimensions */
 	gint       offset_x, offset_y;
 	gdouble    a_ratio, i_ratio;
-	gdouble    max_stretch = 0.0625;	/* Maximum amount of stretch */
-	gdouble    max_crop    = 0.85;		/* Maximum amount of crop */
+	gdouble    max_stretch = 0.1280;	/* Maximum amount of stretch */
+	gdouble    max_crop    = 0.8500;	/* Maximum amount of crop */
 
 	/* Obtaint information about display area */
 	a_width  = img->image_area->allocation.width;
@@ -484,8 +484,7 @@ GdkPixbuf *img_scale_pixbuf(img_window_struct *img, gchar *filename)
 	 * of it's size (just enough to snuggly convert 4:3 image to PAL) or crop
 	 * it more than 10%.
 	 *
-	 * The most common image aspect ratios and the actions taken on them (with
-	 * current settings):
+	 * The most common image aspect ratios and the actions taken on them:
 	 *   SC   - scale
 	 *   SHH  - shrink horizontally
 	 *   SHV  - shrink vertically
@@ -521,7 +520,8 @@ GdkPixbuf *img_scale_pixbuf(img_window_struct *img, gchar *filename)
 			{
 				/* We can shrink image vertically and crop it to fit. */
 				g_print( "SC, SHV, CR -> ratio %.3f\n", i_ratio );
-				pixbuf = gdk_pixbuf_new_from_file_at_scale( filename, a_width, a_height / max_crop, FALSE, NULL );
+				pixbuf = gdk_pixbuf_new_from_file_at_scale(
+							filename, a_width, a_height * ( 1 + max_stretch ), FALSE, NULL );
 			}
 			else
 			{
@@ -529,6 +529,8 @@ GdkPixbuf *img_scale_pixbuf(img_window_struct *img, gchar *filename)
 				g_print( "SC (BR) -> ratio %.3f\n", i_ratio );
 				pixbuf = gdk_pixbuf_new_from_file_at_size( filename, a_width, a_height, NULL );
 			}
+
+
 		}
 	}
 	else
@@ -545,7 +547,8 @@ GdkPixbuf *img_scale_pixbuf(img_window_struct *img, gchar *filename)
 			{
 				/* We can shrink image horizontally and crop it to fit. */
 				g_print( "SC, SHH, CR -> ratio %.3f\n", i_ratio );
-				pixbuf = gdk_pixbuf_new_from_file_at_scale( filename, a_width / max_crop, a_height,	FALSE, NULL );
+				pixbuf = gdk_pixbuf_new_from_file_at_scale(
+							filename, a_width * ( 1 + max_stretch ), a_height, FALSE, NULL );
 			}
 			else
 			{
@@ -575,7 +578,6 @@ GdkPixbuf *img_scale_pixbuf(img_window_struct *img, gchar *filename)
 
 	return( compose );
 }
-
 
 static gboolean img_transition_timeout(img_window_struct *img)
 {
