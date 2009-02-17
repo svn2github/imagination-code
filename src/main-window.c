@@ -472,6 +472,17 @@ img_window_struct *img_create_window (void)
 	gtk_box_pack_start (GTK_BOX (vbox1), img_struct->statusbar, FALSE, TRUE, 0);
 	img_struct->context_id = gtk_statusbar_get_context_id (GTK_STATUSBAR (img_struct->statusbar), "statusbar");
 
+	/* Create the progress bar */
+	img_struct->progress_bar = gtk_progress_bar_new();
+	gtk_widget_set_size_request (img_struct->progress_bar, -1, 15);
+	{
+		GtkWidget *vbox;
+
+		vbox = gtk_vbox_new (FALSE, 0);
+		gtk_box_pack_start (GTK_BOX (img_struct->statusbar), vbox, FALSE, FALSE, 0);
+		gtk_box_pack_start (GTK_BOX (vbox), img_struct->progress_bar, TRUE, FALSE, 0);
+		gtk_widget_show (vbox);
+	}
 	gtk_widget_show_all(hbox);
 	gtk_window_add_accel_group (GTK_WINDOW (img_struct->imagination_window), accel_group);
 

@@ -27,7 +27,8 @@ static gboolean img_transition_timeout(img_window_struct *);
 static gboolean img_sleep_timeout(img_window_struct *);
 static gboolean img_prepare_pixbufs(img_window_struct *);
 static void img_swap_toolbar_images( img_window_struct *, gboolean);
-static void img_clean_after_preview(img_window_struct *img);
+static void img_clean_after_preview(img_window_struct *);
+static void img_increase_progressbar(img_window_struct *, gint);
 
 /* Export related functions */
 static gboolean img_export_transition(img_window_struct *);
@@ -60,12 +61,15 @@ void img_add_slides_thumbnails(GtkMenuItem *item,img_window_struct *img)
 	GdkPixbuf *thumb;
 	GtkTreeIter iter;
 	slide_struct *slide_info;
+	gint total_slides = 0;
 
 	slides = img_import_slides_file_chooser(img);
+
 	if (slides == NULL)
 		return;
 
-	/*img->progress_window = img_create_progress_window(img);*/
+	total_slides = g_slist_length(slides);
+	gtk_widget_show(img->progress_bar);
 	while (slides)
 	{
 		thumb = img_load_pixbuf_from_file(slides->data);
@@ -81,11 +85,29 @@ void img_add_slides_thumbnails(GtkMenuItem *item,img_window_struct *img)
 			}
 			g_free(slides->data);
 		}
+		img_increase_progressbar(img, total_slides);
 		slides = slides->next;
 	}
+	gtk_widget_hide(img->progress_bar);
+
 	g_slist_free(slides);
 	img_set_total_slideshow_duration(img);
 	img_set_statusbar_message(img,0);
+}
+
+static void img_increase_progressbar(img_window_struct *img, gint total)
+{
+	gchar *message;
+	gdouble percent;
+
+	percent = img->slides_nr / total;
+	gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (img->progress_bar),percent);
+	message = g_strdup_printf(_("Please wait, importing slide %d out of %d"), img->slides_nr, total);
+	gtk_statusbar_push(GTK_STATUSBAR(img->statusbar), img->context_id, message);
+	g_free(message);
+
+	while (gtk_events_pending())
+		gtk_main_iteration();
 }
 
 GSList *img_import_slides_file_chooser(img_window_struct *img)
@@ -529,8 +551,6 @@ GdkPixbuf *img_scale_pixbuf(img_window_struct *img, gchar *filename)
 				g_print( "SC (BR) -> ratio %.3f\n", i_ratio );
 				pixbuf = gdk_pixbuf_new_from_file_at_size( filename, a_width, a_height, NULL );
 			}
-
-
 		}
 	}
 	else

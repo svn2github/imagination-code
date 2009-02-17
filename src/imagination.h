@@ -86,6 +86,7 @@ struct _img_window_struct
 	GtkWidget	*resolution_data;	
   	GtkWidget	*thumbnail_iconview;
   	GtkWidget	*statusbar;
+  	GtkWidget	*progress_bar;
   	GtkWidget	*viewport;
   	GtkWidget	*image_area;
   	GdkPixbuf	*slide_pixbuf;
