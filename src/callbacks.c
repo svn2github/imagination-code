@@ -334,14 +334,13 @@ void img_set_total_slideshow_duration(img_window_struct *img)
 	{
 		gtk_tree_model_get(model, &iter,1,&entry,-1);
 		img->total_secs += entry->duration;
-		/* With new fixed-time transitions we can calculate duration
-		 * more precisely. */
-		/*if (entry->speed == FAST && entry->render)
+
+		if (entry->speed == FAST && entry->render)
 			img->total_secs += 1;
 		else if (entry->speed == NORMAL && entry->render)
 			img->total_secs += 3;
 		else if (entry->speed == SLOW && entry->render)
-			img->total_secs += 13;*/
+			img->total_secs += 13;
 		if(entry->render)
 			img->total_secs += (1 / entry->speed) / 25;
 	}
@@ -443,60 +442,140 @@ static gboolean img_on_expose_event(GtkWidget *widget,GdkEventExpose *event,img_
 GdkPixbuf *img_scale_pixbuf(img_window_struct *img, gchar *filename)
 {
 	GdkPixbuf *pixbuf, *compose;
-	gint       image_width, image_height;
-	gint       width, height;
+	gint       i_width, i_height;		/* Image dimensions */
+	gint       a_width, a_height;		/* Display dimensions */
 	gint       offset_x, offset_y;
-	gdouble		scale;
+	gdouble    a_ratio, i_ratio;
+	gdouble    max_stretch = 0.0625;	/* Maximum amount of stretch */
+	gdouble    max_crop    = 0.85;		/* Maximum amount of crop */
 
-	width  = img->image_area->allocation.width;
-	height = img->image_area->allocation.height;
+	/* Obtaint information about display area */
+	a_width  = img->image_area->allocation.width;
+	a_height = img->image_area->allocation.height;
+	a_ratio  = (gdouble)a_width / a_height;
 
-	gdk_pixbuf_get_file_info( filename, &image_width, &image_height );
-	if( image_width > width && image_height > height )
+	/* Obtain information about image being loaded */
+	gdk_pixbuf_get_file_info( filename, &i_width, &i_height );
+	i_ratio = (gdouble)i_width / i_height;
+
+	/* If the image is smaller than display area, just center it and fill
+	 * the background with color. */
+	if( i_width < a_width && i_height < a_height )
 	{
-		/* Image is too big - scale it down */
-		gdouble x_ratio, y_ratio, factor;
-
-		x_ratio = (gdouble)width / image_width;
-		y_ratio = (gdouble)height / image_height;
-		factor = ( x_ratio < y_ratio ? y_ratio : x_ratio );
-		image_width  *= factor;
-		image_height *= factor;
-
-		pixbuf = gdk_pixbuf_new_from_file_at_scale( filename, image_width,
-													image_height, TRUE, NULL );
-	}
-	else
-	{
-		/* Image is too small - leave it as is */
 		pixbuf = gdk_pixbuf_new_from_file( filename, NULL );
+
+		i_width  = gdk_pixbuf_get_width( pixbuf );
+		i_height = gdk_pixbuf_get_height( pixbuf );
+		offset_x = ( a_width  - i_width  ) / 2;
+		offset_y = ( a_height - i_height ) / 2;
+		compose = gdk_pixbuf_new( GDK_COLORSPACE_RGB, FALSE, 8,
+								  a_width, a_height );
+		gdk_pixbuf_fill( compose, 0xffffffff );
+		gdk_pixbuf_composite( pixbuf, compose, offset_x, offset_y, i_width,
+							  i_height, offset_x, offset_y, 1, 1,
+							  GDK_INTERP_BILINEAR, 255 );
+		g_object_unref( G_OBJECT( pixbuf ) );
+		return( compose );
 	}
 
-	image_width  = gdk_pixbuf_get_width( pixbuf );
-	image_height = gdk_pixbuf_get_height( pixbuf );
-	offset_x = (width  - image_width  ) / 2;
-	offset_y = (height - image_height ) / 2;
+	/* If we are here, the image is too big for display area, so we need to
+	 * scale it. Depending on values of i_ratio and a_ratio, we'll do some
+	 * transformations to, but won't distort the image for more than 6.25%
+	 * of it's size (just enough to snuggly convert 4:3 image to PAL) or crop
+	 * it more than 10%.
+	 *
+	 * The most common image aspect ratios and the actions taken on them (with
+	 * current settings):
+	 *   SC   - scale
+	 *   SHH  - shrink horizontally
+	 *   SHV  - shrink vertically
+	 *   CR   - crop image
+	 *   (BR) - image has borders (cannot be streched or cropped)
+	 *  .-------------+-----------+------------.
+	 *  | Image ratio | PAL (5:4) | NTSC (3:2) |
+	 *  +-------------+-----------+------------+
+	 *  |  3:4     11 | SC (BR)   | SC (BR)    |
+	 *  |  5:4      8 | SC        | SC (BR)    |
+	 *  | 14:11     9 | SC SHH    | SC SHV CR  |
+	 *  |  4:3     14 | SC SHH CR | SC SHV CR  |
+	 *  |  7:5     13 | SC SHH CR | SC SHV CR  |
+	 *  |  3:2     12 | SC (BR)   | SC         |
+	 *  | 13:8     10 | SC (BR)   | SC SHH CR  |
+	 *  `-------------+-----------+------------'
+	 */
 
-	if (height == 480)
-		scale = 1.0;
+	/* Let's do it;) */
+	/* Decisions are made in some sort of binary tree for increased
+	 * efficiency of if clauses. */
+	if( i_ratio < a_ratio )
+	{
+		if( i_ratio > a_ratio * ( 1 - max_stretch ) )
+		{
+			/* We can shrink image vertically enough to fit. */
+			g_print( "SC, SHV -> ratio: %.3f\n", i_ratio );
+			return( gdk_pixbuf_new_from_file_at_scale( filename, a_width, a_height, FALSE, NULL ) );
+		}
+		else
+		{
+			if( i_ratio > a_ratio * ( 1 - max_stretch ) * max_crop )
+			{
+				/* We can shrink image vertically and crop it to fit. */
+				g_print( "SC, SHV, CR -> ratio %.3f\n", i_ratio );
+				pixbuf = gdk_pixbuf_new_from_file_at_scale( filename, a_width, a_height / max_crop, FALSE, NULL );
+			}
+			else
+			{
+				/* We cannot avoid white stripes on the left/right. Sorry. */
+				g_print( "SC (BR) -> ratio %.3f\n", i_ratio );
+				pixbuf = gdk_pixbuf_new_from_file_at_size( filename, a_width, a_height, NULL );
+			}
+		}
+	}
 	else
 	{
-		scale = .95;
-		offset_x += 20;
+		if( i_ratio < a_ratio * ( 1 + max_stretch ) )
+		{
+			/* We can shrink image horizontally enough to fit. */
+			g_print( "SC, SHH -> ratio %.3f\n", i_ratio );
+			return( gdk_pixbuf_new_from_file_at_scale( filename, a_width, a_height, FALSE, NULL ) );
+		}
+		else
+		{
+			if( i_ratio < a_ratio * ( 1 + max_stretch ) / max_crop )
+			{
+				/* We can shrink image horizontally and crop it to fit. */
+				g_print( "SC, SHH, CR -> ratio %.3f\n", i_ratio );
+				pixbuf = gdk_pixbuf_new_from_file_at_scale( filename, a_width / max_crop, a_height,	FALSE, NULL );
+			}
+			else
+			{
+				/* We cannot avoid white stripes at the bottom/top. Sorry. */
+				g_print( "SC (BR) -> ratio %.3f\n", i_ratio );
+				pixbuf = gdk_pixbuf_new_from_file_at_size( filename, a_width, a_height, NULL );
+			}
+		}
 	}
 
-	compose = gdk_pixbuf_new( GDK_COLORSPACE_RGB, FALSE, 8, width, height );
-	gdk_pixbuf_fill(compose, 0xffffffff);
+	/* Do composing */
+	i_width  = gdk_pixbuf_get_width( pixbuf );
+	i_height = gdk_pixbuf_get_height( pixbuf );
+	offset_x = ( a_width - i_width ) / 2;
+	offset_y = ( a_height - i_height ) / 2;
+
+	compose = gdk_pixbuf_new( GDK_COLORSPACE_RGB, FALSE, 8, a_width, a_height );
+	gdk_pixbuf_fill( compose, 0xffffffff );
 	gdk_pixbuf_composite( pixbuf, compose,
 						  offset_x < 0 ? 0 : offset_x,
 						  offset_y < 0 ? 0 : offset_y,
-						  image_width < width ? image_width : width,
-						  image_height < height ? image_height : height,
-						  offset_x, offset_y, scale, 1, GDK_INTERP_BILINEAR, 255 );
+						  i_width < a_width ? i_width : a_width,
+						  i_height < a_height ? i_height : a_height,
+						  offset_x, offset_y, 1, 1,
+						  GDK_INTERP_BILINEAR, 255 );
 	g_object_unref( G_OBJECT( pixbuf ) );
 
 	return( compose );
 }
+
 
 static gboolean img_transition_timeout(img_window_struct *img)
 {
