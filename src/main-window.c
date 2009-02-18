@@ -72,7 +72,6 @@ img_window_struct *img_create_window (void)
 	GtkWidget *valign;
 	GtkWidget *halign;
 	GtkWidget *frame1_alignment;
-	GtkWidget *thumb_scrolledwindow;
 	GtkWidget *transition_label;
 	GtkWidget *vbox_info_slide;
 	GtkWidget *hbox_effect_duration;
@@ -440,11 +439,10 @@ img_window_struct *img_create_window (void)
 	img_struct->thumbnail_model = gtk_list_store_new (2, GDK_TYPE_PIXBUF, G_TYPE_POINTER);
 
 	/* Create the thumbnail viewer */
-	thumb_scrolledwindow = gtk_scrolled_window_new (NULL, NULL);
-	gtk_widget_show(thumb_scrolledwindow);
-	gtk_box_pack_start (GTK_BOX (vbox1), thumb_scrolledwindow, FALSE, TRUE, 0);
-	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (thumb_scrolledwindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_NEVER);
-	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (thumb_scrolledwindow), GTK_SHADOW_IN);
+	img_struct->thumb_scrolledwindow = gtk_scrolled_window_new (NULL, NULL);
+	gtk_box_pack_start (GTK_BOX (vbox1), img_struct->thumb_scrolledwindow, FALSE, TRUE, 0);
+	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (img_struct->thumb_scrolledwindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_NEVER);
+	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (img_struct->thumb_scrolledwindow), GTK_SHADOW_IN);
 	img_struct->thumbnail_iconview = gtk_icon_view_new_with_model(GTK_TREE_MODEL (img_struct->thumbnail_model));
 	gtk_widget_show (img_struct->thumbnail_iconview);
 
@@ -462,7 +460,7 @@ img_window_struct *img_create_window (void)
 	gtk_icon_view_set_column_spacing (GTK_ICON_VIEW (img_struct->thumbnail_iconview),0);
 	gtk_icon_view_set_row_spacing (GTK_ICON_VIEW (img_struct->thumbnail_iconview),0);
 	gtk_icon_view_set_columns (GTK_ICON_VIEW (img_struct->thumbnail_iconview), G_MAXINT);
-	gtk_container_add (GTK_CONTAINER (thumb_scrolledwindow), img_struct->thumbnail_iconview);
+	gtk_container_add (GTK_CONTAINER (img_struct->thumb_scrolledwindow), img_struct->thumbnail_iconview);
 	g_signal_connect (G_OBJECT (img_struct->thumbnail_iconview),"selection-changed",G_CALLBACK (img_iconview_selection_changed),img_struct);
 	g_signal_connect (G_OBJECT (img_struct->thumbnail_iconview),"select-all",G_CALLBACK (img_iconview_selection_changed),img_struct);
 

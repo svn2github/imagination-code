@@ -83,7 +83,8 @@ struct _img_window_struct
 	GtkWidget	*type_data;
 	GtkWidget	*total_time_data;
 	GtkWidget	*filename_data;
-	GtkWidget	*resolution_data;	
+	GtkWidget	*resolution_data;
+	GtkWidget	*thumb_scrolledwindow;
   	GtkWidget	*thumbnail_iconview;
   	GtkWidget	*statusbar;
   	GtkWidget	*progress_bar;

@@ -29,6 +29,7 @@ static gboolean img_prepare_pixbufs(img_window_struct *);
 static void img_swap_toolbar_images( img_window_struct *, gboolean);
 static void img_clean_after_preview(img_window_struct *);
 static void img_increase_progressbar(img_window_struct *, gint);
+static void img_run_encoder(img_window_struct *);
 
 /* Export related functions */
 static gboolean img_export_transition(img_window_struct *);
@@ -61,14 +62,14 @@ void img_add_slides_thumbnails(GtkMenuItem *item,img_window_struct *img)
 	GdkPixbuf *thumb;
 	GtkTreeIter iter;
 	slide_struct *slide_info;
-	gint total_slides = 0;
+	gint slides_cnt = 0;
 
 	slides = img_import_slides_file_chooser(img);
 
 	if (slides == NULL)
 		return;
 
-	total_slides = g_slist_length(slides);
+	img->slides_nr = g_slist_length(slides);
 	gtk_widget_show(img->progress_bar);
 	while (slides)
 	{
@@ -81,28 +82,28 @@ void img_add_slides_thumbnails(GtkMenuItem *item,img_window_struct *img)
 				gtk_list_store_append (img->thumbnail_model,&iter);
 				gtk_list_store_set (img->thumbnail_model, &iter, 0, thumb, 1, slide_info, -1);
 				g_object_unref (thumb);
-				img->slides_nr++;
+				slides_cnt++;
 			}
 			g_free(slides->data);
 		}
-		img_increase_progressbar(img, total_slides);
+		img_increase_progressbar(img, slides_cnt);
 		slides = slides->next;
 	}
 	gtk_widget_hide(img->progress_bar);
-
+	gtk_widget_show(img->thumb_scrolledwindow);
 	g_slist_free(slides);
 	img_set_total_slideshow_duration(img);
 	img_set_statusbar_message(img,0);
 }
 
-static void img_increase_progressbar(img_window_struct *img, gint total)
+static void img_increase_progressbar(img_window_struct *img, gint nr)
 {
 	gchar *message;
 	gdouble percent;
 
-	percent = img->slides_nr / total;
-	gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (img->progress_bar),percent);
-	message = g_strdup_printf(_("Please wait, importing slide %d out of %d"), img->slides_nr, total);
+	percent = (gdouble)nr / img->slides_nr;
+	gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (img->progress_bar), percent);
+	message = g_strdup_printf(_("Please wait, importing slide %d out of %d"), nr, img->slides_nr);
 	gtk_statusbar_push(GTK_STATUSBAR(img->statusbar), img->context_id, message);
 	g_free(message);
 
@@ -769,7 +770,11 @@ void img_start_stop_export(GtkWidget *widget, img_window_struct *img)
 	}
 	else
 	{
+		mkfifo ("/tmp/img.fifo",0660);
 		img->file_desc = g_open("/tmp/img.fifo",O_WRONLY,0);
+
+		/* Run ffmpeg encoder on the above pipe */
+		img_run_encoder(img);
 
 		/* Create progress window with cancel and pause buttons, calculate the total number of frames to display */
 		img->slide_pixbuf = gtk_image_get_pixbuf(GTK_IMAGE(img->image_area));
@@ -1002,3 +1007,48 @@ thumb->rotation = 180;
       thumb->rotation = 0;
  }
  */
+
+static void img_run_encoder(img_window_struct *img)
+{
+	GtkWidget *message;
+	GError *error = NULL;
+	gchar **argv;
+	gchar *aspect_ratio = NULL, *size = NULL, *target = NULL;
+	GdkScreen *screen;
+	gint i = 0;
+
+	aspect_ratio= g_strconcat		("-aspect",img->aspect_ratio,NULL);
+	size		= g_strdup_printf	("-s 720x%d",img->slideshow_height);
+	target		= g_strconcat		("-target ", img->slideshow_height == 576 ? "pal" : "ntsc", "-dvd",NULL);
+
+	argv = g_new (gchar *, 13);
+	argv[i++] = "ffmpeg";
+	argv[i++] = "-f image2pipe";
+	argv[i++] = "-vcodec ppm";
+	argv[i++] = "-i /tmp/img.fifo";
+	argv[i++] = target;
+	argv[i++] = "-r 29.97";
+	argv[i++] = "-an";				/* Disable audio */
+	argv[i++] = aspect_ratio;
+	argv[i++] = size;
+	argv[i++] = "-y";
+	argv[i++] = "-bf 2";
+	argv[i++] = g_strdup(img->slideshow_filename);
+	argv[i] = NULL;
+
+	screen = gtk_widget_get_screen (GTK_WIDGET (img->imagination_window));
+	if (!gdk_spawn_on_screen (screen,NULL,argv,NULL,G_SPAWN_LEAVE_DESCRIPTORS_OPEN | G_SPAWN_SEARCH_PATH| G_SPAWN_DO_NOT_REAP_CHILD,
+								NULL,NULL,NULL,&error))
+	{
+		message = gtk_message_dialog_new (GTK_WINDOW (img->imagination_window),
+										GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+										GTK_MESSAGE_ERROR,
+										GTK_BUTTONS_CLOSE,
+										_("Failed to launch the encoder!"));
+		gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (message),"%s.",error->message);
+		gtk_dialog_run (GTK_DIALOG (message));
+		gtk_widget_destroy (message);
+		g_error_free (error);
+	}
+	g_free(argv);
+}
