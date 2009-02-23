@@ -1,5 +1,6 @@
 /*
  *  Copyright (c) 2009 Giuseppe Torelli <colossus73@gmail.com>
+ *  Copyright (c) 2009 Tadej Borovšak 	<tadeboro@gmail.com>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -29,7 +30,7 @@ static gboolean img_prepare_pixbufs(img_window_struct *);
 static void img_swap_toolbar_images( img_window_struct *, gboolean);
 static void img_clean_after_preview(img_window_struct *);
 static void img_increase_progressbar(img_window_struct *, gint);
-static void img_run_encoder(img_window_struct *);
+static gboolean img_run_encoder(img_window_struct *);
 
 /* Export related functions */
 static gboolean img_export_transition(img_window_struct *);
@@ -43,22 +44,32 @@ void img_set_window_title(img_window_struct *img, gchar *text)
 
 	if (text == NULL)
 	{
-		title = g_strconcat("Imagination " VERSION,NULL);
+		title = g_strconcat("Imagination " VERSION, NULL);
 		gtk_window_set_title (GTK_WINDOW (img->imagination_window), title);
 		g_free(title);
 	}
 	else
-		gtk_window_set_title (GTK_WINDOW (img->imagination_window), text);
+	{
+		
+		title = g_strconcat(text, " - Imagination " VERSION, NULL);
+		gtk_window_set_title (GTK_WINDOW (img->imagination_window), title);
+		g_free(title);
+	}
 }
 
 void img_new_slideshow(GtkMenuItem *item,img_window_struct *img_struct)
 {
-	img_new_slideshow_settings_dialog(img_struct);
+	img_new_slideshow_settings_dialog(img_struct, FALSE);
+}
+
+void img_project_properties(GtkMenuItem *item, img_window_struct *img_struct)
+{
+	img_new_slideshow_settings_dialog(img_struct, TRUE);
 }
 
 void img_add_slides_thumbnails(GtkMenuItem *item,img_window_struct *img)
 {
-	GSList	*slides = NULL;
+	GSList	*slides = NULL, *bak;
 	GdkPixbuf *thumb;
 	GtkTreeIter iter;
 	slide_struct *slide_info;
@@ -69,8 +80,10 @@ void img_add_slides_thumbnails(GtkMenuItem *item,img_window_struct *img)
 	if (slides == NULL)
 		return;
 
-	img->slides_nr = g_slist_length(slides);
+	img->slides_nr += g_slist_length(slides);
 	gtk_widget_show(img->progress_bar);
+
+	bak = slides;
 	while (slides)
 	{
 		thumb = img_load_pixbuf_from_file(slides->data);
@@ -91,7 +104,7 @@ void img_add_slides_thumbnails(GtkMenuItem *item,img_window_struct *img)
 	}
 	gtk_widget_hide(img->progress_bar);
 	gtk_widget_show(img->thumb_scrolledwindow);
-	g_slist_free(slides);
+	g_slist_free(bak);
 	img_set_total_slideshow_duration(img);
 	img_set_statusbar_message(img,0);
 }
@@ -123,7 +136,7 @@ GSList *img_import_slides_file_chooser(img_window_struct *img)
 						GTK_FILE_CHOOSER_ACTION_OPEN,
 						GTK_STOCK_CANCEL,
 						GTK_RESPONSE_CANCEL,
-						"gtk-open",
+						GTK_STOCK_OPEN,
 						GTK_RESPONSE_ACCEPT,
 						NULL);
 	img_file_chooser_add_preview(img);
@@ -140,24 +153,24 @@ GSList *img_import_slides_file_chooser(img_window_struct *img)
 
 		g_strfreev (mime_types);
 	}
-	gtk_file_chooser_add_filter((GtkFileChooser*)img->import_slide_chooser,all_images_filter);
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(img->import_slide_chooser),all_images_filter);
 
 	/* All files filter */
 	all_files_filter = gtk_file_filter_new ();
 	gtk_file_filter_set_name(all_files_filter,_("All files"));
 	gtk_file_filter_add_pattern(all_files_filter,"*");
-	gtk_file_chooser_add_filter((GtkFileChooser*)img->import_slide_chooser,all_files_filter);
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(img->import_slide_chooser),all_files_filter);
 
-	gtk_file_chooser_set_select_multiple((GtkFileChooser *)img->import_slide_chooser,TRUE);
+	gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(img->import_slide_chooser),TRUE);
 	if (img->current_dir)
-		gtk_file_chooser_set_current_folder((GtkFileChooser*)img->import_slide_chooser,img->current_dir);
-	response = gtk_dialog_run ((GtkDialog *)img->import_slide_chooser);
+		gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(img->import_slide_chooser),img->current_dir);
+	response = gtk_dialog_run (GTK_DIALOG(img->import_slide_chooser));
 	if (response == GTK_RESPONSE_ACCEPT)
 	{
-		slides = gtk_file_chooser_get_filenames((GtkFileChooser *)img->import_slide_chooser);
+		slides = gtk_file_chooser_get_filenames(GTK_FILE_CHOOSER(img->import_slide_chooser));
 		if (img->current_dir)
 			g_free(img->current_dir);
-		img->current_dir = gtk_file_chooser_get_current_folder((GtkFileChooser*)img->import_slide_chooser);
+		img->current_dir = gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER(img->import_slide_chooser));
 	}
 	gtk_widget_destroy (img->import_slide_chooser);
 	return slides;
@@ -166,32 +179,25 @@ GSList *img_import_slides_file_chooser(img_window_struct *img)
 gboolean img_quit_application(GtkWidget *widget, GdkEvent *event, img_window_struct *img_struct)
 {
 	GtkTreeModel *model;
-	GtkTreePath  *path = NULL;
 	GtkTreeIter iter;
 	slide_struct *entry;
 
-	if (img_struct->slides_nr == 0)
-		goto quit;
-
-	model = gtk_icon_view_get_model (GTK_ICON_VIEW(img_struct->thumbnail_iconview));
-	path = gtk_tree_path_new_first();
-
-	/* Free the slide struct for each slide */
-	if (gtk_tree_model_get_iter(model,&iter,path) == FALSE)
-		goto quit;
-	do
+	if (img_struct->slides_nr)
 	{
-		gtk_tree_model_get(model, &iter,1,&entry,-1);
-		g_free(entry->filename);
-		g_free(entry->resolution);
-		g_free(entry->type);
-		g_free(entry);
-		
-	}
-	while (gtk_tree_model_iter_next (model,&iter));
+		model = gtk_icon_view_get_model (GTK_ICON_VIEW(img_struct->thumbnail_iconview));
 
-quit:
-	gtk_tree_path_free(path);
+		gtk_tree_model_get_iter_first(model,&iter);
+		do
+		{
+			gtk_tree_model_get(model, &iter,1,&entry,-1);
+			g_free(entry->filename);
+			g_free(entry->resolution);
+			g_free(entry->type);
+			g_free(entry);	
+		}
+		while (gtk_tree_model_iter_next (model,&iter));
+	}
+
 	if (img_struct->slideshow_filename)
 		g_free(img_struct->slideshow_filename);
 	if (img_struct->current_dir)
@@ -201,7 +207,12 @@ quit:
 	g_slist_foreach(img_struct->plugin_list,(GFunc)g_module_close,NULL);
 	g_slist_free(img_struct->plugin_list);
 
-	gtk_main_quit();
+	/* I moved this function call to window's destroy event handler, since
+	 * that's the place where quiting should be normally done. This separation
+	 * enables us to add "Do you really want to ..." dialog at the end
+	 * of the application, since we only need to change return value from FALSE
+	 * to TRUE and application will survive. */
+	//gtk_main_quit();
 	return FALSE;
 }
 
@@ -210,7 +221,7 @@ static void img_file_chooser_add_preview(img_window_struct *img_struct)
 	GtkWidget *vbox;
 
 	vbox = gtk_vbox_new (FALSE, 5);
-	gtk_container_set_border_width ((GtkContainer *)vbox, 10);
+	gtk_container_set_border_width (GTK_CONTAINER(vbox), 10);
 
 	img_struct->preview_image = gtk_image_new ();
 
@@ -222,8 +233,8 @@ static void img_file_chooser_add_preview(img_window_struct *img_struct)
 	gtk_box_pack_start (GTK_BOX (vbox), img_struct->size_label, FALSE, TRUE, 0);
 	gtk_widget_show_all (vbox);
 
-	gtk_file_chooser_set_preview_widget ((GtkFileChooser*)img_struct->import_slide_chooser, vbox);
-	gtk_file_chooser_set_preview_widget_active ((GtkFileChooser*)img_struct->import_slide_chooser, FALSE);
+	gtk_file_chooser_set_preview_widget (GTK_FILE_CHOOSER(img_struct->import_slide_chooser), vbox);
+	gtk_file_chooser_set_preview_widget_active (GTK_FILE_CHOOSER(img_struct->import_slide_chooser), FALSE);
 
 	g_signal_connect (img_struct->import_slide_chooser, "update-preview",G_CALLBACK (img_update_preview_file_chooser), img_struct);
 }
@@ -250,7 +261,7 @@ static void	img_update_preview_file_chooser(GtkFileChooser *file_chooser,img_win
 		gtk_image_set_from_pixbuf (GTK_IMAGE(img_struct->preview_image), pixbuf);
 		g_object_unref (pixbuf);
 
-		size = g_strdup_printf("%d x %d pixels",width,height);
+		size = g_strdup_printf(ngettext("%d x %d pixels", "%d x %d pixels", height),width,height);
 		gtk_label_set_text(GTK_LABEL(img_struct->dim_label),size);
 		g_free(size);
 	}
@@ -260,7 +271,7 @@ static void	img_update_preview_file_chooser(GtkFileChooser *file_chooser,img_win
 
 void img_delete_selected_slides(GtkMenuItem *item,img_window_struct *img_struct)
 {
-	GList *selected;
+	GList *selected, *bak;
 	GtkTreeIter iter;
 	GtkTreeModel *model;
 	slide_struct *entry;
@@ -272,6 +283,13 @@ void img_delete_selected_slides(GtkMenuItem *item,img_window_struct *img_struct)
 		return;
 	
 	/* Free the slide struct for each slide and remove it from the iconview */
+	/* Stored list start to avoid memory leak + pulled signal blocks one level
+	 * higher to avoid calling them separately for each entry in list (we are
+	 * removing items synchronously from withing the callback, so the GUI is
+	 * already "frozen" and selection cannot be changed through the user
+	 * intervention until the callback returns). */
+	bak = selected;
+	g_signal_handlers_block_by_func((gpointer)img_struct->thumbnail_iconview, (gpointer)img_iconview_selection_changed, img_struct);
 	while (selected)
   	{
   		gtk_tree_model_get_iter(model, &iter,selected->data);
@@ -281,24 +299,27 @@ void img_delete_selected_slides(GtkMenuItem *item,img_window_struct *img_struct)
   		g_free(entry->type);
   		g_free(entry);
 
-		g_signal_handlers_block_by_func((gpointer)img_struct->thumbnail_iconview, (gpointer)img_iconview_selection_changed, img_struct);
   		gtk_list_store_remove(GTK_LIST_STORE(img_struct->thumbnail_model),&iter);
-		g_signal_handlers_unblock_by_func((gpointer)img_struct->thumbnail_iconview, (gpointer)img_iconview_selection_changed, img_struct);  		
  
   		img_struct->slides_nr--;
   		selected = selected->next;
   	}
+	g_signal_handlers_unblock_by_func((gpointer)img_struct->thumbnail_iconview, (gpointer)img_iconview_selection_changed, img_struct);  		
 	g_list_foreach (selected, (GFunc)gtk_tree_path_free, NULL);
 	g_list_free(selected);
 	img_set_statusbar_message(img_struct,0);
 	gtk_image_set_from_pixbuf(GTK_IMAGE(img_struct->image_area),NULL);
+
+	if (img_struct->slides_nr == 0)
+		gtk_widget_hide(img_struct->thumb_scrolledwindow);
+
 	img_iconview_selection_changed(GTK_ICON_VIEW(img_struct->thumbnail_iconview),img_struct);
 }
 
 void img_show_about_dialog (GtkMenuItem *item,img_window_struct *img_struct)
 {
 	static GtkWidget *about = NULL;
-    const char *authors[] = {"\nMain developer:\nGiuseppe Torelli <colossus73@gmail.com>\n\nCode improvements and patches:\nTadej Borovšak\n\nImagination logo:\nDadster from http://linuxgraphicsusers.com\n\n",NULL};
+    const char *authors[] = {"\nMain developer:\nGiuseppe Torelli <colossus73@gmail.com>\n\nCode improvements and patches:\nTadej Borovšak <tadeboro@gmail.com>\n\nImagination logo:\nDadster from http://linuxgraphicsusers.com\n\n",NULL};
     const char *documenters[] = {NULL};
 
 	if (about == NULL)
@@ -358,12 +379,6 @@ void img_set_total_slideshow_duration(img_window_struct *img)
 		gtk_tree_model_get(model, &iter,1,&entry,-1);
 		img->total_secs += entry->duration;
 
-		if (entry->speed == FAST && entry->render)
-			img->total_secs += 1;
-		else if (entry->speed == NORMAL && entry->render)
-			img->total_secs += 3;
-		else if (entry->speed == SLOW && entry->render)
-			img->total_secs += 13;
 		if(entry->render)
 			img->total_secs += (1 / entry->speed) / 25;
 	}
@@ -374,7 +389,7 @@ void img_set_total_slideshow_duration(img_window_struct *img)
 	m = (img->total_secs % 3600) / 60;
 	s =  img->total_secs - (h * 3600) - (m * 60);
 	time = g_strdup_printf("%02d:%02d:%02d", h, m, s);
-	gtk_label_set_text((GtkLabel*)img->total_time_data,time);
+	gtk_label_set_text(GTK_LABEL (img->total_time_data),time);
 	g_free(time);
 }
 
@@ -422,7 +437,7 @@ void img_start_stop_preview(GtkWidget *button, img_window_struct *img)
 
 		/* Create an empty pixbuf - starting white image */
 		img->pixbuf1 = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8,img->image_area->allocation.width,img->image_area->allocation.height);
-		gdk_pixbuf_fill(img->pixbuf1,0xffffffff);
+		gdk_pixbuf_fill(img->pixbuf1,img->background_color);
 
 		/* Load the first image in the pixbuf */
 		gtk_tree_model_get(model, &iter,1,&entry,-1);
@@ -471,6 +486,7 @@ GdkPixbuf *img_scale_pixbuf(img_window_struct *img, gchar *filename)
 	gdouble    a_ratio, i_ratio;
 	gdouble    max_stretch = 0.1280;	/* Maximum amount of stretch */
 	gdouble    max_crop    = 0.8500;	/* Maximum amount of crop */
+	gboolean   too_small;
 
 	/* Obtaint information about display area */
 	a_width  = img->image_area->allocation.width;
@@ -482,10 +498,15 @@ GdkPixbuf *img_scale_pixbuf(img_window_struct *img, gchar *filename)
 	i_ratio = (gdouble)i_width / i_height;
 
 	/* If the image is smaller than display area, just center it and fill
-	 * the background with color. */
-	if( i_width < a_width && i_height < a_height )
+	 * the background with color. We do approximatelly the same thing if
+	 * the user doesn't want to distort images. */
+	too_small = ( i_width < a_width && i_height < a_height );
+	if( ( ! img->distort_images ) || too_small )
 	{
-		pixbuf = gdk_pixbuf_new_from_file( filename, NULL );
+		if( too_small )
+			pixbuf = gdk_pixbuf_new_from_file( filename, NULL );
+		else
+			pixbuf = gdk_pixbuf_new_from_file_at_size( filename, a_width, a_height, NULL );
 
 		i_width  = gdk_pixbuf_get_width( pixbuf );
 		i_height = gdk_pixbuf_get_height( pixbuf );
@@ -493,7 +514,7 @@ GdkPixbuf *img_scale_pixbuf(img_window_struct *img, gchar *filename)
 		offset_y = ( a_height - i_height ) / 2;
 		compose = gdk_pixbuf_new( GDK_COLORSPACE_RGB, FALSE, 8,
 								  a_width, a_height );
-		gdk_pixbuf_fill( compose, 0xffffffff );
+		gdk_pixbuf_fill( compose, img->background_color );
 		gdk_pixbuf_composite( pixbuf, compose, offset_x, offset_y, i_width,
 							  i_height, offset_x, offset_y, 1, 1,
 							  GDK_INTERP_BILINEAR, 255 );
@@ -501,40 +522,20 @@ GdkPixbuf *img_scale_pixbuf(img_window_struct *img, gchar *filename)
 		return( compose );
 	}
 
+	/* If the user doesn't want to have images distorted, we only scale
+	 * image. */
+
 	/* If we are here, the image is too big for display area, so we need to
 	 * scale it. Depending on values of i_ratio and a_ratio, we'll do some
 	 * transformations to, but won't distort the image for more than 6.25%
 	 * of it's size (just enough to snuggly convert 4:3 image to PAL) or crop
-	 * it more than 10%.
-	 *
-	 * The most common image aspect ratios and the actions taken on them:
-	 *   SC   - scale
-	 *   SHH  - shrink horizontally
-	 *   SHV  - shrink vertically
-	 *   CR   - crop image
-	 *   (BR) - image has borders (cannot be streched or cropped)
-	 *  .-------------+-----------+------------.
-	 *  | Image ratio | PAL (5:4) | NTSC (3:2) |
-	 *  +-------------+-----------+------------+
-	 *  |  3:4     11 | SC (BR)   | SC (BR)    |
-	 *  |  5:4      8 | SC        | SC (BR)    |
-	 *  | 14:11     9 | SC SHH    | SC SHV CR  |
-	 *  |  4:3     14 | SC SHH CR | SC SHV CR  |
-	 *  |  7:5     13 | SC SHH CR | SC SHV CR  |
-	 *  |  3:2     12 | SC (BR)   | SC         |
-	 *  | 13:8     10 | SC (BR)   | SC SHH CR  |
-	 *  `-------------+-----------+------------'
-	 */
+	 * it more than 10%. */
 
-	/* Let's do it;) */
-	/* Decisions are made in some sort of binary tree for increased
-	 * efficiency of if clauses. */
 	if( i_ratio < a_ratio )
 	{
 		if( i_ratio > a_ratio * ( 1 - max_stretch ) )
 		{
 			/* We can shrink image vertically enough to fit. */
-			g_print( "SC, SHV -> ratio: %.3f\n", i_ratio );
 			return( gdk_pixbuf_new_from_file_at_scale( filename, a_width, a_height, FALSE, NULL ) );
 		}
 		else
@@ -542,14 +543,12 @@ GdkPixbuf *img_scale_pixbuf(img_window_struct *img, gchar *filename)
 			if( i_ratio > a_ratio * ( 1 - max_stretch ) * max_crop )
 			{
 				/* We can shrink image vertically and crop it to fit. */
-				g_print( "SC, SHV, CR -> ratio %.3f\n", i_ratio );
 				pixbuf = gdk_pixbuf_new_from_file_at_scale(
 							filename, a_width, a_height * ( 1 + max_stretch ), FALSE, NULL );
 			}
 			else
 			{
 				/* We cannot avoid white stripes on the left/right. Sorry. */
-				g_print( "SC (BR) -> ratio %.3f\n", i_ratio );
 				pixbuf = gdk_pixbuf_new_from_file_at_size( filename, a_width, a_height, NULL );
 			}
 		}
@@ -559,7 +558,6 @@ GdkPixbuf *img_scale_pixbuf(img_window_struct *img, gchar *filename)
 		if( i_ratio < a_ratio * ( 1 + max_stretch ) )
 		{
 			/* We can shrink image horizontally enough to fit. */
-			g_print( "SC, SHH -> ratio %.3f\n", i_ratio );
 			return( gdk_pixbuf_new_from_file_at_scale( filename, a_width, a_height, FALSE, NULL ) );
 		}
 		else
@@ -567,14 +565,12 @@ GdkPixbuf *img_scale_pixbuf(img_window_struct *img, gchar *filename)
 			if( i_ratio < a_ratio * ( 1 + max_stretch ) / max_crop )
 			{
 				/* We can shrink image horizontally and crop it to fit. */
-				g_print( "SC, SHH, CR -> ratio %.3f\n", i_ratio );
 				pixbuf = gdk_pixbuf_new_from_file_at_scale(
 							filename, a_width * ( 1 + max_stretch ), a_height, FALSE, NULL );
 			}
 			else
 			{
 				/* We cannot avoid white stripes at the bottom/top. Sorry. */
-				g_print( "SC (BR) -> ratio %.3f\n", i_ratio );
 				pixbuf = gdk_pixbuf_new_from_file_at_size( filename, a_width, a_height, NULL );
 			}
 		}
@@ -587,7 +583,7 @@ GdkPixbuf *img_scale_pixbuf(img_window_struct *img, gchar *filename)
 	offset_y = ( a_height - i_height ) / 2;
 
 	compose = gdk_pixbuf_new( GDK_COLORSPACE_RGB, FALSE, 8, a_width, a_height );
-	gdk_pixbuf_fill( compose, 0xffffffff );
+	gdk_pixbuf_fill( compose, img->background_color );
 	gdk_pixbuf_composite( pixbuf, compose,
 						  offset_x < 0 ? 0 : offset_x,
 						  offset_y < 0 ? 0 : offset_y,
@@ -700,17 +696,17 @@ static void img_clean_after_preview(img_window_struct *img)
 
 void img_choose_slideshow_filename(GtkWidget *widget, img_window_struct *img)
 {
-	gchar *filename = NULL;
 	GtkWidget *fc;
 	GtkFileChooserAction action = 0;
 	gint response;
 
-	if (widget == img->open_menu_item || widget == img->open_button)
+	/* Determine the mode of the chooser. */
+	if (widget == img->open_menu || widget == img->open_button)
 		action = GTK_FILE_CHOOSER_ACTION_OPEN;
-	else if (widget == img->save_as_menu_item || widget == img->save_menu_item || widget == img->save_button)
+	else if (widget == img->save_as_menu || widget == img->save_menu || widget == img->save_button)
 		action = GTK_FILE_CHOOSER_ACTION_SAVE;
 
-	if (img->slideshow_filename == NULL || widget == img->save_as_menu_item || action == GTK_FILE_CHOOSER_ACTION_OPEN)
+	if (img->project_filename == NULL || widget == img->save_as_menu || action == GTK_FILE_CHOOSER_ACTION_OPEN)
 	{
 		fc = gtk_file_chooser_dialog_new (action == GTK_FILE_CHOOSER_ACTION_OPEN ? _("Load an Imagination slideshow project") : 
 					_("Save an Imagination slideshow project"),
@@ -718,15 +714,24 @@ void img_choose_slideshow_filename(GtkWidget *widget, img_window_struct *img)
 					action,
 					GTK_STOCK_CANCEL,
 					GTK_RESPONSE_CANCEL,
-					action == GTK_FILE_CHOOSER_ACTION_OPEN ?  "gtk-open" : "gtk-save",
+					action == GTK_FILE_CHOOSER_ACTION_OPEN ?  GTK_STOCK_OPEN : GTK_STOCK_SAVE,
 					GTK_RESPONSE_ACCEPT,NULL);
 
 		gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER (fc),TRUE);
-		response = gtk_dialog_run ((GtkDialog *)fc);
+		response = gtk_dialog_run (GTK_DIALOG (fc));
 		if (response == GTK_RESPONSE_ACCEPT)
 		{
-			filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fc));
-			gtk_widget_destroy(fc);
+			gchar *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fc));
+			if(filename)
+			{
+				/* Free any previous filename */
+				if(img->project_filename)
+					g_free(img->project_filename);
+				
+				/* Store new filename */
+				img->project_filename = filename;
+				gtk_widget_destroy(fc);
+			}
 		}
 		else if (response == GTK_RESPONSE_CANCEL || GTK_RESPONSE_DELETE_EVENT)
 		{
@@ -734,16 +739,16 @@ void img_choose_slideshow_filename(GtkWidget *widget, img_window_struct *img)
 			return;
 		}
 	}
-	else
-		filename = g_strdup(img->slideshow_filename);
-
 	if (action == GTK_FILE_CHOOSER_ACTION_OPEN)
-		img_load_slideshow(img,filename);
+		img_load_slideshow(img);
 	else
-		img_save_slideshow(img,filename);
-	
-	if (filename)
-		g_free(filename);
+		img_save_slideshow(img);
+}
+
+void img_close_slideshow(GtkWidget *widget, img_window_struct *img)
+{
+	//img_delete_selected_slides
+	img_set_buttons_state(img, FALSE);
 }
 
 void img_start_stop_export(GtkWidget *widget, img_window_struct *img)
@@ -770,13 +775,73 @@ void img_start_stop_export(GtkWidget *widget, img_window_struct *img)
 	}
 	else
 	{
-		mkfifo ("/tmp/img.fifo",0660);
-		img->file_desc = g_open("/tmp/img.fifo",O_WRONLY,0);
+		GtkWidget *dialog;
+		GtkWidget *vbox, *hbox;
+		GtkWidget *label;
+		GtkWidget *progress;
+		GtkWidget *button;
+		gchar     *string;
 
-		/* Run ffmpeg encoder on the above pipe */
-		img_run_encoder(img);
+		/* Run ffmpeg encoder on the above pipe. This function returns
+		 * TRUE if the encoder has been launched of FALSE if the error
+		 * occured. */
+		if(!img_run_encoder(img))
+			return;
 
-		/* Create progress window with cancel and pause buttons, calculate the total number of frames to display */
+		/* Create progress window with cancel and pause buttons, calculate
+		 * the total number of frames to display. */
+		dialog = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+		img->export_dialog = dialog;
+		gtk_container_set_border_width( GTK_CONTAINER( dialog ), 10 );
+		gtk_window_set_default_size( GTK_WINDOW( dialog ), 400, -1 );
+		gtk_window_set_type_hint( GTK_WINDOW( dialog ),
+								  GDK_WINDOW_TYPE_HINT_DIALOG );
+		gtk_window_set_modal( GTK_WINDOW( dialog ), TRUE );
+		gtk_window_set_transient_for( GTK_WINDOW( dialog ),
+									  GTK_WINDOW( img->imagination_window ) );
+
+		vbox = gtk_vbox_new( FALSE, 6 );
+		gtk_container_add( GTK_CONTAINER( dialog ), vbox );
+
+		label = gtk_label_new( _("Preparing for export ...") );
+		gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
+		img->export_label = label;
+		gtk_box_pack_start( GTK_BOX( vbox ), label, FALSE, FALSE, 0 );
+
+		progress = gtk_progress_bar_new();
+		img->export_pbar1 = progress;
+		string = g_strdup_printf( "%.2f", .0 );
+		gtk_progress_bar_set_text( GTK_PROGRESS_BAR( progress ), string );
+		gtk_box_pack_start( GTK_BOX( vbox ), progress, FALSE, FALSE, 0 );
+
+		label = gtk_label_new( _("Overall progress:") );
+		gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
+		gtk_box_pack_start( GTK_BOX( vbox ), label, FALSE, FALSE, 0 );
+
+		progress = gtk_progress_bar_new();
+		img->export_pbar2 = progress;
+		gtk_progress_bar_set_text( GTK_PROGRESS_BAR( progress ), string );
+		gtk_box_pack_start( GTK_BOX( vbox ), progress, FALSE, FALSE, 0 );
+		g_free( string );
+
+		hbox = gtk_hbox_new( TRUE, 6 );
+		gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
+
+		button = gtk_button_new_from_stock( GTK_STOCK_CANCEL );
+		g_signal_connect( G_OBJECT( button ), "clicked",
+						  G_CALLBACK( img_start_stop_export ), img );
+		gtk_box_pack_end( GTK_BOX( hbox ), button, FALSE, FALSE, 0 );
+
+		button = gtk_toggle_button_new_with_label( GTK_STOCK_MEDIA_PAUSE );
+		gtk_button_set_use_stock( GTK_BUTTON( button ), TRUE );
+		gtk_box_pack_end( GTK_BOX( hbox ), button, FALSE, FALSE, 0 );
+
+		gtk_widget_show_all( dialog );
+
+		/* Display some visual feedback */
+		while( gtk_events_pending() )
+			gtk_main_iteration();
+
 		img->slide_pixbuf = gtk_image_get_pixbuf(GTK_IMAGE(img->image_area));
 		if(img->slide_pixbuf)
 			g_object_ref(G_OBJECT(img->slide_pixbuf));
@@ -792,18 +857,30 @@ void img_start_stop_export(GtkWidget *widget, img_window_struct *img)
 		gtk_tree_model_get(model, &iter, 1, &entry, -1);
 		img->pixbuf2 = img_scale_pixbuf(img, entry->filename);
 
-		/* Add export idle function */
+		/* Add export idle function and set initial values */
 		img->export_is_running = TRUE;
 		img->current_slide = entry;
 		img->progress = 0;
+		img->export_frame_nr = img->total_secs * 29.97;
+		img->export_frame_cur = 0;
+		/* I added 1 here to avoid progress bar being updated with
+		 * fraction that is bigger than 1. */
+		img->export_slide_nr = ( entry->duration + 1 / entry->speed / 25 ) * 29.97 + 1;
+		img->export_slide_cur = 0;
+		img->export_slide = 1;
 		img->source_id = g_idle_add((GSourceFunc)img_export_transition, img);
+
+		string = g_strdup_printf( _("Slide %d export progress:"), 1 );
+		/* I did this for the translators. ^^ */
+		gtk_label_set_label( GTK_LABEL( img->export_label ), string );
+		g_free( string );
 	}
 }
 
 static gboolean img_export_transition(img_window_struct *img)
 {
-	/* Counter, used to draw every 10th frame. */
-	static guint counter = 0;
+	gchar           string[10];
+	gdouble         export_progress;
 
 	/* If no transition effect is set, just connect still export
 	 * idle function and remove itself from main loop. */
@@ -813,11 +890,11 @@ static gboolean img_export_transition(img_window_struct *img)
 		return(FALSE);
 	}
 
+	/* Switch to still export phase if progress reached 1. */
 	img->progress += img->current_slide->speed * (25 / 29.97);
 	if(img->progress > 1 + 0.00000005)
 	{
 		img->progress = 0;
-		counter = 0;
 		img->source_id = g_idle_add((GSourceFunc)img_export_still, img);
 
 		return(FALSE);
@@ -825,10 +902,25 @@ static gboolean img_export_transition(img_window_struct *img)
 
 	/* Draw one frame of transition animation */
 	img->current_slide->render(img->image_area->window, img->pixbuf1, img->pixbuf2, img->progress, img->file_desc);
-	counter++;
+
+	/* Increment global frame counters and update progress bars */
+	img->export_frame_cur++;
+	img->export_slide_cur++;
+
+	export_progress = (gdouble)img->export_slide_cur / img->export_slide_nr;
+	snprintf( string, 10, "%.2f%%", export_progress * 100 );
+	gtk_progress_bar_set_fraction( GTK_PROGRESS_BAR( img->export_pbar1 ),
+								   export_progress );
+	gtk_progress_bar_set_text( GTK_PROGRESS_BAR( img->export_pbar1 ), string );
+
+	export_progress = (gdouble)img->export_frame_cur / img->export_frame_nr;
+	snprintf( string, 10, "%.2f%%", export_progress * 100 );
+	gtk_progress_bar_set_fraction( GTK_PROGRESS_BAR( img->export_pbar2 ),
+								   export_progress );
+	gtk_progress_bar_set_text( GTK_PROGRESS_BAR( img->export_pbar2 ), string );
 
 	/* Draw every 10th frame of animation on screen */
-	if(counter % 10 == 0)
+	if(img->export_frame_cur % 10 == 0)
 		gtk_widget_queue_draw(img->image_area);
 
 	return(TRUE);
@@ -836,13 +928,13 @@ static gboolean img_export_transition(img_window_struct *img)
 
 static gboolean img_export_still(img_window_struct *img)
 {
-	static guint   frame_counter;
 	static guint   lenght;
+	gdouble        export_progress;
+	gchar          string[10];
 
 	/* Initialize pixbuf data buffer */
 	if(img->pixbuf_data == NULL)
 	{
-		frame_counter = 0;
 		gtk_image_set_from_pixbuf(GTK_IMAGE(img->image_area), img->pixbuf2);
 		img_export_pixbuf_to_ppm(img->pixbuf2, &img->pixbuf_data, &lenght);
 	}
@@ -850,7 +942,7 @@ static gboolean img_export_still(img_window_struct *img)
 	/* FIXED RATE!!!
 	 * Draw frames until we have enough of them to fill slide duration gap.
 	 * Again, output rate is fixed at 29.97 fps. */
-	if(frame_counter > img->current_slide->duration * 29.97)
+	if( img->export_slide_cur > img->export_slide_nr )
 	{
 		/* Exit still rendering and continue with next transition. */
 
@@ -860,6 +952,16 @@ static gboolean img_export_still(img_window_struct *img)
 		/* Load next image from store. */
 		if(img_prepare_pixbufs(img))
 		{
+			gchar *string;
+
+			/* Update progress counters */
+			img->export_slide++;
+			string = g_strdup_printf( _("Slide %d export progress:"), img->export_slide );
+			gtk_label_set_label( GTK_LABEL( img->export_label ), string );
+			g_free( string );
+			img->export_slide_cur = 0;
+			img->export_slide_nr = ( img->current_slide->duration + 1 / img->current_slide->speed / 25 ) * 29.97;
+
 			g_free(img->pixbuf_data);
 			img->pixbuf_data = NULL;
 			img->source_id = g_idle_add((GSourceFunc)img_export_transition, img);
@@ -870,7 +972,22 @@ static gboolean img_export_still(img_window_struct *img)
 		return(FALSE);
 	}
 	write(img->file_desc, img->pixbuf_data, lenght);
-	frame_counter++;
+
+	/* Increment global frame counter and update progress bar */
+	img->export_frame_cur++;
+	img->export_slide_cur++;
+
+	export_progress = CLAMP( (gdouble)img->export_slide_cur / img->export_slide_nr, 0, 1 );
+	snprintf( string, 10, "%.2f%%", export_progress * 100 );
+	gtk_progress_bar_set_fraction( GTK_PROGRESS_BAR( img->export_pbar1 ),
+								   export_progress );
+	gtk_progress_bar_set_text( GTK_PROGRESS_BAR( img->export_pbar1 ), string );
+
+	export_progress = CLAMP( (gdouble)img->export_frame_cur / img->export_frame_nr, 0, 1 );
+	snprintf( string, 10, "%.2f%%", export_progress * 100 );
+	gtk_progress_bar_set_fraction( GTK_PROGRESS_BAR( img->export_pbar2 ),
+								   export_progress );
+	gtk_progress_bar_set_text( GTK_PROGRESS_BAR( img->export_pbar2 ), string );
 
 	return(TRUE);
 }
@@ -894,9 +1011,9 @@ static void img_clean_after_export(img_window_struct *img)
 	img->cur_ss_iter = NULL;
 	g_free(img->pixbuf_data);
 	img->pixbuf_data = NULL;
+	gtk_widget_destroy( img->export_dialog );
 
 	close(img->file_desc);
-	g_unlink("/tmp/img.fifo");
 }
 
 /* Move one step forward in model and set img->pixbuf1 and img->pixbuf2
@@ -1008,37 +1125,32 @@ thumb->rotation = 180;
  }
  */
 
-static void img_run_encoder(img_window_struct *img)
+/* Changed return value to gboolean. This way we can abort export in
+ * img_start_stop_export function. */
+static gboolean img_run_encoder(img_window_struct *img)
 {
-	GtkWidget *message;
-	GError *error = NULL;
-	gchar **argv;
-	gchar *aspect_ratio = NULL, *size = NULL, *target = NULL;
-	GdkScreen *screen;
-	gint i = 0;
+	GtkWidget  *message;
+	GError     *error = NULL;
+	gchar     **argv;
+	gchar      *cmd_line;
+	gboolean    ret;
 
-	aspect_ratio= g_strconcat		("-aspect",img->aspect_ratio,NULL);
-	size		= g_strdup_printf	("-s 720x%d",img->slideshow_height);
-	target		= g_strconcat		("-target ", img->slideshow_height == 576 ? "pal" : "ntsc", "-dvd",NULL);
+	cmd_line = g_strdup_printf(
+				"ffmpeg -f image2pipe -vcodec ppm -r 29.97 -i pipe: "
+				"-target %s-dvd -r 29.97 -an -aspect %s -s %dx%d -y -bf 2 %s",
+				img->image_area->allocation.height == 576 ? "pal" : "ntsc",
+				img->aspect_ratio, img->image_area->allocation.width,
+				img->image_area->allocation.height, img->slideshow_filename );
+	argv = g_strsplit( cmd_line, " ", 0 );
+	g_free( cmd_line );
 
-	argv = g_new (gchar *, 13);
-	argv[i++] = "ffmpeg";
-	argv[i++] = "-f image2pipe";
-	argv[i++] = "-vcodec ppm";
-	argv[i++] = "-i /tmp/img.fifo";
-	argv[i++] = target;
-	argv[i++] = "-r 29.97";
-	argv[i++] = "-an";				/* Disable audio */
-	argv[i++] = aspect_ratio;
-	argv[i++] = size;
-	argv[i++] = "-y";
-	argv[i++] = "-bf 2";
-	argv[i++] = g_strdup(img->slideshow_filename);
-	argv[i] = NULL;
-
-	screen = gtk_widget_get_screen (GTK_WIDGET (img->imagination_window));
-	if (!gdk_spawn_on_screen (screen,NULL,argv,NULL,G_SPAWN_LEAVE_DESCRIPTORS_OPEN | G_SPAWN_SEARCH_PATH| G_SPAWN_DO_NOT_REAP_CHILD,
-								NULL,NULL,NULL,&error))
+	ret = g_spawn_async_with_pipes( NULL, argv, NULL,
+									G_SPAWN_SEARCH_PATH /*|
+									G_SPAWN_STDOUT_TO_DEV_NULL |
+									G_SPAWN_STDERR_TO_DEV_NULL*/,
+									NULL, NULL, NULL, &img->file_desc,
+									NULL, NULL, &error );
+	if( ! ret )
 	{
 		message = gtk_message_dialog_new (GTK_WINDOW (img->imagination_window),
 										GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
@@ -1050,5 +1162,22 @@ static void img_run_encoder(img_window_struct *img)
 		gtk_widget_destroy (message);
 		g_error_free (error);
 	}
-	g_free(argv);
+	g_strfreev( argv );
+
+	return( ret );
+}
+
+void img_set_buttons_state(img_window_struct *img, gboolean state)
+{
+	gtk_widget_set_sensitive(img->import_button,state);
+	gtk_widget_set_sensitive(img->import_menu,	state);
+	gtk_widget_set_sensitive(img->save_menu,	state);
+	gtk_widget_set_sensitive(img->save_as_menu,	state);
+	gtk_widget_set_sensitive(img->save_button,	state);
+	gtk_widget_set_sensitive(img->close_menu,	state);
+	gtk_widget_set_sensitive(img->properties_menu,	state);
+	gtk_widget_set_sensitive(img->preview_menu,	state);
+	gtk_widget_set_sensitive(img->preview_button,state);
+	gtk_widget_set_sensitive(img->export_menu,	state);
+	gtk_widget_set_sensitive(img->export_button,state);
 }

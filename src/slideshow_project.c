@@ -1,6 +1,7 @@
 /*
  *  Copyright (C) 2009 Giuseppe Torelli - <colossus73@gmail.com>
- *
+ *  Copyright (c) 2009 Tadej Borovšak 	<tadeboro@gmail.com>
+ * 
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
@@ -18,10 +19,10 @@
 
 #include "slideshow_project.h"
 
-void img_save_slideshow(img_window_struct *img, gchar *filename)
+void img_save_slideshow(img_window_struct *img)
 {
 	GKeyFile *img_key_file;
-	gchar *conf;
+	gchar *conf,*string;
 	gint count = 0;
 	gsize len;
 	GtkTreeIter iter;
@@ -39,11 +40,16 @@ void img_save_slideshow(img_window_struct *img, gchar *filename)
 
 	g_key_file_set_string(img_key_file,"slideshow settings","name",img->slideshow_filename);
 	g_key_file_set_integer(img_key_file,"slideshow settings","export format",img->slideshow_format_index);
-	if ((img->viewport)->allocation.height == 480)
+
+	if ((img->image_area)->allocation.height == 480)
 		g_key_file_set_integer(img_key_file,"slideshow settings","video format",480);
 	else
 		g_key_file_set_integer(img_key_file,"slideshow settings","video format",576);
 	g_key_file_set_string(img_key_file,"slideshow settings","aspect ratio",img->aspect_ratio);
+	conf = g_strdup_printf( "%lx", (gulong)img->background_color );
+	g_key_file_set_string(img_key_file,"slideshow settings", "background color", conf);
+	g_free( conf );
+	g_key_file_set_boolean(img_key_file,"slideshow settings", "distort images", img->distort_images);
 
 	/* Slide individual settings */
 	g_key_file_set_integer(img_key_file, "images", "number", img->slides_nr);
@@ -63,13 +69,16 @@ void img_save_slideshow(img_window_struct *img, gchar *filename)
 
 	/* Write the project file */
 	conf = g_key_file_to_data(img_key_file, &len, NULL);
-	g_file_set_contents(filename, conf, len, NULL);
+	g_file_set_contents(img->project_filename, conf, len, NULL);
 	g_free (conf);
 
+	string = g_path_get_basename(img->project_filename);
+	img_set_window_title(img,string);
+	g_free(string);
 	g_key_file_free(img_key_file);
 }
 
-void img_load_slideshow(img_window_struct *img, gchar *filename)
+void img_load_slideshow(img_window_struct *img)
 {
 	GdkPixbuf *thumb;
 	slide_struct *slide_info;
@@ -78,13 +87,17 @@ void img_load_slideshow(img_window_struct *img, gchar *filename)
 	GKeyFile *img_key_file;
 	gchar *dummy,*slide_filename;
 	GtkWidget *dialog;
-	gint number,i,duration,combo_transition_type_index;
+	gint number,i,duration,combo_transition_type_index, height;
 	gdouble speed;
 	GtkTreeModel *model;
 	void (*render);
 
 	img_key_file = g_key_file_new();
-	g_key_file_load_from_file(img_key_file,filename,G_KEY_FILE_KEEP_COMMENTS,NULL);
+	if(!g_key_file_load_from_file(img_key_file,img->project_filename,G_KEY_FILE_KEEP_COMMENTS,NULL))
+	{
+		g_key_file_free( img_key_file );
+		return;
+	}
 
 	dummy = g_key_file_get_comment(img_key_file,NULL,NULL,NULL);
 
@@ -108,10 +121,16 @@ void img_load_slideshow(img_window_struct *img, gchar *filename)
 	img->slideshow_filename 	= g_key_file_get_string(img_key_file,"slideshow settings","name",NULL);
 	img->slideshow_format_index = g_key_file_get_integer(img_key_file,"slideshow settings","export format",NULL);
 	img->aspect_ratio			= g_key_file_get_string(img_key_file,"slideshow settings","aspect ratio",NULL);
-	img->slideshow_height		= g_key_file_get_integer(img_key_file,"slideshow settings","video format",NULL);
+	height = g_key_file_get_integer(img_key_file,"slideshow settings","video format",NULL);
+	gtk_widget_set_size_request( img->image_area, 720, height );
+	dummy = g_key_file_get_string(img_key_file, "slideshow settings", "background color", NULL );
+	img->background_color = (guint32)strtol( dummy, NULL, 16 );
+	g_free(dummy);
+	img->distort_images = g_key_file_get_boolean(img_key_file, "slideshow settings", "disort images", NULL );
 
 	/* Loads the thumbnails and set the slides info */
 	number = g_key_file_get_integer(img_key_file,"images","number",NULL);
+	model = gtk_combo_box_get_model(GTK_COMBO_BOX(img->transition_type));
 	for (i = 1; i <= number; i++)
 	{
 		dummy = g_strdup_printf("image_%d",i);
@@ -125,7 +144,6 @@ void img_load_slideshow(img_window_struct *img, gchar *filename)
 			combo_transition_type_index = g_key_file_get_integer(img_key_file,"transition type",dummy,NULL);
 
 			/* Get the mem address of the transition according to the index */
-			model = gtk_combo_box_get_model(GTK_COMBO_BOX(img->transition_type));
 			path = gtk_tree_path_new_from_indices(combo_transition_type_index,-1);
 			gtk_tree_model_get_iter(model,&iter,path);
 			gtk_tree_model_get(model,&iter,1,&render,-1);
@@ -144,4 +162,10 @@ void img_load_slideshow(img_window_struct *img, gchar *filename)
 	g_key_file_free (img_key_file);
 	img_set_total_slideshow_duration(img);
 	img_set_statusbar_message(img,0);
+	gtk_widget_show(img->thumb_scrolledwindow);
+
+	dummy = g_path_get_basename(img->project_filename);
+	img_set_window_title(img, dummy);
+	img_set_buttons_state(img, TRUE);
+	g_free(dummy);
 }

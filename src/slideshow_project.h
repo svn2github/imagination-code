@@ -1,6 +1,7 @@
 /*
  *  Copyright (c) 2009 Giuseppe Torelli <colossus73@gmail.com>
- *
+ *  Copyright (c) 2009 Tadej Borovšak 	<tadeboro@gmail.com>
+ * 
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License,or
@@ -28,6 +29,6 @@
 #include "support.h"
 #include "callbacks.h"
 
-void img_save_slideshow(img_window_struct *, gchar *);
-void img_load_slideshow(img_window_struct *, gchar *);
+void img_save_slideshow(img_window_struct *);
+void img_load_slideshow(img_window_struct *);
 #endif

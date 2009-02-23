@@ -1,6 +1,7 @@
 /*
- *  Copyright (c) 2008 Giuseppe Torelli <colossus73@gmail.com>
- *
+ *  Copyright (c) 2009 Giuseppe Torelli <colossus73@gmail.com>
+ *  Copyright (c) 2009 Tadej Borovšak 	<tadeboro@gmail.com>
+ * 
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License,or
@@ -19,7 +20,10 @@
 
 #include "new_slideshow.h"
 
-void img_new_slideshow_settings_dialog(img_window_struct *img)
+static void img_bg_color_changed( GtkColorButton *, img_window_struct *);
+static void img_distort_toggled( GtkToggleButton *, img_window_struct *);
+
+void img_new_slideshow_settings_dialog(img_window_struct *img, gboolean flag)
 {
 	GtkWidget *dialog1;
 	GtkWidget *dialog_vbox1;
@@ -39,21 +43,34 @@ void img_new_slideshow_settings_dialog(img_window_struct *img)
 	GtkWidget *alignment_frame1;
 	GtkWidget *frame2;
 	GtkWidget *label_frame2;
+	/* Some advanced stuff users may want to set. */
+	GtkWidget *expander;
+	GtkWidget *ex_vbox;
+	GtkWidget *ex_hbox;
+	GtkWidget *frame3;
+	GtkWidget *alignment;
+	GtkWidget *distort_button;
+	GtkWidget *bg_button;
+	GtkWidget *bg_label;
+	GdkColor   color;
+	/* End advanced stuff. */
 	GtkWidget *alignment_frame2;
 	GtkWidget *vbox_video_format, *vbox_aspect_ratio;
 	GtkWidget *pal,*ntsc,*tv,*wide;
 	GtkWidget *label1;
-	GSList *radiobutton1_group = NULL;
-	GSList *radiobutton2_group = NULL;
-	gint response;
+	gint       response;
+	gchar     *string;
 
-	dialog1 = gtk_dialog_new_with_buttons(_("Create a new slideshow"),(GtkWindow*)img->imagination_window,
+	/* Display propert title depending on the callback that is calling this function. */
+	string = ( flag ? _("Project properties") : _("Create a new slideshow") );
+	dialog1 = gtk_dialog_new_with_buttons( string,
+										GTK_WINDOW(img->imagination_window),
 										GTK_DIALOG_DESTROY_WITH_PARENT,
 										GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 										GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, NULL);
 
 	gtk_button_box_set_layout (GTK_BUTTON_BOX (GTK_DIALOG (dialog1)->action_area), GTK_BUTTONBOX_SPREAD);
-	gtk_widget_set_size_request(dialog1,520,248);
+	gtk_window_set_default_size(GTK_WINDOW(dialog1),520,248);
 	gtk_dialog_set_has_separator (GTK_DIALOG (dialog1), FALSE);
 
 	dialog_vbox1 = GTK_DIALOG (dialog1)->vbox;
@@ -118,14 +135,10 @@ void img_new_slideshow_settings_dialog(img_window_struct *img)
 
 	pal = gtk_radio_button_new_with_mnemonic (NULL, "PAL 720 x 576");
 	gtk_box_pack_start (GTK_BOX (vbox_video_format), pal, TRUE, TRUE, 0);
-	gtk_radio_button_set_group (GTK_RADIO_BUTTON (pal), radiobutton1_group);
-	radiobutton1_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (pal));
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pal), TRUE);
 
-	ntsc = gtk_radio_button_new_with_mnemonic (NULL, "NTSC 720 x 480");
+	ntsc = gtk_radio_button_new_with_mnemonic_from_widget (GTK_RADIO_BUTTON (pal), "NTSC 720 x 480");
 	gtk_box_pack_start (GTK_BOX (vbox_video_format), ntsc, TRUE, TRUE, 0);
-	gtk_radio_button_set_group (GTK_RADIO_BUTTON (ntsc), radiobutton1_group);
-	radiobutton1_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (ntsc));
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pal), TRUE);
 
 	label_frame1 = gtk_label_new (_("<b>Video Format</b>"));
@@ -143,26 +156,56 @@ void img_new_slideshow_settings_dialog(img_window_struct *img)
 	vbox_aspect_ratio = gtk_vbox_new (FALSE, 0);
 	gtk_container_add (GTK_CONTAINER (alignment_frame2), vbox_aspect_ratio);
 
+	/* Again, removed groups */
 	tv = gtk_radio_button_new_with_mnemonic (NULL, _("Normal 4:3"));
 	gtk_box_pack_start (GTK_BOX (vbox_aspect_ratio), tv, TRUE, TRUE, 0);
-	gtk_radio_button_set_group (GTK_RADIO_BUTTON (tv), radiobutton2_group);
-	radiobutton2_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON(tv));
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (tv), TRUE);
 
-	wide = gtk_radio_button_new_with_mnemonic (NULL, _("Widescreen 16:9"));
+	wide = gtk_radio_button_new_with_mnemonic_from_widget (GTK_RADIO_BUTTON (tv), _("Widescreen 16:9"));
 	gtk_box_pack_start (GTK_BOX (vbox_aspect_ratio), wide, TRUE, TRUE, 0);
-	gtk_radio_button_set_group (GTK_RADIO_BUTTON (wide), radiobutton2_group);
-	radiobutton2_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (wide));
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (tv), TRUE);
 
 	label_frame2 = gtk_label_new (_("<b>Television Format</b>"));
 	gtk_frame_set_label_widget (GTK_FRAME (frame2), label_frame2);
 	gtk_label_set_use_markup (GTK_LABEL (label_frame2), TRUE);
 
+	/* Added some advanced settings */
+	expander = gtk_expander_new( _("Advanced settings") );
+	gtk_box_pack_start( GTK_BOX( vbox_frame1 ), expander, FALSE, FALSE, 0 );
+
+	frame3 = gtk_frame_new( NULL );
+	gtk_container_add( GTK_CONTAINER( expander ), frame3 );
+
+	alignment = gtk_alignment_new( 0.5, 0.5, 1, 1 );
+	gtk_alignment_set_padding( GTK_ALIGNMENT( alignment ), 5, 5, 5, 5 );
+	gtk_container_add( GTK_CONTAINER( frame3 ), alignment );
+
+	ex_vbox = gtk_vbox_new( FALSE, 5 );
+	gtk_container_add( GTK_CONTAINER( alignment ), ex_vbox );
+
+	distort_button = gtk_check_button_new_with_label( _("Rescale images to fit desired aspect ratio") );
+	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( distort_button ), img->distort_images );
+	g_signal_connect( G_OBJECT( distort_button ), "toggled", G_CALLBACK( img_distort_toggled ), img );
+	gtk_box_pack_start( GTK_BOX( ex_vbox ), distort_button, FALSE, FALSE, 0 );
+
+	ex_hbox = gtk_hbox_new( FALSE, 5 );
+	gtk_box_pack_start( GTK_BOX( ex_vbox ), ex_hbox, FALSE, FALSE, 0 );
+
+	bg_label = gtk_label_new( _("Select background color:") );
+	gtk_box_pack_start( GTK_BOX( ex_hbox ), bg_label, FALSE, FALSE, 0 );
+
+	color.red   = ( ( img->background_color >> 24 ) & 0xff ) / 0xff * 0xffff;
+	color.green = ( ( img->background_color >> 16 ) & 0xff ) / 0xff * 0xffff;
+	color.blue  = ( ( img->background_color >>  8 ) & 0xff ) / 0xff * 0xffff;
+	bg_button = gtk_color_button_new_with_color( &color );
+	g_signal_connect( G_OBJECT( bg_button ), "color-set", G_CALLBACK( img_bg_color_changed ), img );
+	gtk_box_pack_start( GTK_BOX( ex_hbox ), bg_button, FALSE, FALSE, 0 );
+
 	gtk_widget_show_all(dialog_vbox1);
 
-	/* Set parameters in case the user has loaded a project file */
-	if (img->slideshow_filename != NULL)
+	/* Set parameters if some project file is already loaded and user clicked
+	 * selected Project properties menu entry. */
+	if (img->slideshow_filename != NULL && flag)
 	{
 		gtk_entry_set_text(GTK_ENTRY(slideshow_title_entry),img->slideshow_filename);
 		gtk_combo_box_set_active(GTK_COMBO_BOX(slideshow_fmt_combo),img->slideshow_format_index);
@@ -170,31 +213,50 @@ void img_new_slideshow_settings_dialog(img_window_struct *img)
 			gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (tv), TRUE);
 		else
 			gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (wide), TRUE);
-		if (img->slideshow_height == 480)
+
+		if (img->image_area->allocation.height == 480)
 			gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (ntsc), TRUE);
 		else
 			gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pal), TRUE);
 	}
 
 	response = gtk_dialog_run(GTK_DIALOG(dialog1));
-	if (response == GTK_RESPONSE_OK || response == GTK_RESPONSE_ACCEPT)
+
+	if (response == GTK_RESPONSE_ACCEPT)
 	{
 		img->slideshow_filename = g_strdup(gtk_entry_get_text(GTK_ENTRY(slideshow_title_entry)));
 		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON (pal)))
 		{
 			gtk_widget_set_size_request(img->image_area,720,576);
-			img->slideshow_height = 576;
 		}
 		else
 		{
 			gtk_widget_set_size_request(img->image_area,720,480);
-			img->slideshow_height = 480;
 		}
 		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON (tv)))
 			img->aspect_ratio = "4:3";
 		else
 			img->aspect_ratio = "16:9";
 		img->slideshow_format_index = gtk_combo_box_get_active(GTK_COMBO_BOX(slideshow_fmt_combo));
+	
+		img_set_buttons_state(img, TRUE);
 	}
 	gtk_widget_destroy(dialog1);
+}
+
+static void img_bg_color_changed( GtkColorButton *button, img_window_struct *img )
+{
+	GdkColor color;
+	gint     r, g, b;
+
+	gtk_color_button_get_color( button, &color );
+	r = ( color.red   / 0xffff * 0xff );
+	g = ( color.green / 0xffff * 0xff );
+	b = ( color.blue  / 0xffff * 0xff );
+	img->background_color = r  << 24 | g << 16 | b <<  8 | 0xff;
+}
+
+static void img_distort_toggled( GtkToggleButton *button, img_window_struct *img )
+{
+	img->distort_images = gtk_toggle_button_get_active( button );
 }

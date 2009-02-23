@@ -28,7 +28,7 @@ void img_export_cairo_to_ppm( cairo_surface_t *surface, gint file_desc)
 {
 	cairo_format_t  format;
 	gint            width, height, stride, row, col;
-	guchar         *data;
+	guchar         *data, *pix;
 	gchar          *header;
 
 	guchar         *buffer, *tmp;
@@ -51,7 +51,7 @@ void img_export_cairo_to_ppm( cairo_surface_t *surface, gint file_desc)
 	width  = cairo_image_surface_get_width( surface );
 	height = cairo_image_surface_get_height( surface );
 	stride = cairo_image_surface_get_stride( surface );
-	data   = cairo_image_surface_get_data( surface );
+	pix    = cairo_image_surface_get_data( surface );
 
 	/* Accomodate difference in RGB and ARGB formats */
 	//if( format == CAIRO_FORMAT_ARGB32 )
@@ -88,16 +88,27 @@ void img_export_cairo_to_ppm( cairo_surface_t *surface, gint file_desc)
 	buf_size = sizeof( guchar ) * width * height * 3;
 	buffer = g_slice_alloc( buf_size );
 	tmp = buffer;
+	data = pix;
 	for( row = 0; row < height; row++ )
 	{
+		data = pix + row * stride;
+
 		for( col = 0; col < width; col++ )
 		{
-			/* Output data. We need to output data in reverse order, because
-			 * majority of machines are small endian, but the PPM file needs
-			 * it's bytes in big endian. */
+			/* Output data. This is done differenty on little endian
+			 * and big endian machines. */
+#if G_BYTE_ORDER == G_LITTLE_ENDIAN
+			/* Little endian machine sees pixel data as being stored in
+			 * BGRA format. This is why we skip the last 8 bit group and
+			 * read the other three groups in reverse order. */
 			tmp[0] = data[2];
 			tmp[1] = data[1];
 			tmp[2] = data[0];
+#elif G_BYTE_ORDER == G_BIG_ENDIAN
+			tmp[0] = data[1];
+			tmp[1] = data[2];
+			tmp[2] = data[3];
+#endif
 			data += 4;
 			tmp  += 3;
 		}
@@ -152,19 +163,19 @@ void img_set_statusbar_message(img_window_struct *img_struct, gint selected)
 	if (img_struct->slides_nr == 0)
 	{
 		message = g_strdup_printf(_("Welcome to Imagination - %d transitions loaded."),img_struct->nr_transitions_loaded);
-		gtk_statusbar_push((GtkStatusbar*)img_struct->statusbar,img_struct->context_id,message);
+		gtk_statusbar_push(GTK_STATUSBAR(img_struct->statusbar),img_struct->context_id,message);
 		g_free(message);
 	}
 	else if (selected)
 	{
 		message = g_strdup_printf(_("%d slides selected"),selected);
-		gtk_statusbar_push((GtkStatusbar*)img_struct->statusbar,img_struct->context_id,message);
+		gtk_statusbar_push(GTK_STATUSBAR(img_struct->statusbar),img_struct->context_id,message);
 		g_free(message);
 	}
 	else
 	{
 		message = g_strdup_printf(ngettext("%d slide %s" ,"%d slides %s",img_struct->slides_nr),img_struct->slides_nr,_("imported - Use the CTRL key to select/unselect or SHIFT for multiple select"));
-		gtk_statusbar_push((GtkStatusbar*)img_struct->statusbar,img_struct->context_id,message);
+		gtk_statusbar_push(GTK_STATUSBAR(img_struct->statusbar),img_struct->context_id,message);
 		g_free(message);
 	}
 }

@@ -45,7 +45,11 @@ int main (int argc, char *argv[])
 	img_load_available_transitions(img_window);
 
 	/* Set some default values */
-	img_window->background_color = 0xffffffff;
+	img_window->background_color = 0x000000ff;
+	img_window->aspect_ratio = "4:3";
+	img_window->slideshow_format_index = 0;
+	img_window->slides_nr = 0;
+	img_window->distort_images = TRUE;
 
 	gtk_widget_show (img_window->imagination_window);
 	img_set_statusbar_message(img_window,0);

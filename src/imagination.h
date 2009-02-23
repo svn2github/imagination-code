@@ -1,5 +1,6 @@
 /*
  *  Copyright (c) 2009 Giuseppe Torelli <colossus73@gmail.com>
+ *  Copyright (c) 2009 Tadej Borovšak 	<tadeboro@gmail.com>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -64,20 +65,25 @@ typedef struct _img_window_struct img_window_struct;
 
 struct _img_window_struct
 {
-	GtkWidget	*imagination_window;
-	GtkWidget	*open_menu_item;
-	GtkWidget	*save_menu_item;
-	GtkWidget	*save_as_menu_item;
+	/* Main GUI related variables */
+	GtkWidget	*imagination_window;	// Main window
+	GtkWidget	*open_menu;
+	GtkWidget	*save_menu;
+	GtkWidget	*save_as_menu;
+	GtkWidget	*properties_menu;
+	GtkWidget	*close_menu;
 	GtkWidget	*open_button;
 	GtkWidget	*save_button;
+	GtkWidget	*import_menu;
 	GtkWidget	*remove_menu;
+	GtkWidget	*import_button;
 	GtkWidget	*remove_button;
 	GtkWidget	*preview_menu;
 	GtkWidget 	*preview_button;
-	GtkWidget   *generate_menu;
-	GtkWidget   *generate_button;
+	GtkWidget   *export_menu;
+	GtkWidget   *export_button;
 	GtkWidget	*transition_type;
-	GtkWidget	*duration;
+	GtkWidget	*duration;				// Duration spin button
 	GtkWidget	*trans_duration;
 	GtkWidget	*slide_selected_data;
 	GtkWidget	*type_data;
@@ -90,34 +96,56 @@ struct _img_window_struct
   	GtkWidget	*progress_bar;
   	GtkWidget	*viewport;
   	GtkWidget	*image_area;
-  	GdkPixbuf	*slide_pixbuf;
-  	GdkPixbuf	*pixbuf1;
-  	GdkPixbuf	*pixbuf2;
-  	GtkWidget	*import_slide_chooser;
+  	guint		context_id;
+  	GtkListStore *thumbnail_model;
+  	gchar		*current_dir;
+
+	/* Import slides dialog variables */
 	GtkWidget	*dim_label;
 	GtkWidget	*size_label;
   	GtkWidget	*preview_image;
-  	GtkWidget	*slide_number_entry;
-  	GtkListStore *thumbnail_model;
-  	slide_struct *current_slide;
-  	gchar		*current_dir;
-  	gchar		*slideshow_filename;
-  	gchar		*aspect_ratio;
-  	GtkTreeIter *cur_ss_iter;
-  	GSList		*plugin_list;
-	gint        file_desc;
-	gint		slideshow_format_index;
-  	gint		slides_nr;
-  	gint		slideshow_height;
-  	gint		total_secs;
+
+	/* Renderers and module stuff */
   	gint		nr_transitions_loaded;
-  	guint		context_id;
-  	guint		source_id;
-  	gboolean	preview_is_running;
-	gboolean    export_is_running;
-	gdouble     progress;
+  	GSList		*plugin_list;
+
+	/* Project related variables */
+	gchar       *project_filename;		// project name for saving
+  	gchar		*slideshow_filename;	// exported file name
+  	gchar		*aspect_ratio;
+	gboolean     distort_images;
+	gint		slideshow_format_index;
 	guint32     background_color;
+  	gint		total_secs;
+  	gint		slides_nr;
+
+	/* Variables common to export and preview functions */
+  	slide_struct *current_slide;
+  	GdkPixbuf	*slide_pixbuf;
+  	GdkPixbuf	*pixbuf1;
+  	GdkPixbuf	*pixbuf2;
+  	GtkTreeIter *cur_ss_iter;
+  	guint		source_id;
+	gdouble     progress;
+
+	/* Preview related variables */
+  	gboolean	preview_is_running;
+  	GtkWidget	*import_slide_chooser;
+  	GtkWidget	*slide_number_entry;
+
+	/* Export dialog related stuff */
+	gboolean    export_is_running;
+	gint        file_desc;
 	guchar      *pixbuf_data;
+	GtkWidget   *export_pbar1;
+	GtkWidget   *export_pbar2;
+	GtkWidget   *export_label;
+	GtkWidget   *export_dialog;
+	guint        export_frame_nr;	// Total number of frames
+	guint        export_frame_cur;	// Current frame
+	guint        export_slide_nr;	// Number of frames fo current slide
+	guint        export_slide_cur;	// Current slide frame
+	guint        export_slide;		// Number of slide being exported
 };
 
 #endif
