@@ -20,20 +20,10 @@
 #ifndef __IMAGINATION_INTERFACE_H__
 #define __IMAGINATION_INTERFACE_H__
 
-#include <stdlib.h>
 #include <gtk/gtk.h>
 #include "support.h"
 #include "imagination.h"
 #include "eog-pixbuf-cell-renderer.h"
-
-/*
-typedef enum 
-{
-	IMG_GOTO_SLIDE = 0,
-	IMG_MOVE_LEFT,
-	IMG_MOVE_RIGHT
-} Img_Thumbnail_Selection_Mode;
-*/
 
 img_window_struct *img_create_window(void);
 void img_iconview_selection_changed (GtkIconView *, img_window_struct *);

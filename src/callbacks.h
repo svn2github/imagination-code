@@ -22,8 +22,6 @@
 #define __CALLBACKS_H__
 
 #include <gtk/gtk.h>
-#include <fcntl.h>
-#include <glib/gstdio.h>
 #include "main-window.h"
 #include "new_slideshow.h"
 #include "slideshow_project.h"

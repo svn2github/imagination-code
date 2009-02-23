@@ -19,7 +19,6 @@
  */
 
 #include "callbacks.h"
-#include <unistd.h>
 
 static void img_file_chooser_add_preview(img_window_struct *);
 static void img_update_preview_file_chooser(GtkFileChooser *,img_window_struct *);

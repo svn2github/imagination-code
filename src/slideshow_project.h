@@ -23,7 +23,6 @@
 
 #include <glib.h>
 #include <gtk/gtk.h>
-#include <stdio.h>
 #include <string.h>
 #include "imagination.h"
 #include "support.h"
