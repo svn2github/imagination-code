@@ -48,9 +48,6 @@ img_window_struct *img_create_window (void)
 	GtkWidget *menuitem2;
 	GtkWidget *slide_menu;
 	GtkWidget *separator_slide_menu;
-	GtkWidget *imagemenuitem6;
-	GtkWidget *imagemenuitem7;
-	GtkWidget *imagemenuitem8;
 	GtkWidget *image_menu;
 	GtkWidget *select_all_menu;
 	GtkWidget *deselect_all_menu;
@@ -188,31 +185,6 @@ img_window_struct *img_create_window (void)
 	slide_menu = gtk_menu_new ();
 	gtk_menu_item_set_submenu (GTK_MENU_ITEM (menuitem2), slide_menu);
 
-	imagemenuitem6 = gtk_image_menu_item_new_from_stock (GTK_STOCK_CUT, accel_group);
-	gtk_container_add (GTK_CONTAINER (slide_menu), imagemenuitem6);
-
-	imagemenuitem7 = gtk_image_menu_item_new_from_stock (GTK_STOCK_COPY, accel_group);
-	gtk_container_add (GTK_CONTAINER (slide_menu), imagemenuitem7);
-
-	imagemenuitem8 = gtk_image_menu_item_new_from_stock (GTK_STOCK_PASTE, accel_group);
-	gtk_container_add (GTK_CONTAINER (slide_menu), imagemenuitem8);
-
-	separator_slide_menu = gtk_separator_menu_item_new ();
-	gtk_container_add (GTK_CONTAINER (slide_menu),separator_slide_menu);
-
-	select_all_menu = gtk_image_menu_item_new_from_stock (GTK_STOCK_SELECT_ALL, accel_group);
-	gtk_container_add (GTK_CONTAINER (slide_menu),select_all_menu);
-	gtk_widget_add_accelerator (select_all_menu,"activate",accel_group,GDK_a,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
-	g_signal_connect (G_OBJECT (select_all_menu),"activate",G_CALLBACK (img_select_all_thumbnails),img_struct);
-
-	deselect_all_menu = gtk_image_menu_item_new_with_mnemonic (_("Un_select all"));
-	gtk_container_add (GTK_CONTAINER (slide_menu),deselect_all_menu);
-	gtk_widget_add_accelerator (deselect_all_menu,"activate",accel_group,GDK_e,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
-	g_signal_connect (G_OBJECT (deselect_all_menu),"activate",G_CALLBACK (img_unselect_all_thumbnails),img_struct);
-
-	separator_slide_menu = gtk_separator_menu_item_new ();
-	gtk_container_add (GTK_CONTAINER (slide_menu),separator_slide_menu);
-
 	img_struct->import_menu = gtk_image_menu_item_new_with_mnemonic (_("_Import"));
 	gtk_container_add (GTK_CONTAINER (slide_menu),img_struct->import_menu);
 	gtk_widget_set_sensitive(img_struct->import_menu, FALSE);
@@ -230,6 +202,19 @@ img_window_struct *img_create_window (void)
 
 	tmp_image = gtk_image_new_from_stock (GTK_STOCK_DELETE,GTK_ICON_SIZE_MENU);
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (img_struct->remove_menu),tmp_image);
+
+	separator_slide_menu = gtk_separator_menu_item_new ();
+	gtk_container_add (GTK_CONTAINER (slide_menu),separator_slide_menu);
+
+	select_all_menu = gtk_image_menu_item_new_from_stock (GTK_STOCK_SELECT_ALL, accel_group);
+	gtk_container_add (GTK_CONTAINER (slide_menu),select_all_menu);
+	gtk_widget_add_accelerator (select_all_menu,"activate",accel_group,GDK_a,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
+	g_signal_connect (G_OBJECT (select_all_menu),"activate",G_CALLBACK (img_select_all_thumbnails),img_struct);
+
+	deselect_all_menu = gtk_image_menu_item_new_with_mnemonic (_("Un_select all"));
+	gtk_container_add (GTK_CONTAINER (slide_menu),deselect_all_menu);
+	gtk_widget_add_accelerator (deselect_all_menu,"activate",accel_group,GDK_e,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
+	g_signal_connect (G_OBJECT (deselect_all_menu),"activate",G_CALLBACK (img_unselect_all_thumbnails),img_struct);
 
 	menuitem3 = gtk_menu_item_new_with_mnemonic (_("_Help"));
 	gtk_container_add (GTK_CONTAINER (menubar), menuitem3);
