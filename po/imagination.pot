@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-02-24 11:38+0100\n"
+"POT-Creation-Date: 2009-02-24 13:32+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -268,14 +268,13 @@ msgstr ""
 
 #: ../src/support.c:173
 #, c-format
-msgid "%d slide %s"
-msgid_plural "%d slides %s"
+msgid "%d slide imported %s"
+msgid_plural "%d slides imported %s"
 msgstr[0] ""
 msgstr[1] ""
 
 #: ../src/support.c:173
-msgid ""
-"imported - Use the CTRL key to select/unselect or SHIFT for multiple select"
+msgid " - Use the CTRL key to select/unselect or SHIFT for multiple select"
 msgstr ""
 
 #: ../src/support.c:240

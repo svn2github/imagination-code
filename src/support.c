@@ -170,7 +170,7 @@ void img_set_statusbar_message(img_window_struct *img_struct, gint selected)
 	}
 	else
 	{
-		message = g_strdup_printf(ngettext("%d slide %s" ,"%d slides %s",img_struct->slides_nr),img_struct->slides_nr,_("imported - Use the CTRL key to select/unselect or SHIFT for multiple select"));
+		message = g_strdup_printf(ngettext("%d slide imported %s" ,"%d slides imported %s",img_struct->slides_nr),img_struct->slides_nr,_(" - Use the CTRL key to select/unselect or SHIFT for multiple select"));
 		gtk_statusbar_push(GTK_STATUSBAR(img_struct->statusbar),img_struct->context_id,message);
 		g_free(message);
 	}

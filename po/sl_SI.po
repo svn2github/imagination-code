@@ -1,283 +1,286 @@
-# Italian translations for imagination package.
+# Slovenian translations for imagination package.
 # Copyright (C) 2009 THE imagination'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the imagination package.
-# colossus73 <colossus73@gmail.com>, 2009.
+# tadeboro <tadeboro@gmail.com>, 2009.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: imagination 1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-02-24 13:32+0100\n"
-"PO-Revision-Date: 2009-02-24 11:47+0100\n"
-"Last-Translator: colossus73 <colossus73@gmail.com>\n"
-"Language-Team: Italian\n"
+"PO-Revision-Date: 2009-02-24 11:55+0100\n"
+"Last-Translator: tadeboro <tadeboro@gmail.com>\n"
+"Language-Team: Slovenian\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=4; plural=(n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || n"
+"%100==4 ? 2 : 3);\n"
 
 #: ../imagination.desktop.in.h:1
 msgid "A DVD slideshow maker"
-msgstr "Un software per creare sequenze di fotografie per DVD"
+msgstr "Program za izdelavo DVD diaprojekcij"
 
 #: ../imagination.desktop.in.h:2
 msgid "A lightweight DVD slideshow maker using GTK+2"
-msgstr "Un software per creare presentazioni per DVD che utilizza GTK+2"
+msgstr "Lahki GTK+2 program za izdelavo DVD diaprojekcij"
 
 #: ../imagination.desktop.in.h:3
 msgid "Imagination"
-msgstr "Imagination"
+msgstr "Domišljija"
 
 #: ../src/main-window.c:114
 msgid "_Slideshow"
-msgstr "_Presentazione"
+msgstr "_Diaprojekcija"
 
 #: ../src/main-window.c:156
 msgid "_Preview"
-msgstr "_Anteprima"
+msgstr "_Predogled"
 
 #: ../src/main-window.c:165
 msgid "Export"
-msgstr "Esporta"
+msgstr "Izvoz"
 
 #: ../src/main-window.c:182
 msgid "_Slide"
-msgstr "Diapositiva"
+msgstr "Di_apozitiv"
 
 #: ../src/main-window.c:188
 msgid "_Import"
-msgstr "_Importa"
+msgstr "_Uvozi"
 
 #: ../src/main-window.c:197
 msgid "_Delete"
-msgstr "Cancella"
+msgstr "_Zbriši"
 
 #: ../src/main-window.c:214
 msgid "Un_select all"
-msgstr "Deseleziona tutto"
+msgstr "Počis_ti izbor"
 
 #: ../src/main-window.c:219
 msgid "_Help"
-msgstr "_Aiuto"
+msgstr "_Pomoč"
 
 #: ../src/main-window.c:238 ../src/new_slideshow.c:63
 msgid "Create a new slideshow"
-msgstr "Crea una nuova presentazione"
+msgstr "Ustvari novo diaprojekcijo"
 
 #: ../src/main-window.c:243
 msgid "Open a slideshow"
-msgstr "Apre una presentazione"
+msgstr "Odpri diaprojekcijo"
 
 #: ../src/main-window.c:249
 msgid "Save the slideshow"
-msgstr "Salva la presentazione"
+msgstr "Shrani diaprojekcijo"
 
 #: ../src/main-window.c:260
 msgid "Import the slides"
-msgstr "Importa le diapositive"
+msgstr "Uvozi diapozitive"
 
 #: ../src/main-window.c:266
 msgid "Delete the selected slides"
-msgstr "Cancella le diapositive selezionate"
+msgstr "Zbriši izbrane diapozitive"
 
 #: ../src/main-window.c:276
 msgid "Preview the slideshow"
-msgstr "Anteprima della presentazione"
+msgstr "Predogled diaprojekcije"
 
 #: ../src/main-window.c:283
 msgid "Export the DVD slideshow"
-msgstr "Esportazione della presentazione"
+msgstr "Izvozi DVD diaprojekcijo"
 
 #: ../src/main-window.c:302
 msgid "Jump to the entered slide number"
-msgstr "Seleziona il numero di diapositiva immesso"
+msgstr "Skoči na vnešeni diapozitiv"
 
 #: ../src/main-window.c:348
 msgid "<b>Slide settings</b>"
-msgstr "<b>Impostazioni diapositiva</b>"
+msgstr "<b>Nastavitve diapozitiva</b>"
 
 #. Transition types
 #: ../src/main-window.c:358
 msgid "Transition Type:"
-msgstr "Tipo di transizione"
+msgstr "Vrsta prehoda:"
 
 #: ../src/main-window.c:373
 msgid "Transition Speed:"
-msgstr "Velocità transizione:"
+msgstr "Histrost prehoda:"
 
 #: ../src/main-window.c:377
 msgid "Fast"
-msgstr "Veloce"
+msgstr "Hitro"
 
 #: ../src/main-window.c:378
 msgid "Normal"
-msgstr "Normale"
+msgstr "Normalno"
 
 #: ../src/main-window.c:379
 msgid "Slow"
-msgstr "Lenta"
+msgstr "Počasi"
 
 #: ../src/main-window.c:388
 msgid "Slide Duration in sec:"
-msgstr "Durata diapositiva in sec:"
+msgstr "Trajanje diapozitiva v sek:"
 
 #: ../src/main-window.c:401
 msgid "Slide number:"
-msgstr "Numero diapositiva"
+msgstr "Številka diapozitiva:"
 
 #: ../src/main-window.c:413
 msgid "Resolution:"
-msgstr "Risoluzione:"
+msgstr "Ločljivost"
 
 #: ../src/main-window.c:425
 msgid "Type:"
-msgstr "Tipo:"
+msgstr "Tip:"
 
 #: ../src/main-window.c:436
 msgid "Slideshow Length:"
-msgstr "Lunghezza presentazione"
+msgstr "Trajanje diaprojekcije:"
 
 #: ../src/main-window.c:750 ../src/main-window.c:752 ../src/support.c:195
 msgid "None"
-msgstr "Nessuna"
+msgstr "Brez"
 
 #: ../src/callbacks.c:120
 #, c-format
 msgid "Please wait, importing slide %d out of %d"
-msgstr "Attendere prego, sto importando la diapositiva %d su %d"
+msgstr "Uvažam diapozitiv %d od %d, prosimo počakajte"
 
 #: ../src/callbacks.c:135
 msgid "Import slides, use SHIFT key for multiple select"
-msgstr "Importazione diapositive, usa MAIUSC per la selezione multipla"
+msgstr "Uvoz diapozitivov, uporabite SHIFT za izbor večih slik"
 
 #: ../src/callbacks.c:147
 msgid "All image files"
-msgstr "Tutti i file immagine"
+msgstr "Vse slikovne datoteke"
 
 #: ../src/callbacks.c:161
 msgid "All files"
-msgstr "Tutti i files"
+msgstr "Vse datoteke"
 
 #: ../src/callbacks.c:265
 #, c-format
 msgid "%d x %d pixels"
 msgid_plural "%d x %d pixels"
-msgstr[0] "%d x %d pixel"
-msgstr[1] "%d x %d pixel"
+msgstr[0] "%d x %d pika"
+msgstr[1] "%d x %d piki"
+msgstr[2] "%d x %d pike"
+msgstr[3] "%d x %d pik"
 
 #: ../src/callbacks.c:341
 msgid "translator-credits"
-msgstr "Giuseppe Torelli <colossus73@gmail.com>"
+msgstr "zasluge-prevajalcev"
 
 #: ../src/callbacks.c:661
 msgid "Starts the preview"
-msgstr "Inizia l'anteprima"
+msgstr "Požene predogled"
 
 #: ../src/callbacks.c:671
 msgid "Stops the preview"
-msgstr "Ferma l'anteprima"
+msgstr "Ustavi predogled"
 
 #: ../src/callbacks.c:712
 msgid "Load an Imagination slideshow project"
-msgstr "Carica una presentazione di Imagination"
+msgstr "Odpri Domišljijin projekt"
 
 #: ../src/callbacks.c:713
 msgid "Save an Imagination slideshow project"
-msgstr "Salva una presentazione di Imagination"
+msgstr "Sharni Domišljijin projekt"
 
 #: ../src/callbacks.c:793
 msgid "Exporting the slideshow"
-msgstr "Esporta la presentazione"
+msgstr "Izvažam diaprojekcijo"
 
 #: ../src/callbacks.c:805
 msgid "Preparing for export ..."
-msgstr "Preparazione esportazione..."
+msgstr "Pripravljam za izvoz ..."
 
 #: ../src/callbacks.c:816
 msgid "Overall progress:"
-msgstr "Progresso complessivo:"
+msgstr "Skupni napredek:"
 
 #: ../src/callbacks.c:874 ../src/callbacks.c:961
 #, c-format
 msgid "Slide %d export progress:"
-msgstr "Progresso esportazione diapositiva %d"
+msgstr "Napredek izvoza diapozitiva %d:"
 
 #: ../src/callbacks.c:1169
 msgid "Failed to launch the encoder!"
-msgstr "Non è stato possibile mandare in esecuzione l'encoder!"
+msgstr "Ne morem zagnati šifrirnika"
 
 #. Display propert title depending on the callback that is calling this function.
 #: ../src/new_slideshow.c:63
 msgid "Project properties"
-msgstr "Proprietà della presentazione"
+msgstr "Lastnosti projekta"
 
 #: ../src/new_slideshow.c:84
 msgid "<b>Slideshow Settings</b>"
-msgstr "<b>Impostazioni Presentazione</b>"
+msgstr "<b>Nastavitve diaprojekcije</b>"
 
 #: ../src/new_slideshow.c:98
 msgid "Filename of the slideshow:"
-msgstr "Nome del file della presentazione"
+msgstr "Ime datoteke z diaprojekcijo:"
 
 #: ../src/new_slideshow.c:110
 msgid "Export the slideshow as:"
-msgstr "Esporta la presentazione come:"
+msgstr "Izvozi diaprojekcijo kot:"
 
 #: ../src/new_slideshow.c:142
 msgid "<b>Video Format</b>"
-msgstr "<b>Formato del video</b>"
+msgstr "<b>Video oblika</b>"
 
 #: ../src/new_slideshow.c:150
 msgid "<b>Television Format</b>"
-msgstr "<b>Formato del televisore</b>"
+msgstr "<b>Televizijska oblika</b>"
 
 #: ../src/new_slideshow.c:161
 msgid "Normal 4:3"
-msgstr "Normale 4:3"
+msgstr "Normalno 4:3"
 
 #: ../src/new_slideshow.c:165
 msgid "Widescreen 16:9"
-msgstr "Widescreen 16:9"
+msgstr "Širokozaslonsko 16:9"
 
 #: ../src/new_slideshow.c:177
 msgid "<b>Advanced Settings</b>"
-msgstr "<b>Impostazioni avanzate</b>"
+msgstr "<b>Napredne nastavitve</b>"
 
 #: ../src/new_slideshow.c:184
 msgid "Rescale images to fit desired aspect ratio"
-msgstr "Ridimensiona le immagini per riempire lo schermo"
+msgstr "Preoblikuj slike da ustrezajo obliki izvoza"
 
 #: ../src/new_slideshow.c:192
 msgid "Select background color:"
-msgstr "Seleziona il colore di sfondo:"
+msgstr "Izberite barvo ozadja:"
 
 #: ../src/slideshow_project.c:106
 msgid "This is not an Imagination project file!"
-msgstr "Questa non è un presentazione di Imagination!"
+msgstr "Izbrana datoteka ni Domišljijin projekt!"
 
 #: ../src/support.c:161
 #, c-format
 msgid "Welcome to Imagination - %d transitions loaded."
-msgstr "Benvenuto in Imagination - %d transizioni caricate."
+msgstr "Dobrodošli v Domišljiji - %d prehodov naloženih."
 
 #: ../src/support.c:167
 #, c-format
 msgid "%d slides selected"
-msgstr "%d diapositive selezionate"
+msgstr "%d diapozitivov izbranih"
 
 #: ../src/support.c:173
 #, c-format
 msgid "%d slide imported %s"
 msgid_plural "%d slides imported %s"
-msgstr[0] "%d diapositiva importata %s"
-msgstr[1] "%d diapositive importate %s"
+msgstr[0] "%d diapozitiv uvožen %s"
+msgstr[1] "%d diapozitiva uvožena %s"
+msgstr[2] "%d diapozitivi uvoženi %s"
+msgstr[3] "%d diapozitivov uvoženih %s"
 
 #: ../src/support.c:173
 msgid " - Use the CTRL key to select/unselect or SHIFT for multiple select"
-msgstr ""
-" - Usa il tasto CTRL per selezionare/deselezionare o MAIUSC per la selezione "
-"multipla"
+msgstr " - Uporabite CTRK za posamično izbiranje ali SHIFT za izbiro večih"
 
 #: ../src/support.c:240
 msgid "Please choose the slideshow project filename"
-msgstr "Prego scegliere il nome del file della presentazione"
+msgstr "Prosimo izberite ime projekta"
