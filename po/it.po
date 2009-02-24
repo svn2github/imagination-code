@@ -18,265 +18,265 @@ msgstr ""
 
 #: ../imagination.desktop.in.h:1
 msgid "A DVD slideshow maker"
-msgstr ""
+msgstr "Un software per creare sequenze di fotografie"
 
 #: ../imagination.desktop.in.h:2
 msgid "A lightweight DVD slideshow maker using GTK+2"
-msgstr ""
+msgstr "Un software per creare presentazioni che utilizza GTK+2"
 
 #: ../imagination.desktop.in.h:3
 msgid "Imagination"
-msgstr ""
+msgstr "Imagination"
 
 #: ../src/main-window.c:114
 msgid "_Slideshow"
-msgstr ""
+msgstr "_Presentazione"
 
 #: ../src/main-window.c:156
 msgid "_Preview"
-msgstr ""
+msgstr "_Anteprima"
 
 #: ../src/main-window.c:165
 msgid "Export"
-msgstr ""
+msgstr "Esporta"
 
 #: ../src/main-window.c:182
 msgid "_Slide"
-msgstr ""
+msgstr "Diapositiva"
 
 #: ../src/main-window.c:188
 msgid "_Import"
-msgstr ""
+msgstr "_Importa"
 
 #: ../src/main-window.c:197
 msgid "_Delete"
-msgstr ""
+msgstr "Cancella"
 
 #: ../src/main-window.c:214
 msgid "Un_select all"
-msgstr ""
+msgstr "Deseleziona tutto"
 
 #: ../src/main-window.c:219
 msgid "_Help"
-msgstr ""
+msgstr "_Aiuto"
 
 #: ../src/main-window.c:238 ../src/new_slideshow.c:63
 msgid "Create a new slideshow"
-msgstr ""
+msgstr "Crea una nuova presentazione"
 
 #: ../src/main-window.c:243
 msgid "Open a slideshow"
-msgstr ""
+msgstr "Apre una presentazione"
 
 #: ../src/main-window.c:249
 msgid "Save the slideshow"
-msgstr ""
+msgstr "Salva la presentazione"
 
 #: ../src/main-window.c:260
 msgid "Import the slides"
-msgstr ""
+msgstr "Importa le diapositive"
 
 #: ../src/main-window.c:266
 msgid "Delete the selected slides"
-msgstr ""
+msgstr "Cancella le diapositive selezionate"
 
 #: ../src/main-window.c:276
 msgid "Preview the slideshow"
-msgstr ""
+msgstr "Anteprima della presentazione"
 
 #: ../src/main-window.c:283
 msgid "Export the DVD slideshow"
-msgstr ""
+msgstr "Esportazione della presentazione"
 
 #: ../src/main-window.c:302
 msgid "Jump to the entered slide number"
-msgstr ""
+msgstr "Seleziona il numero di diapositiva immesso"
 
 #: ../src/main-window.c:348
 msgid "<b>Slide settings</b>"
-msgstr ""
+msgstr "<b>Impostazioni diapositiva</b>"
 
 #. Transition types
 #: ../src/main-window.c:358
 msgid "Transition Type:"
-msgstr ""
+msgstr "Tipo di transizione"
 
 #: ../src/main-window.c:373
 msgid "Transition Speed:"
-msgstr ""
+msgstr "Velocità transizione"
 
 #: ../src/main-window.c:377
 msgid "Fast"
-msgstr ""
+msgstr "Veloce"
 
 #: ../src/main-window.c:378
 msgid "Normal"
-msgstr ""
+msgstr "Normale"
 
 #: ../src/main-window.c:379
 msgid "Slow"
-msgstr ""
+msgstr "Lenta"
 
 #: ../src/main-window.c:388
 msgid "Slide Duration in sec:"
-msgstr ""
+msgstr "Durata diapositiva in sec:"
 
 #: ../src/main-window.c:401
 msgid "Slide number:"
-msgstr ""
+msgstr "Numero diapositiva"
 
 #: ../src/main-window.c:413
 msgid "Resolution:"
-msgstr ""
+msgstr "Risoluzione:"
 
 #: ../src/main-window.c:425
 msgid "Type:"
-msgstr ""
+msgstr "Tipo:"
 
 #: ../src/main-window.c:436
 msgid "Slideshow Length:"
-msgstr ""
+msgstr "Lunghezza presentazione"
 
 #: ../src/main-window.c:750 ../src/main-window.c:752 ../src/support.c:195
 msgid "None"
-msgstr ""
+msgstr "Nessuna"
 
 #: ../src/callbacks.c:120
 #, c-format
 msgid "Please wait, importing slide %d out of %d"
-msgstr ""
+msgstr "Attendere prego, sto importando la diapositiva %d su %d"
 
 #: ../src/callbacks.c:135
 msgid "Import slides, use SHIFT key for multiple select"
-msgstr ""
+msgstr "Importazione diapositive, usa MAIUSC per la selezione multipla"
 
 #: ../src/callbacks.c:147
 msgid "All image files"
-msgstr ""
+msgstr "Tutti i file immagine"
 
 #: ../src/callbacks.c:161
 msgid "All files"
-msgstr ""
+msgstr "Tutti i files"
 
 #: ../src/callbacks.c:265
 #, c-format
 msgid "%d x %d pixels"
 msgid_plural "%d x %d pixels"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%d x %d pixel"
+msgstr[1] "%d x %d pixel"
 
 #: ../src/callbacks.c:341
 msgid "translator-credits"
-msgstr ""
+msgstr "Giuseppe Torelli <colossus73@gmail.com>"
 
 #: ../src/callbacks.c:661
 msgid "Starts the preview"
-msgstr ""
+msgstr "Inizia l'anteprima"
 
 #: ../src/callbacks.c:671
 msgid "Stops the preview"
-msgstr ""
+msgstr "Ferma l'anteprima"
 
 #: ../src/callbacks.c:712
 msgid "Load an Imagination slideshow project"
-msgstr ""
+msgstr "Carica una presentazione di Imagination"
 
 #: ../src/callbacks.c:713
 msgid "Save an Imagination slideshow project"
-msgstr ""
+msgstr "Salva una presentazione di Imagination"
 
 #: ../src/callbacks.c:793
 msgid "Exporting the slideshow"
-msgstr ""
+msgstr "Esporta la presentazione"
 
 #: ../src/callbacks.c:805
 msgid "Preparing for export ..."
-msgstr ""
+msgstr "Preparazione esportazione..."
 
 #: ../src/callbacks.c:816
 msgid "Overall progress:"
-msgstr ""
+msgstr "Progresso complessivo:"
 
 #: ../src/callbacks.c:874 ../src/callbacks.c:961
 #, c-format
 msgid "Slide %d export progress:"
-msgstr ""
+msgstr "Progresso esportazione diapositiva %d"
 
 #: ../src/callbacks.c:1169
 msgid "Failed to launch the encoder!"
-msgstr ""
+msgstr "Non è stato possibile mandare in esecuzione l'encoder!"
 
 #. Display propert title depending on the callback that is calling this function.
 #: ../src/new_slideshow.c:63
 msgid "Project properties"
-msgstr ""
+msgstr "Proprietà della presentazione"
 
 #: ../src/new_slideshow.c:84
 msgid "<b>Slideshow Settings</b>"
-msgstr ""
+msgstr "<b>Impostazioni Presentazione</b>"
 
 #: ../src/new_slideshow.c:98
 msgid "Filename of the slideshow:"
-msgstr ""
+msgstr "Nome del file della presentazione"
 
 #: ../src/new_slideshow.c:110
 msgid "Export the slideshow as:"
-msgstr ""
+msgstr "Esporta la presentazione come:"
 
 #: ../src/new_slideshow.c:142
 msgid "<b>Video Format</b>"
-msgstr ""
+msgstr "<b>Formato del video</b>"
 
 #: ../src/new_slideshow.c:150
 msgid "<b>Television Format</b>"
-msgstr ""
+msgstr "<b>Formato del televisore</b>"
 
 #: ../src/new_slideshow.c:161
 msgid "Normal 4:3"
-msgstr ""
+msgstr "Normale 4:3"
 
 #: ../src/new_slideshow.c:165
 msgid "Widescreen 16:9"
-msgstr ""
+msgstr "Widescreen 16:9"
 
 #: ../src/new_slideshow.c:177
 msgid "<b>Advanced Settings</b>"
-msgstr ""
+msgstr "<b>Impostazioni avanzate</b>"
 
 #: ../src/new_slideshow.c:184
 msgid "Rescale images to fit desired aspect ratio"
-msgstr ""
+msgstr "Ridimensiona le immagini per riempire lo schermo"
 
 #: ../src/new_slideshow.c:192
 msgid "Select background color:"
-msgstr ""
+msgstr "Seleziona il colore di sfondo:"
 
 #: ../src/slideshow_project.c:106
 msgid "This is not an Imagination project file!"
-msgstr ""
+msgstr "Questa non è un presentazione di Imagination!"
 
 #: ../src/support.c:161
 #, c-format
 msgid "Welcome to Imagination - %d transitions loaded."
-msgstr ""
+msgstr "Benvenuto in Imagination - %d transizioni caricate."
 
 #: ../src/support.c:167
 #, c-format
 msgid "%d slides selected"
-msgstr ""
+msgstr "%d diapositive selezionate"
 
 #: ../src/support.c:173
 #, c-format
 msgid "%d slide %s"
 msgid_plural "%d slides %s"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%d diapositiva %s"
+msgstr[1] "%d diapositive %s"
 
 #: ../src/support.c:173
 msgid ""
 "imported - Use the CTRL key to select/unselect or SHIFT for multiple select"
-msgstr ""
+msgstr "importate - Usa il tasto CTRL per selezionare/deselezionare o MAIUSC per la selezione multipla"
 
 #: ../src/support.c:240
 msgid "Please choose the slideshow project filename"
-msgstr ""
+msgstr "Prego scegliere il nome del file della presentazione"
