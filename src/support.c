@@ -53,10 +53,6 @@ void img_export_cairo_to_ppm( cairo_surface_t *surface, gint file_desc)
 	stride = cairo_image_surface_get_stride( surface );
 	pix    = cairo_image_surface_get_data( surface );
 
-	/* Accomodate difference in RGB and ARGB formats */
-	//if( format == CAIRO_FORMAT_ARGB32 )
-	//	data++;
-
 	/* Output PPM file header information:
 	 *   - P6 is a magic number for PPM file
 	 *   - width and height are image's dimensions

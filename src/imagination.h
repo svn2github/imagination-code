@@ -146,6 +146,8 @@ struct _img_window_struct
 	guint        export_slide_nr;	// Number of frames fo current slide
 	guint        export_slide_cur;	// Current slide frame
 	guint        export_slide;		// Number of slide being exported
+	GSourceFunc  export_idle_func;	/* If TRUE, connect transition export,
+									   else still export function. */
 };
 
 #endif

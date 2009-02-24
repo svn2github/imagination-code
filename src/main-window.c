@@ -555,15 +555,18 @@ void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *im
 	/* Set the transition type */
 	model = gtk_combo_box_get_model(GTK_COMBO_BOX(img->transition_type));
 
-	if (gtk_combo_box_get_active(GTK_COMBO_BOX(img->transition_type)) == 0)
-		gtk_widget_set_sensitive(img->trans_duration,FALSE);
-	else
-		gtk_widget_set_sensitive(img->trans_duration,TRUE);
-
 	/* Block "changed" signal from model to avoid rewriting the same value back into current slide. */
 	g_signal_handlers_block_by_func((gpointer)img->transition_type, (gpointer)img_combo_box_transition_type_changed, img);
 	gtk_combo_box_set_active(GTK_COMBO_BOX(img->transition_type), info_slide->combo_transition_type_index );
 	g_signal_handlers_unblock_by_func((gpointer)img->transition_type, (gpointer)img_combo_box_transition_type_changed, img);
+
+	/* Moved this piece of code below the setting the transition, since we
+	 * get false negatives in certain situations (eg.: if the previously
+	 * selected transition doesn't have transition renderer set): */
+	if (gtk_combo_box_get_active(GTK_COMBO_BOX(img->transition_type)) == 0)
+		gtk_widget_set_sensitive(img->trans_duration,FALSE);
+	else
+		gtk_widget_set_sensitive(img->trans_duration,TRUE);
 
 	/* Set the transition speed */
 	if (info_slide->speed == FAST)
@@ -585,6 +588,12 @@ void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *im
 	g_free(selected_slide);
 	gtk_label_set_text(GTK_LABEL (img->type_data),info_slide->type);
 	gtk_label_set_text(GTK_LABEL (img->resolution_data),info_slide->resolution);
+	/* Added missing total label "setter". Current method is not the most
+	 * efficient one, since we're recalculating the whole duration when we
+	 * only need to display it. BTW, is total duration label hidding needed?
+	 * Even when there is no slide selected, duration stays the same. */
+	img_set_total_slideshow_duration(img);
+
 	if (nr_selected > 1)
 		img_set_statusbar_message(img,nr_selected);
 	else

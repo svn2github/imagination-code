@@ -43,17 +43,15 @@ void img_new_slideshow_settings_dialog(img_window_struct *img, gboolean flag)
 	GtkWidget *alignment_frame1;
 	GtkWidget *frame2;
 	GtkWidget *label_frame2;
-	/* Some advanced stuff users may want to set. */
-	GtkWidget *expander;
 	GtkWidget *ex_vbox;
 	GtkWidget *ex_hbox;
 	GtkWidget *frame3;
-	GtkWidget *alignment;
+	GtkWidget *label_frame3;
+	GtkWidget *alignment_frame3;
 	GtkWidget *distort_button;
 	GtkWidget *bg_button;
 	GtkWidget *bg_label;
 	GdkColor   color;
-	/* End advanced stuff. */
 	GtkWidget *alignment_frame2;
 	GtkWidget *vbox_video_format, *vbox_aspect_ratio;
 	GtkWidget *pal,*ntsc,*tv,*wide;
@@ -70,7 +68,7 @@ void img_new_slideshow_settings_dialog(img_window_struct *img, gboolean flag)
 										GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, NULL);
 
 	gtk_button_box_set_layout (GTK_BUTTON_BOX (GTK_DIALOG (dialog1)->action_area), GTK_BUTTONBOX_SPREAD);
-	gtk_window_set_default_size(GTK_WINDOW(dialog1),520,248);
+	gtk_window_set_default_size(GTK_WINDOW(dialog1),520,-1);
 	gtk_dialog_set_has_separator (GTK_DIALOG (dialog1), FALSE);
 
 	dialog_vbox1 = GTK_DIALOG (dialog1)->vbox;
@@ -91,7 +89,7 @@ void img_new_slideshow_settings_dialog(img_window_struct *img, gboolean flag)
 	gtk_container_add (GTK_CONTAINER (main_frame), alignment_main_frame);
 	gtk_alignment_set_padding (GTK_ALIGNMENT (alignment_main_frame), 5, 15, 10, 10);
 
-	vbox_frame1 = gtk_vbox_new (FALSE, 0);
+	vbox_frame1 = gtk_vbox_new (FALSE, 5);
 	gtk_container_add (GTK_CONTAINER (alignment_main_frame), vbox_frame1);
 
 	hbox_slideshow_name = gtk_hbox_new (TRUE, 0);
@@ -119,9 +117,9 @@ void img_new_slideshow_settings_dialog(img_window_struct *img, gboolean flag)
 	gtk_combo_box_append_text(GTK_COMBO_BOX(slideshow_fmt_combo),"FLV (FLash Video)");
 	gtk_combo_box_set_active(GTK_COMBO_BOX(slideshow_fmt_combo),0);
 
-	hbox_slideshow_options = gtk_hbox_new(TRUE,10);
+	hbox_slideshow_options = gtk_hbox_new(TRUE, 10);
 	gtk_box_pack_start(GTK_BOX (vbox_frame1), hbox_slideshow_options, TRUE, TRUE, 10);
-	
+
 	frame1 = gtk_frame_new (NULL);
 	gtk_box_pack_start (GTK_BOX (hbox_slideshow_options), frame1, TRUE, TRUE, 0);
 	gtk_frame_set_shadow_type (GTK_FRAME (frame1), GTK_SHADOW_IN);
@@ -149,6 +147,10 @@ void img_new_slideshow_settings_dialog(img_window_struct *img, gboolean flag)
 	gtk_box_pack_start (GTK_BOX (hbox_slideshow_options), frame2, TRUE, TRUE, 0);
 	gtk_frame_set_shadow_type (GTK_FRAME (frame2), GTK_SHADOW_IN);
 
+	label_frame2 = gtk_label_new (_("<b>Television Format</b>"));
+	gtk_frame_set_label_widget (GTK_FRAME (frame2), label_frame2);
+	gtk_label_set_use_markup (GTK_LABEL (label_frame2), TRUE);
+
 	alignment_frame2 = gtk_alignment_new (0.5, 0.5, 1, 1);
 	gtk_container_add (GTK_CONTAINER (frame2), alignment_frame2);
 	gtk_alignment_set_padding (GTK_ALIGNMENT (alignment_frame2), 5, 5, 5, 5);
@@ -156,7 +158,6 @@ void img_new_slideshow_settings_dialog(img_window_struct *img, gboolean flag)
 	vbox_aspect_ratio = gtk_vbox_new (FALSE, 0);
 	gtk_container_add (GTK_CONTAINER (alignment_frame2), vbox_aspect_ratio);
 
-	/* Again, removed groups */
 	tv = gtk_radio_button_new_with_mnemonic (NULL, _("Normal 4:3"));
 	gtk_box_pack_start (GTK_BOX (vbox_aspect_ratio), tv, TRUE, TRUE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (tv), TRUE);
@@ -165,23 +166,20 @@ void img_new_slideshow_settings_dialog(img_window_struct *img, gboolean flag)
 	gtk_box_pack_start (GTK_BOX (vbox_aspect_ratio), wide, TRUE, TRUE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (tv), TRUE);
 
-	label_frame2 = gtk_label_new (_("<b>Television Format</b>"));
-	gtk_frame_set_label_widget (GTK_FRAME (frame2), label_frame2);
-	gtk_label_set_use_markup (GTK_LABEL (label_frame2), TRUE);
-
-	/* Added some advanced settings */
-	expander = gtk_expander_new( _("Advanced settings") );
-	gtk_box_pack_start( GTK_BOX( vbox_frame1 ), expander, FALSE, FALSE, 0 );
-
 	frame3 = gtk_frame_new( NULL );
-	gtk_container_add( GTK_CONTAINER( expander ), frame3 );
+	gtk_box_pack_start (GTK_BOX (vbox_frame1), frame3, TRUE, TRUE, 0);
+	gtk_frame_set_shadow_type (GTK_FRAME (frame3), GTK_SHADOW_IN);
 
-	alignment = gtk_alignment_new( 0.5, 0.5, 1, 1 );
-	gtk_alignment_set_padding( GTK_ALIGNMENT( alignment ), 5, 5, 5, 5 );
-	gtk_container_add( GTK_CONTAINER( frame3 ), alignment );
+	alignment_frame3 = gtk_alignment_new (0.5, 0.5, 1, 1);
+	gtk_container_add (GTK_CONTAINER (frame3), alignment_frame3);
+	gtk_alignment_set_padding (GTK_ALIGNMENT (alignment_frame3), 5, 5, 5, 5);
+
+	label_frame3 = gtk_label_new (_("<b>Advanced Settings</b>"));
+	gtk_frame_set_label_widget (GTK_FRAME (frame3), label_frame3);
+	gtk_label_set_use_markup (GTK_LABEL (label_frame3), TRUE);
 
 	ex_vbox = gtk_vbox_new( FALSE, 5 );
-	gtk_container_add( GTK_CONTAINER( alignment ), ex_vbox );
+	gtk_container_add( GTK_CONTAINER( alignment_frame3 ), ex_vbox );
 
 	distort_button = gtk_check_button_new_with_label( _("Rescale images to fit desired aspect ratio") );
 	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( distort_button ), img->distort_images );
@@ -240,6 +238,10 @@ void img_new_slideshow_settings_dialog(img_window_struct *img, gboolean flag)
 		img->slideshow_format_index = gtk_combo_box_get_active(GTK_COMBO_BOX(slideshow_fmt_combo));
 	
 		img_set_buttons_state(img, TRUE);
+
+		string = g_path_get_basename(img->slideshow_filename);
+		img_set_window_title(img,string);
+		g_free(string);
 	}
 	gtk_widget_destroy(dialog1);
 }

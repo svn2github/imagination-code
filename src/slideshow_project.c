@@ -126,7 +126,7 @@ void img_load_slideshow(img_window_struct *img)
 	dummy = g_key_file_get_string(img_key_file, "slideshow settings", "background color", NULL );
 	img->background_color = (guint32)strtol( dummy, NULL, 16 );
 	g_free(dummy);
-	img->distort_images = g_key_file_get_boolean(img_key_file, "slideshow settings", "disort images", NULL );
+	img->distort_images = g_key_file_get_boolean(img_key_file, "slideshow settings", "distort images", NULL );
 
 	/* Loads the thumbnails and set the slides info */
 	number = g_key_file_get_integer(img_key_file,"images","number",NULL);

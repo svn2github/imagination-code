@@ -36,6 +36,8 @@ static gboolean img_export_transition(img_window_struct *);
 static gboolean img_export_still(img_window_struct *);
 static void img_clean_after_export(img_window_struct *);
 static void img_export_pixbuf_to_ppm(GdkPixbuf *, guchar **, guint *);
+static void img_export_calc_slide_frames(img_window_struct *);
+static void img_export_pause_unpause(GtkToggleButton *, img_window_struct *);
 
 void img_set_window_title(img_window_struct *img, gchar *text)
 {
@@ -781,9 +783,6 @@ void img_start_stop_export(GtkWidget *widget, img_window_struct *img)
 		GtkWidget *button;
 		gchar     *string;
 
-		/* Run ffmpeg encoder on the above pipe. This function returns
-		 * TRUE if the encoder has been launched of FALSE if the error
-		 * occured. */
 		if(!img_run_encoder(img))
 			return;
 
@@ -791,6 +790,7 @@ void img_start_stop_export(GtkWidget *widget, img_window_struct *img)
 		 * the total number of frames to display. */
 		dialog = gtk_window_new( GTK_WINDOW_TOPLEVEL );
 		img->export_dialog = dialog;
+		gtk_window_set_title (GTK_WINDOW(img->export_dialog),_("Exporting the slideshow"));
 		gtk_container_set_border_width( GTK_CONTAINER( dialog ), 10 );
 		gtk_window_set_default_size( GTK_WINDOW( dialog ), 400, -1 );
 		gtk_window_set_type_hint( GTK_WINDOW( dialog ),
@@ -833,6 +833,8 @@ void img_start_stop_export(GtkWidget *widget, img_window_struct *img)
 
 		button = gtk_toggle_button_new_with_label( GTK_STOCK_MEDIA_PAUSE );
 		gtk_button_set_use_stock( GTK_BUTTON( button ), TRUE );
+		g_signal_connect( G_OBJECT( button ), "toggled",
+						  G_CALLBACK( img_export_pause_unpause ), img );
 		gtk_box_pack_end( GTK_BOX( hbox ), button, FALSE, FALSE, 0 );
 
 		gtk_widget_show_all( dialog );
@@ -862,11 +864,11 @@ void img_start_stop_export(GtkWidget *widget, img_window_struct *img)
 		img->progress = 0;
 		img->export_frame_nr = img->total_secs * 29.97;
 		img->export_frame_cur = 0;
-		/* I added 1 here to avoid progress bar being updated with
-		 * fraction that is bigger than 1. */
-		img->export_slide_nr = ( entry->duration + 1 / entry->speed / 25 ) * 29.97 + 1;
-		img->export_slide_cur = 0;
+		/* Fix for the wrong progress bar indicators. */
+		img_export_calc_slide_frames( img );
+
 		img->export_slide = 1;
+		img->export_idle_func = (GSourceFunc)img_export_transition;
 		img->source_id = g_idle_add((GSourceFunc)img_export_transition, img);
 
 		string = g_strdup_printf( _("Slide %d export progress:"), 1 );
@@ -894,6 +896,7 @@ static gboolean img_export_transition(img_window_struct *img)
 	if(img->progress > 1 + 0.00000005)
 	{
 		img->progress = 0;
+		img->export_idle_func = (GSourceFunc)img_export_still;
 		img->source_id = g_idle_add((GSourceFunc)img_export_still, img);
 
 		return(FALSE);
@@ -958,11 +961,12 @@ static gboolean img_export_still(img_window_struct *img)
 			string = g_strdup_printf( _("Slide %d export progress:"), img->export_slide );
 			gtk_label_set_label( GTK_LABEL( img->export_label ), string );
 			g_free( string );
-			img->export_slide_cur = 0;
-			img->export_slide_nr = ( img->current_slide->duration + 1 / img->current_slide->speed / 25 ) * 29.97;
+			/* Progress bug fix */
+			img_export_calc_slide_frames( img );
 
 			g_free(img->pixbuf_data);
 			img->pixbuf_data = NULL;
+			img->export_idle_func = (GSourceFunc)img_export_transition;
 			img->source_id = g_idle_add((GSourceFunc)img_export_transition, img);
 		}
 		else
@@ -976,6 +980,8 @@ static gboolean img_export_still(img_window_struct *img)
 	img->export_frame_cur++;
 	img->export_slide_cur++;
 
+	/* CLAMPS are needed here because of the loosy conversion when switching
+	 * from floating point to integer arithmetics. */
 	export_progress = CLAMP( (gdouble)img->export_slide_cur / img->export_slide_nr, 0, 1 );
 	snprintf( string, 10, "%.2f%%", export_progress * 100 );
 	gtk_progress_bar_set_fraction( GTK_PROGRESS_BAR( img->export_pbar1 ),
@@ -1134,19 +1140,24 @@ static gboolean img_run_encoder(img_window_struct *img)
 	gchar      *cmd_line;
 	gboolean    ret;
 
-	cmd_line = g_strdup_printf(
+	if (img->slideshow_format_index == 0)
+		cmd_line = g_strdup_printf(
 				"ffmpeg -f image2pipe -vcodec ppm -r 29.97 -i pipe: "
 				"-target %s-dvd -r 29.97 -an -aspect %s -s %dx%d -y -bf 2 %s",
 				img->image_area->allocation.height == 576 ? "pal" : "ntsc",
 				img->aspect_ratio, img->image_area->allocation.width,
 				img->image_area->allocation.height, img->slideshow_filename );
+	else
+		cmd_line = g_strconcat(
+				"ffmpeg -f image2pipe -vcodec ppm -r 30 -i pipe: "
+				"-an -b 512k -s 320x240 -f flv -y ", img->slideshow_filename,NULL);
 	argv = g_strsplit( cmd_line, " ", 0 );
 	g_free( cmd_line );
 
 	ret = g_spawn_async_with_pipes( NULL, argv, NULL,
-									G_SPAWN_SEARCH_PATH /*|
+									G_SPAWN_SEARCH_PATH |
 									G_SPAWN_STDOUT_TO_DEV_NULL |
-									G_SPAWN_STDERR_TO_DEV_NULL*/,
+									G_SPAWN_STDERR_TO_DEV_NULL,
 									NULL, NULL, NULL, &img->file_desc,
 									NULL, NULL, &error );
 	if( ! ret )
@@ -1180,3 +1191,30 @@ void img_set_buttons_state(img_window_struct *img, gboolean state)
 	gtk_widget_set_sensitive(img->export_menu,	state);
 	gtk_widget_set_sensitive(img->export_button,state);
 }
+
+static void img_export_calc_slide_frames(img_window_struct *img)
+{
+
+	/* This is fix for the progress bars. I forgot that slides with no
+	 * transition effect shouldn't have transition time added.
+	 * (I haven't caught that bug when testing because I created slideshow
+	 * where each slide had transition effect set.) */
+	if( img->current_slide->render )
+		/* Duration + transition time */
+		img->export_slide_nr = ( img->current_slide->duration + ( 1 / img->current_slide->speed / 25 ) ) * 29.97;
+	else
+		/* Duration only */
+		img->export_slide_nr = img->current_slide->duration * 29.97;
+
+	img->export_slide_cur = 0;
+}
+
+static void img_export_pause_unpause(GtkToggleButton *button, img_window_struct *img)
+{
+	if( gtk_toggle_button_get_active( button ) )
+		/* Pause export */
+		g_source_remove( img->source_id );
+	else
+		img->source_id = g_idle_add(img->export_idle_func, img);
+}
+
