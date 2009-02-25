@@ -20,6 +20,9 @@ push_to_bottom_la_LDFLAGS = -module -avoid-version
 push_from_bottom_la_LDFLAGS = -module -avoid-version
 push_from_left_la_LDFLAGS = -module -avoid-version
 push_from_right_la_LDFLAGS = -module -avoid-version
+roller_blind_la_LDFLAGS = -module -avoid-version
+cross_fade_la_LDFLAGS = -module -avoid-version
+wave_right_la_LDFLAGS = -module -avoid-version
 
 # Plugins to be installed
 plugin_LTLIBRARIES = \
@@ -38,7 +41,10 @@ plugin_LTLIBRARIES = \
 	push_to_bottom.la	\
 	push_from_bottom.la	\
 	push_from_left.la	\
-	push_from_right.la
+	push_from_right.la	\
+	roller_blind.la		\
+	cross_fade.la		\
+	wave_right.la
 
 circular_blind_from_center_la_SOURCES		= ../src/support.c circular_blind_from_center.c
 circular_blind_to_center_la_SOURCES			= ../src/support.c circular_blind_to_center.c
@@ -56,6 +62,9 @@ push_to_bottom_la_SOURCES	= ../src/support.c push_to_bottom.c
 push_from_bottom_la_SOURCES	= ../src/support.c push_from_bottom.c
 push_from_left_la_SOURCES	= ../src/support.c push_from_left.c
 push_from_right_la_SOURCES	= ../src/support.c push_from_right.c
+roller_blind_la_SOURCES	= ../src/support.c roller_blind.c
+cross_fade_la_SOURCES	= ../src/support.c cross_fade.c
+wave_right_la_SOURCES	= ../src/support.c wave_right.c
 
 # instead of linking against all in $(GTK_LIBS), we link only against needed libs
 circular_blind_from_center_la_LIBADD	 = $(PACKAGE_LIBS)
@@ -74,6 +83,9 @@ push_to_bottom_la_LIBADD = $(PACKAGE_LIBS)
 push_from_bottom_la_LIBADD = $(PACKAGE_LIBS)
 push_from_left_la_LIBADD = $(PACKAGE_LIBS)
 push_from_right_la_LIBADD = $(PACKAGE_LIBS)
+roller_blind_la_LIBADD = $(PACKAGE_LIBS)
+cross_fade_la_LIBADD = $(PACKAGE_LIBS)
+wave_right_la_LIBADD = $(PACKAGE_LIBS)
 
 AM_CPPFLAGS = \
 	-DDATADIR=\"$(datadir)\" \
