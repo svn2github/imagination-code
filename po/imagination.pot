@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-02-24 13:32+0100\n"
+"POT-Creation-Date: 2009-02-25 14:32+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -29,181 +29,185 @@ msgstr ""
 msgid "Imagination"
 msgstr ""
 
-#: ../src/main-window.c:114
+#: ../src/main-window.c:113
 msgid "_Slideshow"
 msgstr ""
 
-#: ../src/main-window.c:156
+#: ../src/main-window.c:155
 msgid "_Preview"
 msgstr ""
 
-#: ../src/main-window.c:165
+#: ../src/main-window.c:164
 msgid "Export"
 msgstr ""
 
-#: ../src/main-window.c:182
+#: ../src/main-window.c:181
 msgid "_Slide"
 msgstr ""
 
-#: ../src/main-window.c:188
+#: ../src/main-window.c:187
 msgid "_Import"
 msgstr ""
 
-#: ../src/main-window.c:197
+#: ../src/main-window.c:196
 msgid "_Delete"
 msgstr ""
 
-#: ../src/main-window.c:214
+#: ../src/main-window.c:213
 msgid "Un_select all"
 msgstr ""
 
-#: ../src/main-window.c:219
+#: ../src/main-window.c:218
 msgid "_Help"
 msgstr ""
 
-#: ../src/main-window.c:238 ../src/new_slideshow.c:63
+#: ../src/main-window.c:237 ../src/new_slideshow.c:63
 msgid "Create a new slideshow"
 msgstr ""
 
-#: ../src/main-window.c:243
+#: ../src/main-window.c:242
 msgid "Open a slideshow"
 msgstr ""
 
-#: ../src/main-window.c:249
+#: ../src/main-window.c:248
 msgid "Save the slideshow"
 msgstr ""
 
-#: ../src/main-window.c:260
+#: ../src/main-window.c:259
 msgid "Import the slides"
 msgstr ""
 
-#: ../src/main-window.c:266
+#: ../src/main-window.c:265
 msgid "Delete the selected slides"
 msgstr ""
 
-#: ../src/main-window.c:276
+#: ../src/main-window.c:275
 msgid "Preview the slideshow"
 msgstr ""
 
-#: ../src/main-window.c:283
+#: ../src/main-window.c:282
 msgid "Export the DVD slideshow"
 msgstr ""
 
-#: ../src/main-window.c:302
+#: ../src/main-window.c:301
 msgid "Jump to the entered slide number"
 msgstr ""
 
-#: ../src/main-window.c:348
+#: ../src/main-window.c:347
 msgid "<b>Slide settings</b>"
 msgstr ""
 
 #. Transition types
-#: ../src/main-window.c:358
+#: ../src/main-window.c:357
 msgid "Transition Type:"
 msgstr ""
 
-#: ../src/main-window.c:373
+#: ../src/main-window.c:372
 msgid "Transition Speed:"
 msgstr ""
 
-#: ../src/main-window.c:377
+#: ../src/main-window.c:376
 msgid "Fast"
 msgstr ""
 
-#: ../src/main-window.c:378
+#: ../src/main-window.c:377
 msgid "Normal"
 msgstr ""
 
-#: ../src/main-window.c:379
+#: ../src/main-window.c:378
 msgid "Slow"
 msgstr ""
 
-#: ../src/main-window.c:388
+#: ../src/main-window.c:387
 msgid "Slide Duration in sec:"
 msgstr ""
 
-#: ../src/main-window.c:401
+#: ../src/main-window.c:400
 msgid "Slide number:"
 msgstr ""
 
-#: ../src/main-window.c:413
+#: ../src/main-window.c:412
 msgid "Resolution:"
 msgstr ""
 
-#: ../src/main-window.c:425
+#: ../src/main-window.c:424
 msgid "Type:"
 msgstr ""
 
-#: ../src/main-window.c:436
+#: ../src/main-window.c:435
 msgid "Slideshow Length:"
 msgstr ""
 
-#: ../src/main-window.c:750 ../src/main-window.c:752 ../src/support.c:195
+#: ../src/main-window.c:753 ../src/main-window.c:755 ../src/support.c:195
 msgid "None"
 msgstr ""
 
-#: ../src/callbacks.c:120
+#: ../src/callbacks.c:121
 #, c-format
 msgid "Please wait, importing slide %d out of %d"
 msgstr ""
 
-#: ../src/callbacks.c:135
+#: ../src/callbacks.c:136
 msgid "Import slides, use SHIFT key for multiple select"
 msgstr ""
 
-#: ../src/callbacks.c:147
+#: ../src/callbacks.c:148
 msgid "All image files"
 msgstr ""
 
-#: ../src/callbacks.c:161
+#: ../src/callbacks.c:162
 msgid "All files"
 msgstr ""
 
-#: ../src/callbacks.c:265
+#: ../src/callbacks.c:233
+msgid "You didn't save your slideshow yet. Are you sure you want to close it?"
+msgstr ""
+
+#: ../src/callbacks.c:299
 #, c-format
 msgid "%d x %d pixels"
 msgid_plural "%d x %d pixels"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ../src/callbacks.c:341
+#: ../src/callbacks.c:376
 msgid "translator-credits"
 msgstr ""
 
-#: ../src/callbacks.c:661
+#: ../src/callbacks.c:703
 msgid "Starts the preview"
 msgstr ""
 
-#: ../src/callbacks.c:671
+#: ../src/callbacks.c:713
 msgid "Stops the preview"
 msgstr ""
 
-#: ../src/callbacks.c:712
+#: ../src/callbacks.c:755
 msgid "Load an Imagination slideshow project"
 msgstr ""
 
-#: ../src/callbacks.c:713
+#: ../src/callbacks.c:756
 msgid "Save an Imagination slideshow project"
 msgstr ""
 
-#: ../src/callbacks.c:793
+#: ../src/callbacks.c:846
 msgid "Exporting the slideshow"
 msgstr ""
 
-#: ../src/callbacks.c:805
+#: ../src/callbacks.c:858
 msgid "Preparing for export ..."
 msgstr ""
 
-#: ../src/callbacks.c:816
+#: ../src/callbacks.c:869
 msgid "Overall progress:"
 msgstr ""
 
-#: ../src/callbacks.c:874 ../src/callbacks.c:961
+#: ../src/callbacks.c:927 ../src/callbacks.c:1012
 #, c-format
 msgid "Slide %d export progress:"
 msgstr ""
 
-#: ../src/callbacks.c:1169
+#: ../src/callbacks.c:1224
 msgid "Failed to launch the encoder!"
 msgstr ""
 
@@ -252,7 +256,7 @@ msgstr ""
 msgid "Select background color:"
 msgstr ""
 
-#: ../src/slideshow_project.c:106
+#: ../src/slideshow_project.c:108
 msgid "This is not an Imagination project file!"
 msgstr ""
 

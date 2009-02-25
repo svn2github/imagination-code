@@ -219,10 +219,6 @@ void img_free_allocated_memory(img_window_struct *img_struct)
 		g_free(img_struct->project_filename);
 		img_struct->project_filename = NULL;
 	}
-
-	/* Unloads the plugins */
-	g_slist_foreach(img_struct->plugin_list,(GFunc)g_module_close,NULL);
-	g_slist_free(img_struct->plugin_list);
 }
 
 gint img_ask_user_confirmation(img_window_struct *img_struct)
@@ -248,6 +244,10 @@ gboolean img_quit_application(GtkWidget *widget, GdkEvent *event, img_window_str
 			return TRUE;
 	}
 	img_free_allocated_memory(img_struct);
+
+	/* Unloads the plugins */
+	g_slist_foreach(img_struct->plugin_list,(GFunc)g_module_close,NULL);
+	g_slist_free(img_struct->plugin_list);
 	return FALSE;
 }
 
@@ -791,12 +791,10 @@ void img_choose_slideshow_filename(GtkWidget *widget, img_window_struct *img)
 
 void img_close_slideshow(GtkWidget *widget, img_window_struct *img)
 {
-	gint result;
-
 	if (img->project_is_modified)
 	{
-		result = img_ask_user_confirmation(img);
-		if (result != GTK_RESPONSE_OK);
+		if (GTK_RESPONSE_OK != img_ask_user_confirmation(img))
+
 			return;
 	}
 	img_free_allocated_memory(img);

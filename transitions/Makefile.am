@@ -23,6 +23,13 @@ push_from_right_la_LDFLAGS = -module -avoid-version
 roller_blind_la_LDFLAGS = -module -avoid-version
 cross_fade_la_LDFLAGS = -module -avoid-version
 wave_right_la_LDFLAGS = -module -avoid-version
+wave_left_la_LDFLAGS = -module -avoid-version
+wave_up_la_LDFLAGS = -module -avoid-version
+wave_down_la_LDFLAGS = -module -avoid-version
+wave_left_down_la_LDFLAGS = -module -avoid-version
+wave_left_up_la_LDFLAGS = -module -avoid-version
+wave_right_down_la_LDFLAGS = -module -avoid-version
+wave_right_up_la_LDFLAGS = -module -avoid-version
 
 # Plugins to be installed
 plugin_LTLIBRARIES = \
@@ -44,7 +51,15 @@ plugin_LTLIBRARIES = \
 	push_from_right.la	\
 	roller_blind.la		\
 	cross_fade.la		\
-	wave_right.la
+	wave_right.la		\
+	wave_left.la		\
+	wave_up.la			\
+	wave_down.la		\
+	wave_left_down.la	\
+	wave_left_up.la		\
+	wave_right_down.la	\
+	wave_right_up.la
+	
 
 circular_blind_from_center_la_SOURCES		= ../src/support.c circular_blind_from_center.c
 circular_blind_to_center_la_SOURCES			= ../src/support.c circular_blind_to_center.c
@@ -65,6 +80,13 @@ push_from_right_la_SOURCES	= ../src/support.c push_from_right.c
 roller_blind_la_SOURCES	= ../src/support.c roller_blind.c
 cross_fade_la_SOURCES	= ../src/support.c cross_fade.c
 wave_right_la_SOURCES	= ../src/support.c wave_right.c
+wave_left_la_SOURCES	= ../src/support.c wave_left.c
+wave_up_la_SOURCES	= ../src/support.c wave_up.c
+wave_down_la_SOURCES	= ../src/support.c wave_down.c
+wave_left_down_la_SOURCES	= ../src/support.c wave_left_down.c
+wave_left_up_la_SOURCES	= ../src/support.c wave_left_up.c
+wave_right_down_la_SOURCES	= ../src/support.c wave_right_down.c
+wave_right_up_la_SOURCES	= ../src/support.c wave_right_up.c
 
 # instead of linking against all in $(GTK_LIBS), we link only against needed libs
 circular_blind_from_center_la_LIBADD	 = $(PACKAGE_LIBS)
@@ -86,6 +108,13 @@ push_from_right_la_LIBADD = $(PACKAGE_LIBS)
 roller_blind_la_LIBADD = $(PACKAGE_LIBS)
 cross_fade_la_LIBADD = $(PACKAGE_LIBS)
 wave_right_la_LIBADD = $(PACKAGE_LIBS)
+wave_left_la_LIBADD = $(PACKAGE_LIBS)
+wave_up_la_LIBADD = $(PACKAGE_LIBS)
+wave_down_la_LIBADD = $(PACKAGE_LIBS)
+wave_left_down_la_LIBADD = $(PACKAGE_LIBS)
+wave_left_up_la_LIBADD = $(PACKAGE_LIBS)
+wave_right_down_la_LIBADD = $(PACKAGE_LIBS)
+wave_right_up_la_LIBADD = $(PACKAGE_LIBS)
 
 AM_CPPFLAGS = \
 	-DDATADIR=\"$(datadir)\" \

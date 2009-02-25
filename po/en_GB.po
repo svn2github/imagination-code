@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-02-24 13:32+0100\n"
+"POT-Creation-Date: 2009-02-25 14:32+0100\n"
 "PO-Revision-Date: 2009-02-24 11:39+0100\n"
 "Last-Translator: colossus73 <colossus73@gmail.com>\n"
 "Language-Team: English (British)\n"
@@ -28,181 +28,185 @@ msgstr "A lightweight DVD slideshow maker using GTK+2"
 msgid "Imagination"
 msgstr "Imagination"
 
-#: ../src/main-window.c:114
+#: ../src/main-window.c:113
 msgid "_Slideshow"
 msgstr "_Slideshow"
 
-#: ../src/main-window.c:156
+#: ../src/main-window.c:155
 msgid "_Preview"
 msgstr "_Preview"
 
-#: ../src/main-window.c:165
+#: ../src/main-window.c:164
 msgid "Export"
 msgstr "Export"
 
-#: ../src/main-window.c:182
+#: ../src/main-window.c:181
 msgid "_Slide"
 msgstr "_Slide"
 
-#: ../src/main-window.c:188
+#: ../src/main-window.c:187
 msgid "_Import"
 msgstr "_Import"
 
-#: ../src/main-window.c:197
+#: ../src/main-window.c:196
 msgid "_Delete"
 msgstr "_Delete"
 
-#: ../src/main-window.c:214
+#: ../src/main-window.c:213
 msgid "Un_select all"
 msgstr "Un_select all"
 
-#: ../src/main-window.c:219
+#: ../src/main-window.c:218
 msgid "_Help"
 msgstr "_Help"
 
-#: ../src/main-window.c:238 ../src/new_slideshow.c:63
+#: ../src/main-window.c:237 ../src/new_slideshow.c:63
 msgid "Create a new slideshow"
 msgstr "Create a new slideshow"
 
-#: ../src/main-window.c:243
+#: ../src/main-window.c:242
 msgid "Open a slideshow"
 msgstr "Open a slideshow"
 
-#: ../src/main-window.c:249
+#: ../src/main-window.c:248
 msgid "Save the slideshow"
 msgstr "Save the slideshow"
 
-#: ../src/main-window.c:260
+#: ../src/main-window.c:259
 msgid "Import the slides"
 msgstr "Import the slides"
 
-#: ../src/main-window.c:266
+#: ../src/main-window.c:265
 msgid "Delete the selected slides"
 msgstr "Delete the selected slides"
 
-#: ../src/main-window.c:276
+#: ../src/main-window.c:275
 msgid "Preview the slideshow"
 msgstr "Preview the slideshow"
 
-#: ../src/main-window.c:283
+#: ../src/main-window.c:282
 msgid "Export the DVD slideshow"
 msgstr "Export the DVD slideshow"
 
-#: ../src/main-window.c:302
+#: ../src/main-window.c:301
 msgid "Jump to the entered slide number"
 msgstr "Jump to the entered slide number"
 
-#: ../src/main-window.c:348
+#: ../src/main-window.c:347
 msgid "<b>Slide settings</b>"
 msgstr "<b>Slide settings</b>"
 
 #. Transition types
-#: ../src/main-window.c:358
+#: ../src/main-window.c:357
 msgid "Transition Type:"
 msgstr "Transition Type:"
 
-#: ../src/main-window.c:373
+#: ../src/main-window.c:372
 msgid "Transition Speed:"
 msgstr "Transition Speed:"
 
-#: ../src/main-window.c:377
+#: ../src/main-window.c:376
 msgid "Fast"
 msgstr "Fast"
 
-#: ../src/main-window.c:378
+#: ../src/main-window.c:377
 msgid "Normal"
 msgstr "Normal"
 
-#: ../src/main-window.c:379
+#: ../src/main-window.c:378
 msgid "Slow"
 msgstr "Slow"
 
-#: ../src/main-window.c:388
+#: ../src/main-window.c:387
 msgid "Slide Duration in sec:"
 msgstr "Slide Duration in sec:"
 
-#: ../src/main-window.c:401
+#: ../src/main-window.c:400
 msgid "Slide number:"
 msgstr "Slide number:"
 
-#: ../src/main-window.c:413
+#: ../src/main-window.c:412
 msgid "Resolution:"
 msgstr "Resolution:"
 
-#: ../src/main-window.c:425
+#: ../src/main-window.c:424
 msgid "Type:"
 msgstr "Type:"
 
-#: ../src/main-window.c:436
+#: ../src/main-window.c:435
 msgid "Slideshow Length:"
 msgstr "Slideshow Length:"
 
-#: ../src/main-window.c:750 ../src/main-window.c:752 ../src/support.c:195
+#: ../src/main-window.c:753 ../src/main-window.c:755 ../src/support.c:195
 msgid "None"
 msgstr "None"
 
-#: ../src/callbacks.c:120
+#: ../src/callbacks.c:121
 #, c-format
 msgid "Please wait, importing slide %d out of %d"
 msgstr "Please wait, importing slide %d out of %d"
 
-#: ../src/callbacks.c:135
+#: ../src/callbacks.c:136
 msgid "Import slides, use SHIFT key for multiple select"
 msgstr "Import slides, use SHIFT key for multiple select"
 
-#: ../src/callbacks.c:147
+#: ../src/callbacks.c:148
 msgid "All image files"
 msgstr "All image files"
 
-#: ../src/callbacks.c:161
+#: ../src/callbacks.c:162
 msgid "All files"
 msgstr "All files"
 
-#: ../src/callbacks.c:265
+#: ../src/callbacks.c:233
+msgid "You didn't save your slideshow yet. Are you sure you want to close it?"
+msgstr "You didn't save your slideshow yet. Are you sure you want to close it?"
+
+#: ../src/callbacks.c:299
 #, c-format
 msgid "%d x %d pixels"
 msgid_plural "%d x %d pixels"
 msgstr[0] "%d x %d pixels"
 msgstr[1] "%d x %d pixels"
 
-#: ../src/callbacks.c:341
+#: ../src/callbacks.c:376
 msgid "translator-credits"
 msgstr "translator-credits"
 
-#: ../src/callbacks.c:661
+#: ../src/callbacks.c:703
 msgid "Starts the preview"
 msgstr "Starts the preview"
 
-#: ../src/callbacks.c:671
+#: ../src/callbacks.c:713
 msgid "Stops the preview"
 msgstr "Stops the preview"
 
-#: ../src/callbacks.c:712
+#: ../src/callbacks.c:755
 msgid "Load an Imagination slideshow project"
 msgstr "Load an Imagination slideshow project"
 
-#: ../src/callbacks.c:713
+#: ../src/callbacks.c:756
 msgid "Save an Imagination slideshow project"
 msgstr "Save an Imagination slideshow project"
 
-#: ../src/callbacks.c:793
+#: ../src/callbacks.c:846
 msgid "Exporting the slideshow"
 msgstr "Exporting the slideshow"
 
-#: ../src/callbacks.c:805
+#: ../src/callbacks.c:858
 msgid "Preparing for export ..."
 msgstr "Preparing for export ..."
 
-#: ../src/callbacks.c:816
+#: ../src/callbacks.c:869
 msgid "Overall progress:"
 msgstr "Overall progress:"
 
-#: ../src/callbacks.c:874 ../src/callbacks.c:961
+#: ../src/callbacks.c:927 ../src/callbacks.c:1012
 #, c-format
 msgid "Slide %d export progress:"
 msgstr "Slide %d export progress:"
 
-#: ../src/callbacks.c:1169
+#: ../src/callbacks.c:1224
 msgid "Failed to launch the encoder!"
 msgstr "Failed to launch the encoder!"
 
@@ -251,7 +255,7 @@ msgstr "Rescale images to fit desired aspect ratio"
 msgid "Select background color:"
 msgstr "Select background color:"
 
-#: ../src/slideshow_project.c:106
+#: ../src/slideshow_project.c:108
 msgid "This is not an Imagination project file!"
 msgstr "This is not an Imagination project file!"
 
