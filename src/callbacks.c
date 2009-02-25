@@ -195,19 +195,30 @@ void img_free_allocated_memory(img_window_struct *img_struct)
 			g_free(entry->filename);
 			g_free(entry->resolution);
 			g_free(entry->type);
-			g_free(entry);	
+			g_free(entry);
+			img_struct->slides_nr--;
 		}
 		while (gtk_tree_model_iter_next (model,&iter));
+		gtk_list_store_clear(GTK_LIST_STORE(img_struct->thumbnail_model));
 	}
 
 	if (img_struct->slideshow_filename)
+	{
 		g_free(img_struct->slideshow_filename);
+		img_struct->slideshow_filename = NULL;
+	}
 
 	if (img_struct->current_dir)
+	{
 		g_free(img_struct->current_dir);
+		img_struct->current_dir = NULL;
+	}
 
 	if (img_struct->project_filename)
+	{
 		g_free(img_struct->project_filename);
+		img_struct->project_filename = NULL;
+	}
 
 	/* Unloads the plugins */
 	g_slist_foreach(img_struct->plugin_list,(GFunc)g_module_close,NULL);

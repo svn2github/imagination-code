@@ -21,7 +21,7 @@
 
 void img_transition_set_name(gchar **name)
 {
-	*name = "Wave right";
+	*name = "Wave Right";
 }
 
 void img_transition_render(GdkDrawable *window, GdkPixbuf *image_from, GdkPixbuf *image_to, gdouble progress, gint file_desc)
