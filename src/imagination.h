@@ -25,18 +25,22 @@
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
 
-/* Timeout (in miliseconds) for transition effects. I increased this value
- * to 40 to obtain 25 fps animation, which should be drawn within the same
- * time frame on any computer (67 fps is too intensive for even most
- * powerfull machines to handle). */
-#define TRANSITION_TIMEOUT 40
+/* Transition preview frame rate. I decided to use 25 fps, which
+ * should be handled on time by most machines. */
+#define PREVIEW_FPS 25
 
-/* Increments are modified to accomodate 25 fps animation set above.
- * With new lover fps anmation, we can be pretty sure that animation time
- * will be fixed and approximatelly the same on all computers. */
-#define	FAST	0.04	/*  25 frames - 1 s */
-#define	NORMAL	0.01	/* 100 frames - 4 s */
-#define	SLOW	0.005	/* 200 frames - 8 s */
+/* The transition speed is defined as a duration in seconds. */
+#define	FAST	1
+#define	NORMAL	4
+#define	SLOW	8
+
+/* Export frame rate is currently set to 29.97. The intent of this
+ * macro is to ease grepping through the sources if we decide to
+ * implement different frame rates for different export formats.
+ * Second macro is string representation of frame rate to be used
+ * when constructing encoder command line. */
+#define EXPORT_FPS         29.97
+#define EXPORT_FPS_STRING "29.97"
 
 #define comment_string	"Imagination 1.0 Slideshow Project - http://imagination.sf.net"
 
@@ -54,7 +58,7 @@ struct _slide_struct
 {
 	gchar	*filename;
 	guint	duration;
-	gdouble	speed;
+	guint  	speed;
 	gchar	*resolution;
 	gchar	*type;
 	void	(*render) (GdkDrawable*, GdkPixbuf*, GdkPixbuf*, gdouble, gint);

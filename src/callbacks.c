@@ -381,7 +381,7 @@ void img_set_total_slideshow_duration(img_window_struct *img)
 		img->total_secs += entry->duration;
 
 		if(entry->render)
-			img->total_secs += (1 / entry->speed) / 25;
+			img->total_secs += entry->speed;
 	}
 	while (gtk_tree_model_iter_next (model,&iter));
 
@@ -448,7 +448,7 @@ void img_start_stop_preview(GtkWidget *button, img_window_struct *img)
 		img->preview_is_running = TRUE;
 		img->current_slide = entry;
 		img->progress = 0;
-		img->source_id = g_timeout_add(TRANSITION_TIMEOUT,(GSourceFunc)img_transition_timeout,img);
+		img->source_id = g_timeout_add(1000 / PREVIEW_FPS,(GSourceFunc)img_transition_timeout,img);
 	}
 	return;
 }
@@ -600,8 +600,10 @@ GdkPixbuf *img_scale_pixbuf(img_window_struct *img, gchar *filename)
 static gboolean img_transition_timeout(img_window_struct *img)
 {
 	/* Increment progress variable (this is being passed as a parameter
-	 * to plug-in provided transition function). */
-	img->progress += (img->current_slide)->speed;
+	 * to plug-in provided transition function).
+	 * 1000 ms / TRANSITION_TIMEOUT gives us a frame rate of preview
+	 * (currently, this is 1000 / 40 = 25 fps). */
+	img->progress += (gdouble)1 / ( img->current_slide->speed * PREVIEW_FPS );
 	
 	/* if the transition render is NULL (no transition is set for this
 	 * slide), we stop this timeout function, but still invalidate
@@ -616,8 +618,11 @@ static gboolean img_transition_timeout(img_window_struct *img)
 
 	/* If the progress reached 1, the transition should be finished and
 	 * it's time to stop this timeout function and add sleep timeout
-	 * function to the main loop. */
-	if( img->progress > (1 + img->current_slide->speed / 2) )
+	 * function to the main loop. The 0.0000005 is added to accomodate
+	 * floating number rounding errors (if we would write this condition
+	 * as img->progress > 1, we would miss the last frame, since
+	 * (gdouble)1 > 1 */
+	if( img->progress > 1.0000005 )
 	{
 		img->progress = 0;
 		img->source_id = g_timeout_add( img->current_slide->duration * 1000,(GSourceFunc)img_sleep_timeout, img );
@@ -634,7 +639,7 @@ static gboolean img_sleep_timeout(img_window_struct *img)
 {
 	if(img_prepare_pixbufs(img))
 	{
-		img->source_id = g_timeout_add( TRANSITION_TIMEOUT,(GSourceFunc)img_transition_timeout,img );
+		img->source_id = g_timeout_add( 1000 / PREVIEW_FPS,(GSourceFunc)img_transition_timeout,img );
 	}
 	else
 	{
@@ -680,7 +685,8 @@ static void img_clean_after_preview(img_window_struct *img)
 
 	/* Restore image that was used before preview */
 	gtk_image_set_from_pixbuf(GTK_IMAGE(img->image_area), img->slide_pixbuf);
-	g_object_unref(G_OBJECT(img->slide_pixbuf));
+	if( img->slide_pixbuf )
+		g_object_unref(G_OBJECT(img->slide_pixbuf));
 
 	/* Swap toolbar and menu icons */
 	img_swap_toolbar_images( img, TRUE );
@@ -862,7 +868,7 @@ void img_start_stop_export(GtkWidget *widget, img_window_struct *img)
 		img->export_is_running = TRUE;
 		img->current_slide = entry;
 		img->progress = 0;
-		img->export_frame_nr = img->total_secs * 29.97;
+		img->export_frame_nr = img->total_secs * EXPORT_FPS;
 		img->export_frame_cur = 0;
 		/* Fix for the wrong progress bar indicators. */
 		img_export_calc_slide_frames( img );
@@ -892,8 +898,8 @@ static gboolean img_export_transition(img_window_struct *img)
 	}
 
 	/* Switch to still export phase if progress reached 1. */
-	img->progress += img->current_slide->speed * (25 / 29.97);
-	if(img->progress > 1 + 0.00000005)
+	img->progress += (gdouble)1 / ( img->current_slide->speed * EXPORT_FPS );
+	if(img->progress > 1.00000005)
 	{
 		img->progress = 0;
 		img->export_idle_func = (GSourceFunc)img_export_still;
@@ -941,9 +947,7 @@ static gboolean img_export_still(img_window_struct *img)
 		img_export_pixbuf_to_ppm(img->pixbuf2, &img->pixbuf_data, &lenght);
 	}
 
-	/* FIXED RATE!!!
-	 * Draw frames until we have enough of them to fill slide duration gap.
-	 * Again, output rate is fixed at 29.97 fps. */
+	 /* Draw frames until we have enough of them to fill slide duration gap. */
 	if( img->export_slide_cur > img->export_slide_nr )
 	{
 		/* Exit still rendering and continue with next transition. */
@@ -1142,22 +1146,26 @@ static gboolean img_run_encoder(img_window_struct *img)
 
 	if (img->slideshow_format_index == 0)
 		cmd_line = g_strdup_printf(
-				"ffmpeg -f image2pipe -vcodec ppm -r 29.97 -i pipe: "
-				"-target %s-dvd -r 29.97 -an -aspect %s -s %dx%d -y -bf 2 %s",
+				"ffmpeg -f image2pipe -vcodec ppm -r %s -i pipe: "
+				"-target %s-dvd -r %s -an -aspect %s -s %dx%d -y -bf 2 %s",
+				EXPORT_FPS_STRING,
 				img->image_area->allocation.height == 576 ? "pal" : "ntsc",
+				EXPORT_FPS_STRING,
 				img->aspect_ratio, img->image_area->allocation.width,
 				img->image_area->allocation.height, img->slideshow_filename );
 	else
 		cmd_line = g_strconcat(
-				"ffmpeg -f image2pipe -vcodec ppm -r 30 -i pipe: "
-				"-an -b 512k -s 320x240 -f flv -y ", img->slideshow_filename,NULL);
+				"ffmpeg -f image2pipe -vcodec ppm -r " EXPORT_FPS_STRING
+				" -i pipe: -an -b 512k -s 320x240 -f flv -y ",
+				img->slideshow_filename,NULL);
 	argv = g_strsplit( cmd_line, " ", 0 );
+	g_print( "%s\n", cmd_line );
 	g_free( cmd_line );
 
 	ret = g_spawn_async_with_pipes( NULL, argv, NULL,
-									G_SPAWN_SEARCH_PATH |
+									G_SPAWN_SEARCH_PATH/* |
 									G_SPAWN_STDOUT_TO_DEV_NULL |
-									G_SPAWN_STDERR_TO_DEV_NULL,
+									G_SPAWN_STDERR_TO_DEV_NULL*/,
 									NULL, NULL, NULL, &img->file_desc,
 									NULL, NULL, &error );
 	if( ! ret )
@@ -1201,10 +1209,10 @@ static void img_export_calc_slide_frames(img_window_struct *img)
 	 * where each slide had transition effect set.) */
 	if( img->current_slide->render )
 		/* Duration + transition time */
-		img->export_slide_nr = ( img->current_slide->duration + ( 1 / img->current_slide->speed / 25 ) ) * 29.97;
+		img->export_slide_nr = ( img->current_slide->duration + img->current_slide->speed ) * EXPORT_FPS;
 	else
 		/* Duration only */
-		img->export_slide_nr = img->current_slide->duration * 29.97;
+		img->export_slide_nr = img->current_slide->duration * EXPORT_FPS;
 
 	img->export_slide_cur = 0;
 }

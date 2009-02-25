@@ -265,7 +265,7 @@ GdkPixbuf *img_load_pixbuf_from_file(gchar *filename)
 	return thumb;
 }
 
-slide_struct *img_set_slide_info(gint duration, gdouble speed, void	(*render), gint combo_transition_type_index, gchar *filename)
+slide_struct *img_set_slide_info(gint duration, guint speed, void (*render), gint combo_transition_type_index, gchar *filename)
 {
 	slide_struct *slide_info;
 	GdkPixbufFormat *pixbuf_format;

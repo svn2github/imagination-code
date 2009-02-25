@@ -60,7 +60,7 @@ void img_save_slideshow(img_window_struct *img)
 		conf = g_strdup_printf("image_%d",count);
 
 		g_key_file_set_string(img_key_file, "images",			conf, entry->filename);
-		g_key_file_set_double(img_key_file, "transition speed", conf, entry->speed);
+		g_key_file_set_integer(img_key_file,"transition speed", conf, entry->speed);
 		g_key_file_set_integer(img_key_file,"slide duration",	conf, entry->duration);
 		g_key_file_set_integer(img_key_file,"transition type",	conf, entry->combo_transition_type_index);
 		g_free(conf);
@@ -88,7 +88,7 @@ void img_load_slideshow(img_window_struct *img)
 	gchar *dummy,*slide_filename;
 	GtkWidget *dialog;
 	gint number,i,duration,combo_transition_type_index, height;
-	gdouble speed;
+	guint speed;
 	GtkTreeModel *model;
 	void (*render);
 
@@ -139,7 +139,7 @@ void img_load_slideshow(img_window_struct *img)
 		thumb = img_load_pixbuf_from_file(slide_filename);
 		if (thumb)
 		{
-			speed 	=	g_key_file_get_double(img_key_file,"transition speed"	,dummy,NULL);
+			speed 	=	g_key_file_get_integer(img_key_file,"transition speed"	,dummy,NULL);
 			duration= 	g_key_file_get_integer (img_key_file,"slide duration"	,dummy,NULL);
 			combo_transition_type_index = g_key_file_get_integer(img_key_file,"transition type",dummy,NULL);
 
