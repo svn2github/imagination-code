@@ -223,14 +223,12 @@ void img_new_slideshow_settings_dialog(img_window_struct *img, gboolean flag)
 	if (response == GTK_RESPONSE_ACCEPT)
 	{
 		img->slideshow_filename = g_strdup(gtk_entry_get_text(GTK_ENTRY(slideshow_title_entry)));
+
 		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON (pal)))
-		{
 			gtk_widget_set_size_request(img->image_area,720,576);
-		}
 		else
-		{
 			gtk_widget_set_size_request(img->image_area,720,480);
-		}
+
 		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON (tv)))
 			img->aspect_ratio = "4:3";
 		else
@@ -242,6 +240,8 @@ void img_new_slideshow_settings_dialog(img_window_struct *img, gboolean flag)
 		string = g_path_get_basename(img->slideshow_filename);
 		img_set_window_title(img,string);
 		g_free(string);
+
+		img->project_is_modified = TRUE;
 	}
 	gtk_widget_destroy(dialog1);
 }
@@ -256,9 +256,11 @@ static void img_bg_color_changed( GtkColorButton *button, img_window_struct *img
 	g = ( color.green / 0xffff * 0xff );
 	b = ( color.blue  / 0xffff * 0xff );
 	img->background_color = r  << 24 | g << 16 | b <<  8 | 0xff;
+	img->project_is_modified = TRUE;
 }
 
 static void img_distort_toggled( GtkToggleButton *button, img_window_struct *img )
 {
 	img->distort_images = gtk_toggle_button_get_active( button );
+	img->project_is_modified = TRUE;
 }

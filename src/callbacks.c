@@ -108,6 +108,7 @@ void img_add_slides_thumbnails(GtkMenuItem *item,img_window_struct *img)
 	g_slist_free(bak);
 	img_set_total_slideshow_duration(img);
 	img_set_statusbar_message(img,0);
+	img->project_is_modified = TRUE;
 }
 
 static void img_increase_progressbar(img_window_struct *img, gint nr)
@@ -177,7 +178,7 @@ GSList *img_import_slides_file_chooser(img_window_struct *img)
 	return slides;
 }
 
-gboolean img_quit_application(GtkWidget *widget, GdkEvent *event, img_window_struct *img_struct)
+void img_free_allocated_memory(img_window_struct *img_struct)
 {
 	GtkTreeModel *model;
 	GtkTreeIter iter;
@@ -201,19 +202,41 @@ gboolean img_quit_application(GtkWidget *widget, GdkEvent *event, img_window_str
 
 	if (img_struct->slideshow_filename)
 		g_free(img_struct->slideshow_filename);
+
 	if (img_struct->current_dir)
 		g_free(img_struct->current_dir);
+
+	if (img_struct->project_filename)
+		g_free(img_struct->project_filename);
 
 	/* Unloads the plugins */
 	g_slist_foreach(img_struct->plugin_list,(GFunc)g_module_close,NULL);
 	g_slist_free(img_struct->plugin_list);
+}
 
-	/* I moved this function call to window's destroy event handler, since
-	 * that's the place where quiting should be normally done. This separation
-	 * enables us to add "Do you really want to ..." dialog at the end
-	 * of the application, since we only need to change return value from FALSE
-	 * to TRUE and application will survive. */
-	//gtk_main_quit();
+gint img_ask_user_confirmation(img_window_struct *img_struct)
+{
+	GtkWidget *dialog;
+	gint response;
+
+	dialog = gtk_message_dialog_new(GTK_WINDOW(img_struct->imagination_window),GTK_DIALOG_MODAL,GTK_MESSAGE_QUESTION,GTK_BUTTONS_OK_CANCEL,_("You didn't save your slideshow yet. Are you sure you want to close it?"));
+	gtk_window_set_title(GTK_WINDOW(dialog),"Imagination");
+	response = gtk_dialog_run (GTK_DIALOG (dialog));
+	gtk_widget_destroy (GTK_WIDGET (dialog));
+	return response;
+}
+
+gboolean img_quit_application(GtkWidget *widget, GdkEvent *event, img_window_struct *img_struct)
+{
+	gint response;
+
+	if (img_struct->project_is_modified)
+	{
+		response = img_ask_user_confirmation(img_struct);
+		if (response != GTK_RESPONSE_OK)
+			return TRUE;
+	}
+	img_free_allocated_memory(img_struct);
 	return FALSE;
 }
 
@@ -310,6 +333,7 @@ void img_delete_selected_slides(GtkMenuItem *item,img_window_struct *img_struct)
 	g_list_free(selected);
 	img_set_statusbar_message(img_struct,0);
 	gtk_image_set_from_pixbuf(GTK_IMAGE(img_struct->image_area),NULL);
+	img_struct->project_is_modified = TRUE;
 
 	if (img_struct->slides_nr == 0)
 		gtk_widget_hide(img_struct->thumb_scrolledwindow);
@@ -392,6 +416,8 @@ void img_set_total_slideshow_duration(img_window_struct *img)
 	time = g_strdup_printf("%02d:%02d:%02d", h, m, s);
 	gtk_label_set_text(GTK_LABEL (img->total_time_data),time);
 	g_free(time);
+
+	img->project_is_modified = TRUE;
 }
 
 void img_start_stop_preview(GtkWidget *button, img_window_struct *img)
@@ -754,8 +780,20 @@ void img_choose_slideshow_filename(GtkWidget *widget, img_window_struct *img)
 
 void img_close_slideshow(GtkWidget *widget, img_window_struct *img)
 {
-	//img_delete_selected_slides
+	gint result;
+
+	if (img->project_is_modified)
+	{
+		result = img_ask_user_confirmation(img);
+		if (result != GTK_RESPONSE_OK);
+			return;
+	}
+	img_free_allocated_memory(img);
 	img_set_buttons_state(img, FALSE);
+	img_set_window_title(img,NULL);
+	img_set_statusbar_message(img,0);
+	gtk_image_set_from_pixbuf(GTK_IMAGE(img->image_area),NULL);
+	gtk_widget_hide(img->thumb_scrolledwindow);
 }
 
 void img_start_stop_export(GtkWidget *widget, img_window_struct *img)
@@ -1225,4 +1263,3 @@ static void img_export_pause_unpause(GtkToggleButton *button, img_window_struct 
 	else
 		img->source_id = g_idle_add(img->export_idle_func, img);
 }
-

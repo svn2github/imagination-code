@@ -100,7 +100,6 @@ img_window_struct *img_create_window (void)
 	gtk_window_set_default_size (GTK_WINDOW (img_struct->imagination_window), 1030, 800);
 	img_set_window_title(img_struct,NULL);
 	g_signal_connect (G_OBJECT (img_struct->imagination_window),"delete-event",G_CALLBACK (img_quit_application),img_struct);
-	/* Handle destroy signal (see callbacks.c:206 for comments on this). */
 	g_signal_connect (G_OBJECT (img_struct->imagination_window), "destroy", G_CALLBACK (gtk_main_quit), NULL );
 
 	vbox1 = gtk_vbox_new (FALSE, 2);
@@ -640,6 +639,7 @@ static void img_combo_box_transition_type_changed (GtkComboBox *combo, img_windo
 		info_slide->combo_transition_type_index = render_index;
 		selected = selected->next;
 	}
+	img->project_is_modified = TRUE;
 	img_set_total_slideshow_duration(img);
 	g_list_foreach (bak, (GFunc)gtk_tree_path_free, NULL);
 	g_list_free(bak);

@@ -76,6 +76,8 @@ void img_save_slideshow(img_window_struct *img)
 	img_set_window_title(img,string);
 	g_free(string);
 	g_key_file_free(img_key_file);
+
+	img->project_is_modified = FALSE;
 }
 
 void img_load_slideshow(img_window_struct *img)
@@ -124,7 +126,7 @@ void img_load_slideshow(img_window_struct *img)
 	height = g_key_file_get_integer(img_key_file,"slideshow settings","video format",NULL);
 	gtk_widget_set_size_request( img->image_area, 720, height );
 	dummy = g_key_file_get_string(img_key_file, "slideshow settings", "background color", NULL );
-	img->background_color = (guint32)strtol( dummy, NULL, 16 );
+	img->background_color = (guint32)strtoul( dummy, NULL, 16 );
 	g_free(dummy);
 	img->distort_images = g_key_file_get_boolean(img_key_file, "slideshow settings", "distort images", NULL );
 

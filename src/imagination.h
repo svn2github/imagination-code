@@ -117,7 +117,8 @@ struct _img_window_struct
 	gchar       *project_filename;		// project name for saving
   	gchar		*slideshow_filename;	// exported file name
   	gchar		*aspect_ratio;
-	gboolean     distort_images;
+	gboolean	distort_images;
+	gboolean	project_is_modified;
 	gint		slideshow_format_index;
 	guint32     background_color;
   	gint		total_secs;
