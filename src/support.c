@@ -17,12 +17,9 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#  include <config.h>
-#endif
-
 #include "support.h"
-#include "imagination.h"
+
+static gboolean img_plugin_is_loaded(img_window_struct *, GModule *);
 
 void img_export_cairo_to_ppm( cairo_surface_t *surface, gint file_desc)
 {
@@ -195,8 +192,8 @@ void img_load_available_transitions(img_window_struct *img)
 	gtk_list_store_set(GTK_LIST_STORE(model), &iter,0, _("None"), 1, NULL, -1);
 	gtk_combo_box_set_active(GTK_COMBO_BOX(img->transition_type), 0);
 
-	path = g_strdup("./transitions");
-	//path = g_strconcat(PACKAGE_LIB_DIR,"/imagination",NULL);
+	//path = g_strdup("./transitions");
+	path = g_strconcat(PACKAGE_LIB_DIR,"/imagination",NULL);
 	dir = g_dir_open(path, 0, error);
 	if (dir == NULL)
 	{
@@ -212,7 +209,7 @@ void img_load_available_transitions(img_window_struct *img)
 
 		fname = g_build_filename(path,transition_name, NULL);
 		module = g_module_open(fname, G_MODULE_BIND_LOCAL);
-		if (module)
+		if (img_plugin_is_loaded(img, module) == FALSE)
 		{
 			/* Obtain the name from the plugin function */
 			g_module_symbol(module, "img_transition_set_name",(void *) &plugin_set_name);
@@ -229,6 +226,11 @@ void img_load_available_transitions(img_window_struct *img)
 	}
 	g_free(path);
 	g_dir_close(dir);
+}
+
+static gboolean img_plugin_is_loaded(img_window_struct *img, GModule *module)
+{
+	return (g_slist_find(img->plugin_list,module) != NULL);
 }
 
 void img_show_file_chooser(SexyIconEntry *entry, SexyIconEntryPosition icon_pos,int button,img_window_struct *img)

@@ -355,7 +355,7 @@ void img_delete_selected_slides(GtkMenuItem *item,img_window_struct *img_struct)
 void img_show_about_dialog (GtkMenuItem *item,img_window_struct *img_struct)
 {
 	static GtkWidget *about = NULL;
-    const char *authors[] = {"\nMain developer:\nGiuseppe Torelli <colossus73@gmail.com>\n\nCode improvements and patches:\nTadej Borovšak <tadeboro@gmail.com>\n\nImagination logo:\nJaws, Dadster, Gemini and Lunoob\nfrom http://linuxgraphicsusers.com\n\n",NULL};
+    const char *authors[] = {"\nDevelopers:\nGiuseppe Torelli <colossus73@gmail.com>\nTadej Borovšak <tadeboro@gmail.com>\n\nImagination logo:\nJaws, Dadster, Gemini and Lunoob\nfrom http://linuxgraphicsusers.com\n\n",NULL};
     const char *documenters[] = {NULL};
 
 	if (about == NULL)

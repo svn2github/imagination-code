@@ -118,6 +118,7 @@ wave_right_up_la_LIBADD = $(PACKAGE_LIBS)
 
 AM_CPPFLAGS = \
 	-DDATADIR=\"$(datadir)\" \
+	-DPACKAGE_LIB_DIR=\""$(libdir)"\" \
 	-I$(top_srcdir)/src \
 	$(PACKAGE_CFLAGS) \
 	$(PLUGIN_CFLAGS)
