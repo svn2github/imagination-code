@@ -4,8 +4,11 @@ SUBDIRS = icons src transitions po
 
 EXTRA_DIST = \
 	autogen.sh \
-	imagination.desktop.in
-
+	imagination.desktop.in \
+	intltool-extract.in \
+	intltool-merge.in \
+	intltool-update.in
+	
 uninstall-local:
 	rm -rf $(DESTDIR)$(pkgdatadir);
 	rm -f $(DESTDIR)$(datadir)/pixmaps/imagination-import.png;
