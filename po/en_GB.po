@@ -171,7 +171,7 @@ msgstr[1] "%d x %d pixels"
 
 #: ../src/callbacks.c:376
 msgid "translator-credits"
-msgstr "translator-credits"
+msgstr "Giuseppe Torelli <colossus73@gmail.com>"
 
 #: ../src/callbacks.c:703
 msgid "Starts the preview"

@@ -174,7 +174,7 @@ msgstr[3] "%d x %d pik"
 
 #: ../src/callbacks.c:376
 msgid "translator-credits"
-msgstr "zasluge-prevajalcev"
+msgstr "Tadej Borovšak <tadeboro@gmail.com>"
 
 #: ../src/callbacks.c:703
 msgid "Starts the preview"
