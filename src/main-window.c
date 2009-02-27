@@ -26,7 +26,8 @@
 #include "callbacks.h"
 
 static void img_combo_box_transition_type_changed (GtkComboBox *, img_window_struct *);
-static gpointer img_set_random_transition(img_window_struct *);
+static void img_random_button_clicked(GtkButton *, img_window_struct *);
+static gpointer img_set_random_transition(img_window_struct *, slide_struct *);
 static void img_combo_box_speed_changed (GtkComboBox *,  img_window_struct *);
 static void img_spinbutton_value_changed (GtkSpinButton *, img_window_struct *);
 static void img_quit_menu(GtkMenuItem *, img_window_struct *);
@@ -71,18 +72,14 @@ img_window_struct *img_create_window (void)
 	GtkWidget *frame1_alignment;
 	GtkWidget *transition_label;
 	GtkWidget *vbox_info_slide;
-	GtkWidget *hbox_effect_duration;
-	GtkWidget *hbox_duration;
+	GtkWidget *table;
+	GtkWidget *random_button;
 	GtkWidget *duration_label;
 	GtkWidget *trans_duration_label;
 	GtkWidget *frame1;
 	GtkWidget *frame_label;
-	GtkWidget *hbox_slide_selected;
 	GtkWidget *selected_slide;
-	GtkWidget *hbox_resolution;
 	GtkWidget *resolution;
-	GtkWidget *hbox_type;
-	GtkWidget *hbox_total;
 	GtkWidget *total_time;
 	GtkWidget *type;
 	GtkAccelGroup *accel_group;
@@ -98,7 +95,8 @@ img_window_struct *img_create_window (void)
 	img_struct = g_new0(img_window_struct,1);
 	img_struct->imagination_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_icon (GTK_WINDOW(img_struct->imagination_window),icon);
-	gtk_window_set_default_size (GTK_WINDOW (img_struct->imagination_window), 1030, 800);
+	gtk_window_set_position (GTK_WINDOW(img_struct->imagination_window),GTK_WIN_POS_CENTER);
+	gtk_window_set_default_size (GTK_WINDOW (img_struct->imagination_window), 1080, 800);
 	img_set_window_title(img_struct,NULL);
 	g_signal_connect (G_OBJECT (img_struct->imagination_window),"delete-event",G_CALLBACK (img_quit_application),img_struct);
 	g_signal_connect (G_OBJECT (img_struct->imagination_window), "destroy", G_CALLBACK (gtk_main_quit), NULL );
@@ -354,91 +352,89 @@ img_window_struct *img_create_window (void)
 	gtk_container_add (GTK_CONTAINER (frame1_alignment), vbox_info_slide);
 	gtk_container_set_border_width (GTK_CONTAINER (vbox_info_slide), 2);
 
-	/* Transition types */
+	/* Transition types label */
 	transition_label = gtk_label_new (_("Transition Type:"));
 	gtk_box_pack_start (GTK_BOX (vbox_info_slide), transition_label, FALSE, FALSE, 0);
 	gtk_misc_set_alignment (GTK_MISC (transition_label), 0, -1);
 
+	/*  slide selected, slide resolution, slide type and slide total duration */
+	table = gtk_table_new (7, 2, FALSE);
+	gtk_box_pack_start (GTK_BOX (vbox_info_slide), table, TRUE, TRUE, 0);
+	gtk_table_set_row_spacings (GTK_TABLE (table), 4);
+	gtk_table_set_col_spacings (GTK_TABLE (table), 4);
+
+	/* Transition type */
 	img_struct->transition_type = _gtk_combo_box_new_text(TRUE);
+	gtk_table_attach (GTK_TABLE (table), img_struct->transition_type, 0, 1, 0, 1,(GtkAttachOptions) (GTK_EXPAND | GTK_FILL),(GtkAttachOptions) (GTK_FILL), 0, 0);
 	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(img_struct->transition_type)))),
 										0,GTK_SORT_ASCENDING);
 	gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(gtk_combo_box_get_model(GTK_COMBO_BOX(img_struct->transition_type))),0,img_sort_none_before_other,NULL,NULL);										
 	gtk_widget_set_sensitive(img_struct->transition_type, FALSE);
-	gtk_box_pack_start (GTK_BOX (vbox_info_slide), img_struct->transition_type, FALSE, TRUE, 0);
 	g_signal_connect (G_OBJECT (img_struct->transition_type),"changed",G_CALLBACK (img_combo_box_transition_type_changed),img_struct);
 
-	/* Transition duration */
-	hbox_effect_duration = gtk_hbox_new (FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (vbox_info_slide), hbox_effect_duration, FALSE, TRUE, 0);
-	trans_duration_label = gtk_label_new (_("Transition Speed:"));
-	gtk_box_pack_start (GTK_BOX (hbox_effect_duration), trans_duration_label, FALSE, FALSE, 0);
+	random_button = gtk_button_new_with_mnemonic (_("Random"));
+	gtk_table_attach (GTK_TABLE (table), random_button, 1, 2, 0, 1,(GtkAttachOptions) (GTK_FILL),(GtkAttachOptions) (0), 0, 0);
+	g_signal_connect (G_OBJECT (random_button),"clicked",G_CALLBACK (img_random_button_clicked),img_struct);
 
+	/* Transition duration */
+	trans_duration_label = gtk_label_new (_("Transition Speed:"));
+	gtk_table_attach (GTK_TABLE (table), trans_duration_label, 0, 1, 1, 2,(GtkAttachOptions) (GTK_FILL),(GtkAttachOptions) (0), 0, 0);
+	gtk_misc_set_alignment (GTK_MISC (trans_duration_label), 0, 0.5);
+  
 	img_struct->trans_duration = _gtk_combo_box_new_text(FALSE);
-	gtk_combo_box_append_text(GTK_COMBO_BOX(img_struct->trans_duration),_("Fast"));
-	gtk_combo_box_append_text(GTK_COMBO_BOX(img_struct->trans_duration),_("Normal"));
-	gtk_combo_box_append_text(GTK_COMBO_BOX(img_struct->trans_duration),_("Slow"));
+	gtk_table_attach (GTK_TABLE (table), img_struct->trans_duration, 1, 2, 1, 2,(GtkAttachOptions) (GTK_FILL),(GtkAttachOptions) (GTK_FILL), 0, 0);
+	gtk_combo_box_append_text (GTK_COMBO_BOX (img_struct->trans_duration), _("Fast"));
+	gtk_combo_box_append_text (GTK_COMBO_BOX (img_struct->trans_duration), _("Normal"));
+	gtk_combo_box_append_text (GTK_COMBO_BOX (img_struct->trans_duration), _("Slow"));
 	gtk_combo_box_set_active(GTK_COMBO_BOX(img_struct->trans_duration),1);
 	gtk_widget_set_sensitive(img_struct->trans_duration, FALSE);
-	gtk_box_pack_end (GTK_BOX (hbox_effect_duration), img_struct->trans_duration, FALSE, TRUE, 0);
 	g_signal_connect (G_OBJECT (img_struct->trans_duration),"changed",G_CALLBACK (img_combo_box_speed_changed),img_struct);
 
 	/* Slide duration */
-	hbox_duration = gtk_hbox_new (FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (vbox_info_slide), hbox_duration, FALSE, TRUE, 0);
 	duration_label = gtk_label_new (_("Slide Duration in sec:"));
-	gtk_box_pack_start (GTK_BOX (hbox_duration), duration_label, FALSE, FALSE, 0);
+	gtk_table_attach (GTK_TABLE (table), duration_label, 0, 1, 2, 3,(GtkAttachOptions) (GTK_FILL),(GtkAttachOptions) (0), 0, 0);
+	gtk_misc_set_alignment (GTK_MISC (duration_label), 0, 0.5);
 
 	img_struct->duration = gtk_spin_button_new_with_range (1, 300, 1);
+	gtk_table_attach (GTK_TABLE (table), img_struct->duration, 1, 2, 2, 3,(GtkAttachOptions) (GTK_EXPAND | GTK_FILL),(GtkAttachOptions) (0), 0, 0);
 	gtk_widget_set_sensitive(img_struct->duration, FALSE);
 	gtk_spin_button_set_numeric(GTK_SPIN_BUTTON (img_struct->duration),TRUE);
-	gtk_box_pack_end (GTK_BOX (hbox_duration), img_struct->duration, FALSE, TRUE, 0);
 	g_signal_connect (G_OBJECT (img_struct->duration),"value-changed",G_CALLBACK (img_spinbutton_value_changed),img_struct);
 
 	/* Slide Selected */
-	hbox_slide_selected = gtk_hbox_new (TRUE, 0);
-	gtk_box_pack_start (GTK_BOX (vbox_info_slide), hbox_slide_selected, FALSE, TRUE, 0);
-
-	selected_slide = gtk_label_new (_("Slide number:"));
-	gtk_box_pack_start (GTK_BOX (hbox_slide_selected), selected_slide, FALSE, TRUE, 0);
+	selected_slide = gtk_label_new (_("Slide Number:"));
+	gtk_table_attach (GTK_TABLE (table), selected_slide, 0, 1, 3, 4,(GtkAttachOptions) (GTK_FILL),(GtkAttachOptions) (0), 0, 0);
 	gtk_misc_set_alignment (GTK_MISC (selected_slide), 0, 0.5);
 
 	img_struct->slide_selected_data = gtk_label_new ("");
-	gtk_box_pack_start (GTK_BOX (hbox_slide_selected), img_struct->slide_selected_data, TRUE, TRUE, 0);
+	gtk_table_attach (GTK_TABLE (table), img_struct->slide_selected_data, 1, 2, 3, 4,(GtkAttachOptions) (GTK_FILL),(GtkAttachOptions) (0), 0, 0);
 	gtk_misc_set_alignment (GTK_MISC (img_struct->slide_selected_data), 0, 0.5);
 
 	/* Slide Resolution */
-	hbox_resolution = gtk_hbox_new (TRUE, 0);
-	gtk_box_pack_start (GTK_BOX (vbox_info_slide), hbox_resolution, FALSE, TRUE, 0);
-
 	resolution = gtk_label_new (_("Resolution:"));
-	gtk_box_pack_start (GTK_BOX (hbox_resolution), resolution, FALSE, TRUE, 0);
+	gtk_table_attach (GTK_TABLE (table), resolution, 0, 1, 4, 5,(GtkAttachOptions) (GTK_FILL),(GtkAttachOptions) (0), 0, 0);
 	gtk_misc_set_alignment (GTK_MISC (resolution), 0, 0.5);
 
 	img_struct->resolution_data = gtk_label_new ("");
-	gtk_box_pack_start (GTK_BOX (hbox_resolution), img_struct->resolution_data, TRUE, TRUE, 0);
+	gtk_table_attach (GTK_TABLE (table), img_struct->resolution_data, 1, 2, 4, 5,(GtkAttachOptions) (GTK_FILL),(GtkAttachOptions) (0), 0, 0);
 	gtk_misc_set_alignment (GTK_MISC (img_struct->resolution_data), 0, 0.5);
 
 	/* Slide Type */
-	hbox_type = gtk_hbox_new (TRUE, 0);
-	gtk_box_pack_start (GTK_BOX (vbox_info_slide), hbox_type, FALSE, TRUE, 0);
-
 	type = gtk_label_new (_("Type:"));
-	gtk_box_pack_start (GTK_BOX (hbox_type), type, FALSE, TRUE, 0);
+ 	gtk_table_attach (GTK_TABLE (table), type, 0, 1, 5, 6,(GtkAttachOptions) (GTK_FILL),(GtkAttachOptions) (0), 0, 0);
 	gtk_misc_set_alignment (GTK_MISC (type), 0, 0.5);
 
 	img_struct->type_data = gtk_label_new ("");
-	gtk_box_pack_start (GTK_BOX (hbox_type), img_struct->type_data, TRUE, TRUE, 0);
+	gtk_table_attach (GTK_TABLE (table), img_struct->type_data, 1, 2, 5, 6,(GtkAttachOptions) (GTK_FILL),(GtkAttachOptions) (0), 0, 0);
 	gtk_misc_set_alignment (GTK_MISC (img_struct->type_data), 0, 0.5);
+
 	/* Slide Total Duration */
-	hbox_total = gtk_hbox_new (TRUE, 0);
-	gtk_box_pack_start (GTK_BOX (vbox_info_slide), hbox_total, FALSE, TRUE, 0);
-
 	total_time = gtk_label_new (_("Slideshow Length:"));
-	gtk_box_pack_start (GTK_BOX (hbox_total), total_time, FALSE, TRUE, 0);
-	gtk_misc_set_alignment (GTK_MISC( total_time ), 0, 0.5);
+	gtk_table_attach (GTK_TABLE (table), total_time, 0, 1, 6, 7,(GtkAttachOptions) (GTK_FILL),(GtkAttachOptions) (0), 0, 0);
+	gtk_misc_set_alignment (GTK_MISC (total_time), 0, 0.5);
 
-	img_struct->total_time_data = gtk_label_new ("00:00:00");
-	gtk_box_pack_start (GTK_BOX (hbox_total), img_struct->total_time_data, TRUE, TRUE, 0);
+	img_struct->total_time_data = gtk_label_new ("");
+	gtk_table_attach (GTK_TABLE (table), img_struct->total_time_data, 1, 2, 6, 7,(GtkAttachOptions) (GTK_FILL),(GtkAttachOptions) (0), 0, 0);
 	gtk_misc_set_alignment (GTK_MISC (img_struct->total_time_data), 0, 0.5);
 
 	/* Create the model */
@@ -645,10 +641,7 @@ static void img_combo_box_transition_type_changed (GtkComboBox *combo, img_windo
 	{
 		gtk_tree_model_get_iter(model, &iter,selected->data);
 		gtk_tree_model_get(model, &iter,1,&info_slide,-1);
-		if (render_index == 1)
-			info_slide->render = img_set_random_transition(img);
-		else
-			info_slide->render = address;
+		info_slide->render = address;
 		info_slide->combo_transition_type_index = render_index;
 		selected = selected->next;
 	}
@@ -658,7 +651,33 @@ static void img_combo_box_transition_type_changed (GtkComboBox *combo, img_windo
 	g_list_free(bak);
 }
 
-static gpointer img_set_random_transition(img_window_struct *img)
+static void img_random_button_clicked(GtkButton *button, img_window_struct *img)
+{
+	GList *selected, *bak;
+	GtkTreeIter iter;
+	GtkTreeModel *model;
+	slide_struct *info_slide;
+
+	model = gtk_icon_view_get_model(GTK_ICON_VIEW (img->thumbnail_iconview));
+	selected = gtk_icon_view_get_selected_items(GTK_ICON_VIEW (img->thumbnail_iconview));
+	if (selected == NULL)
+		return;
+
+	/* Avoiding GList memory leak. */
+	bak = selected;
+	while (selected)
+	{
+		gtk_tree_model_get_iter(model, &iter,selected->data);
+		gtk_tree_model_get(model, &iter,1,&info_slide,-1);
+		info_slide->render = img_set_random_transition(img, info_slide);
+		selected = selected->next;
+	}
+	img->project_is_modified = TRUE;
+	g_list_foreach (bak, (GFunc)gtk_tree_path_free, NULL);
+	g_list_free(bak);
+}
+
+static gpointer img_set_random_transition(img_window_struct *img, slide_struct *info_slide)
 {
 	gint nr;
 	gint random;
@@ -666,9 +685,14 @@ static gpointer img_set_random_transition(img_window_struct *img)
 	GModule *module;
 
 	nr = g_slist_length(img->plugin_list);
-	random = g_random_int_range(0,nr);
+	random = g_random_int_range(0, nr);
 	module = g_slist_nth_data(img->plugin_list, random);
-	
+	info_slide->combo_transition_type_index = random;
+
+	g_signal_handlers_block_by_func((gpointer)img->transition_type, (gpointer)img_combo_box_transition_type_changed, img);	
+	gtk_combo_box_set_active(GTK_COMBO_BOX(img->transition_type), random);
+	g_signal_handlers_unblock_by_func((gpointer)img->transition_type, (gpointer)img_combo_box_transition_type_changed, img);	
+
 	g_module_symbol(module, "img_transition_render", &address);
 	return address;
 }
@@ -775,10 +799,10 @@ static gint img_sort_none_before_other(GtkTreeModel *model,GtkTreeIter *a,GtkTre
 	gtk_tree_model_get(model, a, 0, &name1, -1);
 	gtk_tree_model_get(model, b, 0, &name2, -1);
 
-	if (strcmp(name1,_("None")) == 0 || strcmp(name2,_("None")) == 0)
+	if (strcmp(name1,_("None")) == 0)
 		i = -1;
-	else if (strcmp(name1,_("Random")) == 0 || strcmp(name2,_("Random")) == 0)
-		i = 0;
+	else if (strcmp(name2,_("None")) == 0)
+		i = 1;
 	else
 		i = (g_strcmp0 (name1,name2));
 
