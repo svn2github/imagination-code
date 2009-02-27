@@ -434,14 +434,12 @@ void img_set_total_slideshow_duration(img_window_struct *img)
 void img_start_stop_preview(GtkWidget *button, img_window_struct *img)
 {
 	GtkTreeIter iter;
+	GtkTreePath *path = NULL;
 	slide_struct *entry;
 	GtkTreeModel *model;
+	GList *list = NULL;
 
 	if(img->export_is_running)
-		return;
-		
-	model = gtk_icon_view_get_model(GTK_ICON_VIEW(img->thumbnail_iconview));
-	if( ! gtk_tree_model_get_iter_first (model,&iter))
 		return;
 
 	if (img->preview_is_running)
@@ -458,6 +456,23 @@ void img_start_stop_preview(GtkWidget *button, img_window_struct *img)
 	else
 	{
 		/* Start the preview */
+		model = gtk_icon_view_get_model(GTK_ICON_VIEW(img->thumbnail_iconview));
+		list = gtk_icon_view_get_selected_items( GTK_ICON_VIEW( img->thumbnail_iconview ) );
+		if( list )
+			gtk_icon_view_get_cursor(GTK_ICON_VIEW(img->thumbnail_iconview), &path, NULL);
+		if( list && path )
+		{
+			/* Start preview from this slide */
+			gtk_tree_model_get_iter( model, &iter, path );
+			g_list_foreach( list, (GFunc)gtk_tree_path_free, NULL );
+			g_list_free( list );
+		}
+		else
+		{
+			/* Start preview from the beginning */
+			if(!gtk_tree_model_get_iter_first (model,&iter))
+				return;
+		}
 
 		/* Replace button and menu images */
 		img_swap_toolbar_images( img, FALSE );
@@ -473,17 +488,30 @@ void img_start_stop_preview(GtkWidget *button, img_window_struct *img)
 		gtk_widget_set_app_paintable(img->image_area, TRUE);
 		g_signal_connect( G_OBJECT(img->image_area), "expose-event",G_CALLBACK(img_on_expose_event),img);
 
-		/* Create an empty pixbuf - starting white image */
-		img->pixbuf1 = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8,img->image_area->allocation.width,img->image_area->allocation.height);
-		gdk_pixbuf_fill(img->pixbuf1,img->background_color);
-
 		/* Load the first image in the pixbuf */
 		gtk_tree_model_get(model, &iter,1,&entry,-1);
 		img->pixbuf2 = img_scale_pixbuf(img,entry->filename);
+		img->current_slide = entry;
+
+		/* If we started our preview from beginning, create empty pixbuf and
+		 * fill it with background color. Else load image that is before
+		 * currently selected slide. */
+		if( path != NULL && gtk_tree_path_prev( path ) )
+		{
+			gtk_tree_model_get_iter( model, &iter, path );
+			gtk_tree_model_get( model, &iter, 1, &entry, -1 );
+			img->pixbuf1 = img_scale_pixbuf(img, entry->filename);
+		}
+		else
+		{
+			img->pixbuf1 = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8,img->image_area->allocation.width,img->image_area->allocation.height);
+			gdk_pixbuf_fill(img->pixbuf1,img->background_color);
+		}
+		if( path )
+			gtk_tree_path_free( path );
 
 		/* Add transition timeout function */
 		img->preview_is_running = TRUE;
-		img->current_slide = entry;
 		img->progress = 0;
 		img->source_id = g_timeout_add(1000 / PREVIEW_FPS,(GSourceFunc)img_transition_timeout,img);
 	}
