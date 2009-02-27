@@ -190,6 +190,8 @@ void img_load_available_transitions(img_window_struct *img)
 	/* Fill the combo box with no transition */
 	gtk_list_store_append(GTK_LIST_STORE(model), &iter);
 	gtk_list_store_set(GTK_LIST_STORE(model), &iter,0, _("None"), 1, NULL, -1);
+	gtk_list_store_append(GTK_LIST_STORE(model), &iter);
+	gtk_list_store_set(GTK_LIST_STORE(model), &iter,0, _("Random"), 1, NULL, -1);
 	gtk_combo_box_set_active(GTK_COMBO_BOX(img->transition_type), 0);
 
 	//path = g_strdup("./transitions");

@@ -199,7 +199,9 @@ void img_free_allocated_memory(img_window_struct *img_struct)
 			img_struct->slides_nr--;
 		}
 		while (gtk_tree_model_iter_next (model,&iter));
+		g_signal_handlers_block_by_func((gpointer)img_struct->thumbnail_iconview, (gpointer)img_iconview_selection_changed, img_struct);
 		gtk_list_store_clear(GTK_LIST_STORE(img_struct->thumbnail_model));
+		g_signal_handlers_unblock_by_func((gpointer)img_struct->thumbnail_iconview, (gpointer)img_iconview_selection_changed, img_struct);
 	}
 
 	if (img_struct->slideshow_filename)
@@ -340,8 +342,8 @@ void img_delete_selected_slides(GtkMenuItem *item,img_window_struct *img_struct)
   		selected = selected->next;
   	}
 	g_signal_handlers_unblock_by_func((gpointer)img_struct->thumbnail_iconview, (gpointer)img_iconview_selection_changed, img_struct);  		
-	g_list_foreach (selected, (GFunc)gtk_tree_path_free, NULL);
-	g_list_free(selected);
+	g_list_foreach (bak, (GFunc)gtk_tree_path_free, NULL);
+	g_list_free(bak);
 	img_set_statusbar_message(img_struct,0);
 	gtk_image_set_from_pixbuf(GTK_IMAGE(img_struct->image_area),NULL);
 	img_struct->project_is_modified = TRUE;

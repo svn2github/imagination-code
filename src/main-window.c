@@ -26,6 +26,7 @@
 #include "callbacks.h"
 
 static void img_combo_box_transition_type_changed (GtkComboBox *, img_window_struct *);
+static gpointer img_set_random_transition(img_window_struct *);
 static void img_combo_box_speed_changed (GtkComboBox *,  img_window_struct *);
 static void img_spinbutton_value_changed (GtkSpinButton *, img_window_struct *);
 static void img_quit_menu(GtkMenuItem *, img_window_struct *);
@@ -352,24 +353,19 @@ img_window_struct *img_create_window (void)
 	vbox_info_slide = gtk_vbox_new (FALSE, 3);
 	gtk_container_add (GTK_CONTAINER (frame1_alignment), vbox_info_slide);
 	gtk_container_set_border_width (GTK_CONTAINER (vbox_info_slide), 2);
-GtkWidget *random_button,*hbox_button;
+
 	/* Transition types */
 	transition_label = gtk_label_new (_("Transition Type:"));
 	gtk_box_pack_start (GTK_BOX (vbox_info_slide), transition_label, FALSE, FALSE, 0);
 	gtk_misc_set_alignment (GTK_MISC (transition_label), 0, -1);
 
-	hbox_button = gtk_hbox_new(FALSE,0);
-	gtk_box_pack_start (GTK_BOX (vbox_info_slide), hbox_button, FALSE, FALSE, 0);
 	img_struct->transition_type = _gtk_combo_box_new_text(TRUE);
 	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(img_struct->transition_type)))),
 										0,GTK_SORT_ASCENDING);
 	gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(gtk_combo_box_get_model(GTK_COMBO_BOX(img_struct->transition_type))),0,img_sort_none_before_other,NULL,NULL);										
 	gtk_widget_set_sensitive(img_struct->transition_type, FALSE);
-	gtk_box_pack_start (GTK_BOX (hbox_button), img_struct->transition_type, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (vbox_info_slide), img_struct->transition_type, FALSE, TRUE, 0);
 	g_signal_connect (G_OBJECT (img_struct->transition_type),"changed",G_CALLBACK (img_combo_box_transition_type_changed),img_struct);
-	
-	random_button = gtk_button_new_with_mnemonic(_("Random"));
-	gtk_box_pack_start (GTK_BOX (hbox_button), random_button, FALSE, FALSE, 0);
 
 	/* Transition duration */
 	hbox_effect_duration = gtk_hbox_new (FALSE, 0);
@@ -649,7 +645,10 @@ static void img_combo_box_transition_type_changed (GtkComboBox *combo, img_windo
 	{
 		gtk_tree_model_get_iter(model, &iter,selected->data);
 		gtk_tree_model_get(model, &iter,1,&info_slide,-1);
-		info_slide->render = address;
+		if (render_index == 1)
+			info_slide->render = img_set_random_transition(img);
+		else
+			info_slide->render = address;
 		info_slide->combo_transition_type_index = render_index;
 		selected = selected->next;
 	}
@@ -657,6 +656,21 @@ static void img_combo_box_transition_type_changed (GtkComboBox *combo, img_windo
 	img_set_total_slideshow_duration(img);
 	g_list_foreach (bak, (GFunc)gtk_tree_path_free, NULL);
 	g_list_free(bak);
+}
+
+static gpointer img_set_random_transition(img_window_struct *img)
+{
+	gint nr;
+	gint random;
+	gpointer address;
+	GModule *module;
+
+	nr = g_slist_length(img->plugin_list);
+	random = g_random_int_range(0,nr);
+	module = g_slist_nth_data(img->plugin_list, random);
+	
+	g_module_symbol(module, "img_transition_render", &address);
+	return address;
 }
 
 static void img_combo_box_speed_changed (GtkComboBox *combo, img_window_struct *img)
@@ -761,13 +775,13 @@ static gint img_sort_none_before_other(GtkTreeModel *model,GtkTreeIter *a,GtkTre
 	gtk_tree_model_get(model, a, 0, &name1, -1);
 	gtk_tree_model_get(model, b, 0, &name2, -1);
 
-	if (strcmp(name1,_("None")) == 0)
+	if (strcmp(name1,_("None")) == 0 || strcmp(name2,_("None")) == 0)
 		i = -1;
-	else if(strcmp(name2,_("None")) == 0)
-		i = 1;
+	else if (strcmp(name1,_("Random")) == 0 || strcmp(name2,_("Random")) == 0)
+		i = 0;
 	else
 		i = (g_strcmp0 (name1,name2));
-	
+
 	g_free(name1);
 	g_free(name2);
 	return i;	
