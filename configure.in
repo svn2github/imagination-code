@@ -28,7 +28,24 @@ fi
 pkg_modules="gtk+-2.0 >= 2.12.0"
 PKG_CHECK_MODULES(PACKAGE, [$pkg_modules])
 
-DEVELOPMENT_CFLAGS+=" -Wall"
+# get svn revision
+REVISION="r0"
+if test "x${REVISION}" = "xr0"
+then
+	SVN=`which svn 2>/dev/null`
+	if test -d ".svn" -a "x${SVN}" != "x" -a -x "${SVN}"
+	then
+		REVISION=r`$SVN info|grep 'Last Changed Rev'|cut -d' ' -f4`
+	fi
+fi
+if test "x${REVISION}" != "xr0"
+then
+	# force debug mode for a SVN working copy
+	CFLAGS="-g -Wall"
+else
+	REVISION="-1"
+fi
+AC_DEFINE_UNQUOTED(REVISION, "$REVISION", [subversion revision number])
 
 AC_SUBST(PACKAGE_CFLAGS)
 AC_SUBST(PACKAGE_LIBS)
@@ -40,8 +57,6 @@ AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE", [Gettext package.])
 dnl Add the languages which your application supports here.
 ALL_LINGUAS="`sed -e '/^#/d' $srcdir/po/LINGUAS`"
 AM_GLIB_GNU_GETTEXT
-
-AC_SUBST(DEVELOPMENT_CFLAGS)
 
 GTK_VERSION=`$PKG_CONFIG --modversion gtk+-2.0`
 
@@ -58,12 +73,14 @@ icons/scalable/Makefile
 imagination.desktop.in
 ])
 
-echo "
-
-Imagination configuration:
-------------------------
-
-	Install in  :       ${prefix}/bin
-	GTK version :       ${GTK_VERSION}
-
-"
+echo ""
+echo "Imagination configuration:"
+echo "------------------------"
+echo ""
+echo "Install in  :       ${prefix}/bin"
+echo "GTK version :       ${GTK_VERSION}"
+if test "${REVISION}" != "-1"
+then
+	echo "SVN revision:       ${REVISION}"
+fi
+echo ""

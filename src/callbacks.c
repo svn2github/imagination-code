@@ -355,6 +355,7 @@ void img_delete_selected_slides(GtkMenuItem *item,img_window_struct *img_struct)
 void img_show_about_dialog (GtkMenuItem *item,img_window_struct *img_struct)
 {
 	static GtkWidget *about = NULL;
+	static gchar version[] = VERSION "-" REVISION;
     const char *authors[] = {"\nDevelopers:\nGiuseppe Torelli <colossus73@gmail.com>\nTadej Borovšak <tadeboro@gmail.com>\n\nImagination logo:\nJaws, Dadster, Gemini and Lunoob\nfrom http://linuxgraphicsusers.com\n\n",NULL};
     const char *documenters[] = {NULL};
 
@@ -368,7 +369,7 @@ void img_show_about_dialog (GtkMenuItem *item,img_window_struct *img_struct)
 		gtk_window_set_destroy_with_parent (GTK_WINDOW (about),TRUE);
 		g_object_set (about,
 			"name", "Imagination",
-			"version",PACKAGE_VERSION,
+			"version", strcmp(REVISION, "-1") == 0 ? VERSION : version,
 			"copyright","Copyright \xC2\xA9 2009 Giuseppe Torelli",
 			"comments","A simple and lightweight DVD slideshow maker",
 			"authors",authors,
@@ -433,7 +434,7 @@ void img_set_total_slideshow_duration(img_window_struct *img)
 
 void img_start_stop_preview(GtkWidget *button, img_window_struct *img)
 {
-	GtkTreeIter iter;
+	GtkTreeIter iter, prev;
 	GtkTreePath *path = NULL;
 	slide_struct *entry;
 	GtkTreeModel *model;
@@ -498,9 +499,13 @@ void img_start_stop_preview(GtkWidget *button, img_window_struct *img)
 		 * currently selected slide. */
 		if( path != NULL && gtk_tree_path_prev( path ) )
 		{
-			gtk_tree_model_get_iter( model, &iter, path );
-			gtk_tree_model_get( model, &iter, 1, &entry, -1 );
+			if( ! img->cur_ss_iter )
+				img->cur_ss_iter = g_slice_new( GtkTreeIter );
+
+			gtk_tree_model_get_iter( model, &prev, path );
+			gtk_tree_model_get( model, &prev, 1, &entry, -1 );
 			img->pixbuf1 = img_scale_pixbuf(img, entry->filename);
+			*img->cur_ss_iter = iter;
 		}
 		else
 		{
