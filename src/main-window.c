@@ -397,7 +397,7 @@ img_window_struct *img_create_window (void)
 	gtk_misc_set_alignment (GTK_MISC (duration_label), 0, 0.5);
 
 	img_struct->duration = gtk_spin_button_new_with_range (1, 300, 1);
-	gtk_table_attach (GTK_TABLE (table), img_struct->duration, 1, 2, 2, 3,(GtkAttachOptions) (GTK_EXPAND | GTK_FILL),(GtkAttachOptions) (0), 0, 0);
+	gtk_table_attach (GTK_TABLE (table), img_struct->duration, 1, 2, 2, 3,(GtkAttachOptions) (GTK_FILL),(GtkAttachOptions) (0), 0, 0);
 	gtk_widget_set_sensitive(img_struct->duration, FALSE);
 	gtk_spin_button_set_numeric(GTK_SPIN_BUTTON (img_struct->duration),TRUE);
 	g_signal_connect (G_OBJECT (img_struct->duration),"value-changed",G_CALLBACK (img_spinbutton_value_changed),img_struct);

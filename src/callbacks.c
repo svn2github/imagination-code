@@ -42,17 +42,17 @@ static void img_export_pause_unpause(GtkToggleButton *, img_window_struct *);
 void img_set_window_title(img_window_struct *img, gchar *text)
 {
 	gchar *title = NULL;
+	static gchar version[] = VERSION "-" REVISION;
 
 	if (text == NULL)
 	{
-		title = g_strconcat("Imagination " VERSION, NULL);
+		title = g_strconcat("Imagination ", strcmp(REVISION, "-1") == 0 ? VERSION : version, NULL);
 		gtk_window_set_title (GTK_WINDOW (img->imagination_window), title);
 		g_free(title);
 	}
 	else
 	{
-		
-		title = g_strconcat(text, " - Imagination " VERSION, NULL);
+		title = g_strconcat(text, " - Imagination ", strcmp(REVISION, "-1") == 0 ? VERSION : version, NULL);
 		gtk_window_set_title (GTK_WINDOW (img->imagination_window), title);
 		g_free(title);
 	}
