@@ -544,7 +544,7 @@ void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *im
 		img_set_statusbar_message(img,nr_selected);
 	else
 		gtk_statusbar_pop(GTK_STATUSBAR(img->statusbar),img->context_id);
-	
+
 	gtk_widget_set_sensitive(img->remove_menu,		TRUE);
 	gtk_widget_set_sensitive(img->remove_button,	TRUE);
 	gtk_widget_set_sensitive(img->trans_duration,	TRUE);
