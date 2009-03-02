@@ -30,6 +30,7 @@ static void img_swap_toolbar_images( img_window_struct *, gboolean);
 static void img_clean_after_preview(img_window_struct *);
 static void img_increase_progressbar(img_window_struct *, gint);
 static gboolean img_run_encoder(img_window_struct *);
+static void img_about_dialog_activate_link(GtkAboutDialog * , const gchar *, gpointer );
 
 /* Export related functions */
 static gboolean img_export_transition(img_window_struct *);
@@ -358,14 +359,13 @@ void img_show_about_dialog (GtkMenuItem *item,img_window_struct *img_struct)
 {
 	static GtkWidget *about = NULL;
 	static gchar version[] = VERSION "-" REVISION;
-    const char *authors[] = {"\nDevelopers:\nGiuseppe Torelli <colossus73@gmail.com>\nTadej Borovšak <tadeboro@gmail.com>\n\nImagination logo:\nJaws, Dadster, Gemini and Lunoob\nfrom http://linuxgraphicsusers.com\n\n",NULL};
-    const char *documenters[] = {NULL};
+    const char *authors[] = {"\nDevelopers:\nGiuseppe Torelli <colossus73@gmail.com>\nTadej Borovšak <tadeboro@gmail.com>\n\nImagination logo:\nDadster, Gemini and Lunoob\nfrom http://linuxgraphicsusers.com\n\n",NULL};
+    //const char *documenters[] = {NULL};
 
 	if (about == NULL)
 	{
 		about = gtk_about_dialog_new ();
-		/*gtk_about_dialog_set_email_hook (img_activate_link,NULL,NULL);
-		gtk_about_dialog_set_url_hook (img_activate_link,NULL,NULL);*/
+		gtk_about_dialog_set_url_hook(img_about_dialog_activate_link, NULL, NULL);
 		gtk_window_set_position (GTK_WINDOW (about),GTK_WIN_POS_CENTER_ON_PARENT);
 		gtk_window_set_transient_for (GTK_WINDOW (about),GTK_WINDOW (img_struct->imagination_window));
 		gtk_window_set_destroy_with_parent (GTK_WINDOW (about),TRUE);
@@ -375,7 +375,7 @@ void img_show_about_dialog (GtkMenuItem *item,img_window_struct *img_struct)
 			"copyright","Copyright \xC2\xA9 2009 Giuseppe Torelli",
 			"comments","A simple and lightweight DVD slideshow maker",
 			"authors",authors,
-			"documenters",documenters,
+			"documenters",NULL,
 			"translator_credits",_("translator-credits"),
 			"logo_icon_name","imagination",
 			"website","http://imagination.sf.net",
@@ -398,6 +398,13 @@ void img_show_about_dialog (GtkMenuItem *item,img_window_struct *img_struct)
 	}
 	gtk_dialog_run ( GTK_DIALOG(about));
 	gtk_widget_hide (about);
+}
+
+static void img_about_dialog_activate_link(GtkAboutDialog * dialog, const gchar *link, gpointer data)
+{
+	char * argv[] = { "xdg-open", (char*)link, NULL };
+
+	g_spawn_async( NULL, argv, NULL, G_SPAWN_SEARCH_PATH,NULL, NULL, NULL, NULL);
 }
 
 void img_set_total_slideshow_duration(img_window_struct *img)
