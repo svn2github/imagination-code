@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-02-26 14:16+0100\n"
-"PO-Revision-Date: 2009-02-26 14:11+0100\n"
+"POT-Creation-Date: 2009-03-02 09:01+0100\n"
+"PO-Revision-Date: 2009-03-02 09:07+0100\n"
 "Last-Translator: Daniel Nylander <po@danielnylander.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "MIME-Version: 1.0\n"
@@ -16,128 +16,142 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: ../imagination.desktop.in.h:1 ../imagination.desktop.in.in.h:1
+#: ../imagination.desktop.in.h:1
 msgid "A DVD slideshow maker"
 msgstr "En DVD-bildspelsskapare"
 
-#: ../imagination.desktop.in.h:2 ../imagination.desktop.in.in.h:2
+#: ../imagination.desktop.in.h:2
 msgid "A lightweight DVD slideshow maker using GTK+2"
 msgstr "En lättviktig DVD-bildspelsskapare som använder GTK+2"
 
-#: ../imagination.desktop.in.h:3 ../imagination.desktop.in.in.h:3
+#: ../imagination.desktop.in.h:3
 msgid "Imagination"
 msgstr "Imagination"
 
-#: ../src/main-window.c:113
+#: ../src/main-window.c:112
 msgid "_Slideshow"
 msgstr "_Bildspel"
 
-#: ../src/main-window.c:155
+#: ../src/main-window.c:154
 msgid "_Preview"
 msgstr "_Förhandsgranska"
 
-#: ../src/main-window.c:164
+#: ../src/main-window.c:163
 msgid "Export"
 msgstr "Exportera"
 
-#: ../src/main-window.c:181
+#: ../src/main-window.c:180
 msgid "_Slide"
 msgstr "_Bild"
 
-#: ../src/main-window.c:187
+#: ../src/main-window.c:186
 msgid "_Import"
 msgstr "_Importera"
 
-#: ../src/main-window.c:196
+#: ../src/main-window.c:195
 msgid "_Delete"
 msgstr "_Ta bort"
 
-#: ../src/main-window.c:213
+#: ../src/main-window.c:212
 msgid "Un_select all"
 msgstr "_Avmarkera alla"
 
-#: ../src/main-window.c:218
+#: ../src/main-window.c:217
 msgid "_Help"
 msgstr "_Hjälp"
 
-#: ../src/main-window.c:237 ../src/new_slideshow.c:63
+#: ../src/main-window.c:236 ../src/new_slideshow.c:63
 msgid "Create a new slideshow"
 msgstr "Skapa ett nytt bildspel"
 
-#: ../src/main-window.c:242
+#: ../src/main-window.c:241
 msgid "Open a slideshow"
 msgstr "Öppna ett bildspel"
 
-#: ../src/main-window.c:248
+#: ../src/main-window.c:247
 msgid "Save the slideshow"
 msgstr "Spara bildspelet"
 
-#: ../src/main-window.c:259
+#: ../src/main-window.c:258
 msgid "Import the slides"
 msgstr "Importera bilderna"
 
-#: ../src/main-window.c:265
+#: ../src/main-window.c:264
 msgid "Delete the selected slides"
 msgstr "Ta bort markerade bilder"
 
-#: ../src/main-window.c:275
+#: ../src/main-window.c:274
 msgid "Preview the slideshow"
 msgstr "Förhandsgranska bildspelet"
 
-#: ../src/main-window.c:282
+#: ../src/main-window.c:281
 msgid "Export the DVD slideshow"
 msgstr "Exportera DVD-bildspelet"
 
-#: ../src/main-window.c:301
+#: ../src/main-window.c:300
 msgid "Jump to the entered slide number"
 msgstr "Hoppa till angivet bildnummer"
 
-#: ../src/main-window.c:347
+#: ../src/main-window.c:346
 msgid "<b>Slide settings</b>"
 msgstr "<b>Bildinställningar</b>"
 
-#. Transition types
-#: ../src/main-window.c:357
+#. Transition types label
+#: ../src/main-window.c:356
 msgid "Transition Type:"
 msgstr "Övergångstyp:"
 
-#: ../src/main-window.c:372
+#: ../src/main-window.c:375
+msgid "Random"
+msgstr "Slumpmässigt"
+
+#: ../src/main-window.c:376
+msgid "Imagination randomly decides with transition to apply"
+msgstr "Imagination bestämmer slumpmässigt vilken övergång att tillämpa"
+
+#. Transition duration
+#: ../src/main-window.c:381
 msgid "Transition Speed:"
 msgstr "Övergångshastighet:"
 
-#: ../src/main-window.c:376
+#: ../src/main-window.c:387
 msgid "Fast"
 msgstr "Snabb"
 
-#: ../src/main-window.c:377
+#: ../src/main-window.c:388
 msgid "Normal"
 msgstr "Normal"
 
-#: ../src/main-window.c:378
+#: ../src/main-window.c:389
 msgid "Slow"
 msgstr "Långsam"
 
-#: ../src/main-window.c:387
+#. Slide duration
+#: ../src/main-window.c:395
 msgid "Slide Duration in sec:"
 msgstr "Bildlängd i sekunder:"
 
-#: ../src/main-window.c:400
-msgid "Slide number:"
+#. Slide Selected
+#: ../src/main-window.c:406
+msgid "Slide Number:"
 msgstr "Bildnummer:"
 
-#: ../src/main-window.c:412
+#. Slide Resolution
+#: ../src/main-window.c:415
 msgid "Resolution:"
 msgstr "Upplösning:"
 
+#. Slide Type
 #: ../src/main-window.c:424
 msgid "Type:"
 msgstr "Typ:"
 
-#: ../src/main-window.c:435
+#. Slide Total Duration
+#: ../src/main-window.c:433
 msgid "Slideshow Length:"
 msgstr "Bildvisningslängd:"
 
-#: ../src/main-window.c:759 ../src/main-window.c:761 ../src/support.c:192
+#: ../src/main-window.c:803 ../src/main-window.c:805 ../src/support.c:192
 msgid "None"
 msgstr "Ingen"
 
@@ -158,19 +172,19 @@ msgstr "Alla bildfiler"
 msgid "All files"
 msgstr "Alla filer"
 
-#: ../src/callbacks.c:229
+#: ../src/callbacks.c:231
 msgid "You didn't save your slideshow yet. Are you sure you want to close it?"
 msgstr ""
 "Du har inte sparat ditt bildspel än. Är du säker på att du vill stänga det?"
 
-#: ../src/callbacks.c:299
+#: ../src/callbacks.c:301
 #, c-format
 msgid "%d x %d pixels"
 msgid_plural "%d x %d pixels"
 msgstr[0] "%d x %d bildpunkter"
 msgstr[1] "%d x %d bildpunkter"
 
-#: ../src/callbacks.c:376
+#: ../src/callbacks.c:379
 msgid "translator-credits"
 msgstr ""
 "Daniel Nylander <po@danielnylander.se>\n"
@@ -178,40 +192,40 @@ msgstr ""
 "Skicka synpunkter på översättningen till\n"
 "<tp-sv@listor.tp-sv.se>."
 
-#: ../src/callbacks.c:703
+#: ../src/callbacks.c:738
 msgid "Starts the preview"
 msgstr "Startar förhandsgranskningen"
 
-#: ../src/callbacks.c:713
+#: ../src/callbacks.c:748
 msgid "Stops the preview"
 msgstr "Stoppar förhandsgranskningen"
 
-#: ../src/callbacks.c:755
+#: ../src/callbacks.c:790
 msgid "Load an Imagination slideshow project"
 msgstr "Läs in ett Imagination-bildspelsprojekt"
 
-#: ../src/callbacks.c:756
+#: ../src/callbacks.c:791
 msgid "Save an Imagination slideshow project"
 msgstr "Spara ett Imagination-bildspelsprojekt"
 
-#: ../src/callbacks.c:846
+#: ../src/callbacks.c:881
 msgid "Exporting the slideshow"
 msgstr "Exporterar bildspelet"
 
-#: ../src/callbacks.c:858
+#: ../src/callbacks.c:893
 msgid "Preparing for export ..."
 msgstr "Förbereder för export ..."
 
-#: ../src/callbacks.c:869
+#: ../src/callbacks.c:904
 msgid "Overall progress:"
 msgstr "Totalt förlopp:"
 
-#: ../src/callbacks.c:927 ../src/callbacks.c:1012
+#: ../src/callbacks.c:962 ../src/callbacks.c:1047
 #, c-format
 msgid "Slide %d export progress:"
 msgstr "Förlopp för export av bild %d:"
 
-#: ../src/callbacks.c:1224
+#: ../src/callbacks.c:1259
 msgid "Failed to launch the encoder!"
 msgstr "Misslyckades med att starta kodaren!"
 
