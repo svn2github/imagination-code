@@ -375,10 +375,10 @@ img_window_struct *img_create_window (void)
 	img_struct->transition_type = _gtk_combo_box_new_text(TRUE);
 	gtk_table_attach (GTK_TABLE (table), img_struct->transition_type, 0, 1, 0, 1,(GtkAttachOptions) (GTK_EXPAND | GTK_FILL),(GtkAttachOptions) (GTK_FILL), 0, 0);
 	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(gtk_combo_box_get_model(GTK_COMBO_BOX(img_struct->transition_type))),
-										0,GTK_SORT_ASCENDING);
-	gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(gtk_combo_box_get_model(GTK_COMBO_BOX(img_struct->transition_type))),0,img_sort_none_before_other,NULL,NULL);										
+										1, GTK_SORT_ASCENDING);
+	gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(gtk_combo_box_get_model(GTK_COMBO_BOX(img_struct->transition_type))),1, img_sort_none_before_other,NULL,NULL);										
 	gtk_widget_set_sensitive(img_struct->transition_type, FALSE);
-	g_signal_connect (G_OBJECT (img_struct->transition_type),"changed",G_CALLBACK (img_combo_box_transition_type_changed),img_struct);
+	g_signal_connect (G_OBJECT (img_struct->transition_type), "changed",G_CALLBACK (img_combo_box_transition_type_changed),img_struct);
 
 	random_button = gtk_button_new_with_mnemonic (_("Random"));
 	gtk_widget_set_tooltip_text(random_button,_("Imagination randomly decides with transition to apply"));
@@ -496,31 +496,37 @@ img_window_struct *img_create_window (void)
 	gtk_box_pack_start(GTK_BOX(hbox_buttons), play_button, FALSE, TRUE, 0);
 	image_buttons = gtk_image_new_from_stock (GTK_STOCK_MEDIA_PLAY, GTK_ICON_SIZE_MENU);
 	gtk_container_add (GTK_CONTAINER (play_button), image_buttons);
-	
+	gtk_widget_set_tooltip_text(play_button, _("Play the selected audio file"));
+
 	add_button = gtk_button_new();
 	gtk_box_pack_start(GTK_BOX(hbox_buttons), add_button, FALSE, TRUE, 0);
 	image_buttons = gtk_image_new_from_stock (GTK_STOCK_ADD, GTK_ICON_SIZE_MENU);
 	gtk_container_add (GTK_CONTAINER (add_button), image_buttons);
+	gtk_widget_set_tooltip_text(add_button, _("Add an audio file"));
 
 	remove_button = gtk_button_new();
 	gtk_box_pack_start(GTK_BOX(hbox_buttons), remove_button, FALSE, TRUE, 0);
 	image_buttons = gtk_image_new_from_stock (GTK_STOCK_REMOVE, GTK_ICON_SIZE_MENU);
 	gtk_container_add (GTK_CONTAINER (remove_button), image_buttons);
+	gtk_widget_set_tooltip_text(remove_button, _("Remove the selected audio file"));
 
 	move_up_button = gtk_button_new();
 	gtk_box_pack_start(GTK_BOX(hbox_buttons), move_up_button, FALSE, TRUE, 0);
 	image_buttons = gtk_image_new_from_stock (GTK_STOCK_GO_UP, GTK_ICON_SIZE_MENU);
 	gtk_container_add (GTK_CONTAINER (move_up_button), image_buttons);
+	gtk_widget_set_tooltip_text(move_up_button, _("Move the selected audio file up"));
 
 	move_down_button = gtk_button_new();
 	gtk_box_pack_start(GTK_BOX(hbox_buttons), move_down_button, FALSE, TRUE, 0);
 	image_buttons = gtk_image_new_from_stock (GTK_STOCK_GO_DOWN, GTK_ICON_SIZE_MENU);
 	gtk_container_add (GTK_CONTAINER (move_down_button), image_buttons);
-
+	gtk_widget_set_tooltip_text(move_down_button, _("Move the selected audio file down"));
+	
 	clear_button = gtk_button_new();
 	gtk_box_pack_start(GTK_BOX(hbox_buttons), clear_button, FALSE, TRUE, 0);
 	image_buttons = gtk_image_new_from_stock (GTK_STOCK_CLEAR, GTK_ICON_SIZE_MENU);
 	gtk_container_add (GTK_CONTAINER (clear_button), image_buttons);
+	gtk_widget_set_tooltip_text(clear_button, _("Clear the selection"));
 
 	/* Create the model */
 	img_struct->thumbnail_model = gtk_list_store_new (2, GDK_TYPE_PIXBUF, G_TYPE_POINTER);
@@ -715,8 +721,8 @@ static void img_combo_box_transition_type_changed (GtkComboBox *combo, img_windo
 
 	/* Get the address of the transition function stored in the model of the combo box*/
 	model = gtk_combo_box_get_model(combo);
-	gtk_combo_box_get_active_iter(combo,&iter);
-	gtk_tree_model_get(model, &iter, 1, &address, 2, &transition_id, -1);
+	gtk_combo_box_get_active_iter(combo, &iter);
+	gtk_tree_model_get(model, &iter, 2, &address, 3, &transition_id, -1);
 
 	/* Get index of currently selected item */
 	if (transition_id == -1)
@@ -927,8 +933,8 @@ static gint img_sort_none_before_other(GtkTreeModel *model,GtkTreeIter *a,GtkTre
 	gchar *name1, *name2;
 	gint i;
 
-	gtk_tree_model_get(model, a, 0, &name1, -1);
-	gtk_tree_model_get(model, b, 0, &name2, -1);
+	gtk_tree_model_get(model, a, 1, &name1, -1);
+	gtk_tree_model_get(model, b, 1, &name2, -1);
 
 	if (strcmp(name1,_("None")) == 0)
 		i = -1;

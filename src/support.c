@@ -115,6 +115,7 @@ GtkWidget *img_load_icon(gchar *filename, GtkIconSize size)
     GtkWidget *file_image;
 	gchar *path;
 	GdkPixbuf *file_pixbuf = NULL;
+
 	path = g_strconcat(DATADIR, "/imagination/pixmaps/",filename,NULL);
 	file_pixbuf = gdk_pixbuf_new_from_file(path,NULL);
 	g_free (path);
@@ -139,22 +140,28 @@ GtkWidget *_gtk_combo_box_new_text(gboolean pointer)
 
 	if (pointer)
 	{
-		tree = gtk_tree_store_new (3, G_TYPE_STRING, G_TYPE_POINTER, G_TYPE_INT);
+		tree = gtk_tree_store_new (4, GDK_TYPE_PIXBUF, G_TYPE_STRING, G_TYPE_POINTER, G_TYPE_INT);
 		model = GTK_TREE_MODEL( tree );
+
+		combo_box = gtk_combo_box_new_with_model (model);
+		g_object_unref (G_OBJECT( model ));
+		cell = gtk_cell_renderer_pixbuf_new ();
+		gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (combo_box), cell, FALSE);
+		gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (combo_box), cell, "pixbuf", 0, NULL);
 	}
 	else
 	{
 		list = gtk_list_store_new (1, G_TYPE_STRING);
 		model = GTK_TREE_MODEL( list );
+		
+		combo_box = gtk_combo_box_new_with_model (model);
+		g_object_unref (G_OBJECT( model ));
 	}
-
-	combo_box = gtk_combo_box_new_with_model (model);
-	g_object_unref (G_OBJECT( model ));
 
 	cell = gtk_cell_renderer_text_new ();
 	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (combo_box), cell, TRUE);
-	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (combo_box), cell,"text", 0, NULL);
-	g_object_set(cell,"ypad", (guint)0, NULL);
+	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (combo_box), cell, "text", pointer ? 1 : 0, NULL);
+	g_object_set(cell, "ypad", (guint)0, NULL);
 	return combo_box;
 }
 
@@ -186,10 +193,11 @@ void img_load_available_transitions(img_window_struct *img)
 {
 	GDir *dir;
 	const gchar *transition_name;
-	gchar *path = NULL, *fname = NULL,*name;
+	gchar *path = NULL, *fname = NULL, *name, *filename;
 	gchar **trans, **bak;
 	GError **error = NULL;
 	GModule *module;
+	GdkPixbuf *pixbuf;
 	GtkTreeIter piter, citer;
 	GtkTreeStore *model;
 	gpointer address;
@@ -199,7 +207,7 @@ void img_load_available_transitions(img_window_struct *img)
 	
 	/* Fill the combo box with no transition */
 	gtk_tree_store_append(model, &piter, NULL);
-	gtk_tree_store_set(model, &piter,0, _("None"), 1, NULL, 2, -1, -1);
+	gtk_tree_store_set(model, &piter, 0, NULL, 1, _("None"), 2, NULL, 3, -1, -1);
 	gtk_combo_box_set_active(GTK_COMBO_BOX(img->transition_type), 0);
 
 	path = g_strdup("./transitions");
@@ -227,16 +235,19 @@ void img_load_available_transitions(img_window_struct *img)
 
 			/* Add group name to the store */
 			gtk_tree_store_append( model, &piter, NULL );
-			gtk_tree_store_set( model, &piter, 0, name, 2, 0, -1 );
+			gtk_tree_store_set( model, &piter, 0, NULL, 1, name, 3, 0, -1 );
 			img->plugin_list = g_slist_append(img->plugin_list, module);
 
 			/* Add transitions */
 			bak = trans;
-			for( ; *trans; trans += 3 )
+			for( ; *trans; trans += 4 )
 			{
-				g_module_symbol( module, trans[1], &address );
+				filename = g_strconcat("./pixmaps/", trans[0], NULL);
+				pixbuf = gdk_pixbuf_new_from_file(filename, NULL);
+				g_free(filename);
+				g_module_symbol( module, trans[2], &address );
 				gtk_tree_store_append( model, &citer, &piter );
-				gtk_tree_store_set( model, &citer, 0, trans[0], 1, address, 2, GPOINTER_TO_INT( trans[2] ), -1 );
+				gtk_tree_store_set( model, &citer, 0, pixbuf, 1, trans[1], 2, address, 3, GPOINTER_TO_INT( trans[3] ), -1 );
 				img->nr_transitions_loaded++;
 			}
 			g_free( bak );

@@ -13,6 +13,10 @@ uninstall-local:
 	rm -rf $(DESTDIR)$(pkgdatadir);
 	rm -f $(DESTDIR)$(datadir)/pixmaps/imagination-import.png;
 	rm -f $(DESTDIR)$(datadir)/pixmaps/imagination-generate.png;
+	rm -f $(DESTDIR)$(datadir)/pixmaps/imagination-1.png;
+	rm -f $(DESTDIR)$(datadir)/pixmaps/imagination-2.png;
+	rm -f $(DESTDIR)$(datadir)/pixmaps/imagination-3.png;
+	rm -f $(DESTDIR)$(datadir)/pixmaps/imagination-4.png;
 
 install-data-local:
 	@$(NORMAL_INSTALL)

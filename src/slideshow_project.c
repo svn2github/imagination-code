@@ -156,7 +156,7 @@ void img_load_slideshow(img_window_struct *img)
 			/* Get the mem address of the transition */
 			spath = (gchar *)g_hash_table_lookup( table, GINT_TO_POINTER( transition_id ) );
 			gtk_tree_model_get_iter_from_string( model, &iter, spath );
-			gtk_tree_model_get( model, &iter, 1, &render, -1 );
+			gtk_tree_model_get( model, &iter, 2, &render, -1 );
 			slide_info = img_set_slide_info( duration, speed, render, transition_id, spath, slide_filename );
 			if( slide_info )
 			{
@@ -186,7 +186,7 @@ static gboolean img_populate_hash_table( GtkTreeModel *model, GtkTreePath *path,
 {
 	gint         id;
 
-	gtk_tree_model_get( model, iter, 2, &id, -1 );
+	gtk_tree_model_get( model, iter, 3, &id, -1 );
 
 	/* Leave out family names, since hey don't get saved. */
 	if( ! id )

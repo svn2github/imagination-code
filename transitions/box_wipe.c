@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2009 Giuseppe Torelli <colossus73@gmail.com>
+ *  Copyright (c) 2009 Tadej Borovšak 	<tadeboro@gmail.com>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
  */
 
 #include <gdk/gdk.h>
+#include "support.h"
 
 /* Local functions declarations */
 static void
@@ -36,28 +37,36 @@ img_get_plugin_info( gchar  **group,
 	gint i = 0;
 	*group = "Box Wipe";
 
-	*trans = g_new( gchar *, 25 );
+	*trans = g_new( gchar *, 33 );
+	(*trans)[i++] = "imagination-5.png";
 	(*trans)[i++] = "Top Left";
 	(*trans)[i++] = "img_top_left";
 	(*trans)[i++] = GINT_TO_POINTER( 5 );
+	(*trans)[i++] = "imagination-6.png";
 	(*trans)[i++] = "Top Right";
 	(*trans)[i++] = "img_top_right";
 	(*trans)[i++] = GINT_TO_POINTER( 6 );
+	(*trans)[i++] = "imagination-7.png";
 	(*trans)[i++] = "Bottom Right";
 	(*trans)[i++] = "img_bottom_right";
 	(*trans)[i++] = GINT_TO_POINTER( 7 );
+	(*trans)[i++] = "imagination-8.png";
 	(*trans)[i++] = "Bottom Left";
 	(*trans)[i++] = "img_bottom_left";
 	(*trans)[i++] = GINT_TO_POINTER( 8 );
+	(*trans)[i++] = "imagination-9.png";
 	(*trans)[i++] = "Top Center";
 	(*trans)[i++] = "img_top_center";
 	(*trans)[i++] = GINT_TO_POINTER( 9 );
+	(*trans)[i++] = "imagination-10.png";
 	(*trans)[i++] = "Right Center";
 	(*trans)[i++] = "img_right_center";
 	(*trans)[i++] = GINT_TO_POINTER( 10 );
+	(*trans)[i++] = "imagination-11.png";
 	(*trans)[i++] = "Bottom Center";
 	(*trans)[i++] = "img_bottom_center";
 	(*trans)[i++] = GINT_TO_POINTER( 11 );
+	(*trans)[i++] = "imagination-12.png";
 	(*trans)[i++] = "Left Center";
 	(*trans)[i++] = "img_left_center";
 	(*trans)[i++] = GINT_TO_POINTER( 12 );

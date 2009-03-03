@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2009 Giuseppe Torelli <colossus73@gmail.com>
+ *  Copyright (c) 2009 Tadej Borovšak 	<tadeboro@gmail.com>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
  */
 
 #include <gdk/gdk.h>
+#include "support.h"
 
 /* Local functions declarations */
 static void
@@ -37,16 +38,20 @@ img_get_plugin_info( gchar  **group,
 
 	*group = "Bar Wipe";
 
-	*trans = g_new( gchar *, 13 );
+	*trans = g_new( gchar *, 17 );
+	(*trans)[i++] = "imagination-1.png";
 	(*trans)[i++] = "Left to Right";
 	(*trans)[i++] = "img_left";
 	(*trans)[i++] = GINT_TO_POINTER( 1 );
+	(*trans)[i++] = "imagination-2.png";
 	(*trans)[i++] = "Top to Bottom";
 	(*trans)[i++] = "img_top";
 	(*trans)[i++] = GINT_TO_POINTER( 2 );
+	(*trans)[i++] = "imagination-3.png";
 	(*trans)[i++] = "Right to Left";
 	(*trans)[i++] = "img_right";
 	(*trans)[i++] = GINT_TO_POINTER( 3 );
+	(*trans)[i++] = "imagination-4.png";
 	(*trans)[i++] = "Bottom to Top";
 	(*trans)[i++] = "img_bottom";
 	(*trans)[i++] = GINT_TO_POINTER( 4 );

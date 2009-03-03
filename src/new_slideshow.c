@@ -236,14 +236,6 @@ void img_new_slideshow_settings_dialog(img_window_struct *img, gboolean flag)
 		img->slideshow_format_index = gtk_combo_box_get_active(GTK_COMBO_BOX(slideshow_fmt_combo));
 	
 		img_set_buttons_state(img, TRUE);
-
-		/*if (img->project_filename)
-		{
-			string = g_path_get_basename(img->project_filename);
-			img_set_window_title(img,string);
-			g_free(string);
-		}*/
-
 		img->project_is_modified = TRUE;
 	}
 	gtk_widget_destroy(dialog1);
