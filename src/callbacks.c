@@ -91,7 +91,7 @@ void img_add_slides_thumbnails(GtkMenuItem *item,img_window_struct *img)
 		thumb = img_load_pixbuf_from_file(slides->data);
 		if (thumb)
 		{
-			slide_info = img_set_slide_info(1, NORMAL, NULL, 0, slides->data);
+			slide_info = img_set_slide_info(1, NORMAL, NULL, -1, "0", slides->data);
 			if (slide_info)
 			{
 				gtk_list_store_append (img->thumbnail_model,&iter);
@@ -308,16 +308,14 @@ static void	img_update_preview_file_chooser(GtkFileChooser *file_chooser,img_win
 }
 
 void img_delete_selected_slides(GtkMenuItem *item,img_window_struct *img_struct)
-{
-	GList *selected, *bak;
-	GtkTreeIter iter;
-	GtkTreeModel *model;
-	slide_struct *entry;
+{ GList *selected, *bak; GtkTreeIter iter; GtkTreeModel *model; slide_struct
+	*entry;
 
-	model = gtk_icon_view_get_model(GTK_ICON_VIEW(img_struct->thumbnail_iconview));
+	model =
+		gtk_icon_view_get_model(GTK_ICON_VIEW(img_struct->thumbnail_iconview));
 	
-	selected = gtk_icon_view_get_selected_items (GTK_ICON_VIEW(img_struct->thumbnail_iconview));
-	if (selected == NULL)
+	selected = gtk_icon_view_get_selected_items
+		(GTK_ICON_VIEW(img_struct->thumbnail_iconview)); if (selected == NULL)
 		return;
 	
 	/* Free the slide struct for each slide and remove it from the iconview */
@@ -327,27 +325,22 @@ void img_delete_selected_slides(GtkMenuItem *item,img_window_struct *img_struct)
 	 * already "frozen" and selection cannot be changed through the user
 	 * intervention until the callback returns). */
 	bak = selected;
-	g_signal_handlers_block_by_func((gpointer)img_struct->thumbnail_iconview, (gpointer)img_iconview_selection_changed, img_struct);
-	while (selected)
-  	{
-  		gtk_tree_model_get_iter(model, &iter,selected->data);
-  		gtk_tree_model_get(model, &iter,1,&entry,-1);
-  		g_free(entry->filename);
-  		g_free(entry->resolution);
-  		g_free(entry->type);
-  		g_free(entry);
+	g_signal_handlers_block_by_func((gpointer)img_struct->thumbnail_iconview,
+			(gpointer)img_iconview_selection_changed, img_struct); while
+		(selected) { gtk_tree_model_get_iter(model, &iter,selected->data);
+			gtk_tree_model_get(model, &iter,1,&entry,-1);
+			g_free(entry->filename); g_free(entry->resolution);
+			g_free(entry->type); g_free(entry);
 
-  		gtk_list_store_remove(GTK_LIST_STORE(img_struct->thumbnail_model),&iter);
+		gtk_list_store_remove(GTK_LIST_STORE(img_struct->thumbnail_model),&iter);
  
-  		img_struct->slides_nr--;
-  		selected = selected->next;
-  	}
-	g_signal_handlers_unblock_by_func((gpointer)img_struct->thumbnail_iconview, (gpointer)img_iconview_selection_changed, img_struct);  		
-	g_list_foreach (bak, (GFunc)gtk_tree_path_free, NULL);
-	g_list_free(bak);
-	img_set_statusbar_message(img_struct,0);
-	gtk_image_set_from_pixbuf(GTK_IMAGE(img_struct->image_area),NULL);
-	img_struct->project_is_modified = TRUE;
+		img_struct->slides_nr--; selected = selected->next; }
+		g_signal_handlers_unblock_by_func((gpointer)img_struct->thumbnail_iconview,
+				(gpointer)img_iconview_selection_changed, img_struct);
+		g_list_foreach (bak, (GFunc)gtk_tree_path_free, NULL);
+		g_list_free(bak); img_set_statusbar_message(img_struct,0);
+		gtk_image_set_from_pixbuf(GTK_IMAGE(img_struct->image_area),NULL);
+		img_struct->project_is_modified = TRUE;
 
 	if (img_struct->slides_nr == 0)
 		gtk_widget_hide(img_struct->thumb_scrolledwindow);

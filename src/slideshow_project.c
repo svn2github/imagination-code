@@ -19,6 +19,8 @@
 
 #include "slideshow_project.h"
 
+static gboolean img_populate_hash_table( GtkTreeModel *, GtkTreePath *, GtkTreeIter *, GHashTable ** );
+
 void img_save_slideshow(img_window_struct *img)
 {
 	GKeyFile *img_key_file;
@@ -62,7 +64,7 @@ void img_save_slideshow(img_window_struct *img)
 		g_key_file_set_string(img_key_file, "images",			conf, entry->filename);
 		g_key_file_set_integer(img_key_file,"transition speed", conf, entry->speed);
 		g_key_file_set_integer(img_key_file,"slide duration",	conf, entry->duration);
-		g_key_file_set_integer(img_key_file,"transition type",	conf, entry->combo_transition_type_index);
+		g_key_file_set_integer(img_key_file,"transition type",	conf, entry->transition_id);
 		g_free(conf);
 	}
 	while (gtk_tree_model_iter_next (model,&iter));
@@ -85,14 +87,15 @@ void img_load_slideshow(img_window_struct *img)
 	GdkPixbuf *thumb;
 	slide_struct *slide_info;
 	GtkTreeIter iter;
-	GtkTreePath *path;
 	GKeyFile *img_key_file;
 	gchar *dummy,*slide_filename;
 	GtkWidget *dialog;
-	gint number,i,duration,combo_transition_type_index, height;
+	gint number,i,transition_id, height, duration;
 	guint speed;
 	GtkTreeModel *model;
 	void (*render);
+	GHashTable *table;
+	gchar      *spath;
 
 	img_key_file = g_key_file_new();
 	if(!g_key_file_load_from_file(img_key_file,img->project_filename,G_KEY_FILE_KEEP_COMMENTS,NULL))
@@ -119,6 +122,12 @@ void img_load_slideshow(img_window_struct *img)
 		g_free(img->slideshow_filename);
 		img->slideshow_filename = NULL;
 	}
+
+	/* Create hash table for efficient searching */
+	table = g_hash_table_new_full( g_direct_hash, g_direct_equal, NULL, g_free );
+	model = gtk_combo_box_get_model( GTK_COMBO_BOX( img->transition_type ) );
+	gtk_tree_model_foreach( model, (GtkTreeModelForeachFunc)img_populate_hash_table, &table );
+
 	/* Set the slideshow options */
 	img->slideshow_filename 	= g_key_file_get_string(img_key_file,"slideshow settings","name",NULL);
 	img->slideshow_format_index = g_key_file_get_integer(img_key_file,"slideshow settings","export format",NULL);
@@ -132,7 +141,6 @@ void img_load_slideshow(img_window_struct *img)
 
 	/* Loads the thumbnails and set the slides info */
 	number = g_key_file_get_integer(img_key_file,"images","number",NULL);
-	model = gtk_combo_box_get_model(GTK_COMBO_BOX(img->transition_type));
 	for (i = 1; i <= number; i++)
 	{
 		dummy = g_strdup_printf("image_%d",i);
@@ -143,18 +151,18 @@ void img_load_slideshow(img_window_struct *img)
 		{
 			speed 	=	g_key_file_get_integer(img_key_file,"transition speed"	,dummy,NULL);
 			duration= 	g_key_file_get_integer (img_key_file,"slide duration"	,dummy,NULL);
-			combo_transition_type_index = g_key_file_get_integer(img_key_file,"transition type",dummy,NULL);
+			transition_id = g_key_file_get_integer(img_key_file,"transition type",dummy,NULL);
 
-			/* Get the mem address of the transition according to the index */
-			path = gtk_tree_path_new_from_indices(combo_transition_type_index,-1);
-			gtk_tree_model_get_iter(model,&iter,path);
-			gtk_tree_model_get(model,&iter,1,&render,-1);
-			slide_info = img_set_slide_info(duration, speed, render, combo_transition_type_index, slide_filename);
-			if (slide_info)
+			/* Get the mem address of the transition */
+			spath = (gchar *)g_hash_table_lookup( table, GINT_TO_POINTER( transition_id ) );
+			gtk_tree_model_get_iter_from_string( model, &iter, spath );
+			gtk_tree_model_get( model, &iter, 1, &render, -1 );
+			slide_info = img_set_slide_info( duration, speed, render, transition_id, spath, slide_filename );
+			if( slide_info )
 			{
-				gtk_list_store_append (img->thumbnail_model,&iter);
-				gtk_list_store_set (img->thumbnail_model, &iter, 0, thumb, 1, slide_info, -1);
-				g_object_unref (thumb);
+				gtk_list_store_append( img->thumbnail_model, &iter );
+				gtk_list_store_set( img->thumbnail_model, &iter, 0, thumb, 1, slide_info, -1 );
+				g_object_unref( G_OBJECT( thumb ) );
 				img->slides_nr++;
 			}
 		}
@@ -170,4 +178,24 @@ void img_load_slideshow(img_window_struct *img)
 	img_set_window_title(img, dummy);
 	img_set_buttons_state(img, TRUE);
 	g_free(dummy);
+
+	g_hash_table_destroy( table );
 }
+
+static gboolean img_populate_hash_table( GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, GHashTable **table )
+{
+	gint         id;
+
+	gtk_tree_model_get( model, iter, 2, &id, -1 );
+
+	/* Leave out family names, since hey don't get saved. */
+	if( ! id )
+		return( FALSE );
+
+	/* Freeing of this memory is done automatically when the list gets
+	 * destroyed, since we supplied destroy notifier handler. */
+	g_hash_table_insert( *table, GINT_TO_POINTER( id ), (gpointer)gtk_tree_path_to_string( path ) );
+
+	return( FALSE );
+}
+

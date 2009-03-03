@@ -61,8 +61,9 @@ struct _slide_struct
 	guint  	speed;
 	gchar	*resolution;
 	gchar	*type;
+	gchar   *path;	/* transition model string path representation */
+	gint     transition_id;
 	void	(*render) (GdkDrawable*, GdkPixbuf*, GdkPixbuf*, gdouble, gint);
-	gint    combo_transition_type_index;
 };
 
 typedef struct _img_window_struct img_window_struct;

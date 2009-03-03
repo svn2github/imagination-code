@@ -133,14 +133,23 @@ GtkWidget *_gtk_combo_box_new_text(gboolean pointer)
 {
 	GtkWidget *combo_box;
 	GtkCellRenderer *cell;
-	GtkListStore *store;
+	GtkListStore *list;
+	GtkTreeStore *tree;
+	GtkTreeModel *model;
 
 	if (pointer)
-		store = gtk_list_store_new (2, G_TYPE_STRING, G_TYPE_POINTER);
+	{
+		tree = gtk_tree_store_new (3, G_TYPE_STRING, G_TYPE_POINTER, G_TYPE_INT);
+		model = GTK_TREE_MODEL( tree );
+	}
 	else
-		store = gtk_list_store_new (1, G_TYPE_STRING);
-	combo_box = gtk_combo_box_new_with_model (GTK_TREE_MODEL (store));
-	g_object_unref (store);
+	{
+		list = gtk_list_store_new (1, G_TYPE_STRING);
+		model = GTK_TREE_MODEL( list );
+	}
+
+	combo_box = gtk_combo_box_new_with_model (model);
+	g_object_unref (G_OBJECT( model ));
 
 	cell = gtk_cell_renderer_text_new ();
 	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (combo_box), cell, TRUE);
@@ -178,22 +187,23 @@ void img_load_available_transitions(img_window_struct *img)
 	GDir *dir;
 	const gchar *transition_name;
 	gchar *path = NULL, *fname = NULL,*name;
+	gchar **trans, **bak;
 	GError **error = NULL;
 	GModule *module;
-	GtkTreeIter iter;
-	GtkTreeModel *model;
+	GtkTreeIter piter, citer;
+	GtkTreeStore *model;
 	gpointer address;
-	void (*plugin_set_name)(gchar**);
+	void (*plugin_set_name)(gchar **, gchar ***);
 
-	model = gtk_combo_box_get_model(GTK_COMBO_BOX(img->transition_type));
+	model = GTK_TREE_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(img->transition_type)));
 	
 	/* Fill the combo box with no transition */
-	gtk_list_store_append(GTK_LIST_STORE(model), &iter);
-	gtk_list_store_set(GTK_LIST_STORE(model), &iter,0, _("None"), 1, NULL, -1);
+	gtk_tree_store_append(model, &piter, NULL);
+	gtk_tree_store_set(model, &piter,0, _("None"), 1, NULL, 2, -1, -1);
 	gtk_combo_box_set_active(GTK_COMBO_BOX(img->transition_type), 0);
 
-	//path = g_strdup("./transitions");
-	path = g_strconcat(PACKAGE_LIB_DIR,"/imagination",NULL);
+	path = g_strdup("./transitions");
+	//path = g_strconcat(PACKAGE_LIB_DIR,"/imagination",NULL);
 	dir = g_dir_open(path, 0, error);
 	if (dir == NULL)
 	{
@@ -209,18 +219,27 @@ void img_load_available_transitions(img_window_struct *img)
 
 		fname = g_build_filename(path,transition_name, NULL);
 		module = g_module_open(fname, G_MODULE_BIND_LOCAL);
-		if (img_plugin_is_loaded(img, module) == FALSE)
+		if (module && img_plugin_is_loaded(img, module) == FALSE)
 		{
 			/* Obtain the name from the plugin function */
-			g_module_symbol(module, "img_transition_set_name",(void *) &plugin_set_name);
-			plugin_set_name(&name);
-			/* And the memory address of the render function */
-			g_module_symbol(module, "img_transition_render", &address);
-			/* Fill the model of the combo box */
-			gtk_list_store_append(GTK_LIST_STORE(model), &iter);
-			gtk_list_store_set(GTK_LIST_STORE(model), &iter,0, name, 1, address, -1);
+			g_module_symbol(module, "img_get_plugin_info",(void *) &plugin_set_name);
+			plugin_set_name(&name, &trans);
+
+			/* Add group name to the store */
+			gtk_tree_store_append( model, &piter, NULL );
+			gtk_tree_store_set( model, &piter, 0, name, 2, 0, -1 );
 			img->plugin_list = g_slist_append(img->plugin_list, module);
-			img->nr_transitions_loaded++;
+
+			/* Add transitions */
+			bak = trans;
+			for( ; *trans; trans += 3 )
+			{
+				g_module_symbol( module, trans[1], &address );
+				gtk_tree_store_append( model, &citer, &piter );
+				gtk_tree_store_set( model, &citer, 0, trans[0], 1, address, 2, GPOINTER_TO_INT( trans[2] ), -1 );
+				img->nr_transitions_loaded++;
+			}
+			g_free( bak );
 		}
 		g_free(fname);
 	}
@@ -267,9 +286,9 @@ GdkPixbuf *img_load_pixbuf_from_file(gchar *filename)
 	return thumb;
 }
 
-slide_struct *img_set_slide_info(gint duration, guint speed, void (*render), gint combo_transition_type_index, gchar *filename)
+slide_struct *img_set_slide_info(gint duration, guint speed, void (*render), gint transition_id, gchar *path, gchar *filename)
 {
-	slide_struct *slide_info;
+	slide_struct *slide_info = NULL;
 	GdkPixbufFormat *pixbuf_format;
 	gint width,height;
 
@@ -279,7 +298,8 @@ slide_struct *img_set_slide_info(gint duration, guint speed, void (*render), gin
 		slide_info->duration = duration;
 		slide_info->speed = speed;
 		slide_info->render = render;
-		slide_info->combo_transition_type_index = combo_transition_type_index;
+		slide_info->transition_id = transition_id;
+		slide_info->path = g_strdup( path );
 		slide_info->filename = g_strdup(filename);
 		pixbuf_format = gdk_pixbuf_get_file_info(filename,&width,&height);
 		slide_info->resolution = g_strdup_printf("%d x %d",width,height);

@@ -237,9 +237,12 @@ void img_new_slideshow_settings_dialog(img_window_struct *img, gboolean flag)
 	
 		img_set_buttons_state(img, TRUE);
 
-		string = g_path_get_basename(img->project_filename);
-		img_set_window_title(img,string);
-		g_free(string);
+		/*if (img->project_filename)
+		{
+			string = g_path_get_basename(img->project_filename);
+			img_set_window_title(img,string);
+			g_free(string);
+		}*/
 
 		img->project_is_modified = TRUE;
 	}
