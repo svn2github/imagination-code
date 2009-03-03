@@ -18,7 +18,7 @@
  */
 
 #include <gdk/gdk.h>
-#include "support.h"
+#include <math.h>
 
 /* Local functions declarations */
 static void
@@ -27,7 +27,7 @@ transition_render( GdkDrawable *window,
 				   GdkPixbuf   *image_to,
 				   gdouble      progress,
 				   gint         file_desc,
-				   gint         direction );
+				   gint         type );
 
 /* Plug-in API */
 void
@@ -35,61 +35,60 @@ img_get_plugin_info( gchar  **group,
 					 gchar ***trans )
 {
 	gint i = 0;
-
-	*group = "Bar Wipe";
+	*group = "Barn Door Wipe";
 
 	*trans = g_new( gchar *, 13 );
-	(*trans)[i++] = "Left to Right";
-	(*trans)[i++] = "img_left";
-	(*trans)[i++] = GINT_TO_POINTER( 1 );
-	(*trans)[i++] = "Top to Bottom";
-	(*trans)[i++] = "img_top";
-	(*trans)[i++] = GINT_TO_POINTER( 2 );
-	(*trans)[i++] = "Right to Left";
-	(*trans)[i++] = "img_right";
-	(*trans)[i++] = GINT_TO_POINTER( 3 );
-	(*trans)[i++] = "Bottom to Top";
-	(*trans)[i++] = "img_bottom";
-	(*trans)[i++] = GINT_TO_POINTER( 4 );
+	(*trans)[i++] = "Vertical";
+	(*trans)[i++] = "img_vertical";
+	(*trans)[i++] = GINT_TO_POINTER( 15 );
+	(*trans)[i++] = "Horizontal";
+	(*trans)[i++] = "img_horizontal";
+	(*trans)[i++] = GINT_TO_POINTER( 16 );
+	(*trans)[i++] = "Diagonal Bottom Left";
+	(*trans)[i++] = "img_diagonal_bottom_left";
+	(*trans)[i++] = GINT_TO_POINTER( 17 );
+	(*trans)[i++] = "Diagonal Top Left";
+	(*trans)[i++] = "img_diagonal_top_left";
+	(*trans)[i++] = GINT_TO_POINTER( 18 );
 	(*trans)[i++] = NULL;
 }
 
 void
-img_left( GdkDrawable *window,
-		  GdkPixbuf   *image_from, 
-		  GdkPixbuf   *image_to,
-		  gdouble      progress,
-		  gint         file_desc )
+img_vertical( GdkDrawable *window,
+              GdkPixbuf   *image_from,
+              GdkPixbuf   *image_to,
+              gdouble      progress,
+              gint         file_desc )
 {
 	transition_render( window, image_from, image_to, progress, file_desc, 1 );
 }
 
 void
-img_top( GdkDrawable *window,
-		 GdkPixbuf   *image_from, 
-		 GdkPixbuf   *image_to,
-		 gdouble      progress,
-		 gint         file_desc )
+img_horizontal( GdkDrawable *window,
+                GdkPixbuf   *image_from,
+                GdkPixbuf   *image_to,
+                gdouble      progress,
+                gint         file_desc )
 {
 	transition_render( window, image_from, image_to, progress, file_desc, 2 );
 }
 
 void
-img_right( GdkDrawable *window,
-		   GdkPixbuf   *image_from, 
-		   GdkPixbuf   *image_to,
-		   gdouble      progress,
-		   gint         file_desc )
+img_diagonal_bottom_left( GdkDrawable *window,
+                          GdkPixbuf   *image_from,
+                          GdkPixbuf   *image_to,
+                          gdouble      progress,
+                          gint         file_desc )
 {
 	transition_render( window, image_from, image_to, progress, file_desc, 3 );
 }
 
 void
-img_bottom( GdkDrawable *window,
-			GdkPixbuf   *image_from, 
-			GdkPixbuf   *image_to,
-			gdouble      progress,
-			gint         file_desc )
+img_diagonal_top_left( GdkDrawable *window,
+                       GdkPixbuf   *image_from,
+                       GdkPixbuf   *image_to,
+                       gdouble      progress,
+                       gint         file_desc )
 {
 	transition_render( window, image_from, image_to, progress, file_desc, 4 );
 }
@@ -101,11 +100,12 @@ transition_render( GdkDrawable *window,
 				   GdkPixbuf   *image_to,
 				   gdouble      progress,
 				   gint         file_desc,
-				   gint         direction )
+				   gint         type )
 {
 	cairo_t         *cr;
 	cairo_surface_t *surface;
-	gint             width, height;
+	gint             width, height, dim;
+	gdouble          diag;
 
 	gdk_drawable_get_size( window, &width, &height );
 
@@ -123,26 +123,36 @@ transition_render( GdkDrawable *window,
 	gdk_cairo_set_source_pixbuf( cr, image_from, 0, 0 );
 	cairo_paint( cr );
 
+	diag = sqrt( ( width * width ) + ( height * height ) );
 	gdk_cairo_set_source_pixbuf( cr, image_to, 0, 0 );
-
-	switch( direction )
+	cairo_move_to( cr, width / 2 , height / 2 );
+	switch( type )
 	{
-		case 1:	/* left */
-			cairo_rectangle( cr, 0, 0, width * progress, height );
+		case 1:
+			dim = width;
 			break;
-		case 2:	/* top */
-			cairo_rectangle( cr, 0, 0, width, height * progress );
+		case 2:
+			dim = height;
+			cairo_rotate( cr, G_PI / 2 );
 			break;
-		case 3:	/* right */
-			cairo_rectangle( cr, width * ( 1 - progress ), 0, width, height );
+		case 3:
+			dim = diag;
+			cairo_rotate( cr, atan2( width, height ) );
 			break;
-		case 4:	/* bottom */
-			cairo_rectangle( cr, 0, height * ( 1 - progress ), width, height );
+		case 4:
+			dim = diag;
+			cairo_rotate( cr, atan2( width, -height ) );
 			break;
 	}
-
-	cairo_clip(cr);
+	cairo_rel_move_to( cr, ( dim * progress ) / 2, 0 );
+	cairo_rel_line_to( cr, 0, - diag / 2 );
+	cairo_rel_line_to( cr, - dim * progress, 0 );
+	cairo_rel_line_to( cr, 0, diag );
+	cairo_rel_line_to( cr, dim * progress, 0 );
+	cairo_close_path( cr );
+	cairo_clip( cr );
 	cairo_paint(cr);
+
 	cairo_destroy(cr);
 
 	if(file_desc < 0)

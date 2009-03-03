@@ -240,14 +240,16 @@ void img_load_available_transitions(img_window_struct *img)
 
 			/* Add transitions */
 			bak = trans;
-			for( ; *trans; trans += 4 )
+			for( ; *trans; trans += 3 )
 			{
-				filename = g_strconcat("./pixmaps/", trans[0], NULL);
+				/*filename = g_strconcat("./pixmaps/", trans[0], NULL);*/
+				filename = g_strdup_printf( "./pixmaps/imagination-%d.png",
+											GPOINTER_TO_INT( trans[2] ) );
 				pixbuf = gdk_pixbuf_new_from_file(filename, NULL);
 				g_free(filename);
-				g_module_symbol( module, trans[2], &address );
+				g_module_symbol( module, trans[1], &address );
 				gtk_tree_store_append( model, &citer, &piter );
-				gtk_tree_store_set( model, &citer, 0, pixbuf, 1, trans[1], 2, address, 3, GPOINTER_TO_INT( trans[3] ), -1 );
+				gtk_tree_store_set( model, &citer, 0, pixbuf, 1, trans[0], 2, address, 3, GPOINTER_TO_INT( trans[2] ), -1 );
 				img->nr_transitions_loaded++;
 			}
 			g_free( bak );

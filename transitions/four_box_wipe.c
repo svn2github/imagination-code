@@ -18,7 +18,6 @@
  */
 
 #include <gdk/gdk.h>
-#include "support.h"
 
 /* Local functions declarations */
 static void
@@ -27,7 +26,7 @@ transition_render( GdkDrawable *window,
 				   GdkPixbuf   *image_to,
 				   gdouble      progress,
 				   gint         file_desc,
-				   gint         direction );
+				   gint         type );
 
 /* Plug-in API */
 void
@@ -35,63 +34,36 @@ img_get_plugin_info( gchar  **group,
 					 gchar ***trans )
 {
 	gint i = 0;
+	*group = "Four Box Wipe";
 
-	*group = "Bar Wipe";
-
-	*trans = g_new( gchar *, 13 );
-	(*trans)[i++] = "Left to Right";
-	(*trans)[i++] = "img_left";
-	(*trans)[i++] = GINT_TO_POINTER( 1 );
-	(*trans)[i++] = "Top to Bottom";
-	(*trans)[i++] = "img_top";
-	(*trans)[i++] = GINT_TO_POINTER( 2 );
-	(*trans)[i++] = "Right to Left";
-	(*trans)[i++] = "img_right";
-	(*trans)[i++] = GINT_TO_POINTER( 3 );
-	(*trans)[i++] = "Bottom to Top";
-	(*trans)[i++] = "img_bottom";
-	(*trans)[i++] = GINT_TO_POINTER( 4 );
+	*trans = g_new( gchar *, 7 );
+	(*trans)[i++] = "Corners In";
+	(*trans)[i++] = "img_corners_in";
+	(*trans)[i++] = GINT_TO_POINTER( 13 );
+	(*trans)[i++] = "Corners Out";
+	(*trans)[i++] = "img_corners_out";
+	(*trans)[i++] = GINT_TO_POINTER( 14 );
 	(*trans)[i++] = NULL;
 }
 
 void
-img_left( GdkDrawable *window,
-		  GdkPixbuf   *image_from, 
-		  GdkPixbuf   *image_to,
-		  gdouble      progress,
-		  gint         file_desc )
+img_corners_in( GdkDrawable *window,
+                GdkPixbuf   *image_from,
+                GdkPixbuf   *image_to,
+                gdouble      progress,
+                gint         file_desc )
 {
 	transition_render( window, image_from, image_to, progress, file_desc, 1 );
 }
 
 void
-img_top( GdkDrawable *window,
-		 GdkPixbuf   *image_from, 
-		 GdkPixbuf   *image_to,
-		 gdouble      progress,
-		 gint         file_desc )
+img_corners_out( GdkDrawable *window,
+                 GdkPixbuf   *image_from,
+                 GdkPixbuf   *image_to,
+                 gdouble      progress,
+                 gint         file_desc )
 {
 	transition_render( window, image_from, image_to, progress, file_desc, 2 );
-}
-
-void
-img_right( GdkDrawable *window,
-		   GdkPixbuf   *image_from, 
-		   GdkPixbuf   *image_to,
-		   gdouble      progress,
-		   gint         file_desc )
-{
-	transition_render( window, image_from, image_to, progress, file_desc, 3 );
-}
-
-void
-img_bottom( GdkDrawable *window,
-			GdkPixbuf   *image_from, 
-			GdkPixbuf   *image_to,
-			gdouble      progress,
-			gint         file_desc )
-{
-	transition_render( window, image_from, image_to, progress, file_desc, 4 );
 }
 
 /* Local functions definitions */
@@ -101,11 +73,12 @@ transition_render( GdkDrawable *window,
 				   GdkPixbuf   *image_to,
 				   gdouble      progress,
 				   gint         file_desc,
-				   gint         direction )
+				   gint         type )
 {
 	cairo_t         *cr;
 	cairo_surface_t *surface;
 	gint             width, height;
+	gint             w, h, x, y;
 
 	gdk_drawable_get_size( window, &width, &height );
 
@@ -124,25 +97,28 @@ transition_render( GdkDrawable *window,
 	cairo_paint( cr );
 
 	gdk_cairo_set_source_pixbuf( cr, image_to, 0, 0 );
-
-	switch( direction )
+	w = width  * progress / 2;
+	h = height * progress / 2;
+	switch( type )
 	{
-		case 1:	/* left */
-			cairo_rectangle( cr, 0, 0, width * progress, height );
+		case 1:
+			cairo_rectangle( cr, 0, 0, w, h );
+			cairo_rectangle( cr, width - w, 0, w, h );
+			cairo_rectangle( cr, 0, height - h , w, h );
+			cairo_rectangle( cr, width - w, height - h, w, h );
 			break;
-		case 2:	/* top */
-			cairo_rectangle( cr, 0, 0, width, height * progress );
-			break;
-		case 3:	/* right */
-			cairo_rectangle( cr, width * ( 1 - progress ), 0, width, height );
-			break;
-		case 4:	/* bottom */
-			cairo_rectangle( cr, 0, height * ( 1 - progress ), width, height );
+		case 2:
+			x = ( ( width  / 2 ) - w ) / 2;
+			y = ( ( height / 2 ) - h ) / 2;
+			cairo_rectangle( cr, x, y, w, h );
+			cairo_rectangle( cr, width - w - x, y, w, h );
+			cairo_rectangle( cr, x, height - h - y, w, h );
+			cairo_rectangle( cr, width - w - x, height - h - y, w, h );
 			break;
 	}
-
-	cairo_clip(cr);
+	cairo_clip(cr );
 	cairo_paint(cr);
+
 	cairo_destroy(cr);
 
 	if(file_desc < 0)

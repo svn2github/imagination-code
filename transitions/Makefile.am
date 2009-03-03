@@ -6,18 +6,26 @@ plugins_includedir = $(includedir)/imagination/
 
 bar_wipe_la_LDFLAGS = -module -avoid-version
 box_wipe_la_LDFLAGS = -module -avoid-version
+four_box_wipe_la_LDFLAGS = -module -avoid-version
+barn_door_wipe_la_LDFLAGS = -module -avoid-version
 
 # Plugins to be installed
 plugin_LTLIBRARIES = \
 	bar_wipe.la \
-	box_wipe.la
+	box_wipe.la \
+	four_box_wipe.la \
+	barn_door_wipe.la
 	
 bar_wipe_la_SOURCES	= ../src/support.c bar_wipe.c
 box_wipe_la_SOURCES = ../src/support.c box_wipe.c
+four_box_wipe_la_SOURCES = ../src/support.c four_box_wipe.c
+barn_door_wipe_la_SOURCES = ../src/support.c barn_door_wipe.c
 
 # instead of linking against all in $(GTK_LIBS), we link only against needed libs
 bar_wipe_la_LIBADD = $(PACKAGE_LIBS)
 box_wipe_la_LIBADD = $(PACKAGE_LIBS)
+four_box_wipe_la_LIBADD = $(PACKAGE_LIBS)
+barn_door_wipe_la_LIBADD = $(PACKAGE_LIBS)
 
 AM_CPPFLAGS = \
 	-DDATADIR=\"$(datadir)\" \
