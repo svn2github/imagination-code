@@ -80,8 +80,10 @@ struct _img_window_struct
 	GtkWidget	*open_button;
 	GtkWidget	*save_button;
 	GtkWidget	*import_menu;
+	GtkWidget	*import_audio_menu;
 	GtkWidget	*remove_menu;
 	GtkWidget	*import_button;
+	GtkWidget	*import_audio_button;
 	GtkWidget	*remove_button;
 	GtkWidget	*preview_menu;
 	GtkWidget 	*preview_button;
@@ -103,6 +105,7 @@ struct _img_window_struct
   	GtkWidget	*image_area;
   	guint		context_id;
   	GtkListStore *thumbnail_model;
+	GtkListStore *music_file_liststore;
   	gchar		*current_dir;
 
 	/* Import slides dialog variables */

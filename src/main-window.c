@@ -87,10 +87,10 @@ img_window_struct *img_create_window (void)
 	GtkCellRenderer *renderer, *pixbuf_cell;
 	GtkTreeSelection *selection;
 	GtkTreeViewColumn *column;
-	GtkListStore *music_file_liststore;
 	GtkIconSize tmp_toolbar_icon_size;
 	GtkIconTheme *icon_theme;
 	GdkPixbuf *icon;
+	gint x;
 
 	accel_group = gtk_accel_group_new ();
 	icon_theme = gtk_icon_theme_get_default();
@@ -187,7 +187,7 @@ img_window_struct *img_create_window (void)
 	slide_menu = gtk_menu_new ();
 	gtk_menu_item_set_submenu (GTK_MENU_ITEM (menuitem2), slide_menu);
 
-	img_struct->import_menu = gtk_image_menu_item_new_with_mnemonic (_("_Import"));
+	img_struct->import_menu = gtk_image_menu_item_new_with_mnemonic (_("Import p_ictures"));
 	gtk_container_add (GTK_CONTAINER (slide_menu),img_struct->import_menu);
 	gtk_widget_set_sensitive(img_struct->import_menu, FALSE);
 	gtk_widget_add_accelerator (img_struct->import_menu,"activate",accel_group,GDK_i,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
@@ -195,11 +195,20 @@ img_window_struct *img_create_window (void)
 
 	image_menu = img_load_icon ("imagination-import.png",GTK_ICON_SIZE_MENU);
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (img_struct->import_menu),image_menu);
+	
+	img_struct->import_audio_menu = gtk_image_menu_item_new_with_mnemonic (_("Import au_dio"));
+	gtk_container_add (GTK_CONTAINER (slide_menu),img_struct->import_audio_menu);
+	gtk_widget_set_sensitive(img_struct->import_audio_menu, FALSE);
+	gtk_widget_add_accelerator (img_struct->import_audio_menu,"activate",accel_group,GDK_d,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
+	g_signal_connect (G_OBJECT (img_struct->import_audio_menu),"activate",G_CALLBACK (img_select_audio_files_to_add),img_struct);
 
-	img_struct->remove_menu = gtk_image_menu_item_new_with_mnemonic (_("_Delete"));
+	image_menu = img_load_icon ("imagination-audio.png",GTK_ICON_SIZE_MENU);
+	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (img_struct->import_audio_menu),image_menu);
+
+	img_struct->remove_menu = gtk_image_menu_item_new_with_mnemonic (_("Dele_te"));
 	gtk_widget_set_sensitive(img_struct->remove_menu, FALSE);
 	gtk_container_add (GTK_CONTAINER (slide_menu), img_struct->remove_menu);
-	gtk_widget_add_accelerator (img_struct->remove_menu,"activate",accel_group, GDK_d,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
+	gtk_widget_add_accelerator (img_struct->remove_menu,"activate",accel_group, GDK_t,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
 	g_signal_connect (G_OBJECT (img_struct->remove_menu),"activate",G_CALLBACK (img_delete_selected_slides),img_struct);
 
 	tmp_image = gtk_image_new_from_stock (GTK_STOCK_DELETE,GTK_ICON_SIZE_MENU);
@@ -261,6 +270,13 @@ img_window_struct *img_create_window (void)
 	gtk_widget_set_sensitive(img_struct->import_button, FALSE);
 	gtk_widget_set_tooltip_text(img_struct->import_button, _("Import the slides"));
 	g_signal_connect ((gpointer) img_struct->import_button,"clicked",G_CALLBACK (img_add_slides_thumbnails),img_struct);
+
+	tmp_image = img_load_icon("imagination-audio.png",GTK_ICON_SIZE_LARGE_TOOLBAR);
+	img_struct->import_audio_button = GTK_WIDGET (gtk_tool_button_new (tmp_image,""));
+	gtk_container_add (GTK_CONTAINER (toolbar),img_struct->import_audio_button);
+	gtk_widget_set_sensitive(img_struct->import_audio_button, FALSE);
+	gtk_widget_set_tooltip_text(img_struct->import_audio_button, _("Import the audio files"));
+	g_signal_connect(G_OBJECT(img_struct->import_audio_button), "clicked", G_CALLBACK(img_select_audio_files_to_add), img_struct);
 
 	img_struct->remove_button = GTK_WIDGET (gtk_tool_button_new_from_stock ("gtk-delete"));
 	gtk_widget_set_sensitive(img_struct->remove_button, FALSE);
@@ -469,20 +485,30 @@ img_window_struct *img_create_window (void)
 	gtk_box_pack_start (GTK_BOX (vbox7), scrolledwindow1, TRUE, TRUE, 0);
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow1), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (scrolledwindow1), GTK_SHADOW_IN);
+	gtk_widget_set_size_request(scrolledwindow1, -1, 100);
 
-	music_file_liststore = gtk_list_store_new (2, G_TYPE_STRING, G_TYPE_STRING);
+	img_struct->music_file_liststore = gtk_list_store_new (3, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
 
-	music_file_treeview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(music_file_liststore));
-	column = gtk_tree_view_column_new();
-
+	music_file_treeview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(img_struct->music_file_liststore));
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(music_file_treeview));
 	gtk_tree_selection_set_mode(selection, GTK_SELECTION_MULTIPLE);
 
-	renderer = gtk_cell_renderer_text_new();
-	gtk_tree_view_column_pack_start(column, renderer, TRUE);
-	gtk_tree_view_column_add_attribute(column, renderer, "text", 1);
-
-	gtk_tree_view_append_column(GTK_TREE_VIEW(music_file_treeview), column);
+	for (x = 0; x <= 2; x++)
+	{
+		if (x == 0)
+		{
+			column = gtk_tree_view_column_new();
+			gtk_tree_view_column_set_visible(column, FALSE);
+		}
+		else
+		{
+			column = gtk_tree_view_column_new();
+			renderer = gtk_cell_renderer_text_new();
+			gtk_tree_view_column_pack_start(column, renderer, TRUE);
+			gtk_tree_view_column_add_attribute(column, renderer, "text", x);
+		}
+		gtk_tree_view_append_column (GTK_TREE_VIEW (music_file_treeview), column);
+	}
 
 	gtk_tree_view_set_rules_hint(GTK_TREE_VIEW(music_file_treeview), TRUE);
 	gtk_tree_view_set_headers_visible (GTK_TREE_VIEW (music_file_treeview), FALSE);

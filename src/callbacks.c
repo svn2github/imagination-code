@@ -29,6 +29,7 @@ static gboolean img_prepare_pixbufs(img_window_struct *);
 static void img_swap_toolbar_images( img_window_struct *, gboolean);
 static void img_clean_after_preview(img_window_struct *);
 static void img_increase_progressbar(img_window_struct *, gint);
+static void img_add_audio_files (gchar *, img_window_struct *);
 static gboolean img_run_encoder(img_window_struct *);
 static void img_about_dialog_activate_link(GtkAboutDialog * , const gchar *, gpointer );
 
@@ -125,6 +126,67 @@ static void img_increase_progressbar(img_window_struct *img, gint nr)
 
 	while (gtk_events_pending())
 		gtk_main_iteration();
+}
+
+void img_select_audio_files_to_add ( GtkMenuItem* button, img_window_struct *img)
+{
+	GtkFileFilter *audio_filter, *all_files_filter;
+	GtkWidget *fs;
+	GSList *files = NULL;
+	gint response;
+
+	fs = gtk_file_chooser_dialog_new (_("Please choose the audio files to import"),
+							GTK_WINDOW (img->imagination_window),
+							GTK_FILE_CHOOSER_ACTION_OPEN,
+							GTK_STOCK_CANCEL,
+							GTK_RESPONSE_CANCEL,
+							GTK_STOCK_OPEN,
+							GTK_RESPONSE_ACCEPT,
+							NULL);
+
+	/* only audio files filter */
+	audio_filter = gtk_file_filter_new ();
+	gtk_file_filter_set_name (audio_filter, _("All audio files") );
+	gtk_file_filter_add_pattern (audio_filter, "*.wav");
+	gtk_file_filter_add_pattern (audio_filter, "*.mp3");
+	gtk_file_filter_add_pattern (audio_filter, "*.ogg");
+	gtk_file_filter_add_pattern (audio_filter, "*.flac");
+	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (fs), audio_filter);
+
+	/* All files filter */
+	all_files_filter = gtk_file_filter_new ();
+	gtk_file_filter_set_name(all_files_filter, _("All files"));
+	gtk_file_filter_add_pattern(all_files_filter, "*");
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fs), all_files_filter);
+
+	gtk_file_chooser_set_select_multiple (GTK_FILE_CHOOSER (fs), TRUE);
+
+	response = gtk_dialog_run (GTK_DIALOG (fs));
+	if (response == GTK_RESPONSE_ACCEPT)
+	{
+		files = gtk_file_chooser_get_filenames (GTK_FILE_CHOOSER (fs));
+		g_slist_foreach( files, (GFunc) img_add_audio_files, img);
+	}
+	if (files != NULL)
+		g_slist_free (files);
+
+	gtk_widget_destroy (fs);
+}
+
+static void img_add_audio_files (gchar *filename, img_window_struct *img)
+{
+	GtkTreeIter iter;
+	gchar *path, *file;
+
+	path = g_path_get_dirname(filename);
+	file = g_path_get_basename(filename);
+
+	gtk_list_store_append(img->music_file_liststore, &iter);
+	gtk_list_store_set (img->music_file_liststore, &iter, 0, path, 1, file, 2, "3:26", -1);
+
+	g_free(path);
+	g_free(file);
+	g_free(filename);
 }
 
 GSList *img_import_slides_file_chooser(img_window_struct *img)
@@ -1278,7 +1340,9 @@ static gboolean img_run_encoder(img_window_struct *img)
 void img_set_buttons_state(img_window_struct *img, gboolean state)
 {
 	gtk_widget_set_sensitive(img->import_button,state);
+	gtk_widget_set_sensitive(img->import_audio_button,state);
 	gtk_widget_set_sensitive(img->import_menu,	state);
+	gtk_widget_set_sensitive(img->import_audio_menu,state);
 	gtk_widget_set_sensitive(img->save_menu,	state);
 	gtk_widget_set_sensitive(img->save_as_menu,	state);
 	gtk_widget_set_sensitive(img->save_button,	state);
