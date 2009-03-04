@@ -19,6 +19,7 @@
 
 #include <gdk/gdk.h>
 #include <math.h>
+#include "support.h"
 
 /* Local functions declarations */
 static void

@@ -18,6 +18,7 @@
  */
 
 #include <gdk/gdk.h>
+#include "support.h"
 
 /* Local functions declarations */
 static void

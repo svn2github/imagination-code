@@ -1227,19 +1227,27 @@ static gboolean img_run_encoder(img_window_struct *img)
 	gboolean    ret;
 
 	if (img->slideshow_format_index == 0)
+	/* Export as VOB file */
 		cmd_line = g_strdup_printf(
-				"ffmpeg -f image2pipe -vcodec ppm -r %s -i pipe: "
-				"-target %s-dvd -r %s -an -aspect %s -s %dx%d -y -bf 2 %s",
-				EXPORT_FPS_STRING,
+				"ffmpeg -f image2pipe -vcodec ppm -i pipe: "
+				"-target %s-dvd -r %s -an -aspect %s -s %dx%d -y -bf 2 -f dvd %s",
 				img->image_area->allocation.height == 576 ? "pal" : "ntsc",
 				EXPORT_FPS_STRING,
 				img->aspect_ratio, img->image_area->allocation.width,
 				img->image_area->allocation.height, img->slideshow_filename );
+	else if (img->slideshow_format_index == 1)
+	/* Export as OGG file */
+		cmd_line = g_strdup_printf(
+				"ffmpeg -f image2pipe -vcodec ppm -i pipe: "
+				"-r %s -an -aspect %s -s %dx%d -vcodec libtheora -vb 1024k -acodec libvorbis -f ogg -y %s.ogg",
+				EXPORT_FPS_STRING, img->aspect_ratio, img->image_area->allocation.width,
+				img->image_area->allocation.height, img->slideshow_filename );
 	else
+	/* Export as FLV file */
 		cmd_line = g_strconcat(
 				"ffmpeg -f image2pipe -vcodec ppm -r " EXPORT_FPS_STRING
-				" -i pipe: -an -b 512k -s 320x240 -f flv -y ",
-				img->slideshow_filename,NULL);
+				" -i pipe: -an -b 512k -s 320x240 -f flv -y ", img->slideshow_filename, ".flv", NULL);
+
 	argv = g_strsplit( cmd_line, " ", 0 );
 	g_print( "%s\n", cmd_line );
 	g_free( cmd_line );

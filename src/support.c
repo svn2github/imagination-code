@@ -242,9 +242,8 @@ void img_load_available_transitions(img_window_struct *img)
 			bak = trans;
 			for( ; *trans; trans += 3 )
 			{
-				/*filename = g_strconcat("./pixmaps/", trans[0], NULL);*/
-				filename = g_strdup_printf( "./pixmaps/imagination-%d.png",
-											GPOINTER_TO_INT( trans[2] ) );
+				//filename = g_strdup_printf("%s/imagination/pixmaps/imagination-%d.png", DATADIR, GPOINTER_TO_INT( trans[2] ) );
+				filename = g_strdup_printf( "./pixmaps/imagination-%d.png", GPOINTER_TO_INT( trans[2] ) );
 				pixbuf = gdk_pixbuf_new_from_file(filename, NULL);
 				g_free(filename);
 				g_module_symbol( module, trans[1], &address );
