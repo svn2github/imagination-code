@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-03-03 08:15+0100\n"
+"POT-Creation-Date: 2009-03-05 16:19+0100\n"
 "PO-Revision-Date: 2009-02-24 11:55+0100\n"
 "Last-Translator: tadeboro <tadeboro@gmail.com>\n"
 "Language-Team: Slovenian\n"
@@ -29,159 +29,204 @@ msgstr "Lahki GTK+2 program za izdelavo DVD diaprojekcij"
 msgid "Imagination"
 msgstr "Domišljija"
 
-#: ../src/main-window.c:117
+#: ../src/main-window.c:116
 msgid "_Slideshow"
 msgstr "_Diaprojekcija"
 
-#: ../src/main-window.c:159
+#: ../src/main-window.c:158
 msgid "_Preview"
 msgstr "_Predogled"
 
-#: ../src/main-window.c:168
+#: ../src/main-window.c:167
 msgid "Export"
 msgstr "Izvoz"
 
-#: ../src/main-window.c:185
+#: ../src/main-window.c:184
 msgid "_Slide"
 msgstr "Di_apozitiv"
 
-#: ../src/main-window.c:191
-msgid "_Import"
+#: ../src/main-window.c:190
+#, fuzzy
+msgid "Import p_ictures"
+msgstr "Uvozi diapozitive"
+
+#: ../src/main-window.c:199
+#, fuzzy
+msgid "Import music"
 msgstr "_Uvozi"
 
-#: ../src/main-window.c:200
-msgid "_Delete"
+#: ../src/main-window.c:208
+#, fuzzy
+msgid "Dele_te"
 msgstr "_Zbriši"
 
-#: ../src/main-window.c:217
+#: ../src/main-window.c:225
 msgid "Un_select all"
 msgstr "Počis_ti izbor"
 
-#: ../src/main-window.c:222
+#: ../src/main-window.c:230
 msgid "_Help"
 msgstr "_Pomoč"
 
-#: ../src/main-window.c:241 ../src/new_slideshow.c:63
+#: ../src/main-window.c:249 ../src/new_slideshow.c:63
 msgid "Create a new slideshow"
 msgstr "Ustvari novo diaprojekcijo"
 
-#: ../src/main-window.c:246
+#: ../src/main-window.c:254
 msgid "Open a slideshow"
 msgstr "Odpri diaprojekcijo"
 
-#: ../src/main-window.c:252
+#: ../src/main-window.c:260
 msgid "Save the slideshow"
 msgstr "Shrani diaprojekcijo"
 
-#: ../src/main-window.c:263
+#: ../src/main-window.c:271
 msgid "Import the slides"
 msgstr "Uvozi diapozitive"
 
-#: ../src/main-window.c:269
+#: ../src/main-window.c:278
+#, fuzzy
+msgid "Import the audio files"
+msgstr "Uvozi diapozitive"
+
+#: ../src/main-window.c:284
 msgid "Delete the selected slides"
 msgstr "Zbriši izbrane diapozitive"
 
-#: ../src/main-window.c:279
-msgid "Preview the slideshow"
-msgstr "Predogled diaprojekcije"
+#: ../src/main-window.c:294 ../src/callbacks.c:800
+msgid "Starts the preview"
+msgstr "Požene predogled"
 
-#: ../src/main-window.c:286
+#: ../src/main-window.c:301
 msgid "Export the DVD slideshow"
 msgstr "Izvozi DVD diaprojekcijo"
 
-#: ../src/main-window.c:305
+#: ../src/main-window.c:320
 msgid "Jump to the entered slide number"
 msgstr "Skoči na vnešeni diapozitiv"
 
-#: ../src/main-window.c:355
+#: ../src/main-window.c:370
 msgid "<b>Slide settings</b>"
 msgstr "<b>Nastavitve diapozitiva</b>"
 
 #. Transition types label
-#: ../src/main-window.c:365
+#: ../src/main-window.c:380
 msgid "Transition Type:"
 msgstr "Vrsta prehoda:"
 
-#: ../src/main-window.c:384
+#: ../src/main-window.c:399
 msgid "Random"
 msgstr "Naključno"
 
-#: ../src/main-window.c:385
+#: ../src/main-window.c:400
 msgid "Imagination randomly decides with transition to apply"
 msgstr "Domišljija naključno izbere prehod"
 
 #. Transition duration
-#: ../src/main-window.c:390
+#: ../src/main-window.c:405
 msgid "Transition Speed:"
 msgstr "Histrost prehoda:"
 
-#: ../src/main-window.c:396
+#: ../src/main-window.c:411
 msgid "Fast"
 msgstr "Hitro"
 
-#: ../src/main-window.c:397
+#: ../src/main-window.c:412
 msgid "Normal"
 msgstr "Normalno"
 
-#: ../src/main-window.c:398
+#: ../src/main-window.c:413
 msgid "Slow"
 msgstr "Počasi"
 
 #. Slide duration
-#: ../src/main-window.c:404
+#: ../src/main-window.c:419
 msgid "Slide Duration in sec:"
 msgstr "Trajanje diapozitiva v sek:"
 
 #. Slide Selected
-#: ../src/main-window.c:415
+#: ../src/main-window.c:430
 msgid "Slide Number:"
 msgstr "Številka diapozitiva:"
 
 #. Slide Resolution
-#: ../src/main-window.c:424
+#: ../src/main-window.c:439
 msgid "Resolution:"
 msgstr "Ločljivost:"
 
 #. Slide Type
-#: ../src/main-window.c:433
+#: ../src/main-window.c:448
 msgid "Type:"
 msgstr "Tip:"
 
 #. Slide Total Duration
-#: ../src/main-window.c:442
+#: ../src/main-window.c:457
 msgid "Slideshow Length:"
 msgstr "Trajanje diaprojekcije:"
 
-#: ../src/main-window.c:459
+#: ../src/main-window.c:474
 msgid "<b>Background Music</b>"
 msgstr ""
 
-#: ../src/main-window.c:890 ../src/main-window.c:892 ../src/support.c:192
+#: ../src/main-window.c:525
+#, fuzzy
+msgid "Play the selected audio file"
+msgstr "Zbriši izbrane diapozitive"
+
+#: ../src/main-window.c:531
+#, fuzzy
+msgid "Delete the selected audio file"
+msgstr "Zbriši izbrane diapozitive"
+
+#: ../src/main-window.c:537
+msgid "Move the selected audio file up"
+msgstr ""
+
+#: ../src/main-window.c:543
+msgid "Move the selected audio file down"
+msgstr ""
+
+#: ../src/main-window.c:549
+#, fuzzy
+msgid "Clear all the audio files"
+msgstr "Uvozi diapozitive"
+
+#: ../src/main-window.c:959 ../src/main-window.c:961 ../src/support.c:210
 msgid "None"
 msgstr "Brez"
 
-#: ../src/callbacks.c:122
+#: ../src/callbacks.c:123
 #, c-format
 msgid "Please wait, importing slide %d out of %d"
 msgstr "Uvažam diapozitiv %d od %d, prosimo počakajte"
 
-#: ../src/callbacks.c:137
-msgid "Import slides, use SHIFT key for multiple select"
-msgstr "Uvoz diapozitivov, uporabite SHIFT za izbor večih slik"
+#: ../src/callbacks.c:138
+#, fuzzy
+msgid "Please choose the audio files to import"
+msgstr "Prosimo izberite ime projekta"
 
 #: ../src/callbacks.c:149
-msgid "All image files"
-msgstr "Vse slikovne datoteke"
+#, fuzzy
+msgid "All audio files"
+msgstr "Vse datoteke"
 
-#: ../src/callbacks.c:163
+#: ../src/callbacks.c:158 ../src/callbacks.c:225
 msgid "All files"
 msgstr "Vse datoteke"
 
-#: ../src/callbacks.c:232
+#: ../src/callbacks.c:199
+msgid "Import slides, use SHIFT key for multiple select"
+msgstr "Uvoz diapozitivov, uporabite SHIFT za izbor večih slik"
+
+#: ../src/callbacks.c:211
+msgid "All image files"
+msgstr "Vse slikovne datoteke"
+
+#: ../src/callbacks.c:294
 msgid "You didn't save your slideshow yet. Are you sure you want to close it?"
 msgstr "Projekt ni bil shranjen. Ste prepričani da ga želite zapreti?"
 
-#: ../src/callbacks.c:302
+#: ../src/callbacks.c:364
 #, c-format
 msgid "%d x %d pixels"
 msgid_plural "%d x %d pixels"
@@ -190,44 +235,40 @@ msgstr[1] "%d x %d piki"
 msgstr[2] "%d x %d pike"
 msgstr[3] "%d x %d pik"
 
-#: ../src/callbacks.c:379
+#: ../src/callbacks.c:434
 msgid "translator-credits"
 msgstr "Tadej Borovšak <tadeboro@gmail.com>"
 
-#: ../src/callbacks.c:745
-msgid "Starts the preview"
-msgstr "Požene predogled"
-
-#: ../src/callbacks.c:755
+#: ../src/callbacks.c:810
 msgid "Stops the preview"
 msgstr "Ustavi predogled"
 
-#: ../src/callbacks.c:797
+#: ../src/callbacks.c:852
 msgid "Load an Imagination slideshow project"
 msgstr "Odpri Domišljijin projekt"
 
-#: ../src/callbacks.c:798
+#: ../src/callbacks.c:853
 msgid "Save an Imagination slideshow project"
 msgstr "Shrani Domišljijin projekt"
 
-#: ../src/callbacks.c:888
+#: ../src/callbacks.c:943
 msgid "Exporting the slideshow"
 msgstr "Izvažam diaprojekcijo"
 
-#: ../src/callbacks.c:900
+#: ../src/callbacks.c:955
 msgid "Preparing for export ..."
 msgstr "Pripravljam za izvoz ..."
 
-#: ../src/callbacks.c:911
+#: ../src/callbacks.c:966
 msgid "Overall progress:"
 msgstr "Skupni napredek:"
 
-#: ../src/callbacks.c:969 ../src/callbacks.c:1054
+#: ../src/callbacks.c:1024 ../src/callbacks.c:1109
 #, c-format
 msgid "Slide %d export progress:"
 msgstr "Napredek izvoza diapozitiva %d:"
 
-#: ../src/callbacks.c:1266
+#: ../src/callbacks.c:1329
 msgid "Failed to launch the encoder!"
 msgstr "Ne morem zagnati šifrirnika"
 
@@ -248,49 +289,49 @@ msgstr "Ime datoteke z diaprojekcijo:"
 msgid "Export the slideshow as:"
 msgstr "Izvozi diaprojekcijo kot:"
 
-#: ../src/new_slideshow.c:142
+#: ../src/new_slideshow.c:143
 msgid "<b>Video Format</b>"
 msgstr "<b>Video oblika</b>"
 
-#: ../src/new_slideshow.c:150
+#: ../src/new_slideshow.c:151
 msgid "<b>Television Format</b>"
 msgstr "<b>Televizijska oblika</b>"
 
-#: ../src/new_slideshow.c:161
+#: ../src/new_slideshow.c:162
 msgid "Normal 4:3"
 msgstr "Normalno 4:3"
 
-#: ../src/new_slideshow.c:165
+#: ../src/new_slideshow.c:166
 msgid "Widescreen 16:9"
 msgstr "Širokozaslonsko 16:9"
 
-#: ../src/new_slideshow.c:177
+#: ../src/new_slideshow.c:178
 msgid "<b>Advanced Settings</b>"
 msgstr "<b>Napredne nastavitve</b>"
 
-#: ../src/new_slideshow.c:184
+#: ../src/new_slideshow.c:185
 msgid "Rescale images to fit desired aspect ratio"
 msgstr "Preoblikuj slike da ustrezajo obliki izvoza"
 
-#: ../src/new_slideshow.c:192
+#: ../src/new_slideshow.c:193
 msgid "Select background color:"
 msgstr "Izberite barvo ozadja:"
 
-#: ../src/slideshow_project.c:108
+#: ../src/slideshow_project.c:111
 msgid "This is not an Imagination project file!"
 msgstr "Izbrana datoteka ni Domišljijin projekt!"
 
-#: ../src/support.c:158
+#: ../src/support.c:174
 #, c-format
 msgid "Welcome to Imagination - %d transitions loaded."
 msgstr "Dobrodošli v Domišljiji - %d prehodov naloženih."
 
-#: ../src/support.c:164
+#: ../src/support.c:180
 #, c-format
 msgid "%d slides selected"
 msgstr "%d diapozitivov izbranih"
 
-#: ../src/support.c:170
+#: ../src/support.c:186
 #, c-format
 msgid "%d slide imported %s"
 msgid_plural "%d slides imported %s"
@@ -299,10 +340,17 @@ msgstr[1] "%d diapozitiva uvožena %s"
 msgstr[2] "%d diapozitivi uvoženi %s"
 msgstr[3] "%d diapozitivov uvoženih %s"
 
-#: ../src/support.c:170
+#: ../src/support.c:186
 msgid " - Use the CTRL key to select/unselect or SHIFT for multiple select"
 msgstr " - Uporabite CTRK za posamično izbiranje ali SHIFT za izbiro večih"
 
-#: ../src/support.c:242
+#: ../src/support.c:273
 msgid "Please choose the slideshow project filename"
 msgstr "Prosimo izberite ime projekta"
+
+#~ msgid "Preview the slideshow"
+#~ msgstr "Predogled diaprojekcije"
+
+#, fuzzy
+#~ msgid "Clear the selection"
+#~ msgstr "Zbriši izbrane diapozitive"

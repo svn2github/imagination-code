@@ -81,7 +81,7 @@ img_window_struct *img_create_window (void)
 	GtkWidget *resolution;
 	GtkWidget *total_time;
 	GtkWidget *type;
-	GtkWidget *hbox_buttons, *play_button, *add_button, *remove_button, *move_up_button;
+	GtkWidget *hbox_buttons, *play_button, *remove_button, *move_up_button;
 	GtkWidget *move_down_button, *clear_button, *image_buttons, *vbox7, *scrolledwindow1, *music_file_treeview;
 	GtkAccelGroup *accel_group;
 	GtkCellRenderer *renderer, *pixbuf_cell;
@@ -196,7 +196,7 @@ img_window_struct *img_create_window (void)
 	image_menu = img_load_icon ("imagination-import.png",GTK_ICON_SIZE_MENU);
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (img_struct->import_menu),image_menu);
 	
-	img_struct->import_audio_menu = gtk_image_menu_item_new_with_mnemonic (_("Import au_dio"));
+	img_struct->import_audio_menu = gtk_image_menu_item_new_with_mnemonic (_("Import music"));
 	gtk_container_add (GTK_CONTAINER (slide_menu),img_struct->import_audio_menu);
 	gtk_widget_set_sensitive(img_struct->import_audio_menu, FALSE);
 	gtk_widget_add_accelerator (img_struct->import_audio_menu,"activate",accel_group,GDK_d,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
@@ -291,7 +291,7 @@ img_window_struct *img_create_window (void)
 	img_struct->preview_button = GTK_WIDGET (gtk_tool_button_new_from_stock (GTK_STOCK_MEDIA_PLAY));
 	gtk_container_add (GTK_CONTAINER (toolbar),img_struct->preview_button);
 	gtk_widget_set_sensitive(img_struct->preview_button, FALSE);
-	gtk_widget_set_tooltip_text(img_struct->preview_button, _("Preview the slideshow"));
+	gtk_widget_set_tooltip_text(img_struct->preview_button, _("Starts the preview"));
 	g_signal_connect (G_OBJECT (img_struct->preview_button),"clicked",G_CALLBACK (img_start_stop_preview),img_struct);
 
 	tmp_image = img_load_icon("imagination-generate.png",GTK_ICON_SIZE_LARGE_TOOLBAR);
@@ -524,17 +524,11 @@ img_window_struct *img_create_window (void)
 	gtk_container_add (GTK_CONTAINER (play_button), image_buttons);
 	gtk_widget_set_tooltip_text(play_button, _("Play the selected audio file"));
 
-	add_button = gtk_button_new();
-	gtk_box_pack_start(GTK_BOX(hbox_buttons), add_button, FALSE, TRUE, 0);
-	image_buttons = gtk_image_new_from_stock (GTK_STOCK_ADD, GTK_ICON_SIZE_MENU);
-	gtk_container_add (GTK_CONTAINER (add_button), image_buttons);
-	gtk_widget_set_tooltip_text(add_button, _("Add an audio file"));
-
 	remove_button = gtk_button_new();
 	gtk_box_pack_start(GTK_BOX(hbox_buttons), remove_button, FALSE, TRUE, 0);
-	image_buttons = gtk_image_new_from_stock (GTK_STOCK_REMOVE, GTK_ICON_SIZE_MENU);
+	image_buttons = gtk_image_new_from_stock (GTK_STOCK_DELETE, GTK_ICON_SIZE_MENU);
 	gtk_container_add (GTK_CONTAINER (remove_button), image_buttons);
-	gtk_widget_set_tooltip_text(remove_button, _("Remove the selected audio file"));
+	gtk_widget_set_tooltip_text(remove_button, _("Delete the selected audio file"));
 
 	move_up_button = gtk_button_new();
 	gtk_box_pack_start(GTK_BOX(hbox_buttons), move_up_button, FALSE, TRUE, 0);
@@ -552,7 +546,7 @@ img_window_struct *img_create_window (void)
 	gtk_box_pack_start(GTK_BOX(hbox_buttons), clear_button, FALSE, TRUE, 0);
 	image_buttons = gtk_image_new_from_stock (GTK_STOCK_CLEAR, GTK_ICON_SIZE_MENU);
 	gtk_container_add (GTK_CONTAINER (clear_button), image_buttons);
-	gtk_widget_set_tooltip_text(clear_button, _("Clear the selection"));
+	gtk_widget_set_tooltip_text(clear_button, _("Clear all the audio files"));
 
 	/* Create the model */
 	img_struct->thumbnail_model = gtk_list_store_new (2, GDK_TYPE_PIXBUF, G_TYPE_POINTER);
