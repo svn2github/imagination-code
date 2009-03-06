@@ -45,19 +45,16 @@ msgid "_Slide"
 msgstr "_Slide"
 
 #: ../src/main-window.c:190
-#, fuzzy
 msgid "Import p_ictures"
-msgstr "Import the slides"
+msgstr "Import p_ictures"
 
 #: ../src/main-window.c:199
-#, fuzzy
 msgid "Import music"
-msgstr "_Import"
+msgstr "Import music"
 
 #: ../src/main-window.c:208
-#, fuzzy
 msgid "Dele_te"
-msgstr "_Delete"
+msgstr "Dele_te"
 
 #: ../src/main-window.c:225
 msgid "Un_select all"
@@ -84,9 +81,8 @@ msgid "Import the slides"
 msgstr "Import the slides"
 
 #: ../src/main-window.c:278
-#, fuzzy
 msgid "Import the audio files"
-msgstr "Import the slides"
+msgstr "Import the audio files"
 
 #: ../src/main-window.c:284
 msgid "Delete the selected slides"
@@ -165,30 +161,27 @@ msgstr "Slideshow Length:"
 
 #: ../src/main-window.c:474
 msgid "<b>Background Music</b>"
-msgstr ""
+msgstr "<b>Background Music</b>"
 
 #: ../src/main-window.c:525
-#, fuzzy
 msgid "Play the selected audio file"
-msgstr "Delete the selected slides"
+msgstr "Play the selected audio file"
 
 #: ../src/main-window.c:531
-#, fuzzy
 msgid "Delete the selected audio file"
-msgstr "Delete the selected slides"
+msgstr "Delete the selected audio file"
 
 #: ../src/main-window.c:537
 msgid "Move the selected audio file up"
-msgstr ""
+msgstr "Move the selected audio file up"
 
 #: ../src/main-window.c:543
 msgid "Move the selected audio file down"
-msgstr ""
+msgstr "Move the selected audio file down"
 
 #: ../src/main-window.c:549
-#, fuzzy
 msgid "Clear all the audio files"
-msgstr "Import the slides"
+msgstr "Clear all the audio files"
 
 #: ../src/main-window.c:959 ../src/main-window.c:961 ../src/support.c:210
 msgid "None"
@@ -200,14 +193,12 @@ msgid "Please wait, importing slide %d out of %d"
 msgstr "Please wait, importing slide %d out of %d"
 
 #: ../src/callbacks.c:138
-#, fuzzy
 msgid "Please choose the audio files to import"
-msgstr "Please choose the slideshow project filename"
+msgstr "Please choose the audio files to import"
 
 #: ../src/callbacks.c:149
-#, fuzzy
 msgid "All audio files"
-msgstr "All files"
+msgstr "All audio files"
 
 #: ../src/callbacks.c:158 ../src/callbacks.c:225
 msgid "All files"
@@ -342,10 +333,3 @@ msgstr " - Use the CTRL key to select/unselect or SHIFT for multiple select"
 #: ../src/support.c:273
 msgid "Please choose the slideshow project filename"
 msgstr "Please choose the slideshow project filename"
-
-#~ msgid "Preview the slideshow"
-#~ msgstr "Preview the slideshow"
-
-#, fuzzy
-#~ msgid "Clear the selection"
-#~ msgstr "Delete the selected slides"
