@@ -19,10 +19,10 @@
  
 #include "audio.h"
 
-int img_get_audio_length(char *argc, char **argv)
+int img_get_audio_length(char *filename)
 {
 	/* Bitrate hex values for MP3 files */
-	const gchar *bitrate[5][2] ={
+	const gchar *bitrate[9][2] ={
 									{ "0x10", "32"  },
 									{ "0x20", "40"  },
 									{ "0x30", "48"  },
@@ -45,7 +45,7 @@ int img_get_audio_length(char *argc, char **argv)
 	if (fread (header, 1, 4, f) == 0)
 		printf ("Error !\n");
 
-	/* Version and Layer */
+	// Version and Layer
 	printf ("Version: ");
 	for (i=4; i >= 3; i--)
 	{
@@ -57,7 +57,7 @@ int img_get_audio_length(char *argc, char **argv)
 		printf(((header[1] >> i) & 1) ? "1" : "0");
 	}
 	printf ("\nBitrate: ");
-	/* Bitrate */
+	// Bitrate
 	for (i=7; i >= 4; i--)
 	{
 		printf(((header[2] >> i) & 1) ? "1" : "0");
@@ -66,4 +66,6 @@ int img_get_audio_length(char *argc, char **argv)
 	fclose(f);
 	printf ("\n");
 	return 0;
+	* */
+	
 }
