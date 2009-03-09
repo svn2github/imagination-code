@@ -21,25 +21,12 @@
 
 int img_get_audio_length(char *filename)
 {
-	/* Bitrate hex values for MP3 files */
-	const gchar *bitrate[9][2] ={
-									{ "0x10", "32"  },
-									{ "0x20", "40"  },
-									{ "0x30", "48"  },
-									{ "0x40", "56"  },
-									{ "0x50", "64"  },
-									{ "0x90", "128" },
-									{ "0xA0", "160" },
-									{ "0xB0", "192" },
-									{ "0xD0", "256" }
-								};
-
 	unsigned char header[4];
 	int i;
 
 	FILE *f;
 
-	f = fopen(argv[1],"r");
+	f = fopen(filename,"r");
 	if (f == NULL)
 		return 1;
 	if (fread (header, 1, 4, f) == 0)
@@ -66,6 +53,4 @@ int img_get_audio_length(char *filename)
 	fclose(f);
 	printf ("\n");
 	return 0;
-	* */
-	
 }

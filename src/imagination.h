@@ -90,6 +90,7 @@ struct _img_window_struct
 	GtkWidget   *export_menu;
 	GtkWidget   *export_button;
 	GtkWidget	*transition_type;
+	GtkWidget	*random_button;
 	GtkWidget	*duration;				// Duration spin button
 	GtkWidget	*trans_duration;
 	GtkWidget	*slide_selected_data;

@@ -22,7 +22,6 @@
 
 #include <gtk/gtk.h>
 #include <sys/stat.h>
-#include <sox.h>
 
 int img_get_audio_length(char *);
 

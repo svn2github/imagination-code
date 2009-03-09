@@ -23,4 +23,4 @@ imagination_SOURCES = \
 imagination_CFLAGS = \
 	-DDATADIR=\"$(datadir)\"
 
-imagination_LDADD = @PACKAGE_LIBS@ $(INTLLIBS) -lsox
+imagination_LDADD = @PACKAGE_LIBS@ $(INTLLIBS)

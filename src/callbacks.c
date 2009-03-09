@@ -891,7 +891,6 @@ void img_close_slideshow(GtkWidget *widget, img_window_struct *img)
 	if (img->project_is_modified)
 	{
 		if (GTK_RESPONSE_OK != img_ask_user_confirmation(img))
-
 			return;
 	}
 	img_free_allocated_memory(img);
@@ -899,6 +898,9 @@ void img_close_slideshow(GtkWidget *widget, img_window_struct *img)
 	img_set_window_title(img,NULL);
 	img_set_statusbar_message(img,0);
 	gtk_image_set_from_pixbuf(GTK_IMAGE(img->image_area),NULL);
+	gtk_widget_set_sensitive(img->random_button, FALSE);
+	gtk_widget_set_sensitive(img->transition_type, FALSE);
+	gtk_widget_set_sensitive(img->duration, FALSE);
 	gtk_widget_hide(img->thumb_scrolledwindow);
 }
 

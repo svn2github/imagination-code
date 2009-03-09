@@ -74,7 +74,6 @@ img_window_struct *img_create_window (void)
 	GtkWidget *transition_label;
 	GtkWidget *vbox_info_slide;
 	GtkWidget *table;
-	GtkWidget *random_button;
 	GtkWidget *duration_label;
 	GtkWidget *trans_duration_label;
 	GtkWidget *selected_slide;
@@ -396,10 +395,11 @@ img_window_struct *img_create_window (void)
 	gtk_widget_set_sensitive(img_struct->transition_type, FALSE);
 	g_signal_connect (G_OBJECT (img_struct->transition_type), "changed",G_CALLBACK (img_combo_box_transition_type_changed),img_struct);
 
-	random_button = gtk_button_new_with_mnemonic (_("Random"));
-	gtk_widget_set_tooltip_text(random_button,_("Imagination randomly decides with transition to apply"));
-	gtk_table_attach (GTK_TABLE (table), random_button, 1, 2, 0, 1,(GtkAttachOptions) (GTK_FILL),(GtkAttachOptions) (0), 0, 0);
-	g_signal_connect (G_OBJECT (random_button),"clicked",G_CALLBACK (img_random_button_clicked),img_struct);
+	img_struct->random_button = gtk_button_new_with_mnemonic (_("Random"));
+	gtk_widget_set_tooltip_text(img_struct->random_button,_("Imagination randomly decides with transition to apply"));
+	gtk_table_attach (GTK_TABLE (table), img_struct->random_button, 1, 2, 0, 1,(GtkAttachOptions) (GTK_FILL),(GtkAttachOptions) (0), 0, 0);
+	gtk_widget_set_sensitive(img_struct->random_button, FALSE);
+	g_signal_connect (G_OBJECT (img_struct->random_button),"clicked",G_CALLBACK (img_random_button_clicked),img_struct);
 
 	/* Transition duration */
 	trans_duration_label = gtk_label_new (_("Transition Speed:"));
@@ -644,6 +644,7 @@ void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *im
 		gtk_widget_set_sensitive(img->trans_duration,	FALSE);
 		gtk_widget_set_sensitive(img->duration,			FALSE);
 		gtk_widget_set_sensitive(img->transition_type,	FALSE);
+		gtk_widget_set_sensitive(img->random_button,	FALSE);
 		gtk_label_set_text(GTK_LABEL (img->type_data),"");
 		gtk_label_set_text(GTK_LABEL (img->resolution_data),"");
 		gtk_label_set_text(GTK_LABEL (img->slide_selected_data),"");
@@ -661,6 +662,7 @@ void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *im
 	gtk_widget_set_sensitive(img->trans_duration,	TRUE);
 	gtk_widget_set_sensitive(img->duration,			TRUE);
 	gtk_widget_set_sensitive(img->transition_type,	TRUE);
+	gtk_widget_set_sensitive(img->random_button,	TRUE);
 
 	dummy = gtk_tree_path_get_indices(selected->data)[0]+1;
 	selected_slide = g_strdup_printf("%d",dummy);
