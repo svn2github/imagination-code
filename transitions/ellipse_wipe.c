@@ -38,13 +38,25 @@ img_get_plugin_info( gchar  **group,
 
 	*group = "Ellipse Wipe";
 
-	*trans = g_new( gchar *, 7 );
+	*trans = g_new( gchar *, 19 );
 	(*trans)[i++] = "Circle In";
 	(*trans)[i++] = "img_circle_in";
 	(*trans)[i++] = GINT_TO_POINTER( 20 );
 	(*trans)[i++] = "Circle Out";
 	(*trans)[i++] = "img_circle_out";
 	(*trans)[i++] = GINT_TO_POINTER( 21 );
+	(*trans)[i++] = "Horizontal In";
+	(*trans)[i++] = "img_horizontal_in";
+	(*trans)[i++] = GINT_TO_POINTER( 22 );
+	(*trans)[i++] = "Horizontal Out";
+	(*trans)[i++] = "img_horizontal_out";
+	(*trans)[i++] = GINT_TO_POINTER( 23 );
+	(*trans)[i++] = "Vertical In";
+	(*trans)[i++] = "img_vertical_in";
+	(*trans)[i++] = GINT_TO_POINTER( 24 );
+	(*trans)[i++] = "Vertical Out";
+	(*trans)[i++] = "img_vertical_out";
+	(*trans)[i++] = GINT_TO_POINTER( 25 );
 	(*trans)[i++] = NULL;
 }
 
@@ -56,6 +68,26 @@ void img_circle_in( GdkDrawable *window, GdkPixbuf *image_from, GdkPixbuf *image
 void img_circle_out( GdkDrawable *window, GdkPixbuf *image_to, GdkPixbuf *image_from, gdouble progress, gint file_desc )
 {
 	transition_render( window, image_from, image_to, progress, file_desc, 2 );
+}
+
+void img_horizontal_in( GdkDrawable *window, GdkPixbuf *image_from, GdkPixbuf *image_to, gdouble progress, gint file_desc )
+{
+	transition_render( window, image_from, image_to, progress, file_desc, 3 );
+}
+
+void img_horizontal_out( GdkDrawable *window, GdkPixbuf *image_to, GdkPixbuf *image_from, gdouble progress, gint file_desc )
+{
+	transition_render( window, image_from, image_to, progress, file_desc, 4 );
+}
+
+void img_vertical_in( GdkDrawable *window, GdkPixbuf *image_from, GdkPixbuf *image_to, gdouble progress, gint file_desc )
+{
+	transition_render( window, image_from, image_to, progress, file_desc, 5 );
+}
+
+void img_vertical_out( GdkDrawable *window, GdkPixbuf *image_to, GdkPixbuf *image_from, gdouble progress, gint file_desc )
+{
+	transition_render( window, image_from, image_to, progress, file_desc, 6 );
 }
 
 /* Local functions definitions */
@@ -89,10 +121,48 @@ transition_render( GdkDrawable *window,
 	cairo_paint( cr );
 
 	gdk_cairo_set_source_pixbuf( cr, image_to, 0, 0 );
-	if (direction == 1)
-		cairo_arc(cr, width/2, height/2, radius * progress, 0, 2 * G_PI);
-	if (direction == 2)
-		cairo_arc(cr, width/2, height/2, radius * (1 - progress), 0, 2 * G_PI);
+	switch (direction)
+	{
+		case 1:
+		cairo_arc(cr, width / 2.0, height / 2.0, radius * progress, 0, 2 * G_PI);
+		break;
+		
+		case 2:
+		cairo_arc(cr, width / 2.0, height / 2.0, radius * (1 - progress), 0, 2 * G_PI);
+		break;
+		
+		case 3:
+		cairo_save(cr);
+    	cairo_translate(cr,width / 2.0, height / 2.0);
+    	cairo_scale(cr, width / 2.0, 120);
+    	cairo_arc (cr, 0, 0, progress, 0, 2 * G_PI);
+    	cairo_restore(cr);
+		break;
+		
+		case 4:
+		cairo_save(cr);
+    	cairo_translate(cr,width / 2.0, height / 2.0);
+    	cairo_scale(cr, width / 2.0, 120);
+    	cairo_arc (cr, 0, 0, (1 - progress), 0, 2 * G_PI);
+    	cairo_restore(cr);
+		break;
+		
+		case 5:
+		cairo_save(cr);
+    	cairo_translate(cr,width / 2.0, height / 2.0);
+    	cairo_scale(cr, (width / 2.0) / 2.0, height);
+    	cairo_arc (cr, 0, 0, progress, 0, 2 * G_PI);
+    	cairo_restore(cr);
+		break;
+		
+		case 6:
+		cairo_save(cr);
+    	cairo_translate(cr,width / 2.0, height / 2.0);
+    	cairo_scale(cr, (width / 2.0) / 2.0, height);
+    	cairo_arc (cr, 0, 0, (1 - progress), 0, 2 * G_PI);
+    	cairo_restore(cr);
+		break;
+	}
 	cairo_clip(cr);
    	cairo_paint(cr);
 
