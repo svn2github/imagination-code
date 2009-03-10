@@ -1,6 +1,7 @@
 /*
  *  Copyright (c) 2009 Giuseppe Torelli <colossus73@gmail.com>
- *
+ *  Copyright (c) 2009 Tadej Borovšak 	<tadeboro@gmail.com>
+ * 
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License,or
@@ -19,6 +20,10 @@
 
 #include <gdk/gdk.h>
 #include "support.h"
+#include <math.h>
+
+#define AB 0.5				/* This controls the deformation */
+#define BA ( 1 / ( AB ) )	/* Inverse value for vertical effects */
 
 /* Local functions declarations */
 static void
@@ -102,7 +107,7 @@ transition_render( GdkDrawable *window,
 	cairo_t         *cr;
 	cairo_surface_t *surface;
 	gint            width, height;
-	gdouble			radius = 470;
+	gdouble			radius = 470, j;
 
 	gdk_drawable_get_size( window, &width, &height );
 
@@ -121,6 +126,7 @@ transition_render( GdkDrawable *window,
 	cairo_paint( cr );
 
 	gdk_cairo_set_source_pixbuf( cr, image_to, 0, 0 );
+	j = (gdouble)height / width;
 	switch (direction)
 	{
 		case 1:
@@ -132,34 +138,38 @@ transition_render( GdkDrawable *window,
 		break;
 		
 		case 3:
+		radius = width / ( 2 * AB ) * sqrt( ( AB * AB ) + ( j * j ) );
 		cairo_save(cr);
     	cairo_translate(cr,width / 2.0, height / 2.0);
-    	cairo_scale(cr, width / 2.0, 120);
-    	cairo_arc (cr, 0, 0, progress, 0, 2 * G_PI);
+    	cairo_scale(cr, 1, AB);
+    	cairo_arc (cr, 0, 0, radius * progress, 0, 2 * G_PI);
     	cairo_restore(cr);
 		break;
 		
 		case 4:
+		radius = width / ( 2 * AB ) * sqrt( ( AB * AB ) + ( j * j ) );
 		cairo_save(cr);
     	cairo_translate(cr,width / 2.0, height / 2.0);
-    	cairo_scale(cr, width / 2.0, 120);
-    	cairo_arc (cr, 0, 0, (1 - progress), 0, 2 * G_PI);
+    	cairo_scale(cr, 1, AB);
+    	cairo_arc (cr, 0, 0, radius * (1 - progress), 0, 2 * G_PI);
     	cairo_restore(cr);
 		break;
 		
 		case 5:
+		radius = width / ( 2 * BA ) * sqrt( ( BA * BA ) + ( j * j ) );
 		cairo_save(cr);
     	cairo_translate(cr,width / 2.0, height / 2.0);
-    	cairo_scale(cr, (width / 2.0) / 2.0, height);
-    	cairo_arc (cr, 0, 0, progress, 0, 2 * G_PI);
+    	cairo_scale(cr, 1, BA);
+    	cairo_arc (cr, 0, 0, radius * progress, 0, 2 * G_PI);
     	cairo_restore(cr);
 		break;
 		
 		case 6:
+		radius = width / ( 2 * BA ) * sqrt( ( BA * BA ) + ( j * j ) );
 		cairo_save(cr);
     	cairo_translate(cr,width / 2.0, height / 2.0);
-    	cairo_scale(cr, (width / 2.0) / 2.0, height);
-    	cairo_arc (cr, 0, 0, (1 - progress), 0, 2 * G_PI);
+    	cairo_scale(cr, 1, BA );
+    	cairo_arc (cr, 0, 0, radius * (1 - progress), 0, 2 * G_PI);
     	cairo_restore(cr);
 		break;
 	}
