@@ -10,6 +10,7 @@ four_box_wipe_la_LDFLAGS = -module -avoid-version
 barn_door_wipe_la_LDFLAGS = -module -avoid-version
 fade_la_LDFLAGS = -module -avoid-version
 ellipse_wipe_la_LDFLAGS = -module -avoid-version
+push_wipe_la_LDFLAGS = -module -avoid-version
 
 # Plugins to be installed
 plugin_LTLIBRARIES = \
@@ -18,7 +19,8 @@ plugin_LTLIBRARIES = \
 	four_box_wipe.la \
 	barn_door_wipe.la \
 	fade.la				\
-	ellipse_wipe.la
+	ellipse_wipe.la		\
+	push_wipe.la
 
 bar_wipe_la_SOURCES	= ../src/support.c bar_wipe.c
 box_wipe_la_SOURCES = ../src/support.c box_wipe.c
@@ -26,6 +28,7 @@ four_box_wipe_la_SOURCES = ../src/support.c four_box_wipe.c
 barn_door_wipe_la_SOURCES = ../src/support.c barn_door_wipe.c
 fade_la_SOURCES = ../src/support.c fade.c
 ellipse_wipe_la_SOURCES = ../src/support.c ellipse_wipe.c
+push_wipe_la_SOURCES = ../src/support.c push_wipe.c
 
 # instead of linking against all in $(GTK_LIBS), we link only against needed libs
 bar_wipe_la_LIBADD = $(PACKAGE_LIBS)
@@ -34,6 +37,7 @@ four_box_wipe_la_LIBADD = $(PACKAGE_LIBS)
 barn_door_wipe_la_LIBADD = $(PACKAGE_LIBS)
 fade_la_LIBADD = $(PACKAGE_LIBS)
 ellipse_wipe_la_LIBADD = $(PACKAGE_LIBS)
+push_wipe_la_LIBADD = $(PACKAGE_LIBS)
 
 AM_CPPFLAGS = \
 	-DDATADIR=\"$(datadir)\" \
