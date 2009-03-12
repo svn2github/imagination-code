@@ -96,6 +96,7 @@ struct _img_window_struct
 	GtkWidget	*slide_selected_data;
 	GtkWidget	*type_data;
 	GtkWidget	*music_file_treeview;
+	GtkWidget	*play_audio_button;
 	GtkWidget	*remove_audio_button;
 	GtkWidget	*total_time_data;
 	GtkWidget	*music_time_data;
@@ -160,8 +161,10 @@ struct _img_window_struct
 	guint        export_slide_nr;	// Number of frames fo current slide
 	guint        export_slide_cur;	// Current slide frame
 	guint        export_slide;		// Number of slide being exported
-	GSourceFunc  export_idle_func;	/* If TRUE, connect transition export,
-									   else still export function. */
+	GSourceFunc  export_idle_func;	/* If TRUE, connect transition export, else still export function. */
+	
+	/* Audio related stuff */
+	GPid		play_child_pid;
 };
 
 #endif

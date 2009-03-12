@@ -83,7 +83,7 @@ img_window_struct *img_create_window (void)
 	GtkWidget *type;
 	GtkWidget *hbox_music_label;
 	GtkWidget *music_time;
-	GtkWidget *hbox_buttons, *play_button, *move_up_button;
+	GtkWidget *hbox_buttons, *move_up_button;
 	GtkWidget *move_down_button, *clear_button, *image_buttons, *vbox7, *scrolledwindow1;
 	GtkAccelGroup *accel_group;
 	GtkCellRenderer *renderer, *pixbuf_cell;
@@ -98,7 +98,7 @@ img_window_struct *img_create_window (void)
 	icon_theme = gtk_icon_theme_get_default();
 	icon = gtk_icon_theme_load_icon(icon_theme, "imagination", 24, 0, NULL);
 
-	img_struct = g_new0(img_window_struct,1);
+	img_struct = g_new0(img_window_struct, 1);
 	img_struct->imagination_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_icon (GTK_WINDOW(img_struct->imagination_window),icon);
 	gtk_window_set_position (GTK_WINDOW(img_struct->imagination_window),GTK_WIN_POS_CENTER);
@@ -533,11 +533,13 @@ img_window_struct *img_create_window (void)
 	hbox_buttons = gtk_hbox_new(TRUE, 2);
 	gtk_container_add (GTK_CONTAINER ( vbox7), hbox_buttons);
 
-	play_button = gtk_button_new();
-	gtk_box_pack_start(GTK_BOX(hbox_buttons), play_button, FALSE, TRUE, 0);
+	img_struct->play_audio_button = gtk_button_new();
+	gtk_widget_set_sensitive(img_struct->play_audio_button, FALSE);
+	gtk_box_pack_start(GTK_BOX(hbox_buttons), img_struct->play_audio_button, FALSE, TRUE, 0);
 	image_buttons = gtk_image_new_from_stock (GTK_STOCK_MEDIA_PLAY, GTK_ICON_SIZE_MENU);
-	gtk_container_add (GTK_CONTAINER (play_button), image_buttons);
-	gtk_widget_set_tooltip_text(play_button, _("Play the selected file"));
+	gtk_container_add (GTK_CONTAINER (img_struct->play_audio_button), image_buttons);
+	gtk_widget_set_tooltip_text(img_struct->play_audio_button, _("Play the selected file"));
+	g_signal_connect ( (gpointer) img_struct->play_audio_button, "clicked", G_CALLBACK (img_play_stop_selected_file), img_struct);
 
 	img_struct->remove_audio_button = gtk_button_new();
 	gtk_widget_set_sensitive(img_struct->remove_audio_button, FALSE);
@@ -621,7 +623,10 @@ img_window_struct *img_create_window (void)
 static void img_activate_remove_button_music_liststore(GtkTreeModel *tree_model, GtkTreePath *path, GtkTreeIter *iter, img_window_struct *img)
 {
 	if (gtk_tree_model_get_iter_first(GTK_TREE_MODEL(img->music_file_liststore), iter) == TRUE)
-		gtk_widget_set_sensitive ( img->remove_audio_button, TRUE );
+	{
+		gtk_widget_set_sensitive ( img->remove_audio_button, TRUE);
+		gtk_widget_set_sensitive ( img->play_audio_button, TRUE);
+	}
 }
 
 static void img_quit_menu(GtkMenuItem *menuitem, img_window_struct *img)
@@ -679,7 +684,7 @@ void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *im
 	if (nr_selected >= 1)
 		img_set_statusbar_message(img,nr_selected);
 	else
-		gtk_statusbar_pop(GTK_STATUSBAR(img->statusbar),img->context_id);
+		gtk_statusbar_pop(GTK_STATUSBAR(img->statusbar), img->context_id);
 
 	gtk_widget_set_sensitive(img->remove_menu,		TRUE);
 	gtk_widget_set_sensitive(img->remove_button,	TRUE);

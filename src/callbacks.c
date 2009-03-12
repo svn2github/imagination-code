@@ -157,7 +157,8 @@ void img_remove_audio_files (GtkWidget *widget, img_window_struct *img)
 	}
 	if (gtk_tree_model_get_iter_first(GTK_TREE_MODEL(img->music_file_liststore), &iter) == FALSE)
 	{
-		gtk_widget_set_sensitive ( img->remove_audio_button, FALSE);
+		gtk_widget_set_sensitive (img->remove_audio_button, FALSE);
+		gtk_widget_set_sensitive (img->play_audio_button, FALSE);
 		gtk_label_set_text(GTK_LABEL(img->music_time_data), "");
 	}
 	else
@@ -1366,9 +1367,9 @@ static gboolean img_run_encoder(img_window_struct *img)
 				"ffmpeg -f image2pipe -vcodec ppm -r " EXPORT_FPS_STRING
 				" -i pipe: -an -b 512k -s 320x240 -f flv -y ", img->slideshow_filename, ".flv", NULL);
 
-	argv = g_strsplit( cmd_line, " ", 0 );
-	g_print( "%s\n", cmd_line );
-	g_free( cmd_line );
+	argv = g_strsplit(cmd_line, " ", 0);
+	g_print( "%s\n", cmd_line);
+	g_free(cmd_line);
 
 	ret = g_spawn_async_with_pipes( NULL, argv, NULL,
 									G_SPAWN_SEARCH_PATH/* |

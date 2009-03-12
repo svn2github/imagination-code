@@ -24,7 +24,7 @@ static gboolean img_populate_hash_table( GtkTreeModel *, GtkTreePath *, GtkTreeI
 void img_save_slideshow(img_window_struct *img)
 {
 	GKeyFile *img_key_file;
-	gchar *conf,*string;
+	gchar *conf,*string, *path, *filename, *file;
 	gint count = 0;
 	gsize len;
 	GtkTreeIter iter;
@@ -32,7 +32,7 @@ void img_save_slideshow(img_window_struct *img)
 	GtkTreeModel *model;
 
 	model = gtk_icon_view_get_model(GTK_ICON_VIEW(img->thumbnail_iconview));
-	if (!gtk_tree_model_get_iter_first (model,&iter))
+	if (!gtk_tree_model_get_iter_first (model, &iter))
 		return;
 
 	img_key_file = g_key_file_new();
@@ -40,14 +40,14 @@ void img_save_slideshow(img_window_struct *img)
 	/* Slideshow settings */
 	g_key_file_set_comment(img_key_file, NULL, NULL, comment_string, NULL);
 
-	g_key_file_set_string(img_key_file,"slideshow settings","name",img->slideshow_filename);
-	g_key_file_set_integer(img_key_file,"slideshow settings","export format",img->slideshow_format_index);
+	g_key_file_set_string(img_key_file,"slideshow settings","name", img->slideshow_filename);
+	g_key_file_set_integer(img_key_file,"slideshow settings","export format", img->slideshow_format_index);
 
 	if ((img->image_area)->allocation.height == 480)
-		g_key_file_set_integer(img_key_file,"slideshow settings","video format",480);
+		g_key_file_set_integer(img_key_file,"slideshow settings","video format", 480);
 	else
-		g_key_file_set_integer(img_key_file,"slideshow settings","video format",576);
-	g_key_file_set_string(img_key_file,"slideshow settings","aspect ratio",img->aspect_ratio);
+		g_key_file_set_integer(img_key_file,"slideshow settings","video format", 576);
+	g_key_file_set_string(img_key_file,"slideshow settings","aspect ratio", img->aspect_ratio);
 	conf = g_strdup_printf( "%lx", (gulong)img->background_color );
 	g_key_file_set_string(img_key_file,"slideshow settings", "background color", conf);
 	g_free( conf );
@@ -68,6 +68,27 @@ void img_save_slideshow(img_window_struct *img)
 		g_free(conf);
 	}
 	while (gtk_tree_model_iter_next (model,&iter));
+	count = 0;
+
+	/* Background music */
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(img->music_file_treeview));
+	if (gtk_tree_model_get_iter_first (model, &iter))
+	{
+		g_key_file_set_integer(img_key_file, "music", "number", gtk_tree_model_iter_n_children(model, NULL));
+		do
+		{
+			count++;
+			gtk_tree_model_get(model, &iter, 0, &path, 1, &filename ,-1);
+			conf = g_strdup_printf("music_%d",count);
+			file = g_build_filename(path, filename, NULL);
+			g_free(path);
+			g_free(filename);
+			g_key_file_set_string(img_key_file, "music",			conf, file);
+			g_free(file);
+			g_free(conf);
+		}
+		while (gtk_tree_model_iter_next (model, &iter));
+	}
 
 	/* Write the project file */
 	conf = g_key_file_to_data(img_key_file, &len, NULL);

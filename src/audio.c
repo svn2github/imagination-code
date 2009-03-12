@@ -93,3 +93,50 @@ unsigned getbits(unsigned x, int p, int n)
 {
 	return ( x >> (p+1-n)) & ~ (~0 << n);
 }
+
+void img_play_stop_selected_file(GtkButton *button, img_window_struct *img)
+{
+	GError *error = NULL;
+	gchar	*cmd_line, *path, *filename, *file, *message;
+	gchar 	**argv;
+	gboolean ret;
+	GtkTreeIter iter;
+	GtkWidget *tmp_image;
+
+	if (img->play_child_pid)
+	{
+		kill (img->play_child_pid, SIGINT);
+		img->play_child_pid = 0;
+		
+		tmp_image = gtk_image_new_from_stock (GTK_STOCK_MEDIA_PLAY,GTK_ICON_SIZE_MENU);
+		gtk_button_set_image(GTK_BUTTON(img->play_audio_button), tmp_image);
+		gtk_widget_set_tooltip_text(img->play_audio_button, _("Play the selected file"));
+		gtk_statusbar_pop(GTK_STATUSBAR(img->statusbar), img->context_id);
+		return;
+	}
+	gtk_tree_model_get_iter_first(GTK_TREE_MODEL (img->music_file_liststore),&iter);
+	gtk_tree_model_get(GTK_TREE_MODEL(img->music_file_liststore), &iter, 0, &path, 1, &filename, -1);
+
+	file = g_build_filename(path,filename,NULL);
+	g_free(path);
+	g_free(filename);
+
+	/* TODO get the correct file type */
+	cmd_line = g_strconcat("play -t mp3 ", file, NULL);
+	g_print ("%s\n",cmd_line);
+
+	argv = g_strsplit(cmd_line," ", 0);
+	g_free(cmd_line);
+	ret = g_spawn_async_with_pipes( NULL, argv, NULL,
+									G_SPAWN_SEARCH_PATH | G_SPAWN_STDOUT_TO_DEV_NULL | G_SPAWN_STDERR_TO_DEV_NULL,
+									NULL, NULL, &img->play_child_pid, NULL, NULL, NULL, &error );
+									
+	message = g_strdup_printf(_("Playing %s..."),file);
+	gtk_statusbar_push(GTK_STATUSBAR(img->statusbar), img->context_id, message);
+	g_free(file);
+	g_free(message);
+
+	tmp_image = gtk_image_new_from_stock (GTK_STOCK_MEDIA_STOP,GTK_ICON_SIZE_MENU);
+	gtk_button_set_image(GTK_BUTTON(img->play_audio_button), tmp_image);
+	gtk_widget_set_tooltip_text(img->play_audio_button, _("Stop the playback"));
+}
