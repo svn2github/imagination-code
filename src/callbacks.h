@@ -22,6 +22,7 @@
 #define __CALLBACKS_H__
 
 #include <gtk/gtk.h>
+#include "audio.h"
 #include "main-window.h"
 #include "new_slideshow.h"
 #include "slideshow_project.h"
@@ -30,6 +31,8 @@ void img_set_window_title(img_window_struct *,gchar *);
 void img_new_slideshow(GtkMenuItem *,img_window_struct *);
 void img_project_properties(GtkMenuItem *, img_window_struct *);
 void img_add_slides_thumbnails(GtkMenuItem *,img_window_struct *);
+void img_remove_audio_files (GtkWidget *, img_window_struct *);
+void img_remove_foreach_func (GtkTreeModel *, GtkTreePath *, GtkTreeIter *, GList **);
 void img_delete_selected_slides(GtkMenuItem *,img_window_struct *);
 void img_show_about_dialog (GtkMenuItem *,img_window_struct *);
 void img_set_total_slideshow_duration(img_window_struct *);

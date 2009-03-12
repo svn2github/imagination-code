@@ -95,7 +95,10 @@ struct _img_window_struct
 	GtkWidget	*trans_duration;
 	GtkWidget	*slide_selected_data;
 	GtkWidget	*type_data;
+	GtkWidget	*music_file_treeview;
+	GtkWidget	*remove_audio_button;
 	GtkWidget	*total_time_data;
+	GtkWidget	*music_time_data;
 	GtkWidget	*filename_data;
 	GtkWidget	*resolution_data;
 	GtkWidget	*thumb_scrolledwindow;
@@ -127,6 +130,7 @@ struct _img_window_struct
 	gint		slideshow_format_index;
 	guint32     background_color;
   	gint		total_secs;
+	gint		total_music_secs;
   	gint		slides_nr;
 
 	/* Variables common to export and preview functions */

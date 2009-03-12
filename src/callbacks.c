@@ -128,12 +128,63 @@ static void img_increase_progressbar(img_window_struct *img, gint nr)
 		gtk_main_iteration();
 }
 
+void img_remove_audio_files (GtkWidget *widget, img_window_struct *img)
+{
+	GtkTreeSelection *sel;
+	GtkTreePath *path;
+	GtkTreeIter iter;
+	GList *rr_list = NULL;
+	GList *node;
+	gchar *time;
+	gint secs;
+
+	sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(img->music_file_treeview));
+	gtk_tree_selection_selected_foreach(sel, (GtkTreeSelectionForeachFunc) img_remove_foreach_func, &rr_list);
+
+	for (node = rr_list; node != NULL; node = node->next)
+	{
+		path = gtk_tree_row_reference_get_path((GtkTreeRowReference *) node->data);
+		if (path)
+	    {
+			if (gtk_tree_model_get_iter(GTK_TREE_MODEL(img->music_file_liststore), &iter, path))
+			{
+				gtk_tree_model_get(GTK_TREE_MODEL(img->music_file_liststore), &iter, 3, &secs, -1);
+				gtk_list_store_remove(img->music_file_liststore, &iter);
+			}
+			gtk_tree_path_free(path);
+		}
+		img->total_music_secs -= secs;
+	}
+	if (gtk_tree_model_get_iter_first(GTK_TREE_MODEL(img->music_file_liststore), &iter) == FALSE)
+	{
+		gtk_widget_set_sensitive ( img->remove_audio_button, FALSE);
+		gtk_label_set_text(GTK_LABEL(img->music_time_data), "");
+	}
+	else
+	{
+		time = img_convert_seconds_to_time(img->total_music_secs);
+		gtk_label_set_text(GTK_LABEL(img->music_time_data), time);
+		g_free(time);
+	}
+	g_list_foreach(rr_list, (GFunc) gtk_tree_row_reference_free, NULL);
+	g_list_free(rr_list);
+}
+
+void img_remove_foreach_func (GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, GList **rowref_list)
+{
+	GtkTreeRowReference *rowref;
+
+	rowref = gtk_tree_row_reference_new(model, path);
+	*rowref_list = g_list_append(*rowref_list, rowref);
+}
+
 void img_select_audio_files_to_add ( GtkMenuItem* button, img_window_struct *img)
 {
 	GtkFileFilter *audio_filter, *all_files_filter;
 	GtkWidget *fs;
 	GSList *files = NULL;
 	gint response;
+	gchar *time = NULL;
 
 	fs = gtk_file_chooser_dialog_new (_("Please choose the audio files to import"),
 							GTK_WINDOW (img->imagination_window),
@@ -170,22 +221,30 @@ void img_select_audio_files_to_add ( GtkMenuItem* button, img_window_struct *img
 	if (files != NULL)
 		g_slist_free (files);
 
+	time = img_convert_seconds_to_time(img->total_music_secs);
+	gtk_label_set_text(GTK_LABEL(img->music_time_data), time);
+	g_free(time);
+
 	gtk_widget_destroy (fs);
 }
 
 static void img_add_audio_files (gchar *filename, img_window_struct *img)
 {
 	GtkTreeIter iter;
-	gchar *path, *file;
+	gchar *path, *file, *time;
+	gint secs;
 
 	path = g_path_get_dirname(filename);
 	file = g_path_get_basename(filename);
+	time = img_get_audio_length(filename, &secs);
 
 	gtk_list_store_append(img->music_file_liststore, &iter);
-	gtk_list_store_set (img->music_file_liststore, &iter, 0, path, 1, file, 2, "3:26", -1);
+	gtk_list_store_set (img->music_file_liststore, &iter, 0, path, 1, file, 2, time, 3, secs, -1);
 
+	img->total_music_secs += secs;
 	g_free(path);
 	g_free(file);
+	g_free(time);
 	g_free(filename);
 }
 
@@ -468,7 +527,6 @@ void img_set_total_slideshow_duration(img_window_struct *img)
 	GtkTreeIter iter;
 	slide_struct *entry;
 	GtkTreeModel *model;
-	gint h, m, s;
 
 	model = gtk_icon_view_get_model(GTK_ICON_VIEW(img->thumbnail_iconview));
 	if (!gtk_tree_model_get_iter_first (model,&iter))
@@ -485,11 +543,7 @@ void img_set_total_slideshow_duration(img_window_struct *img)
 	}
 	while (gtk_tree_model_iter_next (model,&iter));
 
-	/* Fix secs -> hour, mins and secs conversion */
-	h =  img->total_secs / 3600;
-	m = (img->total_secs % 3600) / 60;
-	s =  img->total_secs - (h * 3600) - (m * 60);
-	time = g_strdup_printf("%02d:%02d:%02d", h, m, s);
+	time = img_convert_seconds_to_time(img->total_secs);
 	gtk_label_set_text(GTK_LABEL (img->total_time_data),time);
 	g_free(time);
 

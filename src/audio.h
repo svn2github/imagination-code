@@ -21,8 +21,10 @@
 #define __IMAGINATION_AUDIO_H
 
 #include <gtk/gtk.h>
-#include <sys/stat.h>
+#include <glib.h>
+#include <glib/gstdio.h>
+#include "support.h"
 
-int img_get_audio_length(char *);
+gchar *img_get_audio_length(gchar *, gint *);
 
 #endif

@@ -130,6 +130,16 @@ GtkWidget *img_load_icon(gchar *filename, GtkIconSize size)
     return file_image;
 }
 
+gchar *img_convert_seconds_to_time(gint total_secs)
+{
+	gint h, m, s;
+
+	h =  total_secs / 3600;
+	m = (total_secs % 3600) / 60;
+	s =  total_secs - (h * 3600) - (m * 60);
+	return g_strdup_printf("%02d:%02d:%02d", h, m, s);
+}
+
 GtkWidget *_gtk_combo_box_new_text(gboolean pointer)
 {
 	GtkWidget *combo_box;
