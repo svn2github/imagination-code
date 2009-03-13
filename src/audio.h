@@ -24,9 +24,10 @@
 #include <glib.h>
 #include <glib/gstdio.h>
 #include <signal.h>
+#include <errno.h>
 #include "support.h"
 
-gchar *img_get_audio_length(gchar *, gint *);
+gchar *img_get_audio_length(img_window_struct *, gchar *, gint *);
 void img_play_stop_selected_file(GtkButton *, img_window_struct *);
 
 #endif

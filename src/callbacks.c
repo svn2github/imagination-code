@@ -29,7 +29,6 @@ static gboolean img_prepare_pixbufs(img_window_struct *);
 static void img_swap_toolbar_images( img_window_struct *, gboolean);
 static void img_clean_after_preview(img_window_struct *);
 static void img_increase_progressbar(img_window_struct *, gint);
-static void img_add_audio_files (gchar *, img_window_struct *);
 static gboolean img_run_encoder(img_window_struct *);
 static void img_about_dialog_activate_link(GtkAboutDialog * , const gchar *, gpointer );
 
@@ -229,7 +228,7 @@ void img_select_audio_files_to_add ( GtkMenuItem* button, img_window_struct *img
 	gtk_widget_destroy (fs);
 }
 
-static void img_add_audio_files (gchar *filename, img_window_struct *img)
+void img_add_audio_files (gchar *filename, img_window_struct *img)
 {
 	GtkTreeIter iter;
 	gchar *path, *file, *time;
@@ -237,7 +236,7 @@ static void img_add_audio_files (gchar *filename, img_window_struct *img)
 
 	path = g_path_get_dirname(filename);
 	file = g_path_get_basename(filename);
-	time = img_get_audio_length(filename, &secs);
+	time = img_get_audio_length(img, filename, &secs);
 
 	gtk_list_store_append(img->music_file_liststore, &iter);
 	gtk_list_store_set (img->music_file_liststore, &iter, 0, path, 1, file, 2, time, 3, secs, -1);

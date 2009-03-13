@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-03-12 13:33+0100\n"
+"POT-Creation-Date: 2009-03-13 08:15+0100\n"
 "PO-Revision-Date: 2009-03-02 09:07+0100\n"
 "Last-Translator: Daniel Nylander <po@danielnylander.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
@@ -27,6 +27,24 @@ msgstr "En lättviktig DVD-bildspelsskapare som använder GTK+2"
 #: ../imagination.desktop.in.h:3
 msgid "Imagination"
 msgstr "Imagination"
+
+#: ../src/audio.c:53
+msgid "Can't read file header!"
+msgstr ""
+
+#: ../src/audio.c:119 ../src/main-window.c:541
+#, fuzzy
+msgid "Play the selected file"
+msgstr "Ta bort markerade bilder"
+
+#: ../src/audio.c:140
+#, c-format
+msgid "Playing %s..."
+msgstr ""
+
+#: ../src/audio.c:147
+msgid "Stop the playback"
+msgstr ""
 
 #: ../src/main-window.c:118
 msgid "_Slideshow"
@@ -172,36 +190,31 @@ msgstr ""
 msgid "Music Duration:"
 msgstr ""
 
-#: ../src/main-window.c:540
-#, fuzzy
-msgid "Play the selected file"
-msgstr "Ta bort markerade bilder"
-
-#: ../src/main-window.c:547
+#: ../src/main-window.c:549
 #, fuzzy
 msgid "Delete the selected file"
 msgstr "Ta bort markerade bilder"
 
-#: ../src/main-window.c:555
+#: ../src/main-window.c:557
 #, fuzzy
 msgid "Move the selected file up"
 msgstr "Ta bort markerade bilder"
 
-#: ../src/main-window.c:561
+#: ../src/main-window.c:563
 #, fuzzy
 msgid "Move the selected file down"
 msgstr "Ta bort markerade bilder"
 
-#: ../src/main-window.c:567
+#: ../src/main-window.c:569
 #, fuzzy
 msgid "Clear all files"
 msgstr "Importera bilderna"
 
-#: ../src/main-window.c:985 ../src/main-window.c:987 ../src/support.c:220
+#: ../src/main-window.c:990 ../src/main-window.c:992 ../src/support.c:220
 msgid "None"
 msgstr "Ingen"
 
-#: ../src/callbacks.c:123
+#: ../src/callbacks.c:122
 #, c-format
 msgid "Please wait, importing slide %d out of %d"
 msgstr "Vänta, importerar bild %d av %d"
@@ -326,7 +339,7 @@ msgstr "Skala om bilderna för att passa önskat bildformat"
 msgid "Select background color:"
 msgstr "Välj bakgrundsfärg:"
 
-#: ../src/slideshow_project.c:111
+#: ../src/slideshow_project.c:132
 msgid "This is not an Imagination project file!"
 msgstr "Detta är inte en projektfil för Imagination!"
 

@@ -24,7 +24,7 @@ static gboolean img_populate_hash_table( GtkTreeModel *, GtkTreePath *, GtkTreeI
 void img_save_slideshow(img_window_struct *img)
 {
 	GKeyFile *img_key_file;
-	gchar *conf,*string, *path, *filename, *file;
+	gchar *conf, *string, *path, *filename, *file;
 	gint count = 0;
 	gsize len;
 	GtkTreeIter iter;
@@ -109,7 +109,7 @@ void img_load_slideshow(img_window_struct *img)
 	slide_struct *slide_info;
 	GtkTreeIter iter;
 	GKeyFile *img_key_file;
-	gchar *dummy,*slide_filename;
+	gchar *dummy, *slide_filename, *time;
 	GtkWidget *dialog;
 	gint number,i,transition_id, height, duration;
 	guint speed;
@@ -150,10 +150,10 @@ void img_load_slideshow(img_window_struct *img)
 	gtk_tree_model_foreach( model, (GtkTreeModelForeachFunc)img_populate_hash_table, &table );
 
 	/* Set the slideshow options */
-	img->slideshow_filename 	= g_key_file_get_string(img_key_file,"slideshow settings","name",NULL);
-	img->slideshow_format_index = g_key_file_get_integer(img_key_file,"slideshow settings","export format",NULL);
-	img->aspect_ratio			= g_key_file_get_string(img_key_file,"slideshow settings","aspect ratio",NULL);
-	height = g_key_file_get_integer(img_key_file,"slideshow settings","video format",NULL);
+	img->slideshow_filename 	= g_key_file_get_string(img_key_file,"slideshow settings","name", NULL);
+	img->slideshow_format_index = g_key_file_get_integer(img_key_file,"slideshow settings","export format", NULL);
+	img->aspect_ratio			= g_key_file_get_string(img_key_file,"slideshow settings","aspect ratio", NULL);
+	height = g_key_file_get_integer(img_key_file,"slideshow settings","video format", NULL);
 	gtk_widget_set_size_request( img->image_area, 720, height );
 	dummy = g_key_file_get_string(img_key_file, "slideshow settings", "background color", NULL );
 	img->background_color = (guint32)strtoul( dummy, NULL, 16 );
@@ -161,18 +161,18 @@ void img_load_slideshow(img_window_struct *img)
 	img->distort_images = g_key_file_get_boolean(img_key_file, "slideshow settings", "distort images", NULL );
 
 	/* Loads the thumbnails and set the slides info */
-	number = g_key_file_get_integer(img_key_file,"images","number",NULL);
+	number = g_key_file_get_integer(img_key_file,"images","number", NULL);
 	for (i = 1; i <= number; i++)
 	{
 		dummy = g_strdup_printf("image_%d",i);
-		slide_filename = g_key_file_get_string(img_key_file,"images",dummy,NULL);
+		slide_filename = g_key_file_get_string(img_key_file,"images",dummy, NULL);
 
 		thumb = img_load_pixbuf_from_file(slide_filename);
 		if (thumb)
 		{
-			speed 	=	g_key_file_get_integer(img_key_file,"transition speed"	,dummy,NULL);
-			duration= 	g_key_file_get_integer (img_key_file,"slide duration"	,dummy,NULL);
-			transition_id = g_key_file_get_integer(img_key_file,"transition type",dummy,NULL);
+			speed 	=		g_key_file_get_integer(img_key_file,"transition speed",	dummy, NULL);
+			duration= 		g_key_file_get_integer(img_key_file,"slide duration",	dummy, NULL);
+			transition_id = g_key_file_get_integer(img_key_file,"transition type",	dummy, NULL);
 
 			/* Get the mem address of the transition */
 			spath = (gchar *)g_hash_table_lookup( table, GINT_TO_POINTER( transition_id ) );
@@ -190,9 +190,26 @@ void img_load_slideshow(img_window_struct *img)
 		g_free(slide_filename);
 		g_free(dummy);
 	}
+
+	/* Loads the audio files in the liststore */
+	number = g_key_file_get_integer(img_key_file, "music", "number", NULL);
+	for (i = 1; i <= number; i++)
+	{
+		dummy = g_strdup_printf("music_%d", i);
+		slide_filename = g_key_file_get_string(img_key_file, "music", dummy, NULL);
+		img_add_audio_files(slide_filename, img);
+
+		/* slide_filename is freed in img_add_audio_files */
+		g_free(dummy);
+	}
 	g_key_file_free (img_key_file);
 	img_set_total_slideshow_duration(img);
-	img_set_statusbar_message(img,0);
+
+	time = img_convert_seconds_to_time(img->total_music_secs);
+	gtk_label_set_text(GTK_LABEL(img->music_time_data), time);
+	g_free(time);
+
+	img_set_statusbar_message(img, 0);
 	gtk_widget_show(img->thumb_scrolledwindow);
 
 	dummy = g_path_get_basename(img->project_filename);

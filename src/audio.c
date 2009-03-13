@@ -20,7 +20,7 @@
 #include "audio.h"
 
 unsigned getbits(unsigned x, int p, int n);
-gchar *img_get_audio_length(gchar *filename, gint *secs)
+gchar *img_get_audio_length(img_window_struct *img, gchar *filename, gint *secs)
 {
 	/* Bitrate values for MP3 files
 									bits  V1 L1,  V1 L2,   V1 L3,  V2 L1,  V2  L2 & L3 */
@@ -44,12 +44,18 @@ gchar *img_get_audio_length(gchar *filename, gint *secs)
 	guchar header[4];
 	FILE *f;
 	struct stat buf;
+	GtkWidget *dialog;
 
 	f = fopen(filename,"r");
 	if (f == NULL || fread (header, 1, 4, f) == 0)
 	{
 		fclose(f);
-		return g_strdup(_("Error!"));
+		dialog = gtk_message_dialog_new(GTK_WINDOW(img->imagination_window),GTK_DIALOG_MODAL,GTK_MESSAGE_ERROR,GTK_BUTTONS_OK,_("Can't read file header!"));
+		gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (dialog),"%s.",strerror(errno));
+		gtk_window_set_title(GTK_WINDOW(dialog),"Imagination");
+		gtk_dialog_run (GTK_DIALOG (dialog));
+		gtk_widget_destroy (GTK_WIDGET (dialog));
+		return NULL;
 	}
 	fclose(f);
 

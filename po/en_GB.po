@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-03-12 13:33+0100\n"
+"POT-Creation-Date: 2009-03-13 08:15+0100\n"
 "PO-Revision-Date: 2009-02-24 11:39+0100\n"
 "Last-Translator: colossus73 <colossus73@gmail.com>\n"
 "Language-Team: English (British)\n"
@@ -27,6 +27,23 @@ msgstr "A lightweight DVD slideshow maker using GTK+2"
 #: ../imagination.desktop.in.h:3
 msgid "Imagination"
 msgstr "Imagination"
+
+#: ../src/audio.c:53
+msgid "Can't read file header!"
+msgstr "Can't read file header!"
+
+#: ../src/audio.c:119 ../src/main-window.c:541
+msgid "Play the selected file"
+msgstr "Play the selected file"
+
+#: ../src/audio.c:140
+#, c-format
+msgid "Playing %s..."
+msgstr "Playing %s..."
+
+#: ../src/audio.c:147
+msgid "Stop the playback"
+msgstr "Stop the playback"
 
 #: ../src/main-window.c:118
 msgid "_Slideshow"
@@ -167,31 +184,27 @@ msgstr "<b>Background Music</b>"
 msgid "Music Duration:"
 msgstr "Music Duration:"
 
-#: ../src/main-window.c:540
-msgid "Play the selected file"
-msgstr "Play the selected file"
-
-#: ../src/main-window.c:547
+#: ../src/main-window.c:549
 msgid "Delete the selected file"
 msgstr "Delete the selected file"
 
-#: ../src/main-window.c:555
+#: ../src/main-window.c:557
 msgid "Move the selected file up"
 msgstr "Move the selected file up"
 
-#: ../src/main-window.c:561
+#: ../src/main-window.c:563
 msgid "Move the selected file down"
 msgstr "Move the selected file down"
 
-#: ../src/main-window.c:567
+#: ../src/main-window.c:569
 msgid "Clear all files"
 msgstr "Clear all files"
 
-#: ../src/main-window.c:985 ../src/main-window.c:987 ../src/support.c:220
+#: ../src/main-window.c:990 ../src/main-window.c:992 ../src/support.c:220
 msgid "None"
 msgstr "None"
 
-#: ../src/callbacks.c:123
+#: ../src/callbacks.c:122
 #, c-format
 msgid "Please wait, importing slide %d out of %d"
 msgstr "Please wait, importing slide %d out of %d"
@@ -309,7 +322,7 @@ msgstr "Rescale images to fit desired aspect ratio"
 msgid "Select background color:"
 msgstr "Select background color:"
 
-#: ../src/slideshow_project.c:111
+#: ../src/slideshow_project.c:132
 msgid "This is not an Imagination project file!"
 msgstr "This is not an Imagination project file!"
 

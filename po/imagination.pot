@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-03-12 13:33+0100\n"
+"POT-Creation-Date: 2009-03-13 08:15+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -27,6 +27,23 @@ msgstr ""
 
 #: ../imagination.desktop.in.h:3
 msgid "Imagination"
+msgstr ""
+
+#: ../src/audio.c:53
+msgid "Can't read file header!"
+msgstr ""
+
+#: ../src/audio.c:119 ../src/main-window.c:541
+msgid "Play the selected file"
+msgstr ""
+
+#: ../src/audio.c:140
+#, c-format
+msgid "Playing %s..."
+msgstr ""
+
+#: ../src/audio.c:147
+msgid "Stop the playback"
 msgstr ""
 
 #: ../src/main-window.c:118
@@ -168,31 +185,27 @@ msgstr ""
 msgid "Music Duration:"
 msgstr ""
 
-#: ../src/main-window.c:540
-msgid "Play the selected file"
-msgstr ""
-
-#: ../src/main-window.c:547
+#: ../src/main-window.c:549
 msgid "Delete the selected file"
 msgstr ""
 
-#: ../src/main-window.c:555
+#: ../src/main-window.c:557
 msgid "Move the selected file up"
 msgstr ""
 
-#: ../src/main-window.c:561
+#: ../src/main-window.c:563
 msgid "Move the selected file down"
 msgstr ""
 
-#: ../src/main-window.c:567
+#: ../src/main-window.c:569
 msgid "Clear all files"
 msgstr ""
 
-#: ../src/main-window.c:985 ../src/main-window.c:987 ../src/support.c:220
+#: ../src/main-window.c:990 ../src/main-window.c:992 ../src/support.c:220
 msgid "None"
 msgstr ""
 
-#: ../src/callbacks.c:123
+#: ../src/callbacks.c:122
 #, c-format
 msgid "Please wait, importing slide %d out of %d"
 msgstr ""
@@ -310,7 +323,7 @@ msgstr ""
 msgid "Select background color:"
 msgstr ""
 
-#: ../src/slideshow_project.c:111
+#: ../src/slideshow_project.c:132
 msgid "This is not an Imagination project file!"
 msgstr ""
 
