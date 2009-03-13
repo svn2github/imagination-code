@@ -306,6 +306,7 @@ void img_free_allocated_memory(img_window_struct *img_struct)
 	GtkTreeIter iter;
 	slide_struct *entry;
 
+	/* Free the memory allocated the single slides one by one */
 	if (img_struct->slides_nr)
 	{
 		model = gtk_icon_view_get_model (GTK_ICON_VIEW(img_struct->thumbnail_iconview));
@@ -325,7 +326,16 @@ void img_free_allocated_memory(img_window_struct *img_struct)
 		gtk_list_store_clear(GTK_LIST_STORE(img_struct->thumbnail_model));
 		g_signal_handlers_unblock_by_func((gpointer)img_struct->thumbnail_iconview, (gpointer)img_iconview_selection_changed, img_struct);
 	}
+	
+	/* Delete the audio files in the liststore */
+	if (gtk_tree_model_get_iter_first(GTK_TREE_MODEL(img_struct->music_file_liststore), &iter))
+	{
+		gtk_list_store_clear(img_struct->music_file_liststore);
+		img_struct->total_music_secs = 0;
+		gtk_label_set_text(GTK_LABEL(img_struct->music_time_data), "");
+	}
 
+	/* Free gchar pointers */
 	if (img_struct->slideshow_filename)
 	{
 		g_free(img_struct->slideshow_filename);

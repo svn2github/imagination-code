@@ -95,11 +95,7 @@ struct _img_window_struct
 	GtkWidget	*trans_duration;
 	GtkWidget	*slide_selected_data;
 	GtkWidget	*type_data;
-	GtkWidget	*music_file_treeview;
-	GtkWidget	*play_audio_button;
-	GtkWidget	*remove_audio_button;
 	GtkWidget	*total_time_data;
-	GtkWidget	*music_time_data;
 	GtkWidget	*filename_data;
 	GtkWidget	*resolution_data;
 	GtkWidget	*thumb_scrolledwindow;
@@ -110,7 +106,6 @@ struct _img_window_struct
   	GtkWidget	*image_area;
   	guint		context_id;
   	GtkListStore *thumbnail_model;
-	GtkListStore *music_file_liststore;
   	gchar		*current_dir;
 
 	/* Import slides dialog variables */
@@ -164,6 +159,11 @@ struct _img_window_struct
 	GSourceFunc  export_idle_func;	/* If TRUE, connect transition export, else still export function. */
 	
 	/* Audio related stuff */
+	GtkWidget	*music_file_treeview;
+	GtkWidget	*play_audio_button;
+	GtkWidget	*remove_audio_button;
+	GtkListStore *music_file_liststore;
+	GtkWidget	*music_time_data;
 	GPid		play_child_pid;
 };
 
