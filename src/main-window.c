@@ -797,7 +797,6 @@ static void img_combo_box_transition_type_changed (GtkComboBox *combo, img_windo
 										  img_combo_box_transition_type_changed,
 										  img);
 	}
-
 	p = gtk_tree_model_get_path( model, &iter );
 	path = gtk_tree_path_to_string( p );
 	gtk_tree_path_free( p );
