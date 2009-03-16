@@ -21,46 +21,10 @@
 #define __IMAGINATION_AUDIO_H
 
 #include <gtk/gtk.h>
-#include <glib.h>
-#include <glib/gstdio.h>
 #include <signal.h>
 #include <errno.h>
+#include <sox.h>
 #include "support.h"
-
-#define MIN_CONSEC_GOOD_FRAMES 4
-#define FRAME_HEADER_SIZE 4
-#define MIN_FRAME_SIZE 21
-#define NUM_SAMPLES 4
-
-typedef struct {
-	unsigned long	sync;
-	unsigned int	version;
-	unsigned int	layer;
-	unsigned int	crc;
-	unsigned int	bitrate;
-	unsigned int	freq;
-	unsigned int	padding;
-	unsigned int	extension;
-	unsigned int	mode;
-	unsigned int	mode_extension;
-	unsigned int	copyright;
-	unsigned int	original;
-	unsigned int	emphasis;
-} mp3header;
-
-typedef struct {
-	char *filename;
-	FILE *file;
-	off_t datasize;
-	int header_isvalid;
-	mp3header header;
-	int id3_isvalid;
-	int vbr;
-	float vbr_average;
-	int seconds;
-	int frames;
-	int badframes;
-} mp3info;
 
 gchar *img_get_audio_length(img_window_struct *, gchar *, gint *);
 void img_play_stop_selected_file(GtkButton *, img_window_struct *);

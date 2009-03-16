@@ -5,7 +5,8 @@ INCLUDES = \
 	-DPACKAGE_LIB_DIR=\""$(libdir)"\" \
 	-DPACKAGE_DATA_DIR=\""$(datadir)"\" \
 	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" \
-	@PACKAGE_CFLAGS@
+	@PACKAGE_CFLAGS@ \
+	@SOX_CFLAGS@
 
 bin_PROGRAMS = imagination
 
@@ -23,4 +24,4 @@ imagination_SOURCES = \
 imagination_CFLAGS = \
 	-DDATADIR=\"$(datadir)\"
 
-imagination_LDADD = @PACKAGE_LIBS@ $(INTLLIBS)
+imagination_LDADD = @PACKAGE_LIBS@ @SOX_LIBS@ $(INTLLIBS)

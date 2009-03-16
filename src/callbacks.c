@@ -860,7 +860,7 @@ static void img_swap_toolbar_images( img_window_struct *img,gboolean flag )
 		
 		tmp_image = gtk_image_new_from_stock (GTK_STOCK_MEDIA_PLAY,GTK_ICON_SIZE_LARGE_TOOLBAR);
 		gtk_widget_show(tmp_image);
-		g_object_set(img->preview_button,"icon-widget",tmp_image,NULL);
+		gtk_tool_button_set_icon_widget(GTK_TOOL_BUTTON(img->preview_button), tmp_image);
 		gtk_widget_set_tooltip_text(img->preview_button,_("Starts the preview"));
 	}
 	else
@@ -870,7 +870,7 @@ static void img_swap_toolbar_images( img_window_struct *img,gboolean flag )
 		
 		tmp_image = gtk_image_new_from_stock (GTK_STOCK_MEDIA_STOP,GTK_ICON_SIZE_LARGE_TOOLBAR);
 		gtk_widget_show(tmp_image);
-		g_object_set(img->preview_button,"icon-widget",tmp_image,NULL);
+		gtk_tool_button_set_icon_widget(GTK_TOOL_BUTTON(img->preview_button), tmp_image);
 		gtk_widget_set_tooltip_text(img->preview_button,_("Stops the preview"));
 	}
 }

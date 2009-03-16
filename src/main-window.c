@@ -30,6 +30,7 @@ static void img_random_button_clicked(GtkButton *, img_window_struct *);
 static gpointer img_set_random_transition(img_window_struct *, slide_struct *);
 static void img_combo_box_speed_changed (GtkComboBox *,  img_window_struct *);
 static void img_spinbutton_value_changed (GtkSpinButton *, img_window_struct *);
+static void img_clear_audio_files(GtkButton *, img_window_struct *);
 static void img_activate_remove_button_music_liststore(GtkTreeModel *, GtkTreePath *, GtkTreeIter *, img_window_struct *);
 static void img_quit_menu(GtkMenuItem *, img_window_struct *);
 static void img_select_all_thumbnails(GtkMenuItem *, img_window_struct *);
@@ -84,7 +85,7 @@ img_window_struct *img_create_window (void)
 	GtkWidget *hbox_music_label;
 	GtkWidget *music_time;
 	GtkWidget *hbox_buttons, *move_up_button;
-	GtkWidget *move_down_button, *clear_button, *image_buttons, *vbox7, *scrolledwindow1;
+	GtkWidget *move_down_button, *clear_button, *image_buttons, *vbox2, *scrolledwindow1;
 	GtkAccelGroup *accel_group;
 	GtkCellRenderer *renderer, *pixbuf_cell;
 	GtkTreeSelection *selection;
@@ -480,12 +481,12 @@ img_window_struct *img_create_window (void)
 	gtk_misc_set_padding (GTK_MISC (frame_label), 2, 2);
 
 	/* Add the liststore */
-	vbox7 = gtk_vbox_new (FALSE, 4);
-	gtk_widget_show (vbox7);
-	gtk_container_add (GTK_CONTAINER (frame2_alignment), vbox7);
+	vbox2 = gtk_vbox_new (FALSE, 4);
+	gtk_widget_show (vbox2);
+	gtk_container_add (GTK_CONTAINER (frame2_alignment), vbox2);
 	
 	scrolledwindow1 = gtk_scrolled_window_new (NULL, NULL);
-	gtk_box_pack_start (GTK_BOX (vbox7), scrolledwindow1, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (vbox2), scrolledwindow1, TRUE, TRUE, 0);
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow1), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (scrolledwindow1), GTK_SHADOW_IN);
 	gtk_widget_set_size_request(scrolledwindow1, -1, 150);
@@ -495,7 +496,6 @@ img_window_struct *img_create_window (void)
 
 	img_struct->music_file_treeview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(img_struct->music_file_liststore));
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(img_struct->music_file_treeview));
-	gtk_tree_selection_set_mode(selection, GTK_SELECTION_MULTIPLE);
 
 	for (x = 0; x <= 3; x++)
 	{
@@ -520,7 +520,7 @@ img_window_struct *img_create_window (void)
 
 	/* Add the total music labels and the buttons */
 	hbox_music_label = gtk_hbox_new(FALSE, 2);
-	gtk_container_add (GTK_CONTAINER ( vbox7), hbox_music_label);
+	gtk_container_add (GTK_CONTAINER ( vbox2), hbox_music_label);
 
 	music_time = gtk_label_new(_("Music Duration:"));
 	gtk_box_pack_start(GTK_BOX(hbox_music_label), music_time, TRUE, TRUE, 0);
@@ -531,7 +531,7 @@ img_window_struct *img_create_window (void)
 	gtk_misc_set_alignment (GTK_MISC (img_struct->music_time_data), 1, 0.5);
 
 	hbox_buttons = gtk_hbox_new(TRUE, 2);
-	gtk_container_add (GTK_CONTAINER ( vbox7), hbox_buttons);
+	gtk_container_add (GTK_CONTAINER ( vbox2), hbox_buttons);
 
 	img_struct->play_audio_button = gtk_button_new();
 	gtk_widget_set_sensitive(img_struct->play_audio_button, FALSE);
@@ -567,6 +567,7 @@ img_window_struct *img_create_window (void)
 	image_buttons = gtk_image_new_from_stock (GTK_STOCK_CLEAR, GTK_ICON_SIZE_MENU);
 	gtk_container_add (GTK_CONTAINER (clear_button), image_buttons);
 	gtk_widget_set_tooltip_text(clear_button, _("Clear all files"));
+	g_signal_connect ( (gpointer) clear_button, "clicked", G_CALLBACK (img_clear_audio_files), img_struct);
 
 	/* Create the model */
 	img_struct->thumbnail_model = gtk_list_store_new (2, GDK_TYPE_PIXBUF, G_TYPE_POINTER);
@@ -618,6 +619,13 @@ img_window_struct *img_create_window (void)
 	gtk_window_add_accel_group (GTK_WINDOW (img_struct->imagination_window), accel_group);
 
 	return img_struct;
+}
+
+static void img_clear_audio_files(GtkButton *button, img_window_struct *img)
+{
+	gtk_list_store_clear(GTK_LIST_STORE(img->music_file_liststore));
+	gtk_widget_set_sensitive(img->play_audio_button, FALSE);
+	gtk_widget_set_sensitive(img->remove_audio_button, FALSE);
 }
 
 static void img_activate_remove_button_music_liststore(GtkTreeModel *tree_model, GtkTreePath *path, GtkTreeIter *iter, img_window_struct *img)
