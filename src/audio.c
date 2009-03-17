@@ -22,16 +22,6 @@
 static gchar *img_get_audio_filetype(gchar *);
 static void img_play_audio_ended (GPid ,gint ,img_window_struct *);
 static void img_swap_audio_files_button(img_window_struct *, gboolean );
-
-	/*
-		dialog = gtk_message_dialog_new(GTK_WINDOW(img->imagination_window),GTK_DIALOG_MODAL,GTK_MESSAGE_ERROR,GTK_BUTTONS_OK,_("Can't read file header!"));
-		gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (dialog),"%s.",strerror(errno));
-		gtk_window_set_title(GTK_WINDOW(dialog),"Imagination");
-		gtk_dialog_run (GTK_DIALOG (dialog));
-		gtk_widget_destroy (GTK_WIDGET (dialog));
-		return NULL;
-	}*/
-
 static gchar *img_get_audio_filetype(gchar *filename)
 {
 	if (g_str_has_suffix(filename, ".mp3") || g_str_has_suffix(filename, ".MP3"))
@@ -56,6 +46,7 @@ gchar *img_get_audio_length(img_window_struct *img, gchar *filename, gint *secs)
 
 	sox_format_init();
 	ft = sox_open_read(filename, NULL, NULL, filetype);
+
 	if (ft != NULL)
 	{
 		seconds = (ft->signal.length / ft->signal.channels) / ft->signal.rate;
@@ -64,7 +55,7 @@ gchar *img_get_audio_length(img_window_struct *img, gchar *filename, gint *secs)
 	sox_format_quit();
 
 	*secs = seconds;
-	return img_convert_seconds_to_time(*secs);
+	return seconds == -1 ? NULL : img_convert_seconds_to_time(*secs);
 }
 
 void img_play_stop_selected_file(GtkButton *button, img_window_struct *img)
@@ -89,7 +80,6 @@ void img_play_stop_selected_file(GtkButton *button, img_window_struct *img)
 	g_free(path);
 	g_free(filename);
 
-	/* TODO get the correct file type */
 	cmd_line = g_strconcat("play -t ", img_get_audio_filetype(file), " ", file, NULL);
 	g_print ("%s\n",cmd_line);
 
@@ -105,7 +95,7 @@ void img_play_stop_selected_file(GtkButton *button, img_window_struct *img)
 	g_child_watch_add(img->play_child_pid, (GChildWatchFunc) img_play_audio_ended, img);
 
 	img_swap_audio_files_button(img, FALSE);
-	message = g_strdup_printf(_("Playing %s..."),file);
+	message = g_strdup_printf(_("Playing %s..."), file);
 	gtk_statusbar_push(GTK_STATUSBAR(img->statusbar), img->context_id, message);
 	g_free(file);
 	g_free(message);

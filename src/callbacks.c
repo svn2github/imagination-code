@@ -216,6 +216,7 @@ void img_select_audio_files_to_add ( GtkMenuItem* button, img_window_struct *img
 	if (response == GTK_RESPONSE_ACCEPT)
 	{
 		files = gtk_file_chooser_get_filenames (GTK_FILE_CHOOSER (fs));
+		gtk_widget_destroy (fs);
 		g_slist_foreach( files, (GFunc) img_add_audio_files, img);
 	}
 	if (files != NULL)
@@ -224,12 +225,11 @@ void img_select_audio_files_to_add ( GtkMenuItem* button, img_window_struct *img
 	time = img_convert_seconds_to_time(img->total_music_secs);
 	gtk_label_set_text(GTK_LABEL(img->music_time_data), time);
 	g_free(time);
-
-	gtk_widget_destroy (fs);
 }
 
 void img_add_audio_files (gchar *filename, img_window_struct *img)
 {
+	GtkWidget *dialog;
 	GtkTreeIter iter;
 	gchar *path, *file, *time;
 	gint secs;
@@ -238,6 +238,19 @@ void img_add_audio_files (gchar *filename, img_window_struct *img)
 	file = g_path_get_basename(filename);
 	time = img_get_audio_length(img, filename, &secs);
 
+	if (time == NULL)
+	{
+		dialog = gtk_message_dialog_new(GTK_WINDOW(img->imagination_window), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, _("Can't import file:"));
+		gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (dialog), filename);
+		gtk_window_set_title(GTK_WINDOW(dialog), "Imagination");
+		gtk_dialog_run (GTK_DIALOG (dialog));
+		gtk_widget_destroy (GTK_WIDGET (dialog));
+
+		g_free(path);
+		g_free(file);
+		g_free(filename);
+		return;
+	}
 	gtk_list_store_append(img->music_file_liststore, &iter);
 	gtk_list_store_set (img->music_file_liststore, &iter, 0, path, 1, file, 2, time, 3, secs, -1);
 
@@ -316,6 +329,7 @@ void img_free_allocated_memory(img_window_struct *img_struct)
 		{
 			gtk_tree_model_get(model, &iter,1,&entry,-1);
 			g_free(entry->filename);
+			g_free(entry->path);
 			g_free(entry->resolution);
 			g_free(entry->type);
 			g_free(entry);
