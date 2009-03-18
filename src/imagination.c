@@ -22,9 +22,12 @@
 #endif
 
 #include <gtk/gtk.h>
+#include <sox.h>
 
 #include "main-window.h"
 #include "support.h"
+
+extern void output_message(unsigned , const char *, const char *, va_list ap);
 
 int main (int argc, char *argv[])
 {
@@ -38,6 +41,9 @@ int main (int argc, char *argv[])
 
 	gtk_set_locale ();
 	gtk_init (&argc, &argv);
+	
+	sox_globals.output_message_handler = output_message;
+	sox_format_init();
 
 	img_window = img_create_window();
 
@@ -56,6 +62,7 @@ int main (int argc, char *argv[])
 
 	gtk_main ();
 
+	sox_format_quit();
 	g_free(img_window);
 	return 0;
 }

@@ -229,7 +229,6 @@ void img_select_audio_files_to_add ( GtkMenuItem* button, img_window_struct *img
 
 void img_add_audio_files (gchar *filename, img_window_struct *img)
 {
-	GtkWidget *dialog;
 	GtkTreeIter iter;
 	gchar *path, *file, *time;
 	gint secs;
@@ -238,26 +237,16 @@ void img_add_audio_files (gchar *filename, img_window_struct *img)
 	file = g_path_get_basename(filename);
 	time = img_get_audio_length(img, filename, &secs);
 
-	if (time == NULL)
+	if (time != NULL)
 	{
-		dialog = gtk_message_dialog_new(GTK_WINDOW(img->imagination_window), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, _("Can't import file:"));
-		gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (dialog), filename);
-		gtk_window_set_title(GTK_WINDOW(dialog), "Imagination");
-		gtk_dialog_run (GTK_DIALOG (dialog));
-		gtk_widget_destroy (GTK_WIDGET (dialog));
+		gtk_list_store_append(img->music_file_liststore, &iter);
+		gtk_list_store_set (img->music_file_liststore, &iter, 0, path, 1, file, 2, time, 3, secs, -1);
 
-		g_free(path);
-		g_free(file);
-		g_free(filename);
-		return;
+		img->total_music_secs += secs;
+		g_free(time);
 	}
-	gtk_list_store_append(img->music_file_liststore, &iter);
-	gtk_list_store_set (img->music_file_liststore, &iter, 0, path, 1, file, 2, time, 3, secs, -1);
-
-	img->total_music_secs += secs;
 	g_free(path);
 	g_free(file);
-	g_free(time);
 	g_free(filename);
 }
 
@@ -1365,14 +1354,15 @@ static gboolean img_run_encoder(img_window_struct *img)
 	GtkWidget  *message;
 	GError     *error = NULL;
 	gchar     **argv;
-	gchar      *cmd_line;
+	gchar      *cmd_line, *_file;
+	gint		argc;
 	gboolean    ret;
-
+	
 	if (img->slideshow_format_index == 0)
 	/* Export as VOB file */
 		cmd_line = g_strdup_printf(
 				"ffmpeg -f image2pipe -vcodec ppm -i pipe: "
-				"-target %s-dvd -r %s -an -aspect %s -s %dx%d -y -bf 2 -f dvd %s",
+				"-target %s-dvd -r %s -an -aspect %s -s %dx%d -y -bf 2 -f dvd '%s.vob'",
 				img->image_area->allocation.height == 576 ? "pal" : "ntsc",
 				EXPORT_FPS_STRING,
 				img->aspect_ratio, img->image_area->allocation.width,
@@ -1381,16 +1371,16 @@ static gboolean img_run_encoder(img_window_struct *img)
 	/* Export as OGG file */
 		cmd_line = g_strdup_printf(
 				"ffmpeg -f image2pipe -vcodec ppm -i pipe: "
-				"-r %s -an -aspect %s -s %dx%d -vcodec libtheora -vb 1024k -acodec libvorbis -f ogg -y %s.ogg",
+				"-r %s -an -aspect %s -s %dx%d -vcodec libtheora -vb 1024k -acodec libvorbis -f ogg -y '%s.ogg'",
 				EXPORT_FPS_STRING, img->aspect_ratio, img->image_area->allocation.width,
 				img->image_area->allocation.height, img->slideshow_filename );
 	else
 	/* Export as FLV file */
-		cmd_line = g_strconcat(
+		cmd_line = g_strdup_printf(
 				"ffmpeg -f image2pipe -vcodec ppm -r " EXPORT_FPS_STRING
-				" -i pipe: -an -b 512k -s 320x240 -f flv -y ", img->slideshow_filename, ".flv", NULL);
+				" -i pipe: -an -b 512k -s 320x240 -f flv -y '%s.flv'", img->slideshow_filename);
 
-	argv = g_strsplit(cmd_line, " ", 0);
+	g_shell_parse_argv (cmd_line, &argc, &argv, NULL);
 	g_print( "%s\n", cmd_line);
 	g_free(cmd_line);
 

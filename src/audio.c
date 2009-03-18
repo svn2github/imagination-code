@@ -19,9 +19,12 @@
 
 #include "audio.h"
 
+#define LAST_SLASH(path) strrchr(path, '/')
+
 static gchar *img_get_audio_filetype(gchar *);
 static void img_play_audio_ended (GPid ,gint ,img_window_struct *);
 static void img_swap_audio_files_button(img_window_struct *, gboolean );
+
 static gchar *img_get_audio_filetype(gchar *filename)
 {
 	if (g_str_has_suffix(filename, ".mp3") || g_str_has_suffix(filename, ".MP3"))
@@ -39,12 +42,11 @@ static gchar *img_get_audio_filetype(gchar *filename)
 gchar *img_get_audio_length(img_window_struct *img, gchar *filename, gint *secs)
 {
 	gint seconds = -1;
-	gchar *filetype;
+	gchar *filetype = NULL;
 	sox_format_t *ft;
 
 	filetype = img_get_audio_filetype(filename);
-
-	sox_format_init();
+	
 	ft = sox_open_read(filename, NULL, NULL, filetype);
 
 	if (ft != NULL)
@@ -52,7 +54,6 @@ gchar *img_get_audio_length(img_window_struct *img, gchar *filename, gint *secs)
 		seconds = (ft->signal.length / ft->signal.channels) / ft->signal.rate;
 		sox_close(ft); 
 	}
-	sox_format_quit();
 
 	*secs = seconds;
 	return seconds == -1 ? NULL : img_convert_seconds_to_time(*secs);
@@ -61,8 +62,9 @@ gchar *img_get_audio_length(img_window_struct *img, gchar *filename, gint *secs)
 void img_play_stop_selected_file(GtkButton *button, img_window_struct *img)
 {
 	GError *error = NULL;
-	gchar	*cmd_line, *path, *filename, *file, *message;
+	gchar	*cmd_line, *path, *filename, *_file, *file, *message;
 	gchar 	**argv;
+	gint argc;
 	gboolean ret;
 	GtkTreeModel *model;
 	GtkTreeIter iter;
@@ -73,25 +75,30 @@ void img_play_stop_selected_file(GtkButton *button, img_window_struct *img)
 		img_swap_audio_files_button(img, TRUE);
 		return;
 	}
-	gtk_tree_selection_get_selected(gtk_tree_view_get_selection(GTK_TREE_VIEW(img->music_file_treeview)), &model, &iter);
+	if (gtk_tree_selection_get_selected(gtk_tree_view_get_selection(GTK_TREE_VIEW(img->music_file_treeview)), &model, &iter) == FALSE)
+		return;
 	gtk_tree_model_get(GTK_TREE_MODEL(img->music_file_liststore), &iter, 0, &path, 1, &filename, -1);
 
-	file = g_build_filename(path,filename,NULL);
+	_file = g_build_filename(path, filename, NULL);
 	g_free(path);
 	g_free(filename);
 
-	cmd_line = g_strconcat("play -t ", img_get_audio_filetype(file), " ", file, NULL);
+	file = g_shell_quote(_file);
+
+	cmd_line = g_strconcat("play -t ", img_get_audio_filetype(_file), " ", file, NULL);
+	g_free(_file);
 	g_print ("%s\n",cmd_line);
 
-	argv = g_strsplit(cmd_line," ", 0);
+	g_shell_parse_argv (cmd_line, &argc, &argv, NULL);
 	g_free(cmd_line);
+
 	ret = g_spawn_async_with_pipes( NULL, argv, NULL,
 									G_SPAWN_SEARCH_PATH | 
 									G_SPAWN_DO_NOT_REAP_CHILD | 
 									G_SPAWN_STDOUT_TO_DEV_NULL | 
 									G_SPAWN_STDERR_TO_DEV_NULL,
 									NULL, NULL, &img->play_child_pid, NULL, NULL, NULL, &error );
-									
+
 	g_child_watch_add(img->play_child_pid, (GChildWatchFunc) img_play_audio_ended, img);
 
 	img_swap_audio_files_button(img, FALSE);
@@ -125,4 +132,20 @@ static void img_swap_audio_files_button(img_window_struct *img, gboolean flag)
 		gtk_widget_set_tooltip_text(img->play_audio_button, _("Stop the playback"));
 	}
 }
-	
+
+void output_message(unsigned level, const char *filename, const char *fmt, va_list ap)
+{
+	GtkWidget *dialog;
+	gchar *string;
+
+	if (level == 1)
+	{
+		string = g_strdup_vprintf(fmt,ap);
+		dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, string);
+		gtk_window_set_title(GTK_WINDOW(dialog), "Imagination");
+		gtk_dialog_run (GTK_DIALOG (dialog));
+		gtk_widget_destroy (GTK_WIDGET (dialog));
+
+		g_free(string);
+	}
+}
