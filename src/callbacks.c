@@ -486,7 +486,7 @@ void img_show_about_dialog (GtkMenuItem *item,img_window_struct *img_struct)
 {
 	static GtkWidget *about = NULL;
 	static gchar version[] = VERSION "-" REVISION;
-    const char *authors[] = {"\nDevelopers:\nGiuseppe Torelli <colossus73@gmail.com>\nTadej Borovšak <tadeboro@gmail.com>\n\nImagination logo:\nDadster, Gemini and Lunoob\nfrom http://linuxgraphicsusers.com\n\n",NULL};
+    const char *authors[] = {"\nDevelopers:\nGiuseppe Torelli <colossus73@gmail.com>\nTadej Borovšak <tadeboro@gmail.com>\n\nImagination logo: http://linuxgraphicsusers.com\n\n",NULL};
     //const char *documenters[] = {NULL};
 
 	if (about == NULL)
