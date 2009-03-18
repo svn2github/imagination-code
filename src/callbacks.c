@@ -559,8 +559,6 @@ void img_set_total_slideshow_duration(img_window_struct *img)
 	time = img_convert_seconds_to_time(img->total_secs);
 	gtk_label_set_text(GTK_LABEL (img->total_time_data),time);
 	g_free(time);
-
-	img->project_is_modified = TRUE;
 }
 
 void img_start_stop_preview(GtkWidget *button, img_window_struct *img)
@@ -1354,7 +1352,7 @@ static gboolean img_run_encoder(img_window_struct *img)
 	GtkWidget  *message;
 	GError     *error = NULL;
 	gchar     **argv;
-	gchar      *cmd_line, *_file;
+	gchar      *cmd_line;
 	gint		argc;
 	gboolean    ret;
 	

@@ -755,6 +755,7 @@ void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *im
 	 * efficient one, since we're recalculating the whole duration when we
 	 * only need to display it. BTW, is total duration label hidding needed?
 	 * Even when there is no slide selected, duration stays the same. */
+	img->project_is_modified = TRUE;
 	img_set_total_slideshow_duration(img);
 
 	if (nr_selected > 1)

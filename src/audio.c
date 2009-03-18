@@ -62,7 +62,7 @@ gchar *img_get_audio_length(img_window_struct *img, gchar *filename, gint *secs)
 void img_play_stop_selected_file(GtkButton *button, img_window_struct *img)
 {
 	GError *error = NULL;
-	gchar	*cmd_line, *path, *filename, *_file, *file, *message;
+	gchar	*cmd_line, *path, *filename, *file, *message;
 	gchar 	**argv;
 	gint argc;
 	gboolean ret;
@@ -79,14 +79,11 @@ void img_play_stop_selected_file(GtkButton *button, img_window_struct *img)
 		return;
 	gtk_tree_model_get(GTK_TREE_MODEL(img->music_file_liststore), &iter, 0, &path, 1, &filename, -1);
 
-	_file = g_build_filename(path, filename, NULL);
+	file = g_build_filename(path, filename, NULL);
 	g_free(path);
 	g_free(filename);
 
-	file = g_shell_quote(_file);
-
-	cmd_line = g_strconcat("play -t ", img_get_audio_filetype(_file), " ", file, NULL);
-	g_free(_file);
+	cmd_line = g_strdup_printf("play -t %s '%s'", img_get_audio_filetype(file), file);
 	g_print ("%s\n",cmd_line);
 
 	g_shell_parse_argv (cmd_line, &argc, &argv, NULL);
