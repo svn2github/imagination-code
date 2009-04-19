@@ -1352,31 +1352,44 @@ static gboolean img_run_encoder(img_window_struct *img)
 	GtkWidget  *message;
 	GError     *error = NULL;
 	gchar     **argv;
-	gchar      *cmd_line;
+	gchar      *cmd_line, *path, *filename, *audio_string;
 	gint		argc;
 	gboolean    ret;
-	
+	GtkTreeModel *model;
+	GtkTreeIter iter;
+
+	model = gtk_tree_view_get_model (GTK_TREE_VIEW(img->music_file_treeview));
+
+	gtk_tree_model_get_iter_first(model,&iter);
+	do
+	{
+		gtk_tree_model_get(model, &iter,0, &path, 1, &filename, -1);
+		audio_string = g_strdup_printf("-i '%s/%s'", path, filename);
+		g_free(path);
+		g_free(filename);
+	}
+	while (gtk_tree_model_iter_next (model,&iter));
+
 	if (img->slideshow_format_index == 0)
 	/* Export as VOB file */
 		cmd_line = g_strdup_printf(
 				"ffmpeg -f image2pipe -vcodec ppm -i pipe: "
-				"-target %s-dvd -r %s -an -aspect %s -s %dx%d -y -bf 2 -f dvd '%s.vob'",
-				img->image_area->allocation.height == 576 ? "pal" : "ntsc",
-				EXPORT_FPS_STRING,
-				img->aspect_ratio, img->image_area->allocation.width,
-				img->image_area->allocation.height, img->slideshow_filename );
+				"-r %s -aspect %s -s %dx%d -i flashdance.ac3 -y -bf 2 -target %s-dvd '%s.vob'",
+				EXPORT_FPS_STRING, img->aspect_ratio,
+				img->image_area->allocation.width, img->image_area->allocation.height,
+				img->image_area->allocation.height == 576 ? "pal" : "ntsc", img->slideshow_filename );
 	else if (img->slideshow_format_index == 1)
 	/* Export as OGG file */
 		cmd_line = g_strdup_printf(
 				"ffmpeg -f image2pipe -vcodec ppm -i pipe: "
-				"-r %s -an -aspect %s -s %dx%d -vcodec libtheora -vb 1024k -acodec libvorbis -f ogg -y '%s.ogg'",
+				"-r %s -aspect %s -s %dx%d -vcodec libtheora -vb 1024k -acodec libvorbis -f ogg -y '%s.ogg'",
 				EXPORT_FPS_STRING, img->aspect_ratio, img->image_area->allocation.width,
 				img->image_area->allocation.height, img->slideshow_filename );
 	else
 	/* Export as FLV file */
 		cmd_line = g_strdup_printf(
 				"ffmpeg -f image2pipe -vcodec ppm -r " EXPORT_FPS_STRING
-				" -i pipe: -an -b 512k -s 320x240 -f flv -y '%s.flv'", img->slideshow_filename);
+				" -i pipe: -b 512k -s 320x240 -f flv -y '%s.flv'", img->slideshow_filename);
 
 	g_shell_parse_argv (cmd_line, &argc, &argv, NULL);
 	g_print( "%s\n", cmd_line);

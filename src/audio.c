@@ -19,8 +19,6 @@
 
 #include "audio.h"
 
-#define LAST_SLASH(path) strrchr(path, '/')
-
 static gchar *img_get_audio_filetype(gchar *);
 static void img_play_audio_ended (GPid ,gint ,img_window_struct *);
 static void img_swap_audio_files_button(img_window_struct *, gboolean );
