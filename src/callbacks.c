@@ -1352,31 +1352,35 @@ static gboolean img_run_encoder(img_window_struct *img)
 	GtkWidget  *message;
 	GError     *error = NULL;
 	gchar     **argv;
-	gchar      *cmd_line, *path, *filename, *audio_string;
+	gchar      *cmd_line, *path, *filename;
 	gint		argc;
 	gboolean    ret;
 	GtkTreeModel *model;
 	GtkTreeIter iter;
+	GString		*audio_string;
 
 	model = gtk_tree_view_get_model (GTK_TREE_VIEW(img->music_file_treeview));
 
-	gtk_tree_model_get_iter_first(model,&iter);
-	do
+	if (gtk_tree_model_get_iter_first(model,&iter) )
 	{
-		gtk_tree_model_get(model, &iter,0, &path, 1, &filename, -1);
-		audio_string = g_strdup_printf("-i '%s/%s'", path, filename);
-		g_free(path);
-		g_free(filename);
+		audio_string = g_string_new("");
+		do
+		{
+			gtk_tree_model_get(model, &iter,0, &path, 1, &filename, -1);
+			g_string_append_printf(audio_string, " -i '%s/%s'", path, filename);
+			g_free(path);
+			g_free(filename);
+		}
+		while (gtk_tree_model_iter_next (model,&iter));
 	}
-	while (gtk_tree_model_iter_next (model,&iter));
 
 	if (img->slideshow_format_index == 0)
 	/* Export as VOB file */
 		cmd_line = g_strdup_printf(
 				"ffmpeg -f image2pipe -vcodec ppm -i pipe: "
-				"-r %s -aspect %s -s %dx%d -i flashdance.ac3 -y -bf 2 -target %s-dvd '%s.vob'",
+				"-r %s -aspect %s -s %dx%d %s -y -bf 2 -target %s-dvd '%s.vob'",
 				EXPORT_FPS_STRING, img->aspect_ratio,
-				img->image_area->allocation.width, img->image_area->allocation.height,
+				img->image_area->allocation.width, img->image_area->allocation.height, audio_string->str ? audio_string->str : " ",
 				img->image_area->allocation.height == 576 ? "pal" : "ntsc", img->slideshow_filename );
 	else if (img->slideshow_format_index == 1)
 	/* Export as OGG file */
@@ -1391,6 +1395,7 @@ static gboolean img_run_encoder(img_window_struct *img)
 				"ffmpeg -f image2pipe -vcodec ppm -r " EXPORT_FPS_STRING
 				" -i pipe: -b 512k -s 320x240 -f flv -y '%s.flv'", img->slideshow_filename);
 
+	g_string_free(audio_string, FALSE);
 	g_shell_parse_argv (cmd_line, &argc, &argv, NULL);
 	g_print( "%s\n", cmd_line);
 	g_free(cmd_line);
