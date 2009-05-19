@@ -7,5 +7,5 @@ _Comment=A lightweight DVD slideshow maker using GTK+2
 Exec=imagination %F
 Icon=imagination
 Terminal=false
-Categories=Application;AudioVideo;
+Categories=AudioVideo;
 StartupNotify=true
