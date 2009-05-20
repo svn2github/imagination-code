@@ -1357,7 +1357,7 @@ static gboolean img_run_encoder(img_window_struct *img)
 	gboolean    ret;
 	GtkTreeModel *model;
 	GtkTreeIter iter;
-	GString		*audio_string;
+	GString		*audio_string = NULL;
 
 	model = gtk_tree_view_get_model (GTK_TREE_VIEW(img->music_file_treeview));
 
@@ -1380,7 +1380,7 @@ static gboolean img_run_encoder(img_window_struct *img)
 				"ffmpeg -f image2pipe -vcodec ppm -i pipe: "
 				"-r %s -aspect %s -s %dx%d %s -y -bf 2 -target %s-dvd '%s.vob'",
 				EXPORT_FPS_STRING, img->aspect_ratio,
-				img->image_area->allocation.width, img->image_area->allocation.height, audio_string->str ? audio_string->str : " ",
+				img->image_area->allocation.width, img->image_area->allocation.height, audio_string ? audio_string->str : "",
 				img->image_area->allocation.height == 576 ? "pal" : "ntsc", img->slideshow_filename );
 	else if (img->slideshow_format_index == 1)
 	/* Export as OGG file */
