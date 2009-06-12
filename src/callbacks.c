@@ -1386,14 +1386,14 @@ static gboolean img_run_encoder(img_window_struct *img)
 	/* Export as OGG file */
 		cmd_line = g_strdup_printf(
 				"ffmpeg -f image2pipe -vcodec ppm -i pipe: "
-				"-r %s -aspect %s -s %dx%d -vcodec libtheora -vb 1024k -acodec libvorbis -f ogg -y '%s.ogg'",
+				"-r %s -aspect %s -s %dx%d %s -vcodec libtheora -vb 1024k -acodec libvorbis -f ogg -y '%s.ogg'",
 				EXPORT_FPS_STRING, img->aspect_ratio, img->image_area->allocation.width,
-				img->image_area->allocation.height, img->slideshow_filename );
+				img->image_area->allocation.height, audio_string ? audio_string->str : "", img->slideshow_filename );
 	else
 	/* Export as FLV file */
 		cmd_line = g_strdup_printf(
 				"ffmpeg -f image2pipe -vcodec ppm -r " EXPORT_FPS_STRING
-				" -i pipe: -b 512k -s 320x240 -f flv -y '%s.flv'", img->slideshow_filename);
+				" -i pipe: -b 512k -s 320x240 %s -f flv -vcodec flv -acodec libmp3lame -ab 56 -ar 22050 -ac 1 -y '%s.flv'", audio_string ? audio_string->str : "", img->slideshow_filename);
 
 	g_string_free(audio_string, FALSE);
 	g_shell_parse_argv (cmd_line, &argc, &argv, NULL);
