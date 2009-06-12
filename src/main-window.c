@@ -626,6 +626,7 @@ static void img_clear_audio_files(GtkButton *button, img_window_struct *img)
 	gtk_list_store_clear(GTK_LIST_STORE(img->music_file_liststore));
 	gtk_widget_set_sensitive(img->play_audio_button, FALSE);
 	gtk_widget_set_sensitive(img->remove_audio_button, FALSE);
+	gtk_label_set_text(GTK_LABEL(img->music_time_data), "");
 }
 
 static void img_activate_remove_button_music_liststore(GtkTreeModel *tree_model, GtkTreePath *path, GtkTreeIter *iter, img_window_struct *img)

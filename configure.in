@@ -44,7 +44,7 @@ fi
 if test "x${REVISION}" != "xr0"
 then
 	# force debug mode for a SVN working copy
-	CFLAGS="-pg -g -Wall"
+	CFLAGS="-g -Wall"
 else
 	REVISION="-1"
 fi
