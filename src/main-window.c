@@ -883,7 +883,7 @@ static gpointer img_set_random_transition(img_window_struct *img, slide_struct *
 	g_snprintf( path, 10, "%d:%d", r1, r2 );
 	gtk_tree_model_get_iter_from_string( model, &iter, path );
 
-	gtk_tree_model_get( model, &iter, 1, &address, 3, &transition_id, -1 );
+	gtk_tree_model_get( model, &iter, 2, &address, 3, &transition_id, -1 );
 	info_slide->transition_id = transition_id;
 	info_slide->path = g_strdup( path );
 
