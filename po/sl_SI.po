@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-06-12 15:24+0200\n"
+"POT-Creation-Date: 2009-06-13 13:52+0200\n"
 "PO-Revision-Date: 2009-02-24 11:55+0100\n"
 "Last-Translator: tadeboro <tadeboro@gmail.com>\n"
 "Language-Team: Slovenian\n"
@@ -108,7 +108,7 @@ msgstr "_Uvozi"
 msgid "Delete the selected slides"
 msgstr "Zbriši izbrane diapozitive"
 
-#: ../src/main-window.c:297 ../src/callbacks.c:865
+#: ../src/main-window.c:297 ../src/callbacks.c:881
 msgid "Starts the preview"
 msgstr "Požene predogled"
 
@@ -202,12 +202,12 @@ msgstr "Zbriši izbrane diapozitive"
 msgid "Move the selected file down"
 msgstr "Zbriši izbrane diapozitive"
 
-#: ../src/main-window.c:569
+#: ../src/main-window.c:570
 #, fuzzy
 msgid "Clear all files"
 msgstr "Uvozi diapozitive"
 
-#: ../src/main-window.c:998 ../src/main-window.c:1000 ../src/support.c:220
+#: ../src/main-window.c:1000 ../src/main-window.c:1002 ../src/support.c:220
 msgid "None"
 msgstr "Brez"
 
@@ -216,33 +216,33 @@ msgstr "Brez"
 msgid "Please wait, importing slide %d out of %d"
 msgstr "Uvažam diapozitiv %d od %d, prosimo počakajte"
 
-#: ../src/callbacks.c:189
+#: ../src/callbacks.c:205
 #, fuzzy
 msgid "Please choose the audio files to import"
 msgstr "Prosimo izberite ime projekta"
 
-#: ../src/callbacks.c:200
+#: ../src/callbacks.c:216
 #, fuzzy
 msgid "All audio files"
 msgstr "Vse datoteke"
 
-#: ../src/callbacks.c:209 ../src/callbacks.c:286
+#: ../src/callbacks.c:225 ../src/callbacks.c:302
 msgid "All files"
 msgstr "Vse datoteke"
 
-#: ../src/callbacks.c:260
+#: ../src/callbacks.c:276
 msgid "Import slides, use SHIFT key for multiple select"
 msgstr "Uvoz diapozitivov, uporabite SHIFT za izbor večih slik"
 
-#: ../src/callbacks.c:272
+#: ../src/callbacks.c:288
 msgid "All image files"
 msgstr "Vse slikovne datoteke"
 
-#: ../src/callbacks.c:366
+#: ../src/callbacks.c:382
 msgid "You didn't save your slideshow yet. Are you sure you want to close it?"
 msgstr "Projekt ni bil shranjen. Ste prepričani da ga želite zapreti?"
 
-#: ../src/callbacks.c:436
+#: ../src/callbacks.c:452
 #, c-format
 msgid "%d x %d pixels"
 msgid_plural "%d x %d pixels"
@@ -251,40 +251,40 @@ msgstr[1] "%d x %d piki"
 msgstr[2] "%d x %d pike"
 msgstr[3] "%d x %d pik"
 
-#: ../src/callbacks.c:506
+#: ../src/callbacks.c:522
 msgid "translator-credits"
 msgstr "Tadej Borovšak <tadeboro@gmail.com>"
 
-#: ../src/callbacks.c:875
+#: ../src/callbacks.c:891
 msgid "Stops the preview"
 msgstr "Ustavi predogled"
 
-#: ../src/callbacks.c:917
+#: ../src/callbacks.c:933
 msgid "Load an Imagination slideshow project"
 msgstr "Odpri Domišljijin projekt"
 
-#: ../src/callbacks.c:918
+#: ../src/callbacks.c:934
 msgid "Save an Imagination slideshow project"
 msgstr "Shrani Domišljijin projekt"
 
-#: ../src/callbacks.c:1010
+#: ../src/callbacks.c:1026
 msgid "Exporting the slideshow"
 msgstr "Izvažam diaprojekcijo"
 
-#: ../src/callbacks.c:1022
+#: ../src/callbacks.c:1038
 msgid "Preparing for export ..."
 msgstr "Pripravljam za izvoz ..."
 
-#: ../src/callbacks.c:1033
+#: ../src/callbacks.c:1049
 msgid "Overall progress:"
 msgstr "Skupni napredek:"
 
-#: ../src/callbacks.c:1091 ../src/callbacks.c:1176
+#: ../src/callbacks.c:1107 ../src/callbacks.c:1192
 #, c-format
 msgid "Slide %d export progress:"
 msgstr "Napredek izvoza diapozitiva %d:"
 
-#: ../src/callbacks.c:1415
+#: ../src/callbacks.c:1431
 msgid "Failed to launch the encoder!"
 msgstr "Ne morem zagnati šifrirnika"
 

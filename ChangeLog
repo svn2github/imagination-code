@@ -1,0 +1,13 @@
+Imagination changelog
+
+0x/06/09 - 1.5:
+		- Added audio support.
+		- Added OGG slideshow export.
+		- Added ability to randomly choose the transitions.
+		- Grouped the transitions in family and added icons for describing the effect.
+		- Added new transitions effects: Fade In and Fade Out to Fade family,
+		  Barn Door Wipe family, Four Box Wipe and Ellipse Wipe.
+		- Added man page.
+
+26/02/09 - 1.0:
+		- First release.

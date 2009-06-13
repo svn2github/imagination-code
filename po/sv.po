@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-06-12 15:24+0200\n"
+"POT-Creation-Date: 2009-06-13 13:52+0200\n"
 "PO-Revision-Date: 2009-03-02 09:07+0100\n"
 "Last-Translator: Daniel Nylander <po@danielnylander.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
@@ -107,7 +107,7 @@ msgstr "_Importera"
 msgid "Delete the selected slides"
 msgstr "Ta bort markerade bilder"
 
-#: ../src/main-window.c:297 ../src/callbacks.c:865
+#: ../src/main-window.c:297 ../src/callbacks.c:881
 msgid "Starts the preview"
 msgstr "Startar förhandsgranskningen"
 
@@ -201,12 +201,12 @@ msgstr "Ta bort markerade bilder"
 msgid "Move the selected file down"
 msgstr "Ta bort markerade bilder"
 
-#: ../src/main-window.c:569
+#: ../src/main-window.c:570
 #, fuzzy
 msgid "Clear all files"
 msgstr "Importera bilderna"
 
-#: ../src/main-window.c:998 ../src/main-window.c:1000 ../src/support.c:220
+#: ../src/main-window.c:1000 ../src/main-window.c:1002 ../src/support.c:220
 msgid "None"
 msgstr "Ingen"
 
@@ -215,41 +215,41 @@ msgstr "Ingen"
 msgid "Please wait, importing slide %d out of %d"
 msgstr "Vänta, importerar bild %d av %d"
 
-#: ../src/callbacks.c:189
+#: ../src/callbacks.c:205
 #, fuzzy
 msgid "Please choose the audio files to import"
 msgstr "Välj filnamn för bildspelsprojektet"
 
-#: ../src/callbacks.c:200
+#: ../src/callbacks.c:216
 #, fuzzy
 msgid "All audio files"
 msgstr "Alla filer"
 
-#: ../src/callbacks.c:209 ../src/callbacks.c:286
+#: ../src/callbacks.c:225 ../src/callbacks.c:302
 msgid "All files"
 msgstr "Alla filer"
 
-#: ../src/callbacks.c:260
+#: ../src/callbacks.c:276
 msgid "Import slides, use SHIFT key for multiple select"
 msgstr "Importera bilder, använd SKIFT-tangenten för flera markeringar"
 
-#: ../src/callbacks.c:272
+#: ../src/callbacks.c:288
 msgid "All image files"
 msgstr "Alla bildfiler"
 
-#: ../src/callbacks.c:366
+#: ../src/callbacks.c:382
 msgid "You didn't save your slideshow yet. Are you sure you want to close it?"
 msgstr ""
 "Du har inte sparat ditt bildspel än. Är du säker på att du vill stänga det?"
 
-#: ../src/callbacks.c:436
+#: ../src/callbacks.c:452
 #, c-format
 msgid "%d x %d pixels"
 msgid_plural "%d x %d pixels"
 msgstr[0] "%d x %d bildpunkter"
 msgstr[1] "%d x %d bildpunkter"
 
-#: ../src/callbacks.c:506
+#: ../src/callbacks.c:522
 msgid "translator-credits"
 msgstr ""
 "Daniel Nylander <po@danielnylander.se>\n"
@@ -257,36 +257,36 @@ msgstr ""
 "Skicka synpunkter på översättningen till\n"
 "<tp-sv@listor.tp-sv.se>."
 
-#: ../src/callbacks.c:875
+#: ../src/callbacks.c:891
 msgid "Stops the preview"
 msgstr "Stoppar förhandsgranskningen"
 
-#: ../src/callbacks.c:917
+#: ../src/callbacks.c:933
 msgid "Load an Imagination slideshow project"
 msgstr "Läs in ett Imagination-bildspelsprojekt"
 
-#: ../src/callbacks.c:918
+#: ../src/callbacks.c:934
 msgid "Save an Imagination slideshow project"
 msgstr "Spara ett Imagination-bildspelsprojekt"
 
-#: ../src/callbacks.c:1010
+#: ../src/callbacks.c:1026
 msgid "Exporting the slideshow"
 msgstr "Exporterar bildspelet"
 
-#: ../src/callbacks.c:1022
+#: ../src/callbacks.c:1038
 msgid "Preparing for export ..."
 msgstr "Förbereder för export ..."
 
-#: ../src/callbacks.c:1033
+#: ../src/callbacks.c:1049
 msgid "Overall progress:"
 msgstr "Totalt förlopp:"
 
-#: ../src/callbacks.c:1091 ../src/callbacks.c:1176
+#: ../src/callbacks.c:1107 ../src/callbacks.c:1192
 #, c-format
 msgid "Slide %d export progress:"
 msgstr "Förlopp för export av bild %d:"
 
-#: ../src/callbacks.c:1415
+#: ../src/callbacks.c:1431
 msgid "Failed to launch the encoder!"
 msgstr "Misslyckades med att starta kodaren!"
 

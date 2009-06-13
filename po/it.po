@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-06-12 15:24+0200\n"
+"POT-Creation-Date: 2009-06-13 13:52+0200\n"
 "PO-Revision-Date: 2009-02-24 11:47+0100\n"
 "Last-Translator: colossus73 <colossus73@gmail.com>\n"
 "Language-Team: Italian\n"
@@ -101,7 +101,7 @@ msgstr "_Importa l'audio"
 msgid "Delete the selected slides"
 msgstr "Cancella le diapositive selezionate"
 
-#: ../src/main-window.c:297 ../src/callbacks.c:865
+#: ../src/main-window.c:297 ../src/callbacks.c:881
 msgid "Starts the preview"
 msgstr "Avvia l'anteprima"
 
@@ -192,11 +192,11 @@ msgstr "Sposta sopra il file selezionato"
 msgid "Move the selected file down"
 msgstr "Sposta sotto il file selezionato"
 
-#: ../src/main-window.c:569
+#: ../src/main-window.c:570
 msgid "Clear all files"
 msgstr "Cancella tutti i file"
 
-#: ../src/main-window.c:998 ../src/main-window.c:1000 ../src/support.c:220
+#: ../src/main-window.c:1000 ../src/main-window.c:1002 ../src/support.c:220
 msgid "None"
 msgstr "Nessuna"
 
@@ -205,72 +205,72 @@ msgstr "Nessuna"
 msgid "Please wait, importing slide %d out of %d"
 msgstr "Attendere prego, sto importando la diapositiva %d su %d"
 
-#: ../src/callbacks.c:189
+#: ../src/callbacks.c:205
 msgid "Please choose the audio files to import"
 msgstr "Prego scegliere il nome dei file audio da importare"
 
-#: ../src/callbacks.c:200
+#: ../src/callbacks.c:216
 msgid "All audio files"
 msgstr "Tutti i file audio"
 
-#: ../src/callbacks.c:209 ../src/callbacks.c:286
+#: ../src/callbacks.c:225 ../src/callbacks.c:302
 msgid "All files"
 msgstr "Tutti i file"
 
-#: ../src/callbacks.c:260
+#: ../src/callbacks.c:276
 msgid "Import slides, use SHIFT key for multiple select"
 msgstr "Importazione diapositive, usa MAIUSC per la selezione multipla"
 
-#: ../src/callbacks.c:272
+#: ../src/callbacks.c:288
 msgid "All image files"
 msgstr "Tutti i file immagine"
 
-#: ../src/callbacks.c:366
+#: ../src/callbacks.c:382
 msgid "You didn't save your slideshow yet. Are you sure you want to close it?"
 msgstr ""
 "La presentazione non è stata ancora salvata, sei sicuro di volerla chiudere?"
 
-#: ../src/callbacks.c:436
+#: ../src/callbacks.c:452
 #, c-format
 msgid "%d x %d pixels"
 msgid_plural "%d x %d pixels"
 msgstr[0] "%d x %d pixel"
 msgstr[1] "%d x %d pixel"
 
-#: ../src/callbacks.c:506
+#: ../src/callbacks.c:522
 msgid "translator-credits"
 msgstr "Giuseppe Torelli <colossus73@gmail.com>"
 
-#: ../src/callbacks.c:875
+#: ../src/callbacks.c:891
 msgid "Stops the preview"
 msgstr "Ferma l'anteprima"
 
-#: ../src/callbacks.c:917
+#: ../src/callbacks.c:933
 msgid "Load an Imagination slideshow project"
 msgstr "Carica una presentazione di Imagination"
 
-#: ../src/callbacks.c:918
+#: ../src/callbacks.c:934
 msgid "Save an Imagination slideshow project"
 msgstr "Salva una presentazione di Imagination"
 
-#: ../src/callbacks.c:1010
+#: ../src/callbacks.c:1026
 msgid "Exporting the slideshow"
 msgstr "Esporta la presentazione"
 
-#: ../src/callbacks.c:1022
+#: ../src/callbacks.c:1038
 msgid "Preparing for export ..."
 msgstr "Preparazione esportazione..."
 
-#: ../src/callbacks.c:1033
+#: ../src/callbacks.c:1049
 msgid "Overall progress:"
 msgstr "Progresso complessivo:"
 
-#: ../src/callbacks.c:1091 ../src/callbacks.c:1176
+#: ../src/callbacks.c:1107 ../src/callbacks.c:1192
 #, c-format
 msgid "Slide %d export progress:"
 msgstr "Progresso esportazione diapositiva %d"
 
-#: ../src/callbacks.c:1415
+#: ../src/callbacks.c:1431
 msgid "Failed to launch the encoder!"
 msgstr "Non è stato possibile mandare in esecuzione l'encoder!"
 

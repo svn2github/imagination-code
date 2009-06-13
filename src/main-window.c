@@ -497,20 +497,13 @@ img_window_struct *img_create_window (void)
 	img_struct->music_file_treeview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(img_struct->music_file_liststore));
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(img_struct->music_file_treeview));
 
-	for (x = 0; x <= 3; x++)
+	/* First and last column aren't displayed, so we only need two columns. */
+	for (x = 1; x < 3; x++)
 	{
-		if (x == 0 || x == 3)
-		{
-			column = gtk_tree_view_column_new();
-			gtk_tree_view_column_set_visible(column, FALSE);
-		}
-		else
-		{
-			column = gtk_tree_view_column_new();
-			renderer = gtk_cell_renderer_text_new();
-			gtk_tree_view_column_pack_start(column, renderer, TRUE);
-			gtk_tree_view_column_add_attribute(column, renderer, "text", x);
-		}
+		column = gtk_tree_view_column_new();
+		renderer = gtk_cell_renderer_text_new();
+		gtk_tree_view_column_pack_start(column, renderer, TRUE);
+		gtk_tree_view_column_add_attribute(column, renderer, "text", x);
 		gtk_tree_view_append_column (GTK_TREE_VIEW (img_struct->music_file_treeview), column);
 	}
 
@@ -555,12 +548,14 @@ img_window_struct *img_create_window (void)
 	image_buttons = gtk_image_new_from_stock (GTK_STOCK_GO_UP, GTK_ICON_SIZE_MENU);
 	gtk_container_add (GTK_CONTAINER (move_up_button), image_buttons);
 	gtk_widget_set_tooltip_text(move_up_button, _("Move the selected file up"));
+	g_signal_connect( G_OBJECT( move_up_button ), "clicked", G_CALLBACK( img_move_audio_up ), img_struct );
 
 	move_down_button = gtk_button_new();
 	gtk_box_pack_start(GTK_BOX(hbox_buttons), move_down_button, FALSE, TRUE, 0);
 	image_buttons = gtk_image_new_from_stock (GTK_STOCK_GO_DOWN, GTK_ICON_SIZE_MENU);
 	gtk_container_add (GTK_CONTAINER (move_down_button), image_buttons);
 	gtk_widget_set_tooltip_text(move_down_button, _("Move the selected file down"));
+	g_signal_connect( G_OBJECT( move_down_button ), "clicked", G_CALLBACK( img_move_audio_down ), img_struct );
 	
 	clear_button = gtk_button_new();
 	gtk_box_pack_start(GTK_BOX(hbox_buttons), clear_button, FALSE, TRUE, 0);
@@ -863,30 +858,38 @@ static void img_random_button_clicked(GtkButton *button, img_window_struct *img)
 
 static gpointer img_set_random_transition(img_window_struct *img, slide_struct *info_slide)
 {
-	gint nr;
-	gint r1, r2;
-	gpointer address;
-	gint     transition_id;
+	gint          nr;
+	gint          r1, r2;
+	gpointer      address;
+	gint          transition_id;
 	GtkTreeModel *model;
 	GtkTreeIter   iter;
 	gchar         path[10];
 
+	/* Get tree store that holds transitions */
 	model = gtk_combo_box_get_model( GTK_COMBO_BOX( img->transition_type ) );
 
+	/* Get number of top-levels (categories) and select one */
 	nr = gtk_tree_model_iter_n_children( model, NULL );
 	r1 = g_random_int_range( 1, nr );
-	g_snprintf( path, 10, "%d", r1 );
+	g_snprintf( path, sizeof( path ), "%d", r1 );
 	gtk_tree_model_get_iter_from_string( model, &iter, path );
 
+	/* Gen number of transitions in selected category and select one */
 	nr = gtk_tree_model_iter_n_children( model, &iter );
 	r2 = g_random_int_range( 0, nr );
-	g_snprintf( path, 10, "%d:%d", r1, r2 );
+	g_snprintf( path, sizeof( path ), "%d:%d", r1, r2 );
 	gtk_tree_model_get_iter_from_string( model, &iter, path );
 
 	gtk_tree_model_get( model, &iter, 2, &address, 3, &transition_id, -1 );
 	info_slide->transition_id = transition_id;
+
+	/* Prevent leak here */
+	if( info_slide->path )
+		g_free( info_slide->path );
 	info_slide->path = g_strdup( path );
 
+	/* Select proper iter in transition model */
 	g_signal_handlers_block_by_func((gpointer)img->transition_type, (gpointer)img_combo_box_transition_type_changed, img);	
 	gtk_combo_box_set_active_iter(GTK_COMBO_BOX(img->transition_type), &iter);
 	g_signal_handlers_unblock_by_func((gpointer)img->transition_type, (gpointer)img_combo_box_transition_type_changed, img);	

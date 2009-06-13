@@ -1465,3 +1465,46 @@ static void img_export_pause_unpause(GtkToggleButton *button, img_window_struct 
 	else
 		img->source_id = g_idle_add(img->export_idle_func, img);
 }
+
+void img_move_audio_up( GtkButton *button, img_window_struct *img )
+{
+	GtkTreeSelection *sel;
+	GtkTreeModel     *model;
+	GtkTreeIter       iter1, iter2;
+
+	/* We need path, since there is no gtk_tree_model_iter_prev function!! */
+	GtkTreePath      *path;
+
+	/* First we need to get selected iter. This function won't work if
+	 * selection's mode is set to GTK_SELECTION_MULTIPLE!! */
+	sel = gtk_tree_view_get_selection( GTK_TREE_VIEW( img->music_file_treeview ) );
+	if( ! gtk_tree_selection_get_selected( sel, &model, &iter1 ) )
+		return;
+
+	/* Now get previous iter and swap two items if previous iter exists. */
+	path = gtk_tree_model_get_path( model, &iter1 );
+	if( gtk_tree_path_prev( path ) )
+	{
+		gtk_tree_model_get_iter( model, &iter2, path );
+		gtk_list_store_swap( GTK_LIST_STORE( model ), &iter1, &iter2 );
+	}
+	gtk_tree_path_free( path );
+}
+
+void img_move_audio_down( GtkButton *button, img_window_struct *img )
+{
+	GtkTreeSelection *sel;
+	GtkTreeModel     *model;
+	GtkTreeIter       iter1, iter2;
+
+	/* First we need to get selected iter. This function won't work if
+	 * selection's mode is set to GTK_SELECTION_MULTIPLE!! */
+	sel = gtk_tree_view_get_selection( GTK_TREE_VIEW( img->music_file_treeview ) );
+	if( ! gtk_tree_selection_get_selected( sel, &model, &iter1 ) )
+		return;
+
+	/* Get next iter and swap rows if iter exists. */
+	iter2 = iter1;
+	if( gtk_tree_model_iter_next( model, &iter2 ) )
+		gtk_list_store_swap( GTK_LIST_STORE( model ), &iter1, &iter2 );
+}
