@@ -8,6 +8,7 @@ bar_wipe_la_LDFLAGS = -module -avoid-version
 barn_door_wipe_la_LDFLAGS = -module -avoid-version
 bow_tie_wipe_la_LDFLAGS = -module -avoid-version
 box_wipe_la_LDFLAGS = -module -avoid-version
+clock_wipe_la_LDFLAGS = -module -avoid-version
 diagonal_wipe_la_LDFLAGS = -module -avoid-version
 ellipse_wipe_la_LDFLAGS = -module -avoid-version
 fade_la_LDFLAGS = -module -avoid-version
@@ -20,6 +21,7 @@ plugin_LTLIBRARIES = \
 	barn_door_wipe.la  \
 	bow_tie_wipe.la \
 	box_wipe.la \
+	clock_wipe.la \
 	diagonal_wipe.la \
 	ellipse_wipe.la		\
 	fade.la			\
@@ -30,6 +32,7 @@ bar_wipe_la_SOURCES	= ../src/support.c bar_wipe.c
 barn_door_wipe_la_SOURCES = ../src/support.c barn_door_wipe.c
 bow_tie_wipe_la_SOURCES = ../src/support.c bow_tie_wipe.c
 box_wipe_la_SOURCES = ../src/support.c box_wipe.c
+clock_wipe_la_SOURCES = ../src/support.c clock_wipe.c
 diagonal_wipe_la_SOURCES = ../src/support.c diagonal_wipe.c
 ellipse_wipe_la_SOURCES = ../src/support.c ellipse_wipe.c
 fade_la_SOURCES = ../src/support.c fade.c
@@ -41,6 +44,7 @@ bar_wipe_la_LIBADD = $(PACKAGE_LIBS)
 barn_door_wipe_la_LIBADD = $(PACKAGE_LIBS)
 bow_tie_wipe_la_LIBADD = $(PACKAGE_LIBS)
 box_wipe_la_LIBADD = $(PACKAGE_LIBS)
+clock_wipe_la_LIBADD = $(PACKAGE_LIBS)
 diagonal_wipe_la_LIBADD = $(PACKAGE_LIBS)
 ellipse_wipe_la_LIBADD = $(PACKAGE_LIBS)
 fade_la_LIBADD = $(PACKAGE_LIBS)
