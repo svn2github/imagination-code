@@ -358,12 +358,12 @@ void img_free_allocated_memory(img_window_struct *img_struct)
 	}
 }
 
-gint img_ask_user_confirmation(img_window_struct *img_struct)
+gint img_ask_user_confirmation(img_window_struct *img_struct, gchar *msg)
 {
 	GtkWidget *dialog;
 	gint response;
 
-	dialog = gtk_message_dialog_new(GTK_WINDOW(img_struct->imagination_window),GTK_DIALOG_MODAL,GTK_MESSAGE_QUESTION,GTK_BUTTONS_OK_CANCEL,_("You didn't save your slideshow yet. Are you sure you want to close it?"));
+	dialog = gtk_message_dialog_new(GTK_WINDOW(img_struct->imagination_window),GTK_DIALOG_MODAL,GTK_MESSAGE_QUESTION,GTK_BUTTONS_OK_CANCEL, msg);
 	gtk_window_set_title(GTK_WINDOW(dialog),"Imagination");
 	response = gtk_dialog_run (GTK_DIALOG (dialog));
 	gtk_widget_destroy (GTK_WIDGET (dialog));
@@ -376,7 +376,7 @@ gboolean img_quit_application(GtkWidget *widget, GdkEvent *event, img_window_str
 
 	if (img_struct->project_is_modified)
 	{
-		response = img_ask_user_confirmation(img_struct);
+		response = img_ask_user_confirmation(img_struct, _("You didn't save your slideshow yet. Are you sure you want to close it?"));
 		if (response != GTK_RESPONSE_OK)
 			return TRUE;
 	}
@@ -955,7 +955,7 @@ void img_close_slideshow(GtkWidget *widget, img_window_struct *img)
 {
 	if (img->project_is_modified)
 	{
-		if (GTK_RESPONSE_OK != img_ask_user_confirmation(img))
+		if (GTK_RESPONSE_OK != img_ask_user_confirmation(img, _("You didn't save your slideshow yet. Are you sure you want to close it?")))
 			return;
 	}
 	img_free_allocated_memory(img);
@@ -979,6 +979,12 @@ void img_start_stop_export(GtkWidget *widget, img_window_struct *img)
 	if(img->preview_is_running)
 		return;
 
+	if (img->total_music_secs > img->total_secs && img->audio_flag == FALSE)
+	{
+		img->audio_flag = TRUE;
+		if (GTK_RESPONSE_OK != img_ask_user_confirmation(img, _("The lenght of the audio track is longer than the video one. Do you want to continue?")))
+			return;
+	}
 	model = gtk_icon_view_get_model(GTK_ICON_VIEW(img->thumbnail_iconview));
 	if(!gtk_tree_model_get_iter_first(model, &iter))
 			return;
@@ -990,6 +996,7 @@ void img_start_stop_export(GtkWidget *widget, img_window_struct *img)
 
 		/* Clean resources used by export. */
 		img_clean_after_export(img);
+		img->audio_flag = FALSE;
 	}
 	else
 	{

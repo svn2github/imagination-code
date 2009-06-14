@@ -44,7 +44,7 @@ void img_select_audio_files_to_add ( GtkMenuItem* , img_window_struct *);
 void img_add_audio_files (gchar *, img_window_struct *);
 GSList *img_import_slides_file_chooser(img_window_struct *);
 void img_free_allocated_memory(img_window_struct *);
-gint img_ask_user_confirmation(img_window_struct *);
+gint img_ask_user_confirmation(img_window_struct *, gchar *);
 gboolean img_quit_application(GtkWidget *, GdkEvent *, img_window_struct *);
 GdkPixbuf *img_scale_pixbuf (img_window_struct *, gchar *);
 void img_set_buttons_state(img_window_struct *, gboolean );

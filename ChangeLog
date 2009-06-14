@@ -6,7 +6,7 @@ Imagination changelog
 		- Added ability to randomly choose the transitions.
 		- Grouped the transitions in family and added icons for describing the effect.
 		- Added new transitions effects: Fade In and Fade Out to Fade family,
-		  Barn Door Wipe family, Four Box Wipe and Ellipse Wipe.
+		  Barn Door Wipe family, Four Box Wipe, Ellipse Wipe and Diagonal Wipe.
 		- Added man page.
 
 26/02/09 - 1.0:

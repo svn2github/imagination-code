@@ -1,28 +1,28 @@
-# Swedish translation for imagination.
-# Copyright (C) 2009 Free Software Foundation, Inc.
+# French translations for imagination package.
+# Copyright (C) 2009 THE imagination'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the imagination package.
-# Daniel Nylander <po@danielnylander.se>, 2009.
+# Jean-Pierre Redonnet <redonnetbrouk@aol.com>, 2009.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: imagination\n"
+"Project-Id-Version: imagination 1.5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-06-14 11:40+0200\n"
-"PO-Revision-Date: 2009-06-13 23:43+0100\n"
-"Last-Translator: Daniel Nylander <po@danielnylander.se>\n"
-"Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
+"PO-Revision-Date: 2009-06-13 16:46+0200\n"
+"Last-Translator: Jean-Pierre Redonnet <redonnetbrouk@aol.com>\n"
+"Language-Team: French\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #: ../imagination.desktop.in.h:1
 msgid "A DVD slideshow maker"
-msgstr "En DVD-bildspelsskapare"
+msgstr "Un programme de création de présentation DVD"
 
 #: ../imagination.desktop.in.h:2
 msgid "A lightweight DVD slideshow maker using GTK+2"
-msgstr "En lättviktig DVD-bildspelsskapare som använder GTK+2"
+msgstr "Un programme léger de création de présentation DVD qui utilise GTK+2"
 
 #: ../imagination.desktop.in.h:3
 msgid "Imagination"
@@ -31,283 +31,281 @@ msgstr "Imagination"
 #: ../src/audio.c:100
 #, c-format
 msgid "Playing %s..."
-msgstr "Spelar upp %s..."
+msgstr "Joue %s..."
 
 #: ../src/audio.c:119 ../src/main-window.c:534
 msgid "Play the selected file"
-msgstr "Spela upp markerad fil"
+msgstr "Joue le fichier sélectionné"
 
 #: ../src/audio.c:127
 msgid "Stop the playback"
-msgstr "Stoppa uppspelningen"
+msgstr "Arrête le payback"
 
 #: ../src/main-window.c:119
 msgid "_Slideshow"
-msgstr "_Bildspel"
+msgstr "Présentation"
 
 #: ../src/main-window.c:161
 msgid "_Preview"
-msgstr "_Förhandsgranska"
+msgstr "Prévisualise"
 
 #: ../src/main-window.c:170
 msgid "Export"
-msgstr "Exportera"
+msgstr "Exporte"
 
 #: ../src/main-window.c:187
 msgid "_Slide"
-msgstr "_Bild"
+msgstr "Transparent"
 
 #: ../src/main-window.c:193
 msgid "Import p_ictures"
-msgstr "Importera bil_der"
+msgstr "Importe les images"
 
 #: ../src/main-window.c:202
 msgid "Import _music"
-msgstr "Importera _musik"
+msgstr "Importe la musique"
 
 #: ../src/main-window.c:211
 msgid "Dele_te"
-msgstr "Ta _bort"
+msgstr "Supprime"
 
 #: ../src/main-window.c:228
 msgid "Un_select all"
-msgstr "_Avmarkera alla"
+msgstr "Déselectionne tout"
 
 #: ../src/main-window.c:233
 msgid "_Help"
-msgstr "_Hjälp"
+msgstr "Aide"
 
 #: ../src/main-window.c:252 ../src/new_slideshow.c:63
 msgid "Create a new slideshow"
-msgstr "Skapa ett nytt bildspel"
+msgstr "Crée une nouvelle présentation"
 
 #: ../src/main-window.c:257
 msgid "Open a slideshow"
-msgstr "Öppna ett bildspel"
+msgstr "Ouvre une présentation"
 
 #: ../src/main-window.c:263
 msgid "Save the slideshow"
-msgstr "Spara bildspelet"
+msgstr "Sauvegarde la présentation"
 
 #: ../src/main-window.c:274
 msgid "Import pictures"
-msgstr "Importera bilder"
+msgstr "Importe les photos"
 
 #: ../src/main-window.c:281
 msgid "Import music"
-msgstr "Importera musik"
+msgstr "Importe la musique"
 
 #: ../src/main-window.c:287
 msgid "Delete the selected slides"
-msgstr "Ta bort markerade bilder"
+msgstr "Supprime les transparents sélectionnés "
 
 #: ../src/main-window.c:297 ../src/callbacks.c:865
 msgid "Starts the preview"
-msgstr "Startar förhandsgranskningen"
+msgstr "Démarre la prévisualisation"
 
 #: ../src/main-window.c:304
 msgid "Export the DVD slideshow"
-msgstr "Exportera DVD-bildspelet"
+msgstr "Exporte la présentation DVD"
 
 #: ../src/main-window.c:323
 msgid "Jump to the entered slide number"
-msgstr "Hoppa till angivet bildnummer"
+msgstr "Saute au transparent indiqué"
 
 #: ../src/main-window.c:373
 msgid "<b>Slide settings</b>"
-msgstr "<b>Bildinställningar</b>"
+msgstr "Paramètres du transparent"
 
 #. Transition types label
 #: ../src/main-window.c:383
 msgid "Transition Type:"
-msgstr "Övergångstyp:"
+msgstr "Type de transition:"
 
 #: ../src/main-window.c:402
 msgid "Random"
-msgstr "Slumpmässigt"
+msgstr "Aléatoire"
 
 #: ../src/main-window.c:403
 msgid "Imagination randomly decides with transition to apply"
-msgstr "Imagination bestämmer slumpmässigt vilken övergång att tillämpa"
+msgstr "Imagination choisie une transition au hasard"
 
 #. Transition duration
 #: ../src/main-window.c:409
 msgid "Transition Speed:"
-msgstr "Övergångshastighet:"
+msgstr "Vitesse de transition"
 
 #: ../src/main-window.c:415
 msgid "Fast"
-msgstr "Snabb"
+msgstr "Rapide"
 
 #: ../src/main-window.c:416
 msgid "Normal"
-msgstr "Normal"
+msgstr "Normale"
 
 #: ../src/main-window.c:417
 msgid "Slow"
-msgstr "Långsam"
+msgstr "Lente"
 
 #. Slide duration
 #: ../src/main-window.c:423
 msgid "Slide Duration in sec:"
-msgstr "Bildlängd i sekunder:"
+msgstr "Durée du transparent en sec.:"
 
 #. Slide Selected
 #: ../src/main-window.c:434
 msgid "Slide Number:"
-msgstr "Bildnummer:"
+msgstr "Transparent numéro:"
 
 #. Slide Resolution
 #: ../src/main-window.c:443
 msgid "Resolution:"
-msgstr "Upplösning:"
+msgstr "Résolution:"
 
 #. Slide Type
 #: ../src/main-window.c:452
 msgid "Type:"
-msgstr "Typ:"
+msgstr "Type:"
 
 #. Slide Total Duration
 #: ../src/main-window.c:461
 msgid "Slideshow Length:"
-msgstr "Bildvisningslängd:"
+msgstr "Durée de la présentation:"
 
 #: ../src/main-window.c:478
 msgid "<b>Background Music</b>"
-msgstr "<b>Bakgrundsmusik</b>"
+msgstr "Musique de fond"
 
 #: ../src/main-window.c:518
 msgid "Music Duration:"
-msgstr "Musiklängd:"
+msgstr "Durée de la musique"
 
 #: ../src/main-window.c:542
 msgid "Delete the selected file"
-msgstr "Ta bort markerad fil"
+msgstr "Supprime le fichier sélectionné"
 
 #: ../src/main-window.c:550
 msgid "Move the selected file up"
-msgstr "Flytta markerad fil uppåt"
+msgstr "Déplace le fichier sélectionné en haut"
 
 #: ../src/main-window.c:557
 msgid "Move the selected file down"
-msgstr "Flytta markerad fil nedåt"
+msgstr "Déplace le fichier sélectionné en bas"
 
 #: ../src/main-window.c:564
 msgid "Clear all files"
-msgstr "Töm alla filer"
+msgstr "Efface tous les fichiers"
 
 #: ../src/main-window.c:1002 ../src/main-window.c:1004 ../src/support.c:220
 msgid "None"
-msgstr "Ingen"
+msgstr "Aucun"
 
 #: ../src/callbacks.c:122
 #, c-format
 msgid "Please wait, importing slide %d out of %d"
-msgstr "Vänta, importerar bild %d av %d"
+msgstr "SVP attendez, importe le transparent %d sur %d"
 
 #: ../src/callbacks.c:189
 msgid "Please choose the audio files to import"
-msgstr "Välj ljudfilerna att importera"
+msgstr "SVP choisissez un fichier audio à importer"
 
 #: ../src/callbacks.c:200
 msgid "All audio files"
-msgstr "Alla ljudfiler"
+msgstr "Tous les fichiers audios"
 
 #: ../src/callbacks.c:209 ../src/callbacks.c:286
 msgid "All files"
-msgstr "Alla filer"
+msgstr "Tous les fichiers"
 
 #: ../src/callbacks.c:260
 msgid "Import slides, use SHIFT key for multiple select"
-msgstr "Importera bilder, använd SKIFT-tangenten för flera markeringar"
+msgstr "Importe les transparents, utilisez SHIFT pour une sélection multiple"
 
 #: ../src/callbacks.c:272
 msgid "All image files"
-msgstr "Alla bildfiler"
+msgstr "Tous les fichiers d'images"
 
 #: ../src/callbacks.c:379 ../src/callbacks.c:958
 msgid "You didn't save your slideshow yet. Are you sure you want to close it?"
 msgstr ""
-"Du har inte sparat ditt bildspel än. Är du säker på att du vill stänga det?"
+"Vous n'avez pas encore sauvegardé. Êtes-vous certain de vouloir fermer?"
 
 #: ../src/callbacks.c:436
 #, c-format
 msgid "%d x %d pixels"
 msgid_plural "%d x %d pixels"
-msgstr[0] "%d x %d bildpunkter"
-msgstr[1] "%d x %d bildpunkter"
+msgstr[0] "%d x %d pixels"
+msgstr[1] "%d x %d pixels"
 
 #: ../src/callbacks.c:506
 msgid "translator-credits"
-msgstr ""
-"Daniel Nylander <po@danielnylander.se>\n"
-"\n"
-"Skicka synpunkter på översättningen till\n"
-"<tp-sv@listor.tp-sv.se>."
+msgstr "Traducteurs"
 
 #: ../src/callbacks.c:875
 msgid "Stops the preview"
-msgstr "Stoppar förhandsgranskningen"
+msgstr "Arrête la prévisulalisation"
 
 #: ../src/callbacks.c:917
 msgid "Load an Imagination slideshow project"
-msgstr "Läs in ett Imagination-bildspelsprojekt"
+msgstr "Charge un projet Imagination"
 
 #: ../src/callbacks.c:918
 msgid "Save an Imagination slideshow project"
-msgstr "Spara ett Imagination-bildspelsprojekt"
+msgstr "Sauvegarde un projet Imagination"
 
 #: ../src/callbacks.c:985
 msgid ""
 "The lenght of the audio track is longer than the video one. Do you want to "
 "continue?"
-msgstr "Längden på ljudspåret är större än videons längd. Vill du fortsätta?"
+msgstr ""
+"La durée de la piste audio est supérieure à celle de la vidéo. Voulez-vous "
+"poursuivre?"
 
 #: ../src/callbacks.c:1017
 msgid "Exporting the slideshow"
-msgstr "Exporterar bildspelet"
+msgstr "Exporte la présentation"
 
 #: ../src/callbacks.c:1029
 msgid "Preparing for export ..."
-msgstr "Förbereder för export ..."
+msgstr "Prépare pour exporter ..."
 
 #: ../src/callbacks.c:1040
 msgid "Overall progress:"
-msgstr "Totalt förlopp:"
+msgstr "Progression globale:"
 
 #: ../src/callbacks.c:1098 ../src/callbacks.c:1183
 #, c-format
 msgid "Slide %d export progress:"
-msgstr "Förlopp för export av bild %d:"
+msgstr "Exportation du transparent %d en progrès:"
 
 #: ../src/callbacks.c:1422
 msgid "Failed to launch the encoder!"
-msgstr "Misslyckades med att starta kodaren!"
+msgstr "Echec de démarrage de l'encodeur!"
 
 #. Display propert title depending on the callback that is calling this function.
 #: ../src/new_slideshow.c:63
 msgid "Project properties"
-msgstr "Projektegenskaper"
+msgstr "Proprietés du projet"
 
 #: ../src/new_slideshow.c:84
 msgid "<b>Slideshow Settings</b>"
-msgstr "<b>Bildspelsinställningar</b>"
+msgstr "Paramètres de la présentation"
 
 #: ../src/new_slideshow.c:98
 msgid "Filename of the slideshow:"
-msgstr "Filnamn för bildspelet:"
+msgstr "Nom de fichier de la présentation:"
 
 #: ../src/new_slideshow.c:110
 msgid "Export the slideshow as:"
-msgstr "Exportera bildspelet som:"
+msgstr "Exporte la présentation comme:"
 
 #: ../src/new_slideshow.c:143
 msgid "<b>Video Format</b>"
-msgstr "<b>Videoformat</b>"
+msgstr "Format vidéo"
 
 #: ../src/new_slideshow.c:151
 msgid "<b>Television Format</b>"
-msgstr "<b>Tv-format</b>"
+msgstr "Format télévision"
 
 #: ../src/new_slideshow.c:162
 msgid "Normal 4:3"
@@ -315,61 +313,47 @@ msgstr "Normal 4:3"
 
 #: ../src/new_slideshow.c:166
 msgid "Widescreen 16:9"
-msgstr "Bredbild 16:9"
+msgstr "Ecran large 16:9"
 
 #: ../src/new_slideshow.c:178
 msgid "<b>Advanced Settings</b>"
-msgstr "<b>Avancerade inställningar</b>"
+msgstr "Paramètres avancés"
 
 #: ../src/new_slideshow.c:185
 msgid "Rescale images to fit desired aspect ratio"
-msgstr "Skala om bilderna för att passa önskat bildformat"
+msgstr "Redimensionne les images  "
 
 #: ../src/new_slideshow.c:193
 msgid "Select background color:"
-msgstr "Välj bakgrundsfärg:"
+msgstr "Sélectionnez la couleur de l'arrière plan:"
 
 #: ../src/slideshow_project.c:132
 msgid "This is not an Imagination project file!"
-msgstr "Detta är inte en projektfil för Imagination!"
+msgstr "Ce n'est pas un fichier de projet Imagination!"
 
 #: ../src/support.c:184
 #, c-format
 msgid "Welcome to Imagination - %d transitions loaded."
-msgstr "Välkommen till Imagination - %d övergångar inlästa."
+msgstr "Bienvenue à Imagination - %d transitions chargées."
 
 #: ../src/support.c:190
 #, c-format
 msgid "%d slides selected"
-msgstr "%d bilder markerade"
+msgstr "%d transparents selectionnés"
 
 #: ../src/support.c:196
 #, c-format
 msgid "%d slide imported %s"
 msgid_plural "%d slides imported %s"
-msgstr[0] "%d bild importerad %s"
-msgstr[1] "%d bilder importerade %s"
+msgstr[0] "%d transparent importé %s"
+msgstr[1] "%d transparents importés %s"
 
 #: ../src/support.c:196
 msgid " - Use the CTRL key to select/unselect or SHIFT for multiple select"
 msgstr ""
-" - Använd CTRL-tangenten för att markera/avmarkera eller SKIFT för flera "
-"markeringar"
+" - Utilisez la touche CTRL pour sélectionner/déselectionner ou SHIFT pour "
+"une sélection multiple"
 
 #: ../src/support.c:283
 msgid "Please choose the slideshow project filename"
-msgstr "Välj filnamn för bildspelsprojektet"
-
-#~ msgid "Import the slides"
-#~ msgstr "Importera bilderna"
-
-#, fuzzy
-#~ msgid "Import the audio files"
-#~ msgstr "Importera bilderna"
-
-#~ msgid "Preview the slideshow"
-#~ msgstr "Förhandsgranska bildspelet"
-
-#, fuzzy
-#~ msgid "Clear the selection"
-#~ msgstr "Ta bort markerade bilder"
+msgstr "SVP choisissez le nom de fichier de votre projet"

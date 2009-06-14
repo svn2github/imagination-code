@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-06-13 13:52+0200\n"
+"POT-Creation-Date: 2009-06-14 11:40+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: banto palmarino <bantopalmarino@nkosi.org>\n"
 "Language-Team: \n"
@@ -32,7 +32,7 @@ msgstr "Imagination"
 msgid "Playing %s..."
 msgstr "Tocando %s..."
 
-#: ../src/audio.c:119 ../src/main-window.c:541
+#: ../src/audio.c:119 ../src/main-window.c:534
 msgid "Play the selected file"
 msgstr "Tocar o arquivo selecionado"
 
@@ -100,7 +100,7 @@ msgstr "Importar música"
 msgid "Delete the selected slides"
 msgstr "Apagar a imagem selecionada"
 
-#: ../src/main-window.c:297 ../src/callbacks.c:881
+#: ../src/main-window.c:297 ../src/callbacks.c:865
 msgid "Starts the preview"
 msgstr "Iniciar visualização"
 
@@ -175,27 +175,27 @@ msgstr "Duração:"
 msgid "<b>Background Music</b>"
 msgstr "Música de Fundo"
 
-#: ../src/main-window.c:525
+#: ../src/main-window.c:518
 msgid "Music Duration:"
 msgstr "Duração da múica"
 
-#: ../src/main-window.c:549
+#: ../src/main-window.c:542
 msgid "Delete the selected file"
 msgstr "Apagar o arquivo selecionado"
 
-#: ../src/main-window.c:557
+#: ../src/main-window.c:550
 msgid "Move the selected file up"
 msgstr "Mover o arquivo selecionado para cima"
 
-#: ../src/main-window.c:563
+#: ../src/main-window.c:557
 msgid "Move the selected file down"
 msgstr "Mover o arquivo selecionado para baixo"
 
-#: ../src/main-window.c:570
+#: ../src/main-window.c:564
 msgid "Clear all files"
 msgstr "Limpar todos arquivos"
 
-#: ../src/main-window.c:1000 ../src/main-window.c:1002 ../src/support.c:220
+#: ../src/main-window.c:1002 ../src/main-window.c:1004 ../src/support.c:220
 msgid "None"
 msgstr "Nada"
 
@@ -204,72 +204,79 @@ msgstr "Nada"
 msgid "Please wait, importing slide %d out of %d"
 msgstr "Aguarde, importando imagens %d de %d"
 
-#: ../src/callbacks.c:205
+#: ../src/callbacks.c:189
 msgid "Please choose the audio files to import"
 msgstr "Por favor, escolha os arquivos de áudio para importar"
 
-#: ../src/callbacks.c:216
+#: ../src/callbacks.c:200
 msgid "All audio files"
 msgstr "Todos arquivos de áudio"
 
-#: ../src/callbacks.c:225 ../src/callbacks.c:302
+#: ../src/callbacks.c:209 ../src/callbacks.c:286
 msgid "All files"
 msgstr "Todos arquivos"
 
-#: ../src/callbacks.c:276
+#: ../src/callbacks.c:260
 msgid "Import slides, use SHIFT key for multiple select"
 msgstr "Importar imagens, use SHIFT para múltipla seleção"
 
-#: ../src/callbacks.c:288
+#: ../src/callbacks.c:272
 msgid "All image files"
 msgstr "Todos arquivos imagens"
 
-#: ../src/callbacks.c:382
+#: ../src/callbacks.c:379 ../src/callbacks.c:958
 msgid "You didn't save your slideshow yet. Are you sure you want to close it?"
 msgstr ""
 "Você não salvou sua apresentação ainda. Tem certeza de que pretende fecha-lo?"
 
-#: ../src/callbacks.c:452
+#: ../src/callbacks.c:436
 #, c-format
 msgid "%d x %d pixels"
 msgid_plural "%d x %d pixels"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%d x %d pixels"
+msgstr[1] "%d x %d pixels"
 
-#: ../src/callbacks.c:522
+#: ../src/callbacks.c:506
 msgid "translator-credits"
 msgstr "créditos de tradução"
 
-#: ../src/callbacks.c:891
+#: ../src/callbacks.c:875
 msgid "Stops the preview"
 msgstr "Parar a visualização"
 
-#: ../src/callbacks.c:933
+#: ../src/callbacks.c:917
 msgid "Load an Imagination slideshow project"
 msgstr "Carregar um projeto Imagination"
 
-#: ../src/callbacks.c:934
+#: ../src/callbacks.c:918
 msgid "Save an Imagination slideshow project"
 msgstr "Salvar um projeto Imagination"
 
-#: ../src/callbacks.c:1026
+#: ../src/callbacks.c:985
+msgid ""
+"The lenght of the audio track is longer than the video one. Do you want to "
+"continue?"
+msgstr ""
+"A duração da faixa de áudio é maior que a do vídeo. Você deseja continuar?"
+
+#: ../src/callbacks.c:1017
 msgid "Exporting the slideshow"
 msgstr "Exportando a apresentação"
 
-#: ../src/callbacks.c:1038
+#: ../src/callbacks.c:1029
 msgid "Preparing for export ..."
 msgstr "Preparando para exportar ..."
 
-#: ../src/callbacks.c:1049
+#: ../src/callbacks.c:1040
 msgid "Overall progress:"
 msgstr "Progressos globais:"
 
-#: ../src/callbacks.c:1107 ../src/callbacks.c:1192
+#: ../src/callbacks.c:1098 ../src/callbacks.c:1183
 #, c-format
 msgid "Slide %d export progress:"
 msgstr "Progresso do exportar Slide %d:"
 
-#: ../src/callbacks.c:1431
+#: ../src/callbacks.c:1422
 msgid "Failed to launch the encoder!"
 msgstr "Falha ao lançar a codificação!"
 

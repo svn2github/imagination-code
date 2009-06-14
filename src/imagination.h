@@ -145,6 +145,7 @@ struct _img_window_struct
 
 	/* Export dialog related stuff */
 	gboolean    export_is_running;
+	gboolean    audio_flag;
 	gint        file_desc;
 	guchar      *pixbuf_data;
 	GtkWidget   *export_pbar1;
