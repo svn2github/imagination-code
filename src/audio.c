@@ -70,6 +70,9 @@ void img_play_stop_selected_file(GtkButton *button, img_window_struct *img)
 	if (img->play_child_pid)
 	{
 		kill (img->play_child_pid, SIGINT);
+		/* This is not required on unices, but per docs it should be called
+		 * anyway. */
+		g_spawn_close_pid( img->play_child_pid );
 		img_swap_audio_files_button(img, TRUE);
 		return;
 	}
@@ -94,6 +97,9 @@ void img_play_stop_selected_file(GtkButton *button, img_window_struct *img)
 									G_SPAWN_STDERR_TO_DEV_NULL,
 									NULL, NULL, &img->play_child_pid, NULL, NULL, NULL, &error );
 
+	/* Free argument vector */
+	g_strfreev( argv );
+
 	g_child_watch_add(img->play_child_pid, (GChildWatchFunc) img_play_audio_ended, img);
 
 	img_swap_audio_files_button(img, FALSE);
@@ -105,6 +111,7 @@ void img_play_stop_selected_file(GtkButton *button, img_window_struct *img)
 
 static void img_play_audio_ended (GPid pid, gint status, img_window_struct *img)
 {
+	g_spawn_close_pid( img->play_child_pid );
 	img_swap_audio_files_button (img, TRUE);
 }
 

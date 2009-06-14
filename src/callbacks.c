@@ -982,7 +982,7 @@ void img_start_stop_export(GtkWidget *widget, img_window_struct *img)
 	if (img->total_music_secs > img->total_secs && img->audio_flag == FALSE)
 	{
 		img->audio_flag = TRUE;
-		if (GTK_RESPONSE_OK != img_ask_user_confirmation(img, _("The lenght of the audio track is longer than the video one. Do you want to continue?")))
+		if (GTK_RESPONSE_OK != img_ask_user_confirmation(img, _("The length of the audio track is longer than the video one. Do you want to continue?")))
 			return;
 	}
 	model = gtk_icon_view_get_model(GTK_ICON_VIEW(img->thumbnail_iconview));
@@ -993,6 +993,9 @@ void img_start_stop_export(GtkWidget *widget, img_window_struct *img)
 	{
 		/* Remove idle function from main loop */
 		g_source_remove(img->source_id);
+
+		/* Kill ffmepg process */
+		kill( img->ffmpeg_export, SIGINT );
 
 		/* Clean resources used by export. */
 		img_clean_after_export(img);
@@ -1241,6 +1244,7 @@ static void img_clean_after_export(img_window_struct *img)
 	gtk_widget_destroy( img->export_dialog );
 
 	close(img->file_desc);
+	g_spawn_close_pid( img->ffmpeg_export );
 }
 
 /* Move one step forward in model and set img->pixbuf1 and img->pixbuf2
@@ -1411,8 +1415,8 @@ static gboolean img_run_encoder(img_window_struct *img)
 									G_SPAWN_SEARCH_PATH/* |
 									G_SPAWN_STDOUT_TO_DEV_NULL |
 									G_SPAWN_STDERR_TO_DEV_NULL*/,
-									NULL, NULL, NULL, &img->file_desc,
-									NULL, NULL, &error );
+									NULL, NULL, &img->ffmpeg_export,
+									&img->file_desc, NULL, NULL, &error );
 	if( ! ret )
 	{
 		message = gtk_message_dialog_new (GTK_WINDOW (img->imagination_window),

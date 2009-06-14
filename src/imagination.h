@@ -152,12 +152,17 @@ struct _img_window_struct
 	GtkWidget   *export_pbar2;
 	GtkWidget   *export_label;
 	GtkWidget   *export_dialog;
-	guint        export_frame_nr;	// Total number of frames
-	guint        export_frame_cur;	// Current frame
-	guint        export_slide_nr;	// Number of frames fo current slide
-	guint        export_slide_cur;	// Current slide frame
-	guint        export_slide;		// Number of slide being exported
-	GSourceFunc  export_idle_func;	/* If TRUE, connect transition export, else still export function. */
+	guint        export_frame_nr;	/* Total number of frames */
+	guint        export_frame_cur;	/* Current frame */
+	guint        export_slide_nr;	/* Number of frames fo current slide */
+	guint        export_slide_cur;	/* Current slide frame */
+	guint        export_slide;		/* Number of slide being exported */
+	GSourceFunc  export_idle_func;	/* If TRUE, connect transition export, else
+									   still export function. */
+	GPid         ffmpeg_export;     /* ffmpeg's process id */
+	GPid         sox_export;        /* sox's process id - FIXME: This will only
+									   be needed if we decide to mangle audio
+									   files using external sox binary. */
 	
 	/* Audio related stuff */
 	GtkWidget	*music_file_treeview;

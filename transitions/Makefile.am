@@ -6,6 +6,7 @@ plugins_includedir = $(includedir)/imagination/
 
 bar_wipe_la_LDFLAGS = -module -avoid-version
 barn_door_wipe_la_LDFLAGS = -module -avoid-version
+bow_tie_wipe_la_LDFLAGS = -module -avoid-version
 box_wipe_la_LDFLAGS = -module -avoid-version
 diagonal_wipe_la_LDFLAGS = -module -avoid-version
 ellipse_wipe_la_LDFLAGS = -module -avoid-version
@@ -17,6 +18,7 @@ push_wipe_la_LDFLAGS = -module -avoid-version
 plugin_LTLIBRARIES = \
 	bar_wipe.la \
 	barn_door_wipe.la  \
+	bow_tie_wipe.la \
 	box_wipe.la \
 	diagonal_wipe.la \
 	ellipse_wipe.la		\
@@ -26,6 +28,7 @@ plugin_LTLIBRARIES = \
 
 bar_wipe_la_SOURCES	= ../src/support.c bar_wipe.c
 barn_door_wipe_la_SOURCES = ../src/support.c barn_door_wipe.c
+bow_tie_wipe_la_SOURCES = ../src/support.c bow_tie_wipe.c
 box_wipe_la_SOURCES = ../src/support.c box_wipe.c
 diagonal_wipe_la_SOURCES = ../src/support.c diagonal_wipe.c
 ellipse_wipe_la_SOURCES = ../src/support.c ellipse_wipe.c
@@ -36,6 +39,7 @@ push_wipe_la_SOURCES = ../src/support.c push_wipe.c
 # instead of linking against all in $(GTK_LIBS), we link only against needed libs
 bar_wipe_la_LIBADD = $(PACKAGE_LIBS)
 barn_door_wipe_la_LIBADD = $(PACKAGE_LIBS)
+bow_tie_wipe_la_LIBADD = $(PACKAGE_LIBS)
 box_wipe_la_LIBADD = $(PACKAGE_LIBS)
 diagonal_wipe_la_LIBADD = $(PACKAGE_LIBS)
 ellipse_wipe_la_LIBADD = $(PACKAGE_LIBS)

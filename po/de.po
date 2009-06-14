@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-06-14 11:40+0200\n"
+"POT-Creation-Date: 2009-06-14 11:59+0200\n"
 "PO-Revision-Date: 2009-06-14 10:48+0200\n"
 "Last-Translator: Enrico Tröger <enrico@xfce.org>\n"
 "Language-Team: German\n"
@@ -262,9 +262,9 @@ msgstr "Eine Imagination Diaschau speichern"
 
 #: ../src/callbacks.c:985
 msgid ""
-"The lenght of the audio track is longer than the video one. Do you want to "
+"The length of the audio track is longer than the video one. Do you want to "
 "continue?"
-msgstr ""
+msgstr "Die Audiospur ist länger als die Videosput. Möchten Sie fortfahren?"
 
 #: ../src/callbacks.c:1017
 msgid "Exporting the slideshow"
