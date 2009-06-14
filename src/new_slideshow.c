@@ -248,9 +248,9 @@ static void img_bg_color_changed( GtkColorButton *button, img_window_struct *img
 	gint     r, g, b;
 
 	gtk_color_button_get_color( button, &color );
-	r = ( color.red   / 0xffff * 0xff );
-	g = ( color.green / 0xffff * 0xff );
-	b = ( color.blue  / 0xffff * 0xff );
+	r = ( (gdouble)color.red   / 0xffff * 0xff );
+	g = ( (gdouble)color.green / 0xffff * 0xff );
+	b = ( (gdouble)color.blue  / 0xffff * 0xff );
 	img->background_color = r  << 24 | g << 16 | b <<  8 | 0xff;
 	img->project_is_modified = TRUE;
 }
