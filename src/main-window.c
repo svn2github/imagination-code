@@ -395,7 +395,8 @@ img_window_struct *img_create_window (void)
 	gtk_table_attach (GTK_TABLE (table), img_struct->transition_type, 0, 1, 0, 1,(GtkAttachOptions) (GTK_EXPAND | GTK_FILL),(GtkAttachOptions) (GTK_FILL), 0, 0);
 	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(gtk_combo_box_get_model(GTK_COMBO_BOX(img_struct->transition_type))),
 										1, GTK_SORT_ASCENDING);
-	gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(gtk_combo_box_get_model(GTK_COMBO_BOX(img_struct->transition_type))),1, img_sort_none_before_other,NULL,NULL);										
+	gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(gtk_combo_box_get_model(GTK_COMBO_BOX(img_struct->transition_type))),1, img_sort_none_before_other,NULL,NULL);
+
 	gtk_widget_set_sensitive(img_struct->transition_type, FALSE);
 	g_signal_connect (G_OBJECT (img_struct->transition_type), "changed",G_CALLBACK (img_combo_box_transition_type_changed),img_struct);
 
@@ -409,12 +410,24 @@ img_window_struct *img_create_window (void)
 	trans_duration_label = gtk_label_new (_("Transition Speed:"));
 	gtk_table_attach (GTK_TABLE (table), trans_duration_label, 0, 1, 1, 2,(GtkAttachOptions) (GTK_FILL),(GtkAttachOptions) (0), 0, 0);
 	gtk_misc_set_alignment (GTK_MISC (trans_duration_label), 0, 0.5);
-  
+
 	img_struct->trans_duration = _gtk_combo_box_new_text(FALSE);
 	gtk_table_attach (GTK_TABLE (table), img_struct->trans_duration, 1, 2, 1, 2,(GtkAttachOptions) (GTK_FILL),(GtkAttachOptions) (GTK_FILL), 0, 0);
-	gtk_combo_box_append_text (GTK_COMBO_BOX (img_struct->trans_duration), _("Fast"));
+	/* This is BAD!!! Simple and complex API calls should not be mixed!!! */
+	/*gtk_combo_box_append_text (GTK_COMBO_BOX (img_struct->trans_duration), _("Fast"));
 	gtk_combo_box_append_text (GTK_COMBO_BOX (img_struct->trans_duration), _("Normal"));
-	gtk_combo_box_append_text (GTK_COMBO_BOX (img_struct->trans_duration), _("Slow"));
+	gtk_combo_box_append_text (GTK_COMBO_BOX (img_struct->trans_duration), _("Slow"));*/
+	{
+		GtkTreeIter   iter;
+		GtkListStore *store = GTK_LIST_STORE( gtk_combo_box_get_model( GTK_COMBO_BOX( img_struct->trans_duration ) ) );
+
+		gtk_list_store_append( store, &iter );
+		gtk_list_store_set( store, &iter, 0, _("Fast"), -1 );
+		gtk_list_store_append( store, &iter );
+		gtk_list_store_set( store, &iter, 0, _("Normal"), -1 );
+		gtk_list_store_append( store, &iter );
+		gtk_list_store_set( store, &iter, 0, _("Slow"), -1 );
+	}
 	gtk_combo_box_set_active(GTK_COMBO_BOX(img_struct->trans_duration),1);
 	gtk_widget_set_sensitive(img_struct->trans_duration, FALSE);
 	g_signal_connect (G_OBJECT (img_struct->trans_duration),"changed",G_CALLBACK (img_combo_box_speed_changed),img_struct);
@@ -792,7 +805,7 @@ static void img_combo_box_transition_type_changed (GtkComboBox *combo, img_windo
 	{
 		GtkTreeIter parent = iter;
 		gtk_tree_model_iter_nth_child( model, &iter, &parent, 0 );
-		gtk_tree_model_get(model, &iter, 1, &address, 2, &transition_id, -1);
+		gtk_tree_model_get(model, &iter, 2, &address, 2, &transition_id, -1);
 		g_signal_handlers_block_by_func(img->transition_type,
 										img_combo_box_transition_type_changed,
 										img);
@@ -809,7 +822,10 @@ static void img_combo_box_transition_type_changed (GtkComboBox *combo, img_windo
 	model = gtk_icon_view_get_model(GTK_ICON_VIEW (img->thumbnail_iconview));
 	selected = gtk_icon_view_get_selected_items(GTK_ICON_VIEW (img->thumbnail_iconview));
 	if (selected == NULL)
+	{
+		g_free( path );
 		return;
+	}
 
 	/* Avoiding GList memory leak. */
 	bak = selected;
@@ -821,6 +837,12 @@ static void img_combo_box_transition_type_changed (GtkComboBox *combo, img_windo
 		info_slide->transition_id = transition_id;
 		g_free( info_slide->path );
 		info_slide->path = g_strdup( path );
+
+		/* If this is first slide, we need to copy transition
+		 * to the last pseudo-slide too. */
+		if( gtk_tree_path_get_indices( selected->data )[0] == 0 )
+			img->final_transition.render = address;
+
 		selected = selected->next;
 	}
 	g_free( path );
@@ -849,6 +871,12 @@ static void img_random_button_clicked(GtkButton *button, img_window_struct *img)
 		gtk_tree_model_get_iter(model, &iter,selected->data);
 		gtk_tree_model_get(model, &iter,1,&info_slide,-1);
 		info_slide->render = img_set_random_transition(img, info_slide);
+
+		/* If this is first slide, copy transition to last
+		 * pseudo-slide */
+		if( gtk_tree_path_get_indices( selected->data )[0] == 0 )
+			img->final_transition.render = info_slide->render;
+
 		selected = selected->next;
 	}
 	img->project_is_modified = TRUE;
@@ -927,6 +955,12 @@ static void img_combo_box_speed_changed (GtkComboBox *combo, img_window_struct *
 		gtk_tree_model_get_iter(model, &iter,selected->data);
 		gtk_tree_model_get(model, &iter,1,&info_slide,-1);
 		info_slide->speed = duration;
+
+		/* If we're modifying fisr slide, we need to modify
+		 * last pseudo-slide too. */
+		if( gtk_tree_path_get_indices( selected->data )[0] == 0 )
+			img->final_transition.speed = duration;
+
 		selected = selected->next;
 	}
 	img_set_total_slideshow_duration(img);

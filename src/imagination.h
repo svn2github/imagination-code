@@ -128,6 +128,9 @@ struct _img_window_struct
   	gint		total_secs;
 	gint		total_music_secs;
   	gint		slides_nr;
+	slide_struct final_transition;  /* Only speed, render and duration fields
+									   of this structure are used (and duration is
+									   always 0). */
 
 	/* Variables common to export and preview functions */
   	slide_struct *current_slide;

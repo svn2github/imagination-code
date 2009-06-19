@@ -329,3 +329,4 @@ slide_struct *img_set_slide_info(gint duration, guint speed, void (*render), gin
 	}
 	return slide_info;
 }
+

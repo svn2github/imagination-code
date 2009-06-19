@@ -556,6 +556,10 @@ void img_set_total_slideshow_duration(img_window_struct *img)
 	}
 	while (gtk_tree_model_iter_next (model,&iter));
 
+	/* Add time of last pseudo slide */
+	if( img->final_transition.render )
+		img->total_secs += img->final_transition.speed;
+
 	time = img_convert_seconds_to_time(img->total_secs);
 	gtk_label_set_text(GTK_LABEL (img->total_time_data),time);
 	g_free(time);
@@ -967,6 +971,12 @@ void img_close_slideshow(GtkWidget *widget, img_window_struct *img)
 	gtk_widget_set_sensitive(img->transition_type, FALSE);
 	gtk_widget_set_sensitive(img->duration, FALSE);
 	gtk_widget_hide(img->thumb_scrolledwindow);
+
+	/* Reset slideshow properties */
+	img->distort_images = TRUE;
+	img->background_color = 0;
+	img->final_transition.speed = NORMAL;
+	img->final_transition.render = NULL;
 }
 
 void img_start_stop_export(GtkWidget *widget, img_window_struct *img)
@@ -1091,6 +1101,7 @@ void img_start_stop_export(GtkWidget *widget, img_window_struct *img)
 		img->progress = 0;
 		img->export_frame_nr = img->total_secs * EXPORT_FPS;
 		img->export_frame_cur = 0;
+
 		/* Fix for the wrong progress bar indicators. */
 		img_export_calc_slide_frames( img );
 
@@ -1183,7 +1194,12 @@ static gboolean img_export_still(img_window_struct *img)
 
 			/* Update progress counters */
 			img->export_slide++;
-			string = g_strdup_printf( _("Slide %d export progress:"), img->export_slide );
+
+			/* Make dialog more informative */
+			if( img->current_slide->duration == 0 )
+				string = g_strdup_printf( _("Final transition export progress:") );
+			else
+				string = g_strdup_printf( _("Slide %d export progress:"), img->export_slide );
 			gtk_label_set_label( GTK_LABEL( img->export_label ), string );
 			g_free( string );
 			/* Progress bug fix */
@@ -1253,6 +1269,7 @@ static void img_clean_after_export(img_window_struct *img)
 static gboolean img_prepare_pixbufs(img_window_struct *img)
 {
 	GtkTreeModel *model;
+	static gboolean last_transition = TRUE; /* This controls the final transition. */
 
 	model = gtk_icon_view_get_model(GTK_ICON_VIEW(img->thumbnail_iconview));
 
@@ -1264,6 +1281,7 @@ static gboolean img_prepare_pixbufs(img_window_struct *img)
 
 	if(gtk_tree_model_iter_next(model, img->cur_ss_iter))
 	{
+		/* We have next iter, so prepare for next round */
 		g_object_unref(G_OBJECT(img->pixbuf1));
 		img->pixbuf1 = img->pixbuf2;
 		gtk_tree_model_get(model, img->cur_ss_iter, 1, &img->current_slide, -1);
@@ -1271,21 +1289,27 @@ static gboolean img_prepare_pixbufs(img_window_struct *img)
 
 		return(TRUE);
 	}
-	else
-		return(FALSE);
-
-
-	if(gtk_tree_model_iter_next(model, img->cur_ss_iter))
+	else if( last_transition )
 	{
-		g_object_unref(G_OBJECT(img->pixbuf1));
-		img->pixbuf1 = img->pixbuf2;
-		gtk_tree_model_get(model, img->cur_ss_iter, 1, &img->current_slide, -1);
-		img->pixbuf2 = img_scale_pixbuf(img, img->current_slide->filename);
+		/* We displayed last image, but bye-bye transition hasn't
+		 * been displayed. */
+		last_transition = FALSE;
 
-		return(TRUE);
+		g_object_unref( G_OBJECT( img->pixbuf1 ) );
+		img->pixbuf1 = img->pixbuf2;
+		img->pixbuf2 = gdk_pixbuf_new( GDK_COLORSPACE_RGB, FALSE, 8,
+									   img->image_area->allocation.width,
+									   img->image_area->allocation.height );
+		gdk_pixbuf_fill( img->pixbuf2, img->background_color );
+		img->current_slide = &img->final_transition;
+
+		return( TRUE );
 	}
-	else
-		return(FALSE);
+
+	/* We're done now */
+	last_transition = TRUE;
+
+	return(FALSE);
 }
 
 static void img_export_pixbuf_to_ppm(GdkPixbuf *pixbuf, guchar **data, guint *lenght)
@@ -1412,7 +1436,8 @@ static gboolean img_run_encoder(img_window_struct *img)
 	g_free(cmd_line);
 
 	ret = g_spawn_async_with_pipes( NULL, argv, NULL,
-									G_SPAWN_SEARCH_PATH/* |
+									G_SPAWN_SEARCH_PATH /*|
+									G_SPAWN_DO_NOT_REAP_CHILD |
 									G_SPAWN_STDOUT_TO_DEV_NULL |
 									G_SPAWN_STDERR_TO_DEV_NULL*/,
 									NULL, NULL, &img->ffmpeg_export,

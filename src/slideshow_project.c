@@ -185,6 +185,14 @@ void img_load_slideshow(img_window_struct *img)
 				gtk_list_store_set( img->thumbnail_model, &iter, 0, thumb, 1, slide_info, -1 );
 				g_object_unref( G_OBJECT( thumb ) );
 				img->slides_nr++;
+
+				/* If we're loading the first slide, apply some of it's
+				 * data to final pseudo-slide */
+				if( img->slides_nr == 1 )
+				{
+					img->final_transition.speed = slide_info->speed;
+					img->final_transition.render = slide_info->render;
+				}
 			}
 		}
 		g_free(slide_filename);

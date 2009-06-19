@@ -193,9 +193,9 @@ void img_new_slideshow_settings_dialog(img_window_struct *img, gboolean flag)
 	bg_label = gtk_label_new( _("Select background color:") );
 	gtk_box_pack_start( GTK_BOX( ex_hbox ), bg_label, FALSE, FALSE, 0 );
 
-	color.red   = ( ( img->background_color >> 24 ) & 0xff ) / 0xff * 0xffff;
-	color.green = ( ( img->background_color >> 16 ) & 0xff ) / 0xff * 0xffff;
-	color.blue  = ( ( img->background_color >>  8 ) & 0xff ) / 0xff * 0xffff;
+	color.red   = ( ( img->background_color >> 24 ) & 0xff ) / (gdouble)0xff * 0xffff;
+	color.green = ( ( img->background_color >> 16 ) & 0xff ) / (gdouble)0xff * 0xffff;
+	color.blue  = ( ( img->background_color >>  8 ) & 0xff ) / (gdouble)0xff * 0xffff;
 	bg_button = gtk_color_button_new_with_color( &color );
 	g_signal_connect( G_OBJECT( bg_button ), "color-set", G_CALLBACK( img_bg_color_changed ), img );
 	gtk_box_pack_start( GTK_BOX( ex_hbox ), bg_button, FALSE, FALSE, 0 );
@@ -260,3 +260,4 @@ static void img_distort_toggled( GtkToggleButton *button, img_window_struct *img
 	img->distort_images = gtk_toggle_button_get_active( button );
 	img->project_is_modified = TRUE;
 }
+

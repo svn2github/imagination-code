@@ -60,4 +60,7 @@ void img_load_available_transitions(img_window_struct *);
 void img_show_file_chooser(SexyIconEntry *, SexyIconEntryPosition, int, img_window_struct *);
 GdkPixbuf *img_load_pixbuf_from_file(gchar *);
 slide_struct *img_set_slide_info(gint , guint , void (*), gint, gchar *, gchar *);
+
+GtkWidget *img_transition_combo_new( GtkTreeModel * );
+GtkWidget *img_duration_combo_new( GtkTreeModel * );
 #endif
