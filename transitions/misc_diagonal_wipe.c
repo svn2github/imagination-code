@@ -121,8 +121,8 @@ transition_render( GdkDrawable *window,
 			cairo_line_to( cr, w2, h2 * ( 1 - progress ) );
 			cairo_line_to( cr, w2 * progress, 0 );
 			cairo_close_path( cr );
-
 			break;
+
 		case 2:
 			cairo_set_fill_rule( cr, CAIRO_FILL_RULE_EVEN_ODD );
 
@@ -142,7 +142,6 @@ transition_render( GdkDrawable *window,
 			cairo_line_to( cr, w2 * ( 2 - progress ), h2 );
 			cairo_line_to( cr, w2, h2 * progress );
 			cairo_close_path( cr );
-
 			break;
 	}
 	cairo_fill( cr );

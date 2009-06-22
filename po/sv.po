@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-06-22 15:15+0200\n"
-"PO-Revision-Date: 2009-06-13 23:43+0100\n"
+"POT-Creation-Date: 2009-06-22 20:19+0200\n"
+"PO-Revision-Date: 2009-06-22 20:15+0100\n"
 "Last-Translator: Daniel Nylander <po@danielnylander.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "MIME-Version: 1.0\n"
@@ -310,9 +310,8 @@ msgid "Please choose the slideshow project filename"
 msgstr "Välj filnamn för bildspelsprojektet"
 
 #: ../src/export.c:204
-#, fuzzy
 msgid "<b>Export Settings</b>"
-msgstr "<b>Bildspelsinställningar</b>"
+msgstr "<b>Exportinställningar</b>"
 
 #: ../src/export.c:218
 msgid "Filename of the slideshow:"
@@ -340,17 +339,16 @@ msgid "Failed to launch the encoder!"
 msgstr "Misslyckades med att starta kodaren!"
 
 #: ../src/export.c:791
-#, fuzzy, c-format
+#, c-format
 msgid "Final transition export progress:"
-msgstr "Förlopp för export av bild %d:"
+msgstr "Förlopp för export av slutgiltig övergång:"
 
 #. Additional options - <format> only
 #. This function call should be the first thing exporter does, since this
 #. * function will take some preventive measures.
 #: ../src/export.c:892 ../src/export.c:955
-#, fuzzy
 msgid "VOB export"
-msgstr "Exportera"
+msgstr "VOB-export"
 
 #: ../src/export.c:967 ../src/export.c:1051
 msgid "<b>Television Format</b>"
@@ -367,33 +365,30 @@ msgstr "Bredbild 16:9"
 #. This function call should be the first thing exporter does, since this
 #. * function will take some preventive measures.
 #: ../src/export.c:1039
-#, fuzzy
 msgid "OGG export"
-msgstr "Exportera"
+msgstr "OGG-export"
 
 #: ../src/export.c:1069 ../src/export.c:1163
-#, fuzzy
 msgid "<b>Video Quality:</b>"
-msgstr "<b>Videoformat</b>"
+msgstr "<b>Videokvalitet:</b>"
 
 #: ../src/export.c:1076 ../src/export.c:1170
 msgid "Low"
-msgstr ""
+msgstr "Låg"
 
 #: ../src/export.c:1080 ../src/export.c:1174
 msgid "Medium"
-msgstr ""
+msgstr "Medel"
 
 #: ../src/export.c:1085 ../src/export.c:1179
 msgid "High"
-msgstr ""
+msgstr "Hög"
 
 #. This function call should be the first thing exporter does, since this
 #. * function will take some preventive measures.
 #: ../src/export.c:1151
-#, fuzzy
 msgid "FLV export"
-msgstr "Exportera"
+msgstr "FLV-export"
 
 #~ msgid "Export the DVD slideshow"
 #~ msgstr "Exportera DVD-bildspelet"
