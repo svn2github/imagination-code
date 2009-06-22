@@ -15,6 +15,7 @@ fade_la_LDFLAGS = -module -avoid-version
 four_box_wipe_la_LDFLAGS = -module -avoid-version
 push_wipe_la_LDFLAGS = -module -avoid-version
 wave_la_LDFLAGS = -module -avoid-version
+misc_diagonal_wipe_la_LDFLAGS = -module -avoid-version
 
 # Plugins to be installed
 plugin_LTLIBRARIES = \
@@ -28,7 +29,8 @@ plugin_LTLIBRARIES = \
 	fade.la			\
 	four_box_wipe.la \
 	push_wipe.la \
-	wave.la
+	wave.la \
+	misc_diagonal_wipe.la
 
 bar_wipe_la_SOURCES	= ../src/support.c bar_wipe.c
 barn_door_wipe_la_SOURCES = ../src/support.c barn_door_wipe.c
@@ -41,6 +43,7 @@ fade_la_SOURCES = ../src/support.c fade.c
 four_box_wipe_la_SOURCES = ../src/support.c four_box_wipe.c
 push_wipe_la_SOURCES = ../src/support.c push_wipe.c
 wave_la_SOURCES = ../src/support.c wave.c
+misc_diagonal_wipe_la_SOURCES = ../src/support.c misc_diagonal_wipe.c
 
 # instead of linking against all in $(GTK_LIBS), we link only against needed libs
 bar_wipe_la_LIBADD = $(PACKAGE_LIBS)
@@ -54,6 +57,7 @@ fade_la_LIBADD = $(PACKAGE_LIBS)
 four_box_wipe_la_LIBADD = $(PACKAGE_LIBS)
 push_wipe_la_LIBADD = $(PACKAGE_LIBS)
 wave_la_LIBADD = $(PACKAGE_LIBS)
+misc_diagonal_wipe_la_LIBADD = $(PACKAGE_LIBS)
 
 AM_CPPFLAGS = \
 	-DDATADIR=\"$(datadir)\" \
