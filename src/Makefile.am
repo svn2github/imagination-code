@@ -14,12 +14,12 @@ imagination_SOURCES = \
 	sexy-icon-entry.c sexy-icon-entry.h \
 	imagination.c imagination.h \
 	support.c support.h \
-	eog-pixbuf-cell-renderer.c eog-pixbuf-cell-renderer.h \
 	main-window.c main-window.h \
 	callbacks.c callbacks.h \
 	new_slideshow.c new_slideshow.h \
 	slideshow_project.c slideshow_project.h \
-	audio.c audio.h
+	audio.c audio.h \
+	export.c export.h
 
 imagination_CFLAGS = \
 	-DDATADIR=\"$(datadir)\"

@@ -24,6 +24,7 @@
 
 #include "main-window.h"
 #include "callbacks.h"
+#include "export.h"
 
 static void img_combo_box_transition_type_changed (GtkComboBox *, img_window_struct *);
 static void img_random_button_clicked(GtkButton *, img_window_struct *);
@@ -38,6 +39,11 @@ static void img_unselect_all_thumbnails(GtkMenuItem *, img_window_struct *);
 static void img_goto_line_entry_activate(GtkWidget *, img_window_struct *);
 static gint img_sort_none_before_other(GtkTreeModel *, GtkTreeIter *, GtkTreeIter *, gpointer);
 static void img_check_numeric_entry (GtkEditable *entry, gchar *text, gint lenght, gint *position, gpointer data);
+
+static void
+img_create_export_menu( GtkWidget         *item,
+						img_window_struct *img );
+
 
 img_window_struct *img_create_window (void)
 {
@@ -168,13 +174,14 @@ img_window_struct *img_create_window (void)
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (img_struct->preview_menu),tmp_image);
 
 	img_struct->export_menu = gtk_image_menu_item_new_with_mnemonic (_("Export"));
-	gtk_widget_add_accelerator (img_struct->export_menu,"activate",accel_group,GDK_g,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
 	gtk_container_add (GTK_CONTAINER (menu1), img_struct->export_menu);
 	gtk_widget_set_sensitive(img_struct->export_menu, FALSE);
-	g_signal_connect(G_OBJECT(img_struct->export_menu), "activate", G_CALLBACK(img_start_stop_export), img_struct);
 
 	image_menu = img_load_icon ("imagination-generate.png",GTK_ICON_SIZE_MENU);
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (img_struct->export_menu),image_menu);
+
+	/* Attach subitems to export menu */
+	img_create_export_menu( img_struct->export_menu, img_struct );
 
 	separatormenuitem1 = gtk_separator_menu_item_new ();
 	gtk_container_add (GTK_CONTAINER (menu1), separatormenuitem1);
@@ -296,13 +303,6 @@ img_window_struct *img_create_window (void)
 	gtk_widget_set_sensitive(img_struct->preview_button, FALSE);
 	gtk_widget_set_tooltip_text(img_struct->preview_button, _("Starts the preview"));
 	g_signal_connect (G_OBJECT (img_struct->preview_button),"clicked",G_CALLBACK (img_start_stop_preview),img_struct);
-
-	tmp_image = img_load_icon("imagination-generate.png",GTK_ICON_SIZE_LARGE_TOOLBAR);
-	img_struct->export_button = GTK_WIDGET (gtk_tool_button_new (tmp_image,""));
-	gtk_container_add (GTK_CONTAINER (toolbar),img_struct->export_button);
-	gtk_widget_set_sensitive(img_struct->export_button, FALSE);
-	gtk_widget_set_tooltip_text(img_struct->export_button, _("Export the DVD slideshow"));
-	g_signal_connect(G_OBJECT(img_struct->export_button), "clicked", G_CALLBACK(img_start_stop_export), img_struct);
 
 	separatortoolitem = GTK_WIDGET (gtk_separator_tool_item_new());
 	gtk_widget_show (separatortoolitem);
@@ -589,7 +589,7 @@ img_window_struct *img_create_window (void)
 	gtk_widget_show (img_struct->thumbnail_iconview);
 
 	/* Create the cell layout */
-	pixbuf_cell = eog_pixbuf_cell_renderer_new();
+	pixbuf_cell = gtk_cell_renderer_pixbuf_new();
 	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (img_struct->thumbnail_iconview), pixbuf_cell, FALSE);
 	g_object_set (G_OBJECT (pixbuf_cell), "width", 115, "ypad", 2, NULL);
 	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (img_struct->thumbnail_iconview), pixbuf_cell, "pixbuf", 0, NULL);
@@ -805,7 +805,7 @@ static void img_combo_box_transition_type_changed (GtkComboBox *combo, img_windo
 	{
 		GtkTreeIter parent = iter;
 		gtk_tree_model_iter_nth_child( model, &iter, &parent, 0 );
-		gtk_tree_model_get(model, &iter, 2, &address, 2, &transition_id, -1);
+		gtk_tree_model_get(model, &iter, 2, &address, 3, &transition_id, -1);
 		g_signal_handlers_block_by_func(img->transition_type,
 										img_combo_box_transition_type_changed,
 										img);
@@ -1051,3 +1051,34 @@ static void img_check_numeric_entry (GtkEditable *entry, gchar *text, gint lengh
 		g_signal_stop_emission_by_name( (gpointer)entry, "insert-text" );
 }
 
+/*
+ * img_create_export_menu:
+ * @item: menu item to attach export menu to.
+ *
+ * This fuction queries all available exporters and adds them to the menu.
+ */
+static void
+img_create_export_menu( GtkWidget         *item,
+						img_window_struct *img )
+{
+	Exporter  *exporters;
+	gint       number, i;
+	GtkWidget *menu;
+
+	number = img_get_exporters_list( &exporters );
+
+	menu = gtk_menu_new();
+	gtk_menu_item_set_submenu( GTK_MENU_ITEM( item ), menu );
+
+	for( i = 0; i < number; i++ )
+	{
+		GtkWidget *ex;
+
+		ex = gtk_menu_item_new_with_label( exporters[i].description );
+		g_signal_connect_swapped( G_OBJECT( ex ), "activate",
+								  exporters[i].func, img );
+		gtk_menu_shell_append( GTK_MENU_SHELL( menu ), ex );
+	}
+
+	img_free_exporters_list( number, exporters );
+}

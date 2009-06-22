@@ -50,4 +50,5 @@ GdkPixbuf *img_scale_pixbuf (img_window_struct *, gchar *);
 void img_set_buttons_state(img_window_struct *, gboolean );
 void img_move_audio_up( GtkButton *, img_window_struct * );
 void img_move_audio_down( GtkButton *, img_window_struct * );
+gboolean img_on_expose_event(GtkWidget *,GdkEventExpose *,img_window_struct *);
 #endif

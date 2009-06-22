@@ -40,14 +40,11 @@ void img_save_slideshow(img_window_struct *img)
 	/* Slideshow settings */
 	g_key_file_set_comment(img_key_file, NULL, NULL, comment_string, NULL);
 
-	g_key_file_set_string(img_key_file,"slideshow settings","name", img->slideshow_filename);
-	g_key_file_set_integer(img_key_file,"slideshow settings","export format", img->slideshow_format_index);
 
 	if ((img->image_area)->allocation.height == 480)
 		g_key_file_set_integer(img_key_file,"slideshow settings","video format", 480);
 	else
 		g_key_file_set_integer(img_key_file,"slideshow settings","video format", 576);
-	g_key_file_set_string(img_key_file,"slideshow settings","aspect ratio", img->aspect_ratio);
 	conf = g_strdup_printf( "%lx", (gulong)img->background_color );
 	g_key_file_set_string(img_key_file,"slideshow settings", "background color", conf);
 	g_free( conf );
@@ -138,21 +135,12 @@ void img_load_slideshow(img_window_struct *img)
 	}
 	g_free(dummy);
 
-	if (img->slideshow_filename)
-	{
-		g_free(img->slideshow_filename);
-		img->slideshow_filename = NULL;
-	}
-
 	/* Create hash table for efficient searching */
 	table = g_hash_table_new_full( g_direct_hash, g_direct_equal, NULL, g_free );
 	model = gtk_combo_box_get_model( GTK_COMBO_BOX( img->transition_type ) );
 	gtk_tree_model_foreach( model, (GtkTreeModelForeachFunc)img_populate_hash_table, &table );
 
 	/* Set the slideshow options */
-	img->slideshow_filename 	= g_key_file_get_string(img_key_file,"slideshow settings","name", NULL);
-	img->slideshow_format_index = g_key_file_get_integer(img_key_file,"slideshow settings","export format", NULL);
-	img->aspect_ratio			= g_key_file_get_string(img_key_file,"slideshow settings","aspect ratio", NULL);
 	height = g_key_file_get_integer(img_key_file,"slideshow settings","video format", NULL);
 	gtk_widget_set_size_request( img->image_area, 720, height );
 	dummy = g_key_file_get_string(img_key_file, "slideshow settings", "background color", NULL );

@@ -34,15 +34,7 @@
 #define	NORMAL	4
 #define	SLOW	8
 
-/* Export frame rate is currently set to 29.97. The intent of this
- * macro is to ease grepping through the sources if we decide to
- * implement different frame rates for different export formats.
- * Second macro is string representation of frame rate to be used
- * when constructing encoder command line. */
-#define EXPORT_FPS         29.97
-#define EXPORT_FPS_STRING "29.97"
-
-#define comment_string	"Imagination 1.0 Slideshow Project - http://imagination.sf.net"
+#define comment_string	"Imagination Slideshow Project - http://imagination.sf.net"
 
 typedef struct _plugin plugin;
 
@@ -119,11 +111,8 @@ struct _img_window_struct
 
 	/* Project related variables */
 	gchar       *project_filename;		// project name for saving
-  	gchar		*slideshow_filename;	// exported file name
-  	gchar		*aspect_ratio;
 	gboolean	distort_images;
 	gboolean	project_is_modified;
-	gint		slideshow_format_index;
 	guint32     background_color;
   	gint		total_secs;
 	gint		total_music_secs;
@@ -147,14 +136,32 @@ struct _img_window_struct
   	GtkWidget	*slide_number_entry;
 
 	/* Export dialog related stuff */
-	gboolean    export_is_running;
-	gboolean    audio_flag;
+	gint        export_is_running;  /* 0 - export is not running
+									     . no cleaning needed
+									   1 - geting info from user
+									     . no cleaning needed
+									   2 - preparing audio
+									     . terminate sox thread
+										 . delete any created files
+										 . free cmd_line
+										 . free audio_file
+									   3 - exporting video (pre-spawn)
+									     . free cmd_line
+										 . free audio_file
+									   4 - exporting video (post-spawn)
+									     . kill ffmpeg
+										 . free cmd_line
+										 . free audio_file
+										 */
 	gint        file_desc;
 	guchar      *pixbuf_data;
 	GtkWidget   *export_pbar1;
 	GtkWidget   *export_pbar2;
 	GtkWidget   *export_label;
 	GtkWidget   *export_dialog;
+	gdouble      export_fps;        /* Frame rate for exported video */
+	gchar       *export_cmd_line;   /* ffmpeg spawn cmd line */
+	gchar       *export_audio_file; /* Full path to audio */
 	guint        export_frame_nr;	/* Total number of frames */
 	guint        export_frame_cur;	/* Current frame */
 	guint        export_slide_nr;	/* Number of frames fo current slide */

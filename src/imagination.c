@@ -26,6 +26,7 @@
 
 #include "main-window.h"
 #include "support.h"
+#include "callbacks.h"
 
 extern void output_message(unsigned , const char *, const char *, va_list ap);
 
@@ -52,8 +53,6 @@ int main (int argc, char *argv[])
 
 	/* Set some default values */
 	img_window->background_color = 0x000000ff;
-	img_window->aspect_ratio = "4:3";
-	img_window->slideshow_format_index = 0;
 	img_window->slides_nr = 0;
 	img_window->distort_images = TRUE;
 
@@ -64,6 +63,14 @@ int main (int argc, char *argv[])
 
 	gtk_widget_show (img_window->imagination_window);
 	img_set_statusbar_message(img_window,0);
+
+	/*read the project filename passed in argv*/
+ 	if (argc > 1 )
+	{
+		argv++;
+		img_window->project_filename = g_strdup(*argv);
+		img_load_slideshow(img_window);
+	}
 
 	gtk_main ();
 

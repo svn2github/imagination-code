@@ -19,26 +19,16 @@
  */
 
 #include "callbacks.h"
+#include "export.h"
 
 static void img_file_chooser_add_preview(img_window_struct *);
 static void img_update_preview_file_chooser(GtkFileChooser *,img_window_struct *);
-static gboolean img_on_expose_event(GtkWidget *,GdkEventExpose *,img_window_struct *);
 static gboolean img_transition_timeout(img_window_struct *);
 static gboolean img_sleep_timeout(img_window_struct *);
-static gboolean img_prepare_pixbufs(img_window_struct *);
 static void img_swap_toolbar_images( img_window_struct *, gboolean);
 static void img_clean_after_preview(img_window_struct *);
 static void img_increase_progressbar(img_window_struct *, gint);
-static gboolean img_run_encoder(img_window_struct *);
 static void img_about_dialog_activate_link(GtkAboutDialog * , const gchar *, gpointer );
-
-/* Export related functions */
-static gboolean img_export_transition(img_window_struct *);
-static gboolean img_export_still(img_window_struct *);
-static void img_clean_after_export(img_window_struct *);
-static void img_export_pixbuf_to_ppm(GdkPixbuf *, guchar **, guint *);
-static void img_export_calc_slide_frames(img_window_struct *);
-static void img_export_pause_unpause(GtkToggleButton *, img_window_struct *);
 
 void img_set_window_title(img_window_struct *img, gchar *text)
 {
@@ -339,12 +329,6 @@ void img_free_allocated_memory(img_window_struct *img_struct)
 	}
 
 	/* Free gchar pointers */
-	if (img_struct->slideshow_filename)
-	{
-		g_free(img_struct->slideshow_filename);
-		img_struct->slideshow_filename = NULL;
-	}
-
 	if (img_struct->current_dir)
 	{
 		g_free(img_struct->current_dir);
@@ -656,7 +640,7 @@ void img_start_stop_preview(GtkWidget *button, img_window_struct *img)
 	return;
 }
 
-static gboolean img_on_expose_event(GtkWidget *widget,GdkEventExpose *event,img_window_struct *img)
+gboolean img_on_expose_event(GtkWidget *widget,GdkEventExpose *event,img_window_struct *img)
 {
 	/* We always pass negative number as a last parameter when we want to
 	 * draw on screen. */
@@ -979,375 +963,6 @@ void img_close_slideshow(GtkWidget *widget, img_window_struct *img)
 	img->final_transition.render = NULL;
 }
 
-void img_start_stop_export(GtkWidget *widget, img_window_struct *img)
-{
-	GtkTreeIter   iter;
-	slide_struct *entry;
-	GtkTreeModel *model;
-
-	/* If we are displaying preview, abort or bad things will happen. */
-	if(img->preview_is_running)
-		return;
-
-	if (img->total_music_secs > img->total_secs && img->audio_flag == FALSE)
-	{
-		img->audio_flag = TRUE;
-		if (GTK_RESPONSE_OK != img_ask_user_confirmation(img, _("The length of the audio track is longer than the video one. Do you want to continue?")))
-			return;
-	}
-	model = gtk_icon_view_get_model(GTK_ICON_VIEW(img->thumbnail_iconview));
-	if(!gtk_tree_model_get_iter_first(model, &iter))
-			return;
-
-	if(img->export_is_running)
-	{
-		/* Remove idle function from main loop */
-		g_source_remove(img->source_id);
-
-		/* Kill ffmepg process */
-		kill( img->ffmpeg_export, SIGINT );
-
-		/* Clean resources used by export. */
-		img_clean_after_export(img);
-		img->audio_flag = FALSE;
-	}
-	else
-	{
-		GtkWidget *dialog;
-		GtkWidget *vbox, *hbox;
-		GtkWidget *label;
-		GtkWidget *progress;
-		GtkWidget *button;
-		gchar     *string;
-
-		if(!img_run_encoder(img))
-			return;
-
-		/* Create progress window with cancel and pause buttons, calculate
-		 * the total number of frames to display. */
-		dialog = gtk_window_new( GTK_WINDOW_TOPLEVEL );
-		img->export_dialog = dialog;
-		gtk_window_set_title (GTK_WINDOW(img->export_dialog),_("Exporting the slideshow"));
-		gtk_container_set_border_width( GTK_CONTAINER( dialog ), 10 );
-		gtk_window_set_default_size( GTK_WINDOW( dialog ), 400, -1 );
-		gtk_window_set_type_hint( GTK_WINDOW( dialog ),
-								  GDK_WINDOW_TYPE_HINT_DIALOG );
-		gtk_window_set_modal( GTK_WINDOW( dialog ), TRUE );
-		gtk_window_set_transient_for( GTK_WINDOW( dialog ),
-									  GTK_WINDOW( img->imagination_window ) );
-
-		vbox = gtk_vbox_new( FALSE, 6 );
-		gtk_container_add( GTK_CONTAINER( dialog ), vbox );
-
-		label = gtk_label_new( _("Preparing for export ...") );
-		gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
-		img->export_label = label;
-		gtk_box_pack_start( GTK_BOX( vbox ), label, FALSE, FALSE, 0 );
-
-		progress = gtk_progress_bar_new();
-		img->export_pbar1 = progress;
-		string = g_strdup_printf( "%.2f", .0 );
-		gtk_progress_bar_set_text( GTK_PROGRESS_BAR( progress ), string );
-		gtk_box_pack_start( GTK_BOX( vbox ), progress, FALSE, FALSE, 0 );
-
-		label = gtk_label_new( _("Overall progress:") );
-		gtk_misc_set_alignment( GTK_MISC( label ), 0, 0.5 );
-		gtk_box_pack_start( GTK_BOX( vbox ), label, FALSE, FALSE, 0 );
-
-		progress = gtk_progress_bar_new();
-		img->export_pbar2 = progress;
-		gtk_progress_bar_set_text( GTK_PROGRESS_BAR( progress ), string );
-		gtk_box_pack_start( GTK_BOX( vbox ), progress, FALSE, FALSE, 0 );
-		g_free( string );
-
-		hbox = gtk_hbox_new( TRUE, 6 );
-		gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
-
-		button = gtk_button_new_from_stock( GTK_STOCK_CANCEL );
-		g_signal_connect( G_OBJECT( button ), "clicked",
-						  G_CALLBACK( img_start_stop_export ), img );
-		gtk_box_pack_end( GTK_BOX( hbox ), button, FALSE, FALSE, 0 );
-
-		button = gtk_toggle_button_new_with_label( GTK_STOCK_MEDIA_PAUSE );
-		gtk_button_set_use_stock( GTK_BUTTON( button ), TRUE );
-		g_signal_connect( G_OBJECT( button ), "toggled",
-						  G_CALLBACK( img_export_pause_unpause ), img );
-		gtk_box_pack_end( GTK_BOX( hbox ), button, FALSE, FALSE, 0 );
-
-		gtk_widget_show_all( dialog );
-
-		/* Display some visual feedback */
-		while( gtk_events_pending() )
-			gtk_main_iteration();
-
-		img->slide_pixbuf = gtk_image_get_pixbuf(GTK_IMAGE(img->image_area));
-		if(img->slide_pixbuf)
-			g_object_ref(G_OBJECT(img->slide_pixbuf));
-		gtk_image_clear(GTK_IMAGE(img->image_area));
-		gtk_widget_set_app_paintable(img->image_area, TRUE);
-		g_signal_connect(G_OBJECT(img->image_area), "expose-event", G_CALLBACK(img_on_expose_event), img);
-
-		/* Create an empty pixbuf for starting image. */
-		img->pixbuf1 = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8, img->image_area->allocation.width, img->image_area->allocation.height);
-		gdk_pixbuf_fill(img->pixbuf1, img->background_color);
-
-		/* Load first image from model */
-		gtk_tree_model_get(model, &iter, 1, &entry, -1);
-		img->pixbuf2 = img_scale_pixbuf(img, entry->filename);
-
-		/* Add export idle function and set initial values */
-		img->export_is_running = TRUE;
-		img->current_slide = entry;
-		img->progress = 0;
-		img->export_frame_nr = img->total_secs * EXPORT_FPS;
-		img->export_frame_cur = 0;
-
-		/* Fix for the wrong progress bar indicators. */
-		img_export_calc_slide_frames( img );
-
-		img->export_slide = 1;
-		img->export_idle_func = (GSourceFunc)img_export_transition;
-		img->source_id = g_idle_add((GSourceFunc)img_export_transition, img);
-
-		string = g_strdup_printf( _("Slide %d export progress:"), 1 );
-		/* I did this for the translators. ^^ */
-		gtk_label_set_label( GTK_LABEL( img->export_label ), string );
-		g_free( string );
-	}
-}
-
-static gboolean img_export_transition(img_window_struct *img)
-{
-	gchar           string[10];
-	gdouble         export_progress;
-
-	/* If no transition effect is set, just connect still export
-	 * idle function and remove itself from main loop. */
-	if(img->current_slide->render == NULL)
-	{
-		img->source_id = g_idle_add((GSourceFunc)img_export_still, img);
-		return(FALSE);
-	}
-
-	/* Switch to still export phase if progress reached 1. */
-	img->progress += (gdouble)1 / ( img->current_slide->speed * EXPORT_FPS );
-	if(img->progress > 1.00000005)
-	{
-		img->progress = 0;
-		img->export_idle_func = (GSourceFunc)img_export_still;
-		img->source_id = g_idle_add((GSourceFunc)img_export_still, img);
-
-		return(FALSE);
-	}
-
-	/* Draw one frame of transition animation */
-	img->current_slide->render(img->image_area->window, img->pixbuf1, img->pixbuf2, img->progress, img->file_desc);
-
-	/* Increment global frame counters and update progress bars */
-	img->export_frame_cur++;
-	img->export_slide_cur++;
-
-	export_progress = (gdouble)img->export_slide_cur / img->export_slide_nr;
-	snprintf( string, 10, "%.2f%%", export_progress * 100 );
-	gtk_progress_bar_set_fraction( GTK_PROGRESS_BAR( img->export_pbar1 ),
-								   export_progress );
-	gtk_progress_bar_set_text( GTK_PROGRESS_BAR( img->export_pbar1 ), string );
-
-	export_progress = (gdouble)img->export_frame_cur / img->export_frame_nr;
-	snprintf( string, 10, "%.2f%%", export_progress * 100 );
-	gtk_progress_bar_set_fraction( GTK_PROGRESS_BAR( img->export_pbar2 ),
-								   export_progress );
-	gtk_progress_bar_set_text( GTK_PROGRESS_BAR( img->export_pbar2 ), string );
-
-	/* Draw every 10th frame of animation on screen */
-	if(img->export_frame_cur % 10 == 0)
-		gtk_widget_queue_draw(img->image_area);
-
-	return(TRUE);
-}
-
-static gboolean img_export_still(img_window_struct *img)
-{
-	static guint   lenght;
-	gdouble        export_progress;
-	gchar          string[10];
-
-	/* Initialize pixbuf data buffer */
-	if(img->pixbuf_data == NULL)
-	{
-		gtk_image_set_from_pixbuf(GTK_IMAGE(img->image_area), img->pixbuf2);
-		img_export_pixbuf_to_ppm(img->pixbuf2, &img->pixbuf_data, &lenght);
-	}
-
-	 /* Draw frames until we have enough of them to fill slide duration gap. */
-	if( img->export_slide_cur > img->export_slide_nr )
-	{
-		/* Exit still rendering and continue with next transition. */
-
-		/* Clear image area for next renderer */
-		gtk_image_clear(GTK_IMAGE(img->image_area));
-
-		/* Load next image from store. */
-		if(img_prepare_pixbufs(img))
-		{
-			gchar *string;
-
-			/* Update progress counters */
-			img->export_slide++;
-
-			/* Make dialog more informative */
-			if( img->current_slide->duration == 0 )
-				string = g_strdup_printf( _("Final transition export progress:") );
-			else
-				string = g_strdup_printf( _("Slide %d export progress:"), img->export_slide );
-			gtk_label_set_label( GTK_LABEL( img->export_label ), string );
-			g_free( string );
-			/* Progress bug fix */
-			img_export_calc_slide_frames( img );
-
-			g_free(img->pixbuf_data);
-			img->pixbuf_data = NULL;
-			img->export_idle_func = (GSourceFunc)img_export_transition;
-			img->source_id = g_idle_add((GSourceFunc)img_export_transition, img);
-		}
-		else
-			img_clean_after_export(img);
-
-		return(FALSE);
-	}
-	write(img->file_desc, img->pixbuf_data, lenght);
-
-	/* Increment global frame counter and update progress bar */
-	img->export_frame_cur++;
-	img->export_slide_cur++;
-
-	/* CLAMPS are needed here because of the loosy conversion when switching
-	 * from floating point to integer arithmetics. */
-	export_progress = CLAMP( (gdouble)img->export_slide_cur / img->export_slide_nr, 0, 1 );
-	snprintf( string, 10, "%.2f%%", export_progress * 100 );
-	gtk_progress_bar_set_fraction( GTK_PROGRESS_BAR( img->export_pbar1 ),
-								   export_progress );
-	gtk_progress_bar_set_text( GTK_PROGRESS_BAR( img->export_pbar1 ), string );
-
-	export_progress = CLAMP( (gdouble)img->export_frame_cur / img->export_frame_nr, 0, 1 );
-	snprintf( string, 10, "%.2f%%", export_progress * 100 );
-	gtk_progress_bar_set_fraction( GTK_PROGRESS_BAR( img->export_pbar2 ),
-								   export_progress );
-	gtk_progress_bar_set_text( GTK_PROGRESS_BAR( img->export_pbar2 ), string );
-
-	return(TRUE);
-}
-
-static void img_clean_after_export(img_window_struct *img)
-{
-	/* Disconnect expose event */
-	g_signal_handlers_block_by_func(img->image_area, img_on_expose_event, img);
-	gtk_widget_set_app_paintable(img->image_area, FALSE);
-
-	/* Restore image that was used before export */
-	gtk_image_set_from_pixbuf(GTK_IMAGE(img->image_area), img->slide_pixbuf);
-	if(img->slide_pixbuf)
-		g_object_unref(G_OBJECT(img->slide_pixbuf));
-
-	/* Indicate that export is not running any more */
-	img->export_is_running = FALSE;
-
-	/* Clean other resources */
-	g_slice_free(GtkTreeIter, img->cur_ss_iter);
-	img->cur_ss_iter = NULL;
-	g_free(img->pixbuf_data);
-	img->pixbuf_data = NULL;
-	gtk_widget_destroy( img->export_dialog );
-
-	close(img->file_desc);
-	g_spawn_close_pid( img->ffmpeg_export );
-}
-
-/* Move one step forward in model and set img->pixbuf1 and img->pixbuf2
- * to appropriate values.
- * Return FALSE if we reached the end of the model, else TRUE. */
-static gboolean img_prepare_pixbufs(img_window_struct *img)
-{
-	GtkTreeModel *model;
-	static gboolean last_transition = TRUE; /* This controls the final transition. */
-
-	model = gtk_icon_view_get_model(GTK_ICON_VIEW(img->thumbnail_iconview));
-
-	if(!img->cur_ss_iter)
-	{
-		img->cur_ss_iter = g_slice_new(GtkTreeIter);
-		gtk_tree_model_get_iter_first(model, img->cur_ss_iter);
-	}
-
-	if(gtk_tree_model_iter_next(model, img->cur_ss_iter))
-	{
-		/* We have next iter, so prepare for next round */
-		g_object_unref(G_OBJECT(img->pixbuf1));
-		img->pixbuf1 = img->pixbuf2;
-		gtk_tree_model_get(model, img->cur_ss_iter, 1, &img->current_slide, -1);
-		img->pixbuf2 = img_scale_pixbuf(img, img->current_slide->filename);
-
-		return(TRUE);
-	}
-	else if( last_transition )
-	{
-		/* We displayed last image, but bye-bye transition hasn't
-		 * been displayed. */
-		last_transition = FALSE;
-
-		g_object_unref( G_OBJECT( img->pixbuf1 ) );
-		img->pixbuf1 = img->pixbuf2;
-		img->pixbuf2 = gdk_pixbuf_new( GDK_COLORSPACE_RGB, FALSE, 8,
-									   img->image_area->allocation.width,
-									   img->image_area->allocation.height );
-		gdk_pixbuf_fill( img->pixbuf2, img->background_color );
-		img->current_slide = &img->final_transition;
-
-		return( TRUE );
-	}
-
-	/* We're done now */
-	last_transition = TRUE;
-
-	return(FALSE);
-}
-
-static void img_export_pixbuf_to_ppm(GdkPixbuf *pixbuf, guchar **data, guint *lenght)
-{
-	gint      width, height, stride, channels;
-	guchar   *pixels, *tmp;
-	gint      col, row;
-	gchar    *header;
-	gint      header_lenght;
-
-	width    = gdk_pixbuf_get_width(pixbuf);
-	height   = gdk_pixbuf_get_height(pixbuf);
-	stride   = gdk_pixbuf_get_rowstride(pixbuf);
-	channels = gdk_pixbuf_get_n_channels(pixbuf);
-	pixels   = gdk_pixbuf_get_pixels(pixbuf);
-
-	header = g_strdup_printf("P6\n%d %d\n255\n", width, height);
-	header_lenght = strlen(header) * sizeof(gchar);
-
-	*lenght = sizeof(guchar) * width * height * channels + header_lenght;
-	*data = g_slice_alloc(sizeof(guchar) * *lenght);
-
-	memcpy(*data, header, header_lenght);
-	tmp = *data + header_lenght;
-	for(row = 0; row < height; row++)
-	{
-		for(col = 0; col < width; col++)
-		{
-			tmp[0] = pixels[0];
-			tmp[1] = pixels[1];
-			tmp[2] = pixels[2];
-
-			tmp    += 3;
-			pixels += channels;
-		}
-	}
-}
-
 /*
 // In GdkPixbuf 2.12 or above, this returns the EXIF orientation value.
 const char* exif_orientation = gdk_pixbuf_get_option(thumb->pixbuf, "orientation");
@@ -1380,85 +995,6 @@ thumb->rotation = 180;
  }
  */
 
-/* Changed return value to gboolean. This way we can abort export in
- * img_start_stop_export function. */
-static gboolean img_run_encoder(img_window_struct *img)
-{
-	GtkWidget  *message;
-	GError     *error = NULL;
-	gchar     **argv;
-	gchar      *cmd_line, *path, *filename;
-	gint		argc;
-	gboolean    ret;
-	GtkTreeModel *model;
-	GtkTreeIter iter;
-	GString		*audio_string = NULL;
-
-	model = gtk_tree_view_get_model (GTK_TREE_VIEW(img->music_file_treeview));
-
-	if (gtk_tree_model_get_iter_first(model,&iter) )
-	{
-		audio_string = g_string_new("");
-		do
-		{
-			gtk_tree_model_get(model, &iter,0, &path, 1, &filename, -1);
-			g_string_append_printf(audio_string, " -i \"%s/%s\"", path, filename);
-			g_free(path);
-			g_free(filename);
-		}
-		while (gtk_tree_model_iter_next (model,&iter));
-	}
-
-	if (img->slideshow_format_index == 0)
-	/* Export as VOB file */
-		cmd_line = g_strdup_printf(
-				"ffmpeg -f image2pipe -vcodec ppm -i pipe: "
-				"-r %s -aspect %s -s %dx%d %s -y -bf 2 -target %s-dvd \"%s.vob\"",
-				EXPORT_FPS_STRING, img->aspect_ratio,
-				img->image_area->allocation.width, img->image_area->allocation.height, audio_string ? audio_string->str : "",
-				img->image_area->allocation.height == 576 ? "pal" : "ntsc", img->slideshow_filename );
-	else if (img->slideshow_format_index == 1)
-	/* Export as OGG file */
-		cmd_line = g_strdup_printf(
-				"ffmpeg -f image2pipe -vcodec ppm -i pipe: "
-				"-r %s -aspect %s -s %dx%d %s -vcodec libtheora -vb 1024k -acodec libvorbis -f ogg -y \"%s.ogg\"",
-				EXPORT_FPS_STRING, img->aspect_ratio, img->image_area->allocation.width,
-				img->image_area->allocation.height, audio_string ? audio_string->str : "", img->slideshow_filename );
-	else
-	/* Export as FLV file */
-		cmd_line = g_strdup_printf(
-				"ffmpeg -f image2pipe -vcodec ppm -r " EXPORT_FPS_STRING
-				" -i pipe: -b 512k -s 320x240 %s -f flv -vcodec flv -acodec libmp3lame -ab 56 -ar 22050 -ac 1 -y \"%s.flv\"", audio_string ? audio_string->str : "", img->slideshow_filename);
-
-	g_string_free(audio_string, FALSE);
-	g_shell_parse_argv (cmd_line, &argc, &argv, NULL);
-	g_print( "%s\n", cmd_line);
-	g_free(cmd_line);
-
-	ret = g_spawn_async_with_pipes( NULL, argv, NULL,
-									G_SPAWN_SEARCH_PATH /*|
-									G_SPAWN_DO_NOT_REAP_CHILD |
-									G_SPAWN_STDOUT_TO_DEV_NULL |
-									G_SPAWN_STDERR_TO_DEV_NULL*/,
-									NULL, NULL, &img->ffmpeg_export,
-									&img->file_desc, NULL, NULL, &error );
-	if( ! ret )
-	{
-		message = gtk_message_dialog_new (GTK_WINDOW (img->imagination_window),
-										GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-										GTK_MESSAGE_ERROR,
-										GTK_BUTTONS_CLOSE,
-										_("Failed to launch the encoder!"));
-		gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (message),"%s.",error->message);
-		gtk_dialog_run (GTK_DIALOG (message));
-		gtk_widget_destroy (message);
-		g_error_free (error);
-	}
-	g_strfreev( argv );
-
-	return( ret );
-}
-
 void img_set_buttons_state(img_window_struct *img, gboolean state)
 {
 	gtk_widget_set_sensitive(img->import_button,state);
@@ -1473,34 +1009,8 @@ void img_set_buttons_state(img_window_struct *img, gboolean state)
 	gtk_widget_set_sensitive(img->preview_menu,	state);
 	gtk_widget_set_sensitive(img->preview_button,state);
 	gtk_widget_set_sensitive(img->export_menu,	state);
-	gtk_widget_set_sensitive(img->export_button,state);
 }
 
-static void img_export_calc_slide_frames(img_window_struct *img)
-{
-
-	/* This is fix for the progress bars. I forgot that slides with no
-	 * transition effect shouldn't have transition time added.
-	 * (I haven't caught that bug when testing because I created slideshow
-	 * where each slide had transition effect set.) */
-	if( img->current_slide->render )
-		/* Duration + transition time */
-		img->export_slide_nr = ( img->current_slide->duration + img->current_slide->speed ) * EXPORT_FPS;
-	else
-		/* Duration only */
-		img->export_slide_nr = img->current_slide->duration * EXPORT_FPS;
-
-	img->export_slide_cur = 0;
-}
-
-static void img_export_pause_unpause(GtkToggleButton *button, img_window_struct *img)
-{
-	if( gtk_toggle_button_get_active( button ) )
-		/* Pause export */
-		g_source_remove( img->source_id );
-	else
-		img->source_id = g_idle_add(img->export_idle_func, img);
-}
 
 void img_move_audio_up( GtkButton *button, img_window_struct *img )
 {

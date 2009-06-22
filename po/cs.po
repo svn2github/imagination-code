@@ -1,351 +1,350 @@
-# Slovenian translations for imagination package.
-# Copyright (C) 2009 THE imagination'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the imagination package.
-# tadeboro <tadeboro@gmail.com>, 2009.
-# 
 msgid ""
 msgstr ""
 "Project-Id-Version: imagination 1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-06-22 10:22+0200\n"
-"PO-Revision-Date: 2009-02-24 11:55+0100\n"
-"Last-Translator: tadeboro <tadeboro@gmail.com>\n"
-"Language-Team: Slovenian\n"
+"PO-Revision-Date: \n"
+"Last-Translator: Michal Várady <miko.vaji@gmail.com>\n"
+"Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=4; plural=(n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || n"
-"%100==4 ? 2 : 3);\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+"X-Poedit-Language: Czech\n"
+"X-Poedit-Country: CZECH REPUBLIC\n"
+"X-Poedit-SourceCharset: utf-8\n"
 
 #: ../imagination.desktop.in.h:1
 msgid "A DVD slideshow maker"
-msgstr "Program za izdelavo DVD diaprojekcij"
+msgstr "Aplikace pro vytváření prezentací na disky DVD"
 
 #: ../imagination.desktop.in.h:2
 msgid "A lightweight DVD slideshow maker using GTK+2"
-msgstr "Lahki GTK+2 program za izdelavo DVD diaprojekcij"
+msgstr ""
+"Odlehčená aplikace pro vytváření prezentací na disky DVD používající GTK+2"
 
 #: ../imagination.desktop.in.h:3
 msgid "Imagination"
-msgstr "Domišljija"
+msgstr "Imagination"
 
 #: ../src/audio.c:106
 #, c-format
 msgid "Playing %s..."
-msgstr "Predvajam %s"
+msgstr "Přehrávání %s..."
 
 #: ../src/audio.c:126 ../src/main-window.c:547
 msgid "Play the selected file"
-msgstr "Predvajaj izbrano datoteko"
+msgstr "Přehrát vybraný soubor"
 
 #: ../src/audio.c:134
 msgid "Stop the playback"
-msgstr "Ustavi predvajanje"
+msgstr "Zastavit přehrávání"
 
 #: ../src/main-window.c:125
 msgid "_Slideshow"
-msgstr "_Diaprojekcija"
+msgstr "_Prezentace"
 
 #: ../src/main-window.c:167
 msgid "_Preview"
-msgstr "_Predogled"
+msgstr "_Náhled"
 
 #: ../src/main-window.c:176
 msgid "Export"
-msgstr "Izvoz"
+msgstr "Export"
 
 #: ../src/main-window.c:194
 msgid "_Slide"
-msgstr "Di_apozitiv"
+msgstr "_Snímek"
 
 #: ../src/main-window.c:200
 msgid "Import p_ictures"
-msgstr "Uvozi _fotografije"
+msgstr "Importovat _obrázky"
 
 #: ../src/main-window.c:209
 msgid "Import _music"
-msgstr "_Uvozi glasbo"
+msgstr "Importovat _hudbu"
 
 #: ../src/main-window.c:218
 msgid "Dele_te"
-msgstr "_Zbriši"
+msgstr "_Smazat"
 
 #: ../src/main-window.c:235
 msgid "Un_select all"
-msgstr "Počis_ti izbor"
+msgstr "O_dznačit vše"
 
 #: ../src/main-window.c:240
 msgid "_Help"
-msgstr "_Pomoč"
+msgstr "_Nápověda"
 
 #: ../src/main-window.c:259 ../src/new_slideshow.c:54
 msgid "Create a new slideshow"
-msgstr "Ustvari novo diaprojekcijo"
+msgstr "Vytvořit novou prezentaci"
 
 #: ../src/main-window.c:264
 msgid "Open a slideshow"
-msgstr "Odpri diaprojekcijo"
+msgstr "Otevřít prezentaci"
 
 #: ../src/main-window.c:270
 msgid "Save the slideshow"
-msgstr "Shrani diaprojekcijo"
+msgstr "Uložit prezentaci"
 
 #: ../src/main-window.c:281
 msgid "Import pictures"
-msgstr "Uvozi fotografije"
+msgstr "Importovat obrázky"
 
 #: ../src/main-window.c:288
 msgid "Import music"
-msgstr "Uvozi glasbo"
+msgstr "Importovat hudbu"
 
 #: ../src/main-window.c:294
 msgid "Delete the selected slides"
-msgstr "Zbriši izbrane diapozitive"
+msgstr "Smazat vybrané snímky"
 
 #: ../src/main-window.c:304 ../src/callbacks.c:853
 msgid "Starts the preview"
-msgstr "Požene predogled"
+msgstr "Spouští náhled"
 
 #: ../src/main-window.c:323
 msgid "Jump to the entered slide number"
-msgstr "Skoči na vnešeni diapozitiv"
+msgstr "Přejde na zadané číslo snímku"
 
 #: ../src/main-window.c:373
 msgid "<b>Slide settings</b>"
-msgstr "<b>Nastavitve diapozitiva</b>"
+msgstr "<b>Nastavení snímků</b>"
 
 #. Transition types label
 #: ../src/main-window.c:383
 msgid "Transition Type:"
-msgstr "Vrsta prehoda:"
+msgstr "Typ přechodu:"
 
 #: ../src/main-window.c:403
 msgid "Random"
-msgstr "Naključno"
+msgstr "Náhodný"
 
 #: ../src/main-window.c:404
 msgid "Imagination randomly decides with transition to apply"
-msgstr "Domišljija naključno izbere prehod"
+msgstr "Apikace Transition náhodně zvolí použitý přechod"
 
 #. Transition duration
 #: ../src/main-window.c:410
 msgid "Transition Speed:"
-msgstr "Histrost prehoda:"
+msgstr "Rychlost přechodu:"
 
 #: ../src/main-window.c:425
 msgid "Fast"
-msgstr "Hitro"
+msgstr "Rychlý"
 
 #: ../src/main-window.c:427
 msgid "Normal"
-msgstr "Normalno"
+msgstr "Střední"
 
 #: ../src/main-window.c:429
 msgid "Slow"
-msgstr "Počasi"
+msgstr "Pomalý"
 
 #. Slide duration
 #: ../src/main-window.c:436
 msgid "Slide Duration in sec:"
-msgstr "Trajanje diapozitiva v sek:"
+msgstr "Délka zobrazení snímku v sekundách:"
 
 #. Slide Selected
 #: ../src/main-window.c:447
 msgid "Slide Number:"
-msgstr "Številka diapozitiva:"
+msgstr "Číslo snímku:"
 
 #. Slide Resolution
 #: ../src/main-window.c:456
 msgid "Resolution:"
-msgstr "Ločljivost:"
+msgstr "Rozlišení:"
 
 #. Slide Type
 #: ../src/main-window.c:465
 msgid "Type:"
-msgstr "Tip:"
+msgstr "Typ:"
 
 #. Slide Total Duration
 #: ../src/main-window.c:474
 msgid "Slideshow Length:"
-msgstr "Trajanje diaprojekcije:"
+msgstr "Délka prezentace:"
 
 #: ../src/main-window.c:491
 msgid "<b>Background Music</b>"
-msgstr "<b>Glasbena podlaga</b>"
+msgstr "<b>Hudba na pozadí</b>"
 
 #: ../src/main-window.c:531
 msgid "Music Duration:"
-msgstr "Trajanje glasbene podlage:"
+msgstr "Délka přehrávání hudby:"
 
 #: ../src/main-window.c:555
 msgid "Delete the selected file"
-msgstr "Zbriši izbrane datoteke"
+msgstr "Smazat vybraný soubor"
 
 #: ../src/main-window.c:563
 msgid "Move the selected file up"
-msgstr "Premakni izbrano datoteko navzgor"
+msgstr "Přesunout vybraný soubor nahoru"
 
 #: ../src/main-window.c:570
 msgid "Move the selected file down"
-msgstr "Premakni izbrano datoteko navzdol"
+msgstr "Přesunou vybraný soubor dolů"
 
 #: ../src/main-window.c:577
 msgid "Clear all files"
-msgstr "Počisti datoteke"
+msgstr "Odebrat všechny soubory"
 
 #: ../src/main-window.c:1036 ../src/main-window.c:1038 ../src/support.c:220
 msgid "None"
-msgstr "Brez"
+msgstr "Žádný"
 
 #: ../src/callbacks.c:112
 #, c-format
 msgid "Please wait, importing slide %d out of %d"
-msgstr "Uvažam diapozitiv %d od %d, prosimo počakajte"
+msgstr "Čekejte prosím, importuje se %d. snímek z %d"
 
 #: ../src/callbacks.c:179
 msgid "Please choose the audio files to import"
-msgstr "Prosimo izberite glasbene datoteke za uvoz"
+msgstr "Zvolte zvukové soubory pro import"
 
 #: ../src/callbacks.c:190
 msgid "All audio files"
-msgstr "Vse glasbene datoteke"
+msgstr "Všechny zvukové soubory"
 
 #: ../src/callbacks.c:199 ../src/callbacks.c:276
 msgid "All files"
-msgstr "Vse datoteke"
+msgstr "Všechny soubory"
 
 #: ../src/callbacks.c:250
 msgid "Import slides, use SHIFT key for multiple select"
-msgstr "Uvoz diapozitivov, uporabite SHIFT za izbor večih slik"
+msgstr "Import snímků, více souborů vyberete použitím klávesy SHIFT"
 
 #: ../src/callbacks.c:262
 msgid "All image files"
-msgstr "Vse slikovne datoteke"
+msgstr "Všechny obrázky"
 
 #: ../src/callbacks.c:363 ../src/callbacks.c:946
 msgid "You didn't save your slideshow yet. Are you sure you want to close it?"
-msgstr "Projekt ni bil shranjen. Ste prepričani da ga želite zapreti?"
+msgstr "Dosud jste prezentaci neuložili. Opravdu ji chcete zavřít?"
 
 #: ../src/callbacks.c:420
 #, c-format
 msgid "%d x %d pixels"
 msgid_plural "%d x %d pixels"
-msgstr[0] "%d x %d pika"
-msgstr[1] "%d x %d piki"
-msgstr[2] "%d x %d pike"
-msgstr[3] "%d x %d pik"
+msgstr[0] "%d x %d obrazový bod"
+msgstr[1] "%d x %d obrazové body"
+msgstr[2] "%d x %d obrazových bodů"
 
 #: ../src/callbacks.c:490
 msgid "translator-credits"
-msgstr "Tadej Borovšak <tadeboro@gmail.com>"
+msgstr "Michal Várady <miko.vaji@gmail.com>"
 
 #: ../src/callbacks.c:863
 msgid "Stops the preview"
-msgstr "Ustavi predogled"
+msgstr "Zastaví náhled"
 
 #: ../src/callbacks.c:905
 msgid "Load an Imagination slideshow project"
-msgstr "Odpri Domišljijin projekt"
+msgstr "Načtení projektu prezentace aplikace Imagination"
 
 #: ../src/callbacks.c:906
 msgid "Save an Imagination slideshow project"
-msgstr "Shrani Domišljijin projekt"
+msgstr "Uložení projektu prezentace aplikace Imagination"
 
 #. Display propert title depending on the callback that is calling this function.
 #: ../src/new_slideshow.c:54
 msgid "Project properties"
-msgstr "Lastnosti projekta"
+msgstr "Vlastnosti projektu"
 
 #: ../src/new_slideshow.c:79
 msgid "<b>Slideshow Settings</b>"
-msgstr "<b>Nastavitve diaprojekcije</b>"
+msgstr "<b>Nastavení prezentace</b>"
 
 #: ../src/new_slideshow.c:112
 msgid "<b>Video Format</b>"
-msgstr "<b>Video oblika</b>"
+msgstr "<b>Formát videa</b>"
 
 #: ../src/new_slideshow.c:124
 msgid "<b>Advanced Settings</b>"
-msgstr "<b>Napredne nastavitve</b>"
+msgstr "<b>Pokročilá nastavení</b>"
 
 #: ../src/new_slideshow.c:131
 msgid "Rescale images to fit desired aspect ratio"
-msgstr "Preoblikuj slike da ustrezajo obliki izvoza"
+msgstr ""
+"Změnit poměry stran obrázků tak, aby odpovídaly požadovanému poměru stran"
 
 #: ../src/new_slideshow.c:139
 msgid "Select background color:"
-msgstr "Izberite barvo ozadja:"
+msgstr "Vybrat barvu pozadí:"
 
 #: ../src/slideshow_project.c:129
 msgid "This is not an Imagination project file!"
-msgstr "Izbrana datoteka ni Domišljijin projekt!"
+msgstr "Toto není soubor projektu aplikace Imagination."
 
 #: ../src/support.c:184
 #, c-format
 msgid "Welcome to Imagination - %d transitions loaded."
-msgstr "Dobrodošli v Domišljiji - %d prehodov naloženih."
+msgstr "Vítejte v aplikaci Imagination - načteno %d přechodů"
 
 #: ../src/support.c:190
 #, c-format
 msgid "%d slides selected"
-msgstr "%d diapozitivov izbranih"
+msgstr "Vybráno %d snímků"
 
 #: ../src/support.c:196
 #, c-format
 msgid "%d slide imported %s"
 msgid_plural "%d slides imported %s"
-msgstr[0] "%d diapozitiv uvožen %s"
-msgstr[1] "%d diapozitiva uvožena %s"
-msgstr[2] "%d diapozitivi uvoženi %s"
-msgstr[3] "%d diapozitivov uvoženih %s"
+msgstr[0] "%d snímek importován %s"
+msgstr[1] "%d snímky importovnány %s"
+msgstr[2] "%d snímků importovnáno %s"
 
 #: ../src/support.c:196
 msgid " - Use the CTRL key to select/unselect or SHIFT for multiple select"
-msgstr " - Uporabite CTRK za posamično izbiranje ali SHIFT za izbiro večih"
+msgstr ""
+" - Pro označení nebo odznačení použijte klávesu CTRL nebo SHIFT pro výběr "
+"více položek"
 
 #: ../src/support.c:283
 msgid "Please choose the slideshow project filename"
-msgstr "Prosimo izberite ime projekta"
+msgstr "Zvolte název souboru projektu prezentace"
 
 #~ msgid "Export the DVD slideshow"
-#~ msgstr "Izvozi DVD diaprojekcijo"
+#~ msgstr "Exportovat DVD prezentaci"
 
 #~ msgid ""
 #~ "The length of the audio track is longer than the video one. Do you want "
 #~ "to continue?"
 #~ msgstr ""
-#~ "Glasbena podlaga je daljša od video vsebinw. Želite vseeno nadaljevati?"
+#~ "Délka zvukové stopy je delší než délka obrazové stopy. Chcete pokračovat?"
 
 #~ msgid "Exporting the slideshow"
-#~ msgstr "Izvažam diaprojekcijo"
+#~ msgstr "Exportování prezentace"
 
 #~ msgid "Preparing for export ..."
-#~ msgstr "Pripravljam za izvoz ..."
+#~ msgstr "Příprava na export..."
 
 #~ msgid "Overall progress:"
-#~ msgstr "Skupni napredek:"
+#~ msgstr "Celkový průběh:"
 
 #~ msgid "Slide %d export progress:"
-#~ msgstr "Napredek izvoza diapozitiva %d:"
+#~ msgstr "Průběh exportu snímku %d:"
 
 #, fuzzy
 #~ msgid "Final transition export progress:"
-#~ msgstr "Napredek izvoza diapozitiva %d:"
+#~ msgstr "Průběh exportu snímku %d:"
 
 #~ msgid "Failed to launch the encoder!"
-#~ msgstr "Ne morem zagnati šifrirnika!"
+#~ msgstr "Nepodařilo se spustit enkodér."
 
 #~ msgid "Filename of the slideshow:"
-#~ msgstr "Ime datoteke z diaprojekcijo:"
+#~ msgstr "Název souboru prezentace:"
 
 #~ msgid "Export the slideshow as:"
-#~ msgstr "Izvozi diaprojekcijo kot:"
+#~ msgstr "Exportovat prezentaci jako:"
 
 #~ msgid "<b>Television Format</b>"
-#~ msgstr "<b>Televizijska oblika</b>"
+#~ msgstr "<b>Televizní formát</b>"
 
 #~ msgid "Normal 4:3"
-#~ msgstr "Normalno 4:3"
+#~ msgstr "Běžný 4:3"
 
 #~ msgid "Widescreen 16:9"
-#~ msgstr "Širokozaslonsko 16:9"
+#~ msgstr "Širokoúhlý 16:9"

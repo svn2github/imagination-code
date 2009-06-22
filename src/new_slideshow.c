@@ -32,17 +32,9 @@ void img_new_slideshow_settings_dialog(img_window_struct *img, gboolean flag)
 	GtkWidget *alignment_main_frame;
 	GtkWidget *vbox_frame1;
 	GtkWidget *hbox_slideshow_options;
-	GtkWidget *hbox_slideshow_name;
-	GtkWidget *hbox_slideshow_fmt;
-	GtkWidget *label2;
-	GtkWidget *label3;
-	GtkWidget *slideshow_fmt_combo;
-	GtkWidget *slideshow_title_entry;
 	GtkWidget *frame1;
 	GtkWidget *label_frame1;
 	GtkWidget *alignment_frame1;
-	GtkWidget *frame2;
-	GtkWidget *label_frame2;
 	GtkWidget *ex_vbox;
 	GtkWidget *ex_hbox;
 	GtkWidget *frame3;
@@ -52,9 +44,8 @@ void img_new_slideshow_settings_dialog(img_window_struct *img, gboolean flag)
 	GtkWidget *bg_button;
 	GtkWidget *bg_label;
 	GdkColor   color;
-	GtkWidget *alignment_frame2;
-	GtkWidget *vbox_video_format, *vbox_aspect_ratio;
-	GtkWidget *pal,*ntsc,*tv,*wide;
+	GtkWidget *vbox_video_format;
+	GtkWidget *pal,*ntsc;
 	GtkWidget *label1;
 	gint       response;
 	gchar     *string;
@@ -71,7 +62,11 @@ void img_new_slideshow_settings_dialog(img_window_struct *img, gboolean flag)
 	gtk_window_set_default_size(GTK_WINDOW(dialog1),520,-1);
 	gtk_dialog_set_has_separator (GTK_DIALOG (dialog1), FALSE);
 
-	dialog_vbox1 = GTK_DIALOG (dialog1)->vbox;
+	#if GTK_CHECK_VERSION( 2, 14, 0 )
+	dialog_vbox1 = gtk_dialog_get_content_area( GTK_DIALOG( dialog1 ) );
+#else
+	dialog_vbox1 = GTK_DIALOG( dialog )->vbox;
+#endif
 
 	vbox1 = gtk_vbox_new (FALSE, 5);
 	gtk_container_set_border_width (GTK_CONTAINER (vbox1), 5);
@@ -89,34 +84,8 @@ void img_new_slideshow_settings_dialog(img_window_struct *img, gboolean flag)
 	gtk_container_add (GTK_CONTAINER (main_frame), alignment_main_frame);
 	gtk_alignment_set_padding (GTK_ALIGNMENT (alignment_main_frame), 5, 15, 10, 10);
 
-	vbox_frame1 = gtk_vbox_new (FALSE, 5);
-	gtk_container_add (GTK_CONTAINER (alignment_main_frame), vbox_frame1);
-
-	hbox_slideshow_name = gtk_hbox_new (TRUE, 0);
-	gtk_box_pack_start (GTK_BOX (vbox_frame1), hbox_slideshow_name, TRUE, TRUE, 0);
-
-	label2 = gtk_label_new (_("Filename of the slideshow:"));
-	gtk_box_pack_start (GTK_BOX (hbox_slideshow_name), label2, FALSE, TRUE, 0);
-	gtk_misc_set_alignment(GTK_MISC(label2), 0, 0.5);
-
-	slideshow_title_entry = sexy_icon_entry_new();
-	sexy_icon_entry_add_clear_button( SEXY_ICON_ENTRY(slideshow_title_entry), img, img_show_file_chooser);
-    sexy_icon_entry_set_icon_highlight( SEXY_ICON_ENTRY(slideshow_title_entry), SEXY_ICON_ENTRY_PRIMARY, TRUE);
-	gtk_box_pack_start (GTK_BOX (hbox_slideshow_name), slideshow_title_entry, TRUE, TRUE, 0);
-
-	hbox_slideshow_fmt = gtk_hbox_new (TRUE, 0);
-	gtk_box_pack_start (GTK_BOX (vbox_frame1), hbox_slideshow_fmt, FALSE, TRUE, 0);
-
-	label3 = gtk_label_new (_("Export the slideshow as:"));
-	gtk_box_pack_start (GTK_BOX (hbox_slideshow_fmt), label3, FALSE, TRUE, 0);
-	gtk_misc_set_alignment(GTK_MISC(label3), 0, 0.5);
-
-	slideshow_fmt_combo = _gtk_combo_box_new_text(FALSE);
-	gtk_box_pack_start (GTK_BOX (hbox_slideshow_fmt), slideshow_fmt_combo, TRUE, TRUE, 0);
-	gtk_combo_box_append_text(GTK_COMBO_BOX(slideshow_fmt_combo),"VOB (DVD VIDEO)");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(slideshow_fmt_combo),"OGG (Theora/Vorbis)");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(slideshow_fmt_combo),"FLV (FLash Video)");
-	gtk_combo_box_set_active(GTK_COMBO_BOX(slideshow_fmt_combo),0);
+	vbox_frame1 = gtk_vbox_new( FALSE, 10 );
+	gtk_container_add( GTK_CONTAINER( alignment_main_frame ), vbox_frame1 );
 
 	hbox_slideshow_options = gtk_hbox_new(TRUE, 10);
 	gtk_box_pack_start(GTK_BOX (vbox_frame1), hbox_slideshow_options, TRUE, TRUE, 10);
@@ -129,7 +98,7 @@ void img_new_slideshow_settings_dialog(img_window_struct *img, gboolean flag)
 	gtk_container_add (GTK_CONTAINER (frame1), alignment_frame1);
 	gtk_alignment_set_padding (GTK_ALIGNMENT (alignment_frame1), 5, 5, 5, 5);
 
-	vbox_video_format = gtk_vbox_new (FALSE, 0);
+	vbox_video_format = gtk_hbox_new (FALSE, 0);
 	gtk_container_add (GTK_CONTAINER (alignment_frame1), vbox_video_format);
 
 	pal = gtk_radio_button_new_with_mnemonic (NULL, "PAL 720 x 576");
@@ -143,29 +112,6 @@ void img_new_slideshow_settings_dialog(img_window_struct *img, gboolean flag)
 	label_frame1 = gtk_label_new (_("<b>Video Format</b>"));
 	gtk_frame_set_label_widget (GTK_FRAME (frame1), label_frame1);
 	gtk_label_set_use_markup (GTK_LABEL (label_frame1), TRUE);
-
-	frame2 = gtk_frame_new (NULL);
-	gtk_box_pack_start (GTK_BOX (hbox_slideshow_options), frame2, TRUE, TRUE, 0);
-	gtk_frame_set_shadow_type (GTK_FRAME (frame2), GTK_SHADOW_IN);
-
-	label_frame2 = gtk_label_new (_("<b>Television Format</b>"));
-	gtk_frame_set_label_widget (GTK_FRAME (frame2), label_frame2);
-	gtk_label_set_use_markup (GTK_LABEL (label_frame2), TRUE);
-
-	alignment_frame2 = gtk_alignment_new (0.5, 0.5, 1, 1);
-	gtk_container_add (GTK_CONTAINER (frame2), alignment_frame2);
-	gtk_alignment_set_padding (GTK_ALIGNMENT (alignment_frame2), 5, 5, 5, 5);
-
-	vbox_aspect_ratio = gtk_vbox_new (FALSE, 0);
-	gtk_container_add (GTK_CONTAINER (alignment_frame2), vbox_aspect_ratio);
-
-	tv = gtk_radio_button_new_with_mnemonic (NULL, _("Normal 4:3"));
-	gtk_box_pack_start (GTK_BOX (vbox_aspect_ratio), tv, TRUE, TRUE, 0);
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (tv), TRUE);
-
-	wide = gtk_radio_button_new_with_mnemonic_from_widget (GTK_RADIO_BUTTON (tv), _("Widescreen 16:9"));
-	gtk_box_pack_start (GTK_BOX (vbox_aspect_ratio), wide, TRUE, TRUE, 0);
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (tv), TRUE);
 
 	frame3 = gtk_frame_new( NULL );
 	gtk_box_pack_start (GTK_BOX (vbox_frame1), frame3, TRUE, TRUE, 0);
@@ -202,40 +148,21 @@ void img_new_slideshow_settings_dialog(img_window_struct *img, gboolean flag)
 
 	gtk_widget_show_all(dialog_vbox1);
 
-	/* Set parameters if some project file is already loaded and user clicked
-	 * selected Project properties menu entry. */
-	if (img->slideshow_filename != NULL && flag)
-	{
-		gtk_entry_set_text(GTK_ENTRY(slideshow_title_entry),img->slideshow_filename);
-		gtk_combo_box_set_active(GTK_COMBO_BOX(slideshow_fmt_combo),img->slideshow_format_index);
-		if (strcmp(img->aspect_ratio,"4:3") == 0)
-			gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (tv), TRUE);
-		else
-			gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (wide), TRUE);
-
-		if (img->image_area->allocation.height == 480)
-			gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (ntsc), TRUE);
-		else
-			gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pal), TRUE);
-	}
+	/* Set parameters */
+	if (img->image_area->allocation.height == 480)
+		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (ntsc), TRUE);
+	else
+		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pal), TRUE);
 
 	response = gtk_dialog_run(GTK_DIALOG(dialog1));
 
 	if (response == GTK_RESPONSE_ACCEPT)
 	{
-		img->slideshow_filename = g_strdup(gtk_entry_get_text(GTK_ENTRY(slideshow_title_entry)));
-
 		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON (pal)))
 			gtk_widget_set_size_request(img->image_area,720,576);
 		else
 			gtk_widget_set_size_request(img->image_area,720,480);
 
-		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON (tv)))
-			img->aspect_ratio = "4:3";
-		else
-			img->aspect_ratio = "16:9";
-		img->slideshow_format_index = gtk_combo_box_get_active(GTK_COMBO_BOX(slideshow_fmt_combo));
-	
 		img_set_buttons_state(img, TRUE);
 		img->project_is_modified = TRUE;
 	}

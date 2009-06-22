@@ -23,7 +23,6 @@
 #include <gtk/gtk.h>
 #include "support.h"
 #include "imagination.h"
-#include "eog-pixbuf-cell-renderer.h"
 
 img_window_struct *img_create_window(void);
 void img_iconview_selection_changed (GtkIconView *, img_window_struct *);

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-06-14 11:59+0200\n"
+"POT-Creation-Date: 2009-06-22 10:22+0200\n"
 "PO-Revision-Date: 2009-03-02 11:39+0100\n"
 "Last-Translator: xroberx <xroberx@gmail.com>\n"
 "Language-Team: Spanish (Spain)\n"
@@ -28,92 +28,88 @@ msgstr "Un creador de pases de diapositivas en DVD ligero que usa GTK+2"
 msgid "Imagination"
 msgstr "Imagination"
 
-#: ../src/audio.c:100
+#: ../src/audio.c:106
 #, c-format
 msgid "Playing %s..."
 msgstr ""
 
-#: ../src/audio.c:119 ../src/main-window.c:534
+#: ../src/audio.c:126 ../src/main-window.c:547
 #, fuzzy
 msgid "Play the selected file"
 msgstr "Elminar diapositivas seleccionadas"
 
-#: ../src/audio.c:127
+#: ../src/audio.c:134
 msgid "Stop the playback"
 msgstr ""
 
-#: ../src/main-window.c:119
+#: ../src/main-window.c:125
 msgid "_Slideshow"
 msgstr "_Diapositivas"
 
-#: ../src/main-window.c:161
+#: ../src/main-window.c:167
 msgid "_Preview"
 msgstr "P_revisualizar"
 
-#: ../src/main-window.c:170
+#: ../src/main-window.c:176
 msgid "Export"
 msgstr "Exportar"
 
-#: ../src/main-window.c:187
+#: ../src/main-window.c:194
 msgid "_Slide"
 msgstr "Diapo_sitiva"
 
-#: ../src/main-window.c:193
+#: ../src/main-window.c:200
 #, fuzzy
 msgid "Import p_ictures"
 msgstr "Importar diapositivas"
 
-#: ../src/main-window.c:202
+#: ../src/main-window.c:209
 #, fuzzy
 msgid "Import _music"
 msgstr "_Importar"
 
-#: ../src/main-window.c:211
+#: ../src/main-window.c:218
 #, fuzzy
 msgid "Dele_te"
 msgstr "_Eliminar"
 
-#: ../src/main-window.c:228
+#: ../src/main-window.c:235
 msgid "Un_select all"
 msgstr "De_seleccionar todo"
 
-#: ../src/main-window.c:233
+#: ../src/main-window.c:240
 msgid "_Help"
 msgstr "_Ayuda"
 
-#: ../src/main-window.c:252 ../src/new_slideshow.c:63
+#: ../src/main-window.c:259 ../src/new_slideshow.c:54
 msgid "Create a new slideshow"
 msgstr "Crear nuevo pase de diapositivas"
 
-#: ../src/main-window.c:257
+#: ../src/main-window.c:264
 msgid "Open a slideshow"
 msgstr "Abrir pase de diapositivas"
 
-#: ../src/main-window.c:263
+#: ../src/main-window.c:270
 msgid "Save the slideshow"
 msgstr "Guardar pase de diapositivas"
 
-#: ../src/main-window.c:274
+#: ../src/main-window.c:281
 #, fuzzy
 msgid "Import pictures"
 msgstr "Importar diapositivas"
 
-#: ../src/main-window.c:281
+#: ../src/main-window.c:288
 #, fuzzy
 msgid "Import music"
 msgstr "_Importar"
 
-#: ../src/main-window.c:287
+#: ../src/main-window.c:294
 msgid "Delete the selected slides"
 msgstr "Elminar diapositivas seleccionadas"
 
-#: ../src/main-window.c:297 ../src/callbacks.c:865
+#: ../src/main-window.c:304 ../src/callbacks.c:853
 msgid "Starts the preview"
 msgstr "Empieza la previsualización"
-
-#: ../src/main-window.c:304
-msgid "Export the DVD slideshow"
-msgstr "Exportar el pase de diapositivas en DVD"
 
 #: ../src/main-window.c:323
 msgid "Jump to the entered slide number"
@@ -128,218 +124,171 @@ msgstr "<b>Ajustes de diapositivas</b>"
 msgid "Transition Type:"
 msgstr "Tipo de transición:"
 
-#: ../src/main-window.c:402
+#: ../src/main-window.c:403
 msgid "Random"
 msgstr ""
 
-#: ../src/main-window.c:403
+#: ../src/main-window.c:404
 msgid "Imagination randomly decides with transition to apply"
 msgstr ""
 
 #. Transition duration
-#: ../src/main-window.c:409
+#: ../src/main-window.c:410
 msgid "Transition Speed:"
 msgstr "Velocidad de transición:"
 
-#: ../src/main-window.c:415
+#: ../src/main-window.c:425
 msgid "Fast"
 msgstr "Rápido"
 
-#: ../src/main-window.c:416
+#: ../src/main-window.c:427
 msgid "Normal"
 msgstr "Normal"
 
-#: ../src/main-window.c:417
+#: ../src/main-window.c:429
 msgid "Slow"
 msgstr "Lento"
 
 #. Slide duration
-#: ../src/main-window.c:423
+#: ../src/main-window.c:436
 msgid "Slide Duration in sec:"
 msgstr "Duración del pase en seg:"
 
 #. Slide Selected
-#: ../src/main-window.c:434
+#: ../src/main-window.c:447
 msgid "Slide Number:"
 msgstr "Número de diapositiva:"
 
 #. Slide Resolution
-#: ../src/main-window.c:443
+#: ../src/main-window.c:456
 msgid "Resolution:"
 msgstr "Resolución:"
 
 #. Slide Type
-#: ../src/main-window.c:452
+#: ../src/main-window.c:465
 msgid "Type:"
 msgstr "Tipo:"
 
 #. Slide Total Duration
-#: ../src/main-window.c:461
+#: ../src/main-window.c:474
 msgid "Slideshow Length:"
 msgstr "Duración del pase de diapositivas:"
 
-#: ../src/main-window.c:478
+#: ../src/main-window.c:491
 msgid "<b>Background Music</b>"
 msgstr ""
 
-#: ../src/main-window.c:518
+#: ../src/main-window.c:531
 msgid "Music Duration:"
 msgstr ""
 
-#: ../src/main-window.c:542
+#: ../src/main-window.c:555
 #, fuzzy
 msgid "Delete the selected file"
 msgstr "Elminar diapositivas seleccionadas"
 
-#: ../src/main-window.c:550
+#: ../src/main-window.c:563
 #, fuzzy
 msgid "Move the selected file up"
 msgstr "Elminar diapositivas seleccionadas"
 
-#: ../src/main-window.c:557
+#: ../src/main-window.c:570
 #, fuzzy
 msgid "Move the selected file down"
 msgstr "Elminar diapositivas seleccionadas"
 
-#: ../src/main-window.c:564
+#: ../src/main-window.c:577
 #, fuzzy
 msgid "Clear all files"
 msgstr "Importar diapositivas"
 
-#: ../src/main-window.c:1002 ../src/main-window.c:1004 ../src/support.c:220
+#: ../src/main-window.c:1036 ../src/main-window.c:1038 ../src/support.c:220
 msgid "None"
 msgstr "Ninguno"
 
-#: ../src/callbacks.c:122
+#: ../src/callbacks.c:112
 #, c-format
 msgid "Please wait, importing slide %d out of %d"
 msgstr "Por favor espere, importando diapositiva %d de %d"
 
-#: ../src/callbacks.c:189
+#: ../src/callbacks.c:179
 #, fuzzy
 msgid "Please choose the audio files to import"
 msgstr ""
 "Por favor elija el nombre del fichero de proyecto del pase de diapositivas"
 
-#: ../src/callbacks.c:200
+#: ../src/callbacks.c:190
 #, fuzzy
 msgid "All audio files"
 msgstr "Todos los ficheros"
 
-#: ../src/callbacks.c:209 ../src/callbacks.c:286
+#: ../src/callbacks.c:199 ../src/callbacks.c:276
 msgid "All files"
 msgstr "Todos los ficheros"
 
-#: ../src/callbacks.c:260
+#: ../src/callbacks.c:250
 msgid "Import slides, use SHIFT key for multiple select"
 msgstr "Importar diapositivas, use la tecla mayúscula para selección múltiple"
 
-#: ../src/callbacks.c:272
+#: ../src/callbacks.c:262
 msgid "All image files"
 msgstr "Todas las imágenes"
 
-#: ../src/callbacks.c:379 ../src/callbacks.c:958
+#: ../src/callbacks.c:363 ../src/callbacks.c:946
 msgid "You didn't save your slideshow yet. Are you sure you want to close it?"
 msgstr ""
 "No has guardado el pase de diapostivas aún. Estás seguro de que quieres "
 "cerrarlo ?"
 
-#: ../src/callbacks.c:436
+#: ../src/callbacks.c:420
 #, c-format
 msgid "%d x %d pixels"
 msgid_plural "%d x %d pixels"
 msgstr[0] "%d x %d pixels"
 msgstr[1] "%d x %d pixels"
 
-#: ../src/callbacks.c:506
+#: ../src/callbacks.c:490
 msgid "translator-credits"
 msgstr "Giuseppe Torelli <colossus73@gmail.com>"
 
-#: ../src/callbacks.c:875
+#: ../src/callbacks.c:863
 msgid "Stops the preview"
 msgstr "Detiene la previsualización"
 
-#: ../src/callbacks.c:917
+#: ../src/callbacks.c:905
 msgid "Load an Imagination slideshow project"
 msgstr "Cargar proyecto de pase de diapositivas"
 
-#: ../src/callbacks.c:918
+#: ../src/callbacks.c:906
 msgid "Save an Imagination slideshow project"
 msgstr "Guardar proyecto de pase de diapositivas"
 
-#: ../src/callbacks.c:985
-msgid ""
-"The length of the audio track is longer than the video one. Do you want to "
-"continue?"
-msgstr ""
-
-#: ../src/callbacks.c:1017
-msgid "Exporting the slideshow"
-msgstr "Exportando pase de diapositivas"
-
-#: ../src/callbacks.c:1029
-msgid "Preparing for export ..."
-msgstr "Preparando para exportar ..."
-
-#: ../src/callbacks.c:1040
-msgid "Overall progress:"
-msgstr "Progreso global:"
-
-#: ../src/callbacks.c:1098 ../src/callbacks.c:1183
-#, c-format
-msgid "Slide %d export progress:"
-msgstr "Progreso de exportación de la diapositiva %d:"
-
-#: ../src/callbacks.c:1422
-msgid "Failed to launch the encoder!"
-msgstr "Fallo al lanzar el codificador!"
-
 #. Display propert title depending on the callback that is calling this function.
-#: ../src/new_slideshow.c:63
+#: ../src/new_slideshow.c:54
 msgid "Project properties"
 msgstr "Propiedades del proyecto"
 
-#: ../src/new_slideshow.c:84
+#: ../src/new_slideshow.c:79
 msgid "<b>Slideshow Settings</b>"
 msgstr "<b>Ajustes del pase de diapositivas</b>"
 
-#: ../src/new_slideshow.c:98
-msgid "Filename of the slideshow:"
-msgstr "Nombre de fichero del pase de diapositivas:"
-
-#: ../src/new_slideshow.c:110
-msgid "Export the slideshow as:"
-msgstr "Exportar el pase de diapositivas como:"
-
-#: ../src/new_slideshow.c:143
+#: ../src/new_slideshow.c:112
 msgid "<b>Video Format</b>"
 msgstr "<b>Formato de vídeo</b>"
 
-#: ../src/new_slideshow.c:151
-msgid "<b>Television Format</b>"
-msgstr "<b>Formato Televisión</b>"
-
-#: ../src/new_slideshow.c:162
-msgid "Normal 4:3"
-msgstr "Normal 4:3"
-
-#: ../src/new_slideshow.c:166
-msgid "Widescreen 16:9"
-msgstr "Panorámico 16:9"
-
-#: ../src/new_slideshow.c:178
+#: ../src/new_slideshow.c:124
 msgid "<b>Advanced Settings</b>"
 msgstr "<b>Ajustes avanzados</b>"
 
-#: ../src/new_slideshow.c:185
+#: ../src/new_slideshow.c:131
 msgid "Rescale images to fit desired aspect ratio"
 msgstr "Reescalar imágenes para adaptarlas a la relación de aspecto"
 
-#: ../src/new_slideshow.c:193
+#: ../src/new_slideshow.c:139
 msgid "Select background color:"
 msgstr "Seleccione color de fondo:"
 
-#: ../src/slideshow_project.c:132
+#: ../src/slideshow_project.c:129
 msgid "This is not an Imagination project file!"
 msgstr "Este no es un fichero de proyecto de Imagination!"
 
@@ -370,6 +319,43 @@ msgstr ""
 msgid "Please choose the slideshow project filename"
 msgstr ""
 "Por favor elija el nombre del fichero de proyecto del pase de diapositivas"
+
+#~ msgid "Export the DVD slideshow"
+#~ msgstr "Exportar el pase de diapositivas en DVD"
+
+#~ msgid "Exporting the slideshow"
+#~ msgstr "Exportando pase de diapositivas"
+
+#~ msgid "Preparing for export ..."
+#~ msgstr "Preparando para exportar ..."
+
+#~ msgid "Overall progress:"
+#~ msgstr "Progreso global:"
+
+#~ msgid "Slide %d export progress:"
+#~ msgstr "Progreso de exportación de la diapositiva %d:"
+
+#, fuzzy
+#~ msgid "Final transition export progress:"
+#~ msgstr "Progreso de exportación de la diapositiva %d:"
+
+#~ msgid "Failed to launch the encoder!"
+#~ msgstr "Fallo al lanzar el codificador!"
+
+#~ msgid "Filename of the slideshow:"
+#~ msgstr "Nombre de fichero del pase de diapositivas:"
+
+#~ msgid "Export the slideshow as:"
+#~ msgstr "Exportar el pase de diapositivas como:"
+
+#~ msgid "<b>Television Format</b>"
+#~ msgstr "<b>Formato Televisión</b>"
+
+#~ msgid "Normal 4:3"
+#~ msgstr "Normal 4:3"
+
+#~ msgid "Widescreen 16:9"
+#~ msgstr "Panorámico 16:9"
 
 #~ msgid "Import the slides"
 #~ msgstr "Importar diapositivas"
