@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-06-22 11:24+0200\n"
+"POT-Creation-Date: 2009-06-22 15:15+0200\n"
 "PO-Revision-Date: 2009-03-02 11:39+0100\n"
 "Last-Translator: xroberx <xroberx@gmail.com>\n"
 "Language-Team: Spanish (Spain)\n"
@@ -320,42 +320,97 @@ msgid "Please choose the slideshow project filename"
 msgstr ""
 "Por favor elija el nombre del fichero de proyecto del pase de diapositivas"
 
+#: ../src/export.c:204
+#, fuzzy
+msgid "<b>Export Settings</b>"
+msgstr "<b>Ajustes del pase de diapositivas</b>"
+
+#: ../src/export.c:218
+msgid "Filename of the slideshow:"
+msgstr "Nombre de fichero del pase de diapositivas:"
+
+#: ../src/export.c:349
+msgid "Exporting the slideshow"
+msgstr "Exportando pase de diapositivas"
+
+#: ../src/export.c:360
+msgid "Preparing for export ..."
+msgstr "Preparando para exportar ..."
+
+#: ../src/export.c:371
+msgid "Overall progress:"
+msgstr "Progreso global:"
+
+#: ../src/export.c:435 ../src/export.c:793
+#, c-format
+msgid "Slide %d export progress:"
+msgstr "Progreso de exportación de la diapositiva %d:"
+
+#: ../src/export.c:651
+msgid "Failed to launch the encoder!"
+msgstr "Fallo al lanzar el codificador!"
+
+#: ../src/export.c:791
+#, fuzzy, c-format
+msgid "Final transition export progress:"
+msgstr "Progreso de exportación de la diapositiva %d:"
+
+#. Additional options - <format> only
+#. This function call should be the first thing exporter does, since this
+#. * function will take some preventive measures.
+#: ../src/export.c:892 ../src/export.c:955
+#, fuzzy
+msgid "VOB export"
+msgstr "Exportar"
+
+#: ../src/export.c:967 ../src/export.c:1051
+msgid "<b>Television Format</b>"
+msgstr "<b>Formato Televisión</b>"
+
+#: ../src/export.c:974 ../src/export.c:1058
+msgid "Normal 4:3"
+msgstr "Normal 4:3"
+
+#: ../src/export.c:979 ../src/export.c:1063
+msgid "Widescreen 16:9"
+msgstr "Panorámico 16:9"
+
+#. This function call should be the first thing exporter does, since this
+#. * function will take some preventive measures.
+#: ../src/export.c:1039
+#, fuzzy
+msgid "OGG export"
+msgstr "Exportar"
+
+#: ../src/export.c:1069 ../src/export.c:1163
+#, fuzzy
+msgid "<b>Video Quality:</b>"
+msgstr "<b>Formato de vídeo</b>"
+
+#: ../src/export.c:1076 ../src/export.c:1170
+msgid "Low"
+msgstr ""
+
+#: ../src/export.c:1080 ../src/export.c:1174
+msgid "Medium"
+msgstr ""
+
+#: ../src/export.c:1085 ../src/export.c:1179
+msgid "High"
+msgstr ""
+
+#. This function call should be the first thing exporter does, since this
+#. * function will take some preventive measures.
+#: ../src/export.c:1151
+#, fuzzy
+msgid "FLV export"
+msgstr "Exportar"
+
 #~ msgid "Export the DVD slideshow"
 #~ msgstr "Exportar el pase de diapositivas en DVD"
 
-#~ msgid "Exporting the slideshow"
-#~ msgstr "Exportando pase de diapositivas"
-
-#~ msgid "Preparing for export ..."
-#~ msgstr "Preparando para exportar ..."
-
-#~ msgid "Overall progress:"
-#~ msgstr "Progreso global:"
-
-#~ msgid "Slide %d export progress:"
-#~ msgstr "Progreso de exportación de la diapositiva %d:"
-
-#, fuzzy
-#~ msgid "Final transition export progress:"
-#~ msgstr "Progreso de exportación de la diapositiva %d:"
-
-#~ msgid "Failed to launch the encoder!"
-#~ msgstr "Fallo al lanzar el codificador!"
-
-#~ msgid "Filename of the slideshow:"
-#~ msgstr "Nombre de fichero del pase de diapositivas:"
-
 #~ msgid "Export the slideshow as:"
 #~ msgstr "Exportar el pase de diapositivas como:"
-
-#~ msgid "<b>Television Format</b>"
-#~ msgstr "<b>Formato Televisión</b>"
-
-#~ msgid "Normal 4:3"
-#~ msgstr "Normal 4:3"
-
-#~ msgid "Widescreen 16:9"
-#~ msgstr "Panorámico 16:9"
 
 #~ msgid "Import the slides"
 #~ msgstr "Importar diapositivas"

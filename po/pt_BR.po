@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-06-22 11:24+0200\n"
+"POT-Creation-Date: 2009-06-22 15:15+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: banto palmarino <bantopalmarino@nkosi.org>\n"
 "Language-Team: \n"
@@ -304,6 +304,92 @@ msgstr ""
 msgid "Please choose the slideshow project filename"
 msgstr "Por favor dê nome para o projeto"
 
+#: ../src/export.c:204
+#, fuzzy
+msgid "<b>Export Settings</b>"
+msgstr "<b>Configurações da Apresentação</b>"
+
+#: ../src/export.c:218
+msgid "Filename of the slideshow:"
+msgstr "Nome do arquivo:"
+
+#: ../src/export.c:349
+msgid "Exporting the slideshow"
+msgstr "Exportando a apresentação"
+
+#: ../src/export.c:360
+msgid "Preparing for export ..."
+msgstr "Preparando para exportar ..."
+
+#: ../src/export.c:371
+msgid "Overall progress:"
+msgstr "Progressos globais:"
+
+#: ../src/export.c:435 ../src/export.c:793
+#, c-format
+msgid "Slide %d export progress:"
+msgstr "Progresso do exportar Slide %d:"
+
+#: ../src/export.c:651
+msgid "Failed to launch the encoder!"
+msgstr "Falha ao lançar a codificação!"
+
+#: ../src/export.c:791
+#, fuzzy, c-format
+msgid "Final transition export progress:"
+msgstr "Progresso do exportar Slide %d:"
+
+#. Additional options - <format> only
+#. This function call should be the first thing exporter does, since this
+#. * function will take some preventive measures.
+#: ../src/export.c:892 ../src/export.c:955
+#, fuzzy
+msgid "VOB export"
+msgstr "Exportar"
+
+#: ../src/export.c:967 ../src/export.c:1051
+msgid "<b>Television Format</b>"
+msgstr "<b>Formato de Televisão</b>"
+
+#: ../src/export.c:974 ../src/export.c:1058
+msgid "Normal 4:3"
+msgstr "Normal 4:3"
+
+#: ../src/export.c:979 ../src/export.c:1063
+msgid "Widescreen 16:9"
+msgstr "Widescreen 16:9"
+
+#. This function call should be the first thing exporter does, since this
+#. * function will take some preventive measures.
+#: ../src/export.c:1039
+#, fuzzy
+msgid "OGG export"
+msgstr "Exportar"
+
+#: ../src/export.c:1069 ../src/export.c:1163
+#, fuzzy
+msgid "<b>Video Quality:</b>"
+msgstr "<b>Formato de Vídeo</b>"
+
+#: ../src/export.c:1076 ../src/export.c:1170
+msgid "Low"
+msgstr ""
+
+#: ../src/export.c:1080 ../src/export.c:1174
+msgid "Medium"
+msgstr ""
+
+#: ../src/export.c:1085 ../src/export.c:1179
+msgid "High"
+msgstr ""
+
+#. This function call should be the first thing exporter does, since this
+#. * function will take some preventive measures.
+#: ../src/export.c:1151
+#, fuzzy
+msgid "FLV export"
+msgstr "Exportar"
+
 #~ msgid "Export the DVD slideshow"
 #~ msgstr "Exportar para DVD slideshow"
 
@@ -313,36 +399,5 @@ msgstr "Por favor dê nome para o projeto"
 #~ msgstr ""
 #~ "A duração da faixa de áudio é maior que a do vídeo. Você deseja continuar?"
 
-#~ msgid "Exporting the slideshow"
-#~ msgstr "Exportando a apresentação"
-
-#~ msgid "Preparing for export ..."
-#~ msgstr "Preparando para exportar ..."
-
-#~ msgid "Overall progress:"
-#~ msgstr "Progressos globais:"
-
-#~ msgid "Slide %d export progress:"
-#~ msgstr "Progresso do exportar Slide %d:"
-
-#, fuzzy
-#~ msgid "Final transition export progress:"
-#~ msgstr "Progresso do exportar Slide %d:"
-
-#~ msgid "Failed to launch the encoder!"
-#~ msgstr "Falha ao lançar a codificação!"
-
-#~ msgid "Filename of the slideshow:"
-#~ msgstr "Nome do arquivo:"
-
 #~ msgid "Export the slideshow as:"
 #~ msgstr "Exportar como:"
-
-#~ msgid "<b>Television Format</b>"
-#~ msgstr "<b>Formato de Televisão</b>"
-
-#~ msgid "Normal 4:3"
-#~ msgstr "Normal 4:3"
-
-#~ msgid "Widescreen 16:9"
-#~ msgstr "Widescreen 16:9"

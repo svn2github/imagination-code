@@ -152,7 +152,7 @@ img_create_export_dialog( img_window_struct  *img,
 {
 	GtkWidget    *dialog;
 	GtkWidget    *vbox, *vbox1, *hbox_slideshow_name;
-	GtkWidget    *vbox_frame1, *file_frame, *main_frame, *alignment_main_frame;
+	GtkWidget    *vbox_frame1, *main_frame, *alignment_main_frame;
 	GtkWidget    *label, *label1;
 	GtkWidget    *slideshow_title_entry;
 	GtkTreeModel *model;
@@ -1113,7 +1113,7 @@ img_exporter_ogg( img_window_struct *img )
 
 	cmd_line = g_strdup_printf( "ffmpeg -f image2pipe -vcodec ppm -i pipe: "
 								"-r %.02f -aspect %s -s %dx%d <#AUDIO#> "
-								"-vcodec libtheora -vb %dk -acodec libvorbis "
+								"-vcodec libtheora -b %dk -acodec libvorbis "
 								"-f ogg -y \"%s.ogg\"",
 								img->export_fps, aspect_ratio,
 								img->image_area->allocation.width,

@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-06-22 11:24+0200\n"
+"POT-Creation-Date: 2009-06-22 15:15+0200\n"
 "PO-Revision-Date: 2009-06-14 10:48+0200\n"
 "Last-Translator: Enrico Tröger <enrico@xfce.org>\n"
 "Language-Team: German\n"
@@ -312,6 +312,92 @@ msgstr ""
 msgid "Please choose the slideshow project filename"
 msgstr "Projektnamen für die Diaschau wählen"
 
+#: ../src/export.c:204
+#, fuzzy
+msgid "<b>Export Settings</b>"
+msgstr "<b>Diaschau-Einstellungen</b>"
+
+#: ../src/export.c:218
+msgid "Filename of the slideshow:"
+msgstr "Dateiname für die Diaschau:"
+
+#: ../src/export.c:349
+msgid "Exporting the slideshow"
+msgstr "Diaschau wird exportiert"
+
+#: ../src/export.c:360
+msgid "Preparing for export ..."
+msgstr "Export vorbereiten ..."
+
+#: ../src/export.c:371
+msgid "Overall progress:"
+msgstr "Gesamtfortschritt: "
+
+#: ../src/export.c:435 ../src/export.c:793
+#, c-format
+msgid "Slide %d export progress:"
+msgstr "Dia %d Exportfortschritt:"
+
+#: ../src/export.c:651
+msgid "Failed to launch the encoder!"
+msgstr "Konnte den Encoder nicht starten."
+
+#: ../src/export.c:791
+#, fuzzy, c-format
+msgid "Final transition export progress:"
+msgstr "Dia %d Exportfortschritt:"
+
+#. Additional options - <format> only
+#. This function call should be the first thing exporter does, since this
+#. * function will take some preventive measures.
+#: ../src/export.c:892 ../src/export.c:955
+#, fuzzy
+msgid "VOB export"
+msgstr "_Exportieren"
+
+#: ../src/export.c:967 ../src/export.c:1051
+msgid "<b>Television Format</b>"
+msgstr "<b>Fernsehformat</b>"
+
+#: ../src/export.c:974 ../src/export.c:1058
+msgid "Normal 4:3"
+msgstr "Normal 4:3"
+
+#: ../src/export.c:979 ../src/export.c:1063
+msgid "Widescreen 16:9"
+msgstr "Breitbild 16:9"
+
+#. This function call should be the first thing exporter does, since this
+#. * function will take some preventive measures.
+#: ../src/export.c:1039
+#, fuzzy
+msgid "OGG export"
+msgstr "_Exportieren"
+
+#: ../src/export.c:1069 ../src/export.c:1163
+#, fuzzy
+msgid "<b>Video Quality:</b>"
+msgstr "<b>Videoformat</b>"
+
+#: ../src/export.c:1076 ../src/export.c:1170
+msgid "Low"
+msgstr ""
+
+#: ../src/export.c:1080 ../src/export.c:1174
+msgid "Medium"
+msgstr ""
+
+#: ../src/export.c:1085 ../src/export.c:1179
+msgid "High"
+msgstr ""
+
+#. This function call should be the first thing exporter does, since this
+#. * function will take some preventive measures.
+#: ../src/export.c:1151
+#, fuzzy
+msgid "FLV export"
+msgstr "_Exportieren"
+
 #~ msgid "Export the DVD slideshow"
 #~ msgstr "Die DVD-Diaschau exportieren"
 
@@ -320,39 +406,8 @@ msgstr "Projektnamen für die Diaschau wählen"
 #~ "to continue?"
 #~ msgstr "Die Audiospur ist länger als die Videosput. Möchten Sie fortfahren?"
 
-#~ msgid "Exporting the slideshow"
-#~ msgstr "Diaschau wird exportiert"
-
-#~ msgid "Preparing for export ..."
-#~ msgstr "Export vorbereiten ..."
-
-#~ msgid "Overall progress:"
-#~ msgstr "Gesamtfortschritt: "
-
-#~ msgid "Slide %d export progress:"
-#~ msgstr "Dia %d Exportfortschritt:"
-
-#, fuzzy
-#~ msgid "Final transition export progress:"
-#~ msgstr "Dia %d Exportfortschritt:"
-
-#~ msgid "Failed to launch the encoder!"
-#~ msgstr "Konnte den Encoder nicht starten."
-
-#~ msgid "Filename of the slideshow:"
-#~ msgstr "Dateiname für die Diaschau:"
-
 #~ msgid "Export the slideshow as:"
 #~ msgstr "Diaschau exportieren als:"
-
-#~ msgid "<b>Television Format</b>"
-#~ msgstr "<b>Fernsehformat</b>"
-
-#~ msgid "Normal 4:3"
-#~ msgstr "Normal 4:3"
-
-#~ msgid "Widescreen 16:9"
-#~ msgstr "Breitbild 16:9"
 
 #~ msgid "Import the slides"
 #~ msgstr "Dias importieren"

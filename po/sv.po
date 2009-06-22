@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-06-22 11:24+0200\n"
+"POT-Creation-Date: 2009-06-22 15:15+0200\n"
 "PO-Revision-Date: 2009-06-13 23:43+0100\n"
 "Last-Translator: Daniel Nylander <po@danielnylander.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
@@ -309,6 +309,92 @@ msgstr ""
 msgid "Please choose the slideshow project filename"
 msgstr "Välj filnamn för bildspelsprojektet"
 
+#: ../src/export.c:204
+#, fuzzy
+msgid "<b>Export Settings</b>"
+msgstr "<b>Bildspelsinställningar</b>"
+
+#: ../src/export.c:218
+msgid "Filename of the slideshow:"
+msgstr "Filnamn för bildspelet:"
+
+#: ../src/export.c:349
+msgid "Exporting the slideshow"
+msgstr "Exporterar bildspelet"
+
+#: ../src/export.c:360
+msgid "Preparing for export ..."
+msgstr "Förbereder för export ..."
+
+#: ../src/export.c:371
+msgid "Overall progress:"
+msgstr "Totalt förlopp:"
+
+#: ../src/export.c:435 ../src/export.c:793
+#, c-format
+msgid "Slide %d export progress:"
+msgstr "Förlopp för export av bild %d:"
+
+#: ../src/export.c:651
+msgid "Failed to launch the encoder!"
+msgstr "Misslyckades med att starta kodaren!"
+
+#: ../src/export.c:791
+#, fuzzy, c-format
+msgid "Final transition export progress:"
+msgstr "Förlopp för export av bild %d:"
+
+#. Additional options - <format> only
+#. This function call should be the first thing exporter does, since this
+#. * function will take some preventive measures.
+#: ../src/export.c:892 ../src/export.c:955
+#, fuzzy
+msgid "VOB export"
+msgstr "Exportera"
+
+#: ../src/export.c:967 ../src/export.c:1051
+msgid "<b>Television Format</b>"
+msgstr "<b>Tv-format</b>"
+
+#: ../src/export.c:974 ../src/export.c:1058
+msgid "Normal 4:3"
+msgstr "Normal 4:3"
+
+#: ../src/export.c:979 ../src/export.c:1063
+msgid "Widescreen 16:9"
+msgstr "Bredbild 16:9"
+
+#. This function call should be the first thing exporter does, since this
+#. * function will take some preventive measures.
+#: ../src/export.c:1039
+#, fuzzy
+msgid "OGG export"
+msgstr "Exportera"
+
+#: ../src/export.c:1069 ../src/export.c:1163
+#, fuzzy
+msgid "<b>Video Quality:</b>"
+msgstr "<b>Videoformat</b>"
+
+#: ../src/export.c:1076 ../src/export.c:1170
+msgid "Low"
+msgstr ""
+
+#: ../src/export.c:1080 ../src/export.c:1174
+msgid "Medium"
+msgstr ""
+
+#: ../src/export.c:1085 ../src/export.c:1179
+msgid "High"
+msgstr ""
+
+#. This function call should be the first thing exporter does, since this
+#. * function will take some preventive measures.
+#: ../src/export.c:1151
+#, fuzzy
+msgid "FLV export"
+msgstr "Exportera"
+
 #~ msgid "Export the DVD slideshow"
 #~ msgstr "Exportera DVD-bildspelet"
 
@@ -318,39 +404,8 @@ msgstr "Välj filnamn för bildspelsprojektet"
 #~ msgstr ""
 #~ "Längden på ljudspåret är större än videons längd. Vill du fortsätta?"
 
-#~ msgid "Exporting the slideshow"
-#~ msgstr "Exporterar bildspelet"
-
-#~ msgid "Preparing for export ..."
-#~ msgstr "Förbereder för export ..."
-
-#~ msgid "Overall progress:"
-#~ msgstr "Totalt förlopp:"
-
-#~ msgid "Slide %d export progress:"
-#~ msgstr "Förlopp för export av bild %d:"
-
-#, fuzzy
-#~ msgid "Final transition export progress:"
-#~ msgstr "Förlopp för export av bild %d:"
-
-#~ msgid "Failed to launch the encoder!"
-#~ msgstr "Misslyckades med att starta kodaren!"
-
-#~ msgid "Filename of the slideshow:"
-#~ msgstr "Filnamn för bildspelet:"
-
 #~ msgid "Export the slideshow as:"
 #~ msgstr "Exportera bildspelet som:"
-
-#~ msgid "<b>Television Format</b>"
-#~ msgstr "<b>Tv-format</b>"
-
-#~ msgid "Normal 4:3"
-#~ msgstr "Normal 4:3"
-
-#~ msgid "Widescreen 16:9"
-#~ msgstr "Bredbild 16:9"
 
 #~ msgid "Import the slides"
 #~ msgstr "Importera bilderna"

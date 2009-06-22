@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination 1.5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-06-22 11:24+0200\n"
+"POT-Creation-Date: 2009-06-22 15:15+0200\n"
 "PO-Revision-Date: 2009-06-13 16:46+0200\n"
 "Last-Translator: Jean-Pierre Redonnet <redonnetbrouk@aol.com>\n"
 "Language-Team: French\n"
@@ -305,6 +305,92 @@ msgstr ""
 msgid "Please choose the slideshow project filename"
 msgstr "SVP choisissez le nom de fichier de votre projet"
 
+#: ../src/export.c:204
+#, fuzzy
+msgid "<b>Export Settings</b>"
+msgstr "Paramètres de la présentation"
+
+#: ../src/export.c:218
+msgid "Filename of the slideshow:"
+msgstr "Nom de fichier de la présentation:"
+
+#: ../src/export.c:349
+msgid "Exporting the slideshow"
+msgstr "Exporte la présentation"
+
+#: ../src/export.c:360
+msgid "Preparing for export ..."
+msgstr "Prépare pour exporter ..."
+
+#: ../src/export.c:371
+msgid "Overall progress:"
+msgstr "Progression globale:"
+
+#: ../src/export.c:435 ../src/export.c:793
+#, c-format
+msgid "Slide %d export progress:"
+msgstr "Exportation du transparent %d en progrès:"
+
+#: ../src/export.c:651
+msgid "Failed to launch the encoder!"
+msgstr "Echec de démarrage de l'encodeur!"
+
+#: ../src/export.c:791
+#, fuzzy, c-format
+msgid "Final transition export progress:"
+msgstr "Exportation du transparent %d en progrès:"
+
+#. Additional options - <format> only
+#. This function call should be the first thing exporter does, since this
+#. * function will take some preventive measures.
+#: ../src/export.c:892 ../src/export.c:955
+#, fuzzy
+msgid "VOB export"
+msgstr "Exporte"
+
+#: ../src/export.c:967 ../src/export.c:1051
+msgid "<b>Television Format</b>"
+msgstr "Format télévision"
+
+#: ../src/export.c:974 ../src/export.c:1058
+msgid "Normal 4:3"
+msgstr "Normal 4:3"
+
+#: ../src/export.c:979 ../src/export.c:1063
+msgid "Widescreen 16:9"
+msgstr "Ecran large 16:9"
+
+#. This function call should be the first thing exporter does, since this
+#. * function will take some preventive measures.
+#: ../src/export.c:1039
+#, fuzzy
+msgid "OGG export"
+msgstr "Exporte"
+
+#: ../src/export.c:1069 ../src/export.c:1163
+#, fuzzy
+msgid "<b>Video Quality:</b>"
+msgstr "Format vidéo"
+
+#: ../src/export.c:1076 ../src/export.c:1170
+msgid "Low"
+msgstr ""
+
+#: ../src/export.c:1080 ../src/export.c:1174
+msgid "Medium"
+msgstr ""
+
+#: ../src/export.c:1085 ../src/export.c:1179
+msgid "High"
+msgstr ""
+
+#. This function call should be the first thing exporter does, since this
+#. * function will take some preventive measures.
+#: ../src/export.c:1151
+#, fuzzy
+msgid "FLV export"
+msgstr "Exporte"
+
 #~ msgid "Export the DVD slideshow"
 #~ msgstr "Exporte la présentation DVD"
 
@@ -315,36 +401,5 @@ msgstr "SVP choisissez le nom de fichier de votre projet"
 #~ "La durée de la piste audio est supérieure à celle de la vidéo. Voulez-"
 #~ "vous poursuivre?"
 
-#~ msgid "Exporting the slideshow"
-#~ msgstr "Exporte la présentation"
-
-#~ msgid "Preparing for export ..."
-#~ msgstr "Prépare pour exporter ..."
-
-#~ msgid "Overall progress:"
-#~ msgstr "Progression globale:"
-
-#~ msgid "Slide %d export progress:"
-#~ msgstr "Exportation du transparent %d en progrès:"
-
-#, fuzzy
-#~ msgid "Final transition export progress:"
-#~ msgstr "Exportation du transparent %d en progrès:"
-
-#~ msgid "Failed to launch the encoder!"
-#~ msgstr "Echec de démarrage de l'encodeur!"
-
-#~ msgid "Filename of the slideshow:"
-#~ msgstr "Nom de fichier de la présentation:"
-
 #~ msgid "Export the slideshow as:"
 #~ msgstr "Exporte la présentation comme:"
-
-#~ msgid "<b>Television Format</b>"
-#~ msgstr "Format télévision"
-
-#~ msgid "Normal 4:3"
-#~ msgstr "Normal 4:3"
-
-#~ msgid "Widescreen 16:9"
-#~ msgstr "Ecran large 16:9"

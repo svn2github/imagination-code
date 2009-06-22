@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-06-22 11:24+0200\n"
+"POT-Creation-Date: 2009-06-22 15:15+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -301,4 +301,85 @@ msgstr ""
 
 #: ../src/support.c:283
 msgid "Please choose the slideshow project filename"
+msgstr ""
+
+#: ../src/export.c:204
+msgid "<b>Export Settings</b>"
+msgstr ""
+
+#: ../src/export.c:218
+msgid "Filename of the slideshow:"
+msgstr ""
+
+#: ../src/export.c:349
+msgid "Exporting the slideshow"
+msgstr ""
+
+#: ../src/export.c:360
+msgid "Preparing for export ..."
+msgstr ""
+
+#: ../src/export.c:371
+msgid "Overall progress:"
+msgstr ""
+
+#: ../src/export.c:435 ../src/export.c:793
+#, c-format
+msgid "Slide %d export progress:"
+msgstr ""
+
+#: ../src/export.c:651
+msgid "Failed to launch the encoder!"
+msgstr ""
+
+#: ../src/export.c:791
+#, c-format
+msgid "Final transition export progress:"
+msgstr ""
+
+#. Additional options - <format> only
+#. This function call should be the first thing exporter does, since this
+#. * function will take some preventive measures.
+#: ../src/export.c:892 ../src/export.c:955
+msgid "VOB export"
+msgstr ""
+
+#: ../src/export.c:967 ../src/export.c:1051
+msgid "<b>Television Format</b>"
+msgstr ""
+
+#: ../src/export.c:974 ../src/export.c:1058
+msgid "Normal 4:3"
+msgstr ""
+
+#: ../src/export.c:979 ../src/export.c:1063
+msgid "Widescreen 16:9"
+msgstr ""
+
+#. This function call should be the first thing exporter does, since this
+#. * function will take some preventive measures.
+#: ../src/export.c:1039
+msgid "OGG export"
+msgstr ""
+
+#: ../src/export.c:1069 ../src/export.c:1163
+msgid "<b>Video Quality:</b>"
+msgstr ""
+
+#: ../src/export.c:1076 ../src/export.c:1170
+msgid "Low"
+msgstr ""
+
+#: ../src/export.c:1080 ../src/export.c:1174
+msgid "Medium"
+msgstr ""
+
+#: ../src/export.c:1085 ../src/export.c:1179
+msgid "High"
+msgstr ""
+
+#. This function call should be the first thing exporter does, since this
+#. * function will take some preventive measures.
+#: ../src/export.c:1151
+msgid "FLV export"
 msgstr ""

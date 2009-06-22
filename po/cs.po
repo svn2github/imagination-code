@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-06-22 11:24+0200\n"
+"POT-Creation-Date: 2009-06-22 15:15+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Michal Várady <miko.vaji@gmail.com>\n"
 "Language-Team: \n"
@@ -299,12 +299,93 @@ msgstr[2] "%d snímků importovnáno %s"
 #: ../src/support.c:196
 msgid " - Use the CTRL key to select/unselect or SHIFT for multiple select"
 msgstr ""
-" - Pro označení nebo odznačení použijte klávesu CTRL nebo SHIFT pro výběr "
-"více položek"
+" - Pro označení nebo odznačení použijte klávesu CTRL, pomocí klávesy SHIFT "
+"vyberete více položek"
 
 #: ../src/support.c:283
 msgid "Please choose the slideshow project filename"
 msgstr "Zvolte název souboru projektu prezentace"
+
+#: ../src/export.c:204
+msgid "<b>Export Settings</b>"
+msgstr "<b>Nastavení exportu</b>"
+
+#: ../src/export.c:218
+msgid "Filename of the slideshow:"
+msgstr "Název souboru prezentace:"
+
+#: ../src/export.c:349
+msgid "Exporting the slideshow"
+msgstr "Exportování prezentace"
+
+#: ../src/export.c:360
+msgid "Preparing for export ..."
+msgstr "Příprava na export..."
+
+#: ../src/export.c:371
+msgid "Overall progress:"
+msgstr "Celkový průběh:"
+
+#: ../src/export.c:435 ../src/export.c:793
+#, c-format
+msgid "Slide %d export progress:"
+msgstr "Průběh exportu snímku %d:"
+
+#: ../src/export.c:651
+msgid "Failed to launch the encoder!"
+msgstr "Nepodařilo se spustit enkodér."
+
+#: ../src/export.c:791
+#, c-format
+msgid "Final transition export progress:"
+msgstr "Průběh exportu hotových přechodů"
+
+#. Additional options - <format> only
+#. This function call should be the first thing exporter does, since this
+#. * function will take some preventive measures.
+#: ../src/export.c:892 ../src/export.c:955
+msgid "VOB export"
+msgstr "Export do formátu VOB"
+
+#: ../src/export.c:967 ../src/export.c:1051
+msgid "<b>Television Format</b>"
+msgstr "<b>Televizní formát</b>"
+
+#: ../src/export.c:974 ../src/export.c:1058
+msgid "Normal 4:3"
+msgstr "Běžný 4:3"
+
+#: ../src/export.c:979 ../src/export.c:1063
+msgid "Widescreen 16:9"
+msgstr "Širokoúhlý 16:9"
+
+#. This function call should be the first thing exporter does, since this
+#. * function will take some preventive measures.
+#: ../src/export.c:1039
+msgid "OGG export"
+msgstr "Export do formátu OGG"
+
+#: ../src/export.c:1069 ../src/export.c:1163
+msgid "<b>Video Quality:</b>"
+msgstr "<b>Kvalita videa:</b>"
+
+#: ../src/export.c:1076 ../src/export.c:1170
+msgid "Low"
+msgstr "Nízká"
+
+#: ../src/export.c:1080 ../src/export.c:1174
+msgid "Medium"
+msgstr "Střední"
+
+#: ../src/export.c:1085 ../src/export.c:1179
+msgid "High"
+msgstr "Vysoká"
+
+#. This function call should be the first thing exporter does, since this
+#. * function will take some preventive measures.
+#: ../src/export.c:1151
+msgid "FLV export"
+msgstr "Export do formátu FLV"
 
 #~ msgid "Export the DVD slideshow"
 #~ msgstr "Exportovat DVD prezentaci"
@@ -315,36 +396,5 @@ msgstr "Zvolte název souboru projektu prezentace"
 #~ msgstr ""
 #~ "Délka zvukové stopy je delší než délka obrazové stopy. Chcete pokračovat?"
 
-#~ msgid "Exporting the slideshow"
-#~ msgstr "Exportování prezentace"
-
-#~ msgid "Preparing for export ..."
-#~ msgstr "Příprava na export..."
-
-#~ msgid "Overall progress:"
-#~ msgstr "Celkový průběh:"
-
-#~ msgid "Slide %d export progress:"
-#~ msgstr "Průběh exportu snímku %d:"
-
-#, fuzzy
-#~ msgid "Final transition export progress:"
-#~ msgstr "Průběh exportu snímku %d:"
-
-#~ msgid "Failed to launch the encoder!"
-#~ msgstr "Nepodařilo se spustit enkodér."
-
-#~ msgid "Filename of the slideshow:"
-#~ msgstr "Název souboru prezentace:"
-
 #~ msgid "Export the slideshow as:"
 #~ msgstr "Exportovat prezentaci jako:"
-
-#~ msgid "<b>Television Format</b>"
-#~ msgstr "<b>Televizní formát</b>"
-
-#~ msgid "Normal 4:3"
-#~ msgstr "Běžný 4:3"
-
-#~ msgid "Widescreen 16:9"
-#~ msgstr "Širokoúhlý 16:9"

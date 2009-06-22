@@ -109,7 +109,7 @@ img_window_struct *img_create_window (void)
 	img_struct->imagination_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_icon (GTK_WINDOW(img_struct->imagination_window),icon);
 	gtk_window_set_position (GTK_WINDOW(img_struct->imagination_window),GTK_WIN_POS_CENTER);
-	gtk_window_set_default_size (GTK_WINDOW (img_struct->imagination_window), 1080, 800);
+	gtk_window_set_default_size (GTK_WINDOW (img_struct->imagination_window), 1072, 828);
 	img_set_window_title(img_struct,NULL);
 	g_signal_connect (G_OBJECT (img_struct->imagination_window),"delete-event",G_CALLBACK (img_quit_application),img_struct);
 	g_signal_connect (G_OBJECT (img_struct->imagination_window), "destroy", G_CALLBACK (gtk_main_quit), NULL );

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-06-22 11:24+0200\n"
+"POT-Creation-Date: 2009-06-22 15:15+0200\n"
 "PO-Revision-Date: 2009-02-24 11:55+0100\n"
 "Last-Translator: tadeboro <tadeboro@gmail.com>\n"
 "Language-Team: Slovenian\n"
@@ -307,6 +307,92 @@ msgstr " - Uporabite CTRK za posamično izbiranje ali SHIFT za izbiro večih"
 msgid "Please choose the slideshow project filename"
 msgstr "Prosimo izberite ime projekta"
 
+#: ../src/export.c:204
+#, fuzzy
+msgid "<b>Export Settings</b>"
+msgstr "<b>Nastavitve diaprojekcije</b>"
+
+#: ../src/export.c:218
+msgid "Filename of the slideshow:"
+msgstr "Ime datoteke z diaprojekcijo:"
+
+#: ../src/export.c:349
+msgid "Exporting the slideshow"
+msgstr "Izvažam diaprojekcijo"
+
+#: ../src/export.c:360
+msgid "Preparing for export ..."
+msgstr "Pripravljam za izvoz ..."
+
+#: ../src/export.c:371
+msgid "Overall progress:"
+msgstr "Skupni napredek:"
+
+#: ../src/export.c:435 ../src/export.c:793
+#, c-format
+msgid "Slide %d export progress:"
+msgstr "Napredek izvoza diapozitiva %d:"
+
+#: ../src/export.c:651
+msgid "Failed to launch the encoder!"
+msgstr "Ne morem zagnati šifrirnika!"
+
+#: ../src/export.c:791
+#, fuzzy, c-format
+msgid "Final transition export progress:"
+msgstr "Napredek izvoza diapozitiva %d:"
+
+#. Additional options - <format> only
+#. This function call should be the first thing exporter does, since this
+#. * function will take some preventive measures.
+#: ../src/export.c:892 ../src/export.c:955
+#, fuzzy
+msgid "VOB export"
+msgstr "Izvoz"
+
+#: ../src/export.c:967 ../src/export.c:1051
+msgid "<b>Television Format</b>"
+msgstr "<b>Televizijska oblika</b>"
+
+#: ../src/export.c:974 ../src/export.c:1058
+msgid "Normal 4:3"
+msgstr "Normalno 4:3"
+
+#: ../src/export.c:979 ../src/export.c:1063
+msgid "Widescreen 16:9"
+msgstr "Širokozaslonsko 16:9"
+
+#. This function call should be the first thing exporter does, since this
+#. * function will take some preventive measures.
+#: ../src/export.c:1039
+#, fuzzy
+msgid "OGG export"
+msgstr "Izvoz"
+
+#: ../src/export.c:1069 ../src/export.c:1163
+#, fuzzy
+msgid "<b>Video Quality:</b>"
+msgstr "<b>Video oblika</b>"
+
+#: ../src/export.c:1076 ../src/export.c:1170
+msgid "Low"
+msgstr ""
+
+#: ../src/export.c:1080 ../src/export.c:1174
+msgid "Medium"
+msgstr ""
+
+#: ../src/export.c:1085 ../src/export.c:1179
+msgid "High"
+msgstr ""
+
+#. This function call should be the first thing exporter does, since this
+#. * function will take some preventive measures.
+#: ../src/export.c:1151
+#, fuzzy
+msgid "FLV export"
+msgstr "Izvoz"
+
 #~ msgid "Export the DVD slideshow"
 #~ msgstr "Izvozi DVD diaprojekcijo"
 
@@ -316,36 +402,5 @@ msgstr "Prosimo izberite ime projekta"
 #~ msgstr ""
 #~ "Glasbena podlaga je daljša od video vsebinw. Želite vseeno nadaljevati?"
 
-#~ msgid "Exporting the slideshow"
-#~ msgstr "Izvažam diaprojekcijo"
-
-#~ msgid "Preparing for export ..."
-#~ msgstr "Pripravljam za izvoz ..."
-
-#~ msgid "Overall progress:"
-#~ msgstr "Skupni napredek:"
-
-#~ msgid "Slide %d export progress:"
-#~ msgstr "Napredek izvoza diapozitiva %d:"
-
-#, fuzzy
-#~ msgid "Final transition export progress:"
-#~ msgstr "Napredek izvoza diapozitiva %d:"
-
-#~ msgid "Failed to launch the encoder!"
-#~ msgstr "Ne morem zagnati šifrirnika!"
-
-#~ msgid "Filename of the slideshow:"
-#~ msgstr "Ime datoteke z diaprojekcijo:"
-
 #~ msgid "Export the slideshow as:"
 #~ msgstr "Izvozi diaprojekcijo kot:"
-
-#~ msgid "<b>Television Format</b>"
-#~ msgstr "<b>Televizijska oblika</b>"
-
-#~ msgid "Normal 4:3"
-#~ msgstr "Normalno 4:3"
-
-#~ msgid "Widescreen 16:9"
-#~ msgstr "Širokozaslonsko 16:9"
