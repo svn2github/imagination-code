@@ -1,14 +1,17 @@
 Imagination changelog
 
 0x/06/09 - 1.5:
-		- Added ability to add audio files.
+		- Added ability to add audio to the slideshow.
 		- Added OGG slideshow export.
+		- Last slide closes the slideshow with the same transition applied to the first.
+		- Imagination can produce OGG and FLV with different video quality, thanks to
+		  Jean-Pierre Redonnet for the idea.
 		- Added ability to randomly choose the transitions.
-		- Grouped the transitions in family and added icons for describing the effect.
-		- Added new transitions effects: Fade In and Fade Out to Fade family,
-		  Barn Door Wipe, Four Box Wipe, Ellipse Wipe,Diagonal Wipe and
-		  Clock Wipe families thanks to the work of Tadej.
-		- Added man page.
+		- Grouped the transitions in families and added icons for describing the effect.
+		- Added new transitions effects: Barn Door Wipe, Four Box Wipe, Ellipse Wipe, Diagonal Wipe and
+		  Clock Wipe families thanks to Tadej Borovšak.
+		- Added man page thanks to Alessio Treglia.
+		- Added French, Czech, Brazilian Portuguese, German and Spanish translations.
 
 26/02/09 - 1.0:
 		- First release.

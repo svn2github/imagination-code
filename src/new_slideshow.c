@@ -163,7 +163,6 @@ void img_new_slideshow_settings_dialog(img_window_struct *img, gboolean flag)
 		else
 			gtk_widget_set_size_request(img->image_area,720,480);
 
-		img_set_buttons_state(img, TRUE);
 		img->project_is_modified = TRUE;
 	}
 	gtk_widget_destroy(dialog1);

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-06-22 10:22+0200\n"
+"POT-Creation-Date: 2009-06-22 11:24+0200\n"
 "PO-Revision-Date: 2009-02-24 11:55+0100\n"
 "Last-Translator: tadeboro <tadeboro@gmail.com>\n"
 "Language-Team: Slovenian\n"
@@ -34,7 +34,7 @@ msgstr "Domišljija"
 msgid "Playing %s..."
 msgstr "Predvajam %s"
 
-#: ../src/audio.c:126 ../src/main-window.c:547
+#: ../src/audio.c:126 ../src/main-window.c:530
 msgid "Play the selected file"
 msgstr "Predvajaj izbrano datoteko"
 
@@ -46,154 +46,154 @@ msgstr "Ustavi predvajanje"
 msgid "_Slideshow"
 msgstr "_Diaprojekcija"
 
-#: ../src/main-window.c:167
+#: ../src/main-window.c:161
 msgid "_Preview"
 msgstr "_Predogled"
 
-#: ../src/main-window.c:176
+#: ../src/main-window.c:169
 msgid "Export"
 msgstr "Izvoz"
 
-#: ../src/main-window.c:194
+#: ../src/main-window.c:185
 msgid "_Slide"
 msgstr "Di_apozitiv"
 
-#: ../src/main-window.c:200
+#: ../src/main-window.c:191
 msgid "Import p_ictures"
 msgstr "Uvozi _fotografije"
 
-#: ../src/main-window.c:209
+#: ../src/main-window.c:199
 msgid "Import _music"
 msgstr "_Uvozi glasbo"
 
-#: ../src/main-window.c:218
+#: ../src/main-window.c:207
 msgid "Dele_te"
 msgstr "_Zbriši"
 
-#: ../src/main-window.c:235
+#: ../src/main-window.c:223
 msgid "Un_select all"
 msgstr "Počis_ti izbor"
 
-#: ../src/main-window.c:240
+#: ../src/main-window.c:228
 msgid "_Help"
 msgstr "_Pomoč"
 
-#: ../src/main-window.c:259 ../src/new_slideshow.c:54
+#: ../src/main-window.c:247 ../src/new_slideshow.c:54
 msgid "Create a new slideshow"
 msgstr "Ustvari novo diaprojekcijo"
 
-#: ../src/main-window.c:264
+#: ../src/main-window.c:252
 msgid "Open a slideshow"
 msgstr "Odpri diaprojekcijo"
 
-#: ../src/main-window.c:270
+#: ../src/main-window.c:257
 msgid "Save the slideshow"
 msgstr "Shrani diaprojekcijo"
 
-#: ../src/main-window.c:281
+#: ../src/main-window.c:267
 msgid "Import pictures"
 msgstr "Uvozi fotografije"
 
-#: ../src/main-window.c:288
+#: ../src/main-window.c:273
 msgid "Import music"
 msgstr "Uvozi glasbo"
 
-#: ../src/main-window.c:294
+#: ../src/main-window.c:278
 msgid "Delete the selected slides"
 msgstr "Zbriši izbrane diapozitive"
 
-#: ../src/main-window.c:304 ../src/callbacks.c:853
+#: ../src/main-window.c:287 ../src/callbacks.c:858
 msgid "Starts the preview"
 msgstr "Požene predogled"
 
-#: ../src/main-window.c:323
+#: ../src/main-window.c:306
 msgid "Jump to the entered slide number"
 msgstr "Skoči na vnešeni diapozitiv"
 
-#: ../src/main-window.c:373
+#: ../src/main-window.c:356
 msgid "<b>Slide settings</b>"
 msgstr "<b>Nastavitve diapozitiva</b>"
 
 #. Transition types label
-#: ../src/main-window.c:383
+#: ../src/main-window.c:366
 msgid "Transition Type:"
 msgstr "Vrsta prehoda:"
 
-#: ../src/main-window.c:403
+#: ../src/main-window.c:386
 msgid "Random"
 msgstr "Naključno"
 
-#: ../src/main-window.c:404
+#: ../src/main-window.c:387
 msgid "Imagination randomly decides with transition to apply"
 msgstr "Domišljija naključno izbere prehod"
 
 #. Transition duration
-#: ../src/main-window.c:410
+#: ../src/main-window.c:393
 msgid "Transition Speed:"
 msgstr "Histrost prehoda:"
 
-#: ../src/main-window.c:425
+#: ../src/main-window.c:408
 msgid "Fast"
 msgstr "Hitro"
 
-#: ../src/main-window.c:427
+#: ../src/main-window.c:410
 msgid "Normal"
 msgstr "Normalno"
 
-#: ../src/main-window.c:429
+#: ../src/main-window.c:412
 msgid "Slow"
 msgstr "Počasi"
 
 #. Slide duration
-#: ../src/main-window.c:436
+#: ../src/main-window.c:419
 msgid "Slide Duration in sec:"
 msgstr "Trajanje diapozitiva v sek:"
 
 #. Slide Selected
-#: ../src/main-window.c:447
+#: ../src/main-window.c:430
 msgid "Slide Number:"
 msgstr "Številka diapozitiva:"
 
 #. Slide Resolution
-#: ../src/main-window.c:456
+#: ../src/main-window.c:439
 msgid "Resolution:"
 msgstr "Ločljivost:"
 
 #. Slide Type
-#: ../src/main-window.c:465
+#: ../src/main-window.c:448
 msgid "Type:"
 msgstr "Tip:"
 
 #. Slide Total Duration
-#: ../src/main-window.c:474
+#: ../src/main-window.c:457
 msgid "Slideshow Length:"
 msgstr "Trajanje diaprojekcije:"
 
-#: ../src/main-window.c:491
+#: ../src/main-window.c:474
 msgid "<b>Background Music</b>"
 msgstr "<b>Glasbena podlaga</b>"
 
-#: ../src/main-window.c:531
+#: ../src/main-window.c:514
 msgid "Music Duration:"
 msgstr "Trajanje glasbene podlage:"
 
-#: ../src/main-window.c:555
+#: ../src/main-window.c:538
 msgid "Delete the selected file"
 msgstr "Zbriši izbrane datoteke"
 
-#: ../src/main-window.c:563
+#: ../src/main-window.c:546
 msgid "Move the selected file up"
 msgstr "Premakni izbrano datoteko navzgor"
 
-#: ../src/main-window.c:570
+#: ../src/main-window.c:553
 msgid "Move the selected file down"
 msgstr "Premakni izbrano datoteko navzdol"
 
-#: ../src/main-window.c:577
+#: ../src/main-window.c:560
 msgid "Clear all files"
 msgstr "Počisti datoteke"
 
-#: ../src/main-window.c:1036 ../src/main-window.c:1038 ../src/support.c:220
+#: ../src/main-window.c:1019 ../src/main-window.c:1021 ../src/support.c:220
 msgid "None"
 msgstr "Brez"
 
@@ -210,23 +210,23 @@ msgstr "Prosimo izberite glasbene datoteke za uvoz"
 msgid "All audio files"
 msgstr "Vse glasbene datoteke"
 
-#: ../src/callbacks.c:199 ../src/callbacks.c:276
+#: ../src/callbacks.c:199 ../src/callbacks.c:277
 msgid "All files"
 msgstr "Vse datoteke"
 
-#: ../src/callbacks.c:250
+#: ../src/callbacks.c:251
 msgid "Import slides, use SHIFT key for multiple select"
 msgstr "Uvoz diapozitivov, uporabite SHIFT za izbor večih slik"
 
-#: ../src/callbacks.c:262
+#: ../src/callbacks.c:263
 msgid "All image files"
 msgstr "Vse slikovne datoteke"
 
-#: ../src/callbacks.c:363 ../src/callbacks.c:946
+#: ../src/callbacks.c:364 ../src/callbacks.c:955
 msgid "You didn't save your slideshow yet. Are you sure you want to close it?"
 msgstr "Projekt ni bil shranjen. Ste prepričani da ga želite zapreti?"
 
-#: ../src/callbacks.c:420
+#: ../src/callbacks.c:421
 #, c-format
 msgid "%d x %d pixels"
 msgid_plural "%d x %d pixels"
@@ -235,19 +235,19 @@ msgstr[1] "%d x %d piki"
 msgstr[2] "%d x %d pike"
 msgstr[3] "%d x %d pik"
 
-#: ../src/callbacks.c:490
+#: ../src/callbacks.c:491
 msgid "translator-credits"
 msgstr "Tadej Borovšak <tadeboro@gmail.com>"
 
-#: ../src/callbacks.c:863
+#: ../src/callbacks.c:868
 msgid "Stops the preview"
 msgstr "Ustavi predogled"
 
-#: ../src/callbacks.c:905
+#: ../src/callbacks.c:914
 msgid "Load an Imagination slideshow project"
 msgstr "Odpri Domišljijin projekt"
 
-#: ../src/callbacks.c:906
+#: ../src/callbacks.c:915
 msgid "Save an Imagination slideshow project"
 msgstr "Shrani Domišljijin projekt"
 

@@ -206,7 +206,6 @@ void img_select_audio_files_to_add ( GtkMenuItem* button, img_window_struct *img
 	if (response == GTK_RESPONSE_ACCEPT)
 	{
 		files = gtk_file_chooser_get_filenames (GTK_FILE_CHOOSER (fs));
-		gtk_widget_destroy (fs);
 		g_slist_foreach( files, (GFunc) img_add_audio_files, img);
 	}
 	if (files != NULL)
@@ -215,6 +214,8 @@ void img_select_audio_files_to_add ( GtkMenuItem* button, img_window_struct *img
 	time = img_convert_seconds_to_time(img->total_music_secs);
 	gtk_label_set_text(GTK_LABEL(img->music_time_data), time);
 	g_free(time);
+
+	gtk_widget_destroy (fs);
 }
 
 void img_add_audio_files (gchar *filename, img_window_struct *img)
@@ -556,6 +557,10 @@ void img_start_stop_preview(GtkWidget *button, img_window_struct *img)
 	slide_struct *entry;
 	GtkTreeModel *model;
 	GList *list = NULL;
+
+	/* If no images are present, abort */
+	if( img->slides_nr == 0 )
+		return;
 
 	if(img->export_is_running)
 		return;
@@ -900,6 +905,10 @@ void img_choose_slideshow_filename(GtkWidget *widget, img_window_struct *img)
 	else if (widget == img->save_as_menu || widget == img->save_menu || widget == img->save_button)
 		action = GTK_FILE_CHOOSER_ACTION_SAVE;
 
+	/* If user wants to save empty slideshow, simply abort */
+	if( img->slides_nr == 0 && action == GTK_FILE_CHOOSER_ACTION_SAVE  )
+		return;
+
 	if (img->project_filename == NULL || widget == img->save_as_menu || action == GTK_FILE_CHOOSER_ACTION_OPEN)
 	{
 		fc = gtk_file_chooser_dialog_new (action == GTK_FILE_CHOOSER_ACTION_OPEN ? _("Load an Imagination slideshow project") : 
@@ -947,7 +956,6 @@ void img_close_slideshow(GtkWidget *widget, img_window_struct *img)
 			return;
 	}
 	img_free_allocated_memory(img);
-	img_set_buttons_state(img, FALSE);
 	img_set_window_title(img,NULL);
 	img_set_statusbar_message(img,0);
 	gtk_image_set_from_pixbuf(GTK_IMAGE(img->image_area),NULL);
@@ -994,23 +1002,6 @@ thumb->rotation = 180;
       thumb->rotation = 0;
  }
  */
-
-void img_set_buttons_state(img_window_struct *img, gboolean state)
-{
-	gtk_widget_set_sensitive(img->import_button,state);
-	gtk_widget_set_sensitive(img->import_audio_button,state);
-	gtk_widget_set_sensitive(img->import_menu,	state);
-	gtk_widget_set_sensitive(img->import_audio_menu,state);
-	gtk_widget_set_sensitive(img->save_menu,	state);
-	gtk_widget_set_sensitive(img->save_as_menu,	state);
-	gtk_widget_set_sensitive(img->save_button,	state);
-	gtk_widget_set_sensitive(img->close_menu,	state);
-	gtk_widget_set_sensitive(img->properties_menu,	state);
-	gtk_widget_set_sensitive(img->preview_menu,	state);
-	gtk_widget_set_sensitive(img->preview_button,state);
-	gtk_widget_set_sensitive(img->export_menu,	state);
-}
-
 
 void img_move_audio_up( GtkButton *button, img_window_struct *img )
 {

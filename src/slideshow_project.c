@@ -210,7 +210,6 @@ void img_load_slideshow(img_window_struct *img)
 
 	dummy = g_path_get_basename(img->project_filename);
 	img_set_window_title(img, dummy);
-	img_set_buttons_state(img, TRUE);
 	g_free(dummy);
 
 	g_hash_table_destroy( table );

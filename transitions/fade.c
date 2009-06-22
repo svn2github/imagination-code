@@ -38,32 +38,16 @@ img_get_plugin_info( gchar  **group,
 
 	*group = "Fade";
 
-	*trans = g_new( gchar *, 10 );
+	*trans = g_new( gchar *, 4 );
 	(*trans)[i++] = "Cross Fade";
 	(*trans)[i++] = "img_cross_fade";
 	(*trans)[i++] = GINT_TO_POINTER( 19 );
-	(*trans)[i++] = "Fade In";
-	(*trans)[i++] = "img_fade_in";
-	(*trans)[i++] = GINT_TO_POINTER( 30 );
-	(*trans)[i++] = "Fade Out";
-	(*trans)[i++] = "img_fade_out";
-	(*trans)[i++] = GINT_TO_POINTER( 31 );
 	(*trans)[i++] = NULL;
 }
 
 void img_cross_fade( GdkDrawable *window, GdkPixbuf *image_from, GdkPixbuf *image_to, gdouble progress, gint file_desc )
 {
 	transition_render( window, image_from, image_to, progress, file_desc, 1 );
-}
-
-void img_fade_in( GdkDrawable *window, GdkPixbuf *image_from, GdkPixbuf *image_to, gdouble progress, gint file_desc )
-{
-	transition_render( window, image_from, image_to, progress, file_desc, 2 );
-}
-
-void img_fade_out( GdkDrawable *window, GdkPixbuf *image_from, GdkPixbuf *image_to, gdouble progress, gint file_desc )
-{
-	transition_render( window, image_from, image_to, progress, file_desc, 3 );
 }
 
 /* Local functions definitions */
@@ -92,27 +76,10 @@ transition_render( GdkDrawable *window,
 		cr = cairo_create( surface );
 	}
 
-	switch (direction)
-	{
-		case 1:
-			gdk_cairo_set_source_pixbuf( cr, image_from, 0, 0 );
-		break;
-		
-		case 2:
-			cairo_set_source_rgb (cr, 0, 0, 0);
-		break;
-		
-		case 3:
-			gdk_cairo_set_source_pixbuf( cr, image_to, 0, 0 );
-		break;
-	}
+	gdk_cairo_set_source_pixbuf( cr, image_from, 0, 0 );
 	cairo_paint( cr );
 
-	if (direction == 3)
-		cairo_set_source_rgb (cr, 0, 0, 0);
-	else
-		gdk_cairo_set_source_pixbuf( cr, image_to, 0, 0 );
-
+	gdk_cairo_set_source_pixbuf( cr, image_to, 0, 0 );
 	cairo_paint_with_alpha(cr, progress);
 	cairo_destroy(cr);
 
