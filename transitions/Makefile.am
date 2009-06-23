@@ -16,6 +16,7 @@ four_box_wipe_la_LDFLAGS = -module -avoid-version
 push_wipe_la_LDFLAGS = -module -avoid-version
 wave_la_LDFLAGS = -module -avoid-version
 misc_diagonal_wipe_la_LDFLAGS = -module -avoid-version
+misc_shape_wipe_la_LDFLAGS = -module -avoid-version
 
 # Plugins to be installed
 plugin_LTLIBRARIES = \
@@ -30,7 +31,8 @@ plugin_LTLIBRARIES = \
 	four_box_wipe.la \
 	push_wipe.la \
 	wave.la \
-	misc_diagonal_wipe.la
+	misc_diagonal_wipe.la \
+	misc_shape_wipe.la
 
 bar_wipe_la_SOURCES	= export_to_ppm.c export_to_ppm.h bar_wipe.c
 barn_door_wipe_la_SOURCES = export_to_ppm.c export_to_ppm.h barn_door_wipe.c
@@ -44,6 +46,7 @@ four_box_wipe_la_SOURCES = export_to_ppm.c export_to_ppm.h four_box_wipe.c
 push_wipe_la_SOURCES = export_to_ppm.c export_to_ppm.h push_wipe.c
 wave_la_SOURCES = export_to_ppm.c export_to_ppm.h wave.c
 misc_diagonal_wipe_la_SOURCES = export_to_ppm.c export_to_ppm.h misc_diagonal_wipe.c
+misc_shape_wipe_la_SOURCES = export_to_ppm.c export_to_ppm.h misc_shape_wipe.c
 
 # instead of linking against all in $(GTK_LIBS), we link only against needed libs
 bar_wipe_la_LIBADD = $(PLUGINS_LIBS)
@@ -58,6 +61,7 @@ four_box_wipe_la_LIBADD = $(PLUGINS_LIBS)
 push_wipe_la_LIBADD = $(PLUGINS_LIBS)
 wave_la_LIBADD = $(PLUGINS_LIBS)
 misc_diagonal_wipe_la_LIBADD = $(PLUGINS_LIBS)
+misc_shape_wipe_la_LIBADD = $(PLUGINS_LIBS)
 
 AM_CPPFLAGS = \
 	-DDATADIR=\"$(datadir)\" \
