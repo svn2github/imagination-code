@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-06-23 15:48+0200\n"
+"POT-Creation-Date: 2009-06-23 22:55+0200\n"
 "PO-Revision-Date: 2009-06-23 08:39-0400\n"
 "Last-Translator: Og Maciel <ogmaciel@gnome.org>\n"
 "Language-Team: Brazilian Portuguese <ldp-br@bazar2.conectiva.com.br>\n"
@@ -17,15 +17,15 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: ../imagination.desktop.in.h:1
+#: ../imagination.desktop.in.in.h:1
 msgid "A DVD slideshow maker"
 msgstr "Um criador de apresentações de slides em DVD"
 
-#: ../imagination.desktop.in.h:2
+#: ../imagination.desktop.in.in.h:2
 msgid "A lightweight DVD slideshow maker using GTK+2"
 msgstr "Um criador leve de apresentações de slides em DVD usando GTK+2"
 
-#: ../imagination.desktop.in.h:3
+#: ../imagination.desktop.in.in.h:3
 msgid "Imagination"
 msgstr "Imagination"
 

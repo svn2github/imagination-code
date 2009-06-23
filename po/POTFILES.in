@@ -1,6 +1,6 @@
 # List of source files containing translatable strings.
 
-imagination.desktop.in
+imagination.desktop.in.in
 src/audio.c
 src/imagination.c
 src/main-window.c

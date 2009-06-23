@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-06-23 15:48+0200\n"
+"POT-Creation-Date: 2009-06-23 22:55+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Michal Várady <miko.vaji@gmail.com>\n"
 "Language-Team: \n"
@@ -14,16 +14,16 @@ msgstr ""
 "X-Poedit-Country: CZECH REPUBLIC\n"
 "X-Poedit-SourceCharset: utf-8\n"
 
-#: ../imagination.desktop.in.h:1
+#: ../imagination.desktop.in.in.h:1
 msgid "A DVD slideshow maker"
 msgstr "Aplikace pro vytváření prezentací na disky DVD"
 
-#: ../imagination.desktop.in.h:2
+#: ../imagination.desktop.in.in.h:2
 msgid "A lightweight DVD slideshow maker using GTK+2"
 msgstr ""
 "Odlehčená aplikace pro vytváření prezentací na disky DVD používající GTK+2"
 
-#: ../imagination.desktop.in.h:3
+#: ../imagination.desktop.in.in.h:3
 msgid "Imagination"
 msgstr "Imagination"
 
@@ -123,7 +123,7 @@ msgstr "Náhodný"
 
 #: ../src/main-window.c:387
 msgid "Imagination randomly decides which transition to apply"
-msgstr "Apikace Transition náhodně zvolí použitý přechod"
+msgstr "Aplikace Transition náhodně zvolí použitý přechod"
 
 #. Transition duration
 #: ../src/main-window.c:393
