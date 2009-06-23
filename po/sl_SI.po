@@ -301,16 +301,15 @@ msgstr[3] "%d diapozitivov uvoženih %s"
 
 #: ../src/support.c:196
 msgid " - Use the CTRL key to select/unselect or SHIFT for multiple select"
-msgstr " - Uporabite CTRK za posamično izbiranje ali SHIFT za izbiro večih"
+msgstr " - Uporabite CTRL za posamično izbiranje ali SHIFT za izbiro večih"
 
 #: ../src/support.c:283
 msgid "Please choose the slideshow project filename"
 msgstr "Prosimo izberite ime projekta"
 
 #: ../src/export.c:204
-#, fuzzy
 msgid "<b>Export Settings</b>"
-msgstr "<b>Nastavitve diaprojekcije</b>"
+msgstr "<b>Nastavitve izvoza</b>"
 
 #: ../src/export.c:218
 msgid "Filename of the slideshow:"
@@ -338,17 +337,15 @@ msgid "Failed to launch the encoder!"
 msgstr "Ne morem zagnati šifrirnika!"
 
 #: ../src/export.c:791
-#, fuzzy, c-format
 msgid "Final transition export progress:"
-msgstr "Napredek izvoza diapozitiva %d:"
+msgstr "Napredek izvoza zadnjega prehoda:"
 
 #. Additional options - <format> only
 #. This function call should be the first thing exporter does, since this
 #. * function will take some preventive measures.
 #: ../src/export.c:892 ../src/export.c:955
-#, fuzzy
 msgid "VOB export"
-msgstr "Izvoz"
+msgstr "VOB izvoz"
 
 #: ../src/export.c:967 ../src/export.c:1051
 msgid "<b>Television Format</b>"
@@ -365,33 +362,30 @@ msgstr "Širokozaslonsko 16:9"
 #. This function call should be the first thing exporter does, since this
 #. * function will take some preventive measures.
 #: ../src/export.c:1039
-#, fuzzy
 msgid "OGG export"
-msgstr "Izvoz"
+msgstr "OGG izvoz"
 
 #: ../src/export.c:1069 ../src/export.c:1163
-#, fuzzy
 msgid "<b>Video Quality:</b>"
-msgstr "<b>Video oblika</b>"
+msgstr "<b>Kvaliteta videa:</b>"
 
 #: ../src/export.c:1076 ../src/export.c:1170
 msgid "Low"
-msgstr ""
+msgstr "Nizka"
 
 #: ../src/export.c:1080 ../src/export.c:1174
 msgid "Medium"
-msgstr ""
+msgstr "Srednja"
 
 #: ../src/export.c:1085 ../src/export.c:1179
 msgid "High"
-msgstr ""
+msgstr "Visoka"
 
 #. This function call should be the first thing exporter does, since this
 #. * function will take some preventive measures.
 #: ../src/export.c:1151
-#, fuzzy
 msgid "FLV export"
-msgstr "Izvoz"
+msgstr "FLV izvoz"
 
 #~ msgid "Export the DVD slideshow"
 #~ msgstr "Izvozi DVD diaprojekcijo"
