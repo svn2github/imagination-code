@@ -9,8 +9,7 @@ Imagination changelog
 		  Jean-Pierre Redonnet for the idea.
 		- Added ability to randomly choose the transitions.
 		- Grouped the transitions in families and added icons for describing the effect.
-		- Added new transitions effects: Barn Door Wipe, Four Box Wipe, Ellipse Wipe, Diagonal Wipe and
-		  Clock Wipe families thanks to Tadej Borovšak.
+		- Added new transitions effects: Barn Door Wipe, Box Tie Wipe, Four Box Wipe, Ellipse Wipe, Diagonal Wipe, Clock Wipe, Wave and Misc Diagonal Wipe families thanks to Tadej Borovšak.
 		- Added man page thanks to Alessio Treglia.
 		- Added French, Czech, Brazilian Portuguese, German and Spanish translations.
 

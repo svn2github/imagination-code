@@ -86,15 +86,6 @@ img_up( GdkDrawable *window,
 	transition_render( window, image_from, image_to, progress, file_desc, 2 );
 }
 
-void
-img_left( GdkDrawable *window,
-		   GdkPixbuf   *image_from, 
-		   GdkPixbuf   *image_to,
-		   gdouble      progress,
-		   gint         file_desc )
-{
-	transition_render( window, image_from, image_to, progress, file_desc, 3 );
-}
 
 void
 img_right( GdkDrawable *window,
@@ -103,11 +94,21 @@ img_right( GdkDrawable *window,
 			gdouble      progress,
 			gint         file_desc )
 {
+	transition_render( window, image_from, image_to, progress, file_desc, 3 );
+}
+
+void
+img_left( GdkDrawable *window,
+		   GdkPixbuf   *image_from, 
+		   GdkPixbuf   *image_to,
+		   gdouble      progress,
+		   gint         file_desc )
+{
 	transition_render( window, image_from, image_to, progress, file_desc, 4 );
 }
 
 void
-img_left_down( GdkDrawable *window,
+img_right_down( GdkDrawable *window,
 			GdkPixbuf   *image_from, 
 			GdkPixbuf   *image_to,
 			gdouble      progress,
@@ -117,7 +118,7 @@ img_left_down( GdkDrawable *window,
 }
 
 void
-img_left_up( GdkDrawable *window,
+img_right_up( GdkDrawable *window,
 			GdkPixbuf   *image_from, 
 			GdkPixbuf   *image_to,
 			gdouble      progress,
@@ -127,7 +128,7 @@ img_left_up( GdkDrawable *window,
 }
 
 void
-img_right_up( GdkDrawable *window,
+img_left_up( GdkDrawable *window,
 			GdkPixbuf   *image_from, 
 			GdkPixbuf   *image_to,
 			gdouble      progress,
@@ -137,7 +138,7 @@ img_right_up( GdkDrawable *window,
 }
 
 void
-img_right_down( GdkDrawable *window,
+img_left_down( GdkDrawable *window,
 			GdkPixbuf   *image_from, 
 			GdkPixbuf   *image_to,
 			gdouble      progress,
