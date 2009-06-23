@@ -17,9 +17,9 @@
  *
  */
 
-#include <gdk/gdk.h>
+#include "export_to_ppm.h"
 #include <math.h>
-#include "support.h"
+#include <gdk/gdk.h>
 
 /* Local functions declarations */
 static void

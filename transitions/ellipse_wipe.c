@@ -18,8 +18,8 @@
  *
  */
 
+#include "export_to_ppm.h"
 #include <gdk/gdk.h>
-#include "support.h"
 #include <math.h>
 
 #define AB 0.5				/* This controls the deformation */

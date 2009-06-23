@@ -51,7 +51,6 @@
 #  define N_(String) (String)
 #endif
 
-void img_export_cairo_to_ppm(cairo_surface_t *, gint );
 GtkWidget *img_load_icon(gchar *, GtkIconSize );
 gchar *img_convert_seconds_to_time(gint );
 GtkWidget *_gtk_combo_box_new_text(gboolean);

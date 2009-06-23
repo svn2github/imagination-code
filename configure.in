@@ -31,6 +31,9 @@ PKG_CHECK_MODULES(PACKAGE, [$pkg_modules])
 sox_modules="sox >= 14.2.0"
 PKG_CHECK_MODULES(SOX, [$sox_modules])
 
+plugins_modules="cairo >= 1.6 gdk-2.0 > 2.12.0"
+PKG_CHECK_MODULES(PLUGINS, [$plugins_modules])
+
 # get svn revision
 REVISION="r0"
 if test "x${REVISION}" = "xr0"
@@ -55,6 +58,9 @@ AC_SUBST(PACKAGE_LIBS)
 
 AC_SUBST(SOX_CFLAGS)
 AC_SUBST(SOX_LIBS)
+
+AC_SUBST(PLUGINS_CFLAGS)
+AC_SUBST(PLUGINS_LIBS)
 
 GETTEXT_PACKAGE=imagination
 AC_SUBST(GETTEXT_PACKAGE)

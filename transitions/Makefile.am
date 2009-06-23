@@ -32,48 +32,35 @@ plugin_LTLIBRARIES = \
 	wave.la \
 	misc_diagonal_wipe.la
 
-bar_wipe_la_SOURCES	= ../src/support.c bar_wipe.c
-barn_door_wipe_la_SOURCES = ../src/support.c barn_door_wipe.c
-bow_tie_wipe_la_SOURCES = ../src/support.c bow_tie_wipe.c
-box_wipe_la_SOURCES = ../src/support.c box_wipe.c
-clock_wipe_la_SOURCES = ../src/support.c clock_wipe.c
-diagonal_wipe_la_SOURCES = ../src/support.c diagonal_wipe.c
-ellipse_wipe_la_SOURCES = ../src/support.c ellipse_wipe.c
-fade_la_SOURCES = ../src/support.c fade.c
-four_box_wipe_la_SOURCES = ../src/support.c four_box_wipe.c
-push_wipe_la_SOURCES = ../src/support.c push_wipe.c
-wave_la_SOURCES = ../src/support.c wave.c
-misc_diagonal_wipe_la_SOURCES = ../src/support.c misc_diagonal_wipe.c
+bar_wipe_la_SOURCES	= export_to_ppm.c export_to_ppm.h bar_wipe.c
+barn_door_wipe_la_SOURCES = export_to_ppm.c export_to_ppm.h barn_door_wipe.c
+bow_tie_wipe_la_SOURCES = export_to_ppm.c export_to_ppm.h bow_tie_wipe.c
+box_wipe_la_SOURCES = export_to_ppm.c export_to_ppm.h box_wipe.c
+clock_wipe_la_SOURCES = export_to_ppm.c export_to_ppm.h clock_wipe.c
+diagonal_wipe_la_SOURCES = export_to_ppm.c export_to_ppm.h diagonal_wipe.c
+ellipse_wipe_la_SOURCES = export_to_ppm.c export_to_ppm.h ellipse_wipe.c
+fade_la_SOURCES = export_to_ppm.c export_to_ppm.h fade.c
+four_box_wipe_la_SOURCES = export_to_ppm.c export_to_ppm.h four_box_wipe.c
+push_wipe_la_SOURCES = export_to_ppm.c export_to_ppm.h push_wipe.c
+wave_la_SOURCES = export_to_ppm.c export_to_ppm.h wave.c
+misc_diagonal_wipe_la_SOURCES = export_to_ppm.c export_to_ppm.h misc_diagonal_wipe.c
 
 # instead of linking against all in $(GTK_LIBS), we link only against needed libs
-bar_wipe_la_LIBADD = $(PACKAGE_LIBS)
-barn_door_wipe_la_LIBADD = $(PACKAGE_LIBS)
-bow_tie_wipe_la_LIBADD = $(PACKAGE_LIBS)
-box_wipe_la_LIBADD = $(PACKAGE_LIBS)
-clock_wipe_la_LIBADD = $(PACKAGE_LIBS)
-diagonal_wipe_la_LIBADD = $(PACKAGE_LIBS)
-ellipse_wipe_la_LIBADD = $(PACKAGE_LIBS)
-fade_la_LIBADD = $(PACKAGE_LIBS)
-four_box_wipe_la_LIBADD = $(PACKAGE_LIBS)
-push_wipe_la_LIBADD = $(PACKAGE_LIBS)
-wave_la_LIBADD = $(PACKAGE_LIBS)
-misc_diagonal_wipe_la_LIBADD = $(PACKAGE_LIBS)
+bar_wipe_la_LIBADD = $(PLUGINS_LIBS)
+barn_door_wipe_la_LIBADD = $(PLUGINS_LIBS)
+bow_tie_wipe_la_LIBADD = $(PLUGINS_LIBS)
+box_wipe_la_LIBADD = $(PLUGINS_LIBS)
+clock_wipe_la_LIBADD = $(PLUGINS_LIBS)
+diagonal_wipe_la_LIBADD = $(PLUGINS_LIBS)
+ellipse_wipe_la_LIBADD = $(PLUGINS_LIBS)
+fade_la_LIBADD = $(PLUGINS_LIBS)
+four_box_wipe_la_LIBADD = $(PLUGINS_LIBS)
+push_wipe_la_LIBADD = $(PLUGINS_LIBS)
+wave_la_LIBADD = $(PLUGINS_LIBS)
+misc_diagonal_wipe_la_LIBADD = $(PLUGINS_LIBS)
 
 AM_CPPFLAGS = \
 	-DDATADIR=\"$(datadir)\" \
 	-DPACKAGE_LIB_DIR=\""$(libdir)"\" \
-	-I$(top_srcdir)/src \
-	$(PACKAGE_CFLAGS) \
-	$(PLUGIN_CFLAGS)
+	$(PLUGINS_CFLAGS)
 
-#
-# This part allows people to build their own plugins in here.
-# Yes, it's a mess.
-#
-SUFFIXES = .c .so
-.c.so:
-	$(LIBTOOL) --mode=compile $(CC) -DHAVE_CONFIG_H -I$(top_srcdir) $(AM_CPPFLAGS) $(CFLAGS) -c $< -o tmp$@.lo $(PLUGIN_CFLAGS)
-	$(LIBTOOL) --mode=link    $(CC) $(CFLAGS) -o libtmp$@.la -rpath $(plugindir) tmp$@.lo $(LIBS) $(LDFLAGS) -module -avoid-version $(PLUGIN_LIBS)
-	@rm -f tmp$@.lo tmp$@.o libtmp$@.la
-	@cp .libs/libtmp$@.so* $@
-	@rm -f .libs/libtmp$@.*

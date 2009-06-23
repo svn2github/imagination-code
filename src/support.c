@@ -19,96 +19,9 @@
 
 #include "support.h"
 
+#define PLUGINS_INSTALLED 0
+
 static gboolean img_plugin_is_loaded(img_window_struct *, GModule *);
-
-void img_export_cairo_to_ppm( cairo_surface_t *surface, gint file_desc)
-{
-	cairo_format_t  format;
-	gint            width, height, stride, row, col;
-	guchar         *data, *pix;
-	gchar          *header;
-
-	guchar         *buffer, *tmp;
-	gint            buf_size;
-
-	/* Get info about cairo surface passed in. */
-	format = cairo_image_surface_get_format( surface );
-
-	/* For more information on diferent formats, see
-	 * www.cairographics.org/manual/cairo-image-surface.html#cairo-format-t */
-	/* Currently this exporter only handles CAIRO_FORMAT_(ARGB32|RGB24)
-	 * formats. */
-	if( ! format == CAIRO_FORMAT_ARGB32 && ! format == CAIRO_FORMAT_RGB24 )
-	{
-		g_print( "Unsupported cairo surface format!\n" );
-		return;
-	}
-
-	/* Image info and pixel data */
-	width  = cairo_image_surface_get_width( surface );
-	height = cairo_image_surface_get_height( surface );
-	stride = cairo_image_surface_get_stride( surface );
-	pix    = cairo_image_surface_get_data( surface );
-
-	/* Output PPM file header information:
-	 *   - P6 is a magic number for PPM file
-	 *   - width and height are image's dimensions
-	 *   - 255 is number of colors
-	 * */
-	header = g_strdup_printf( "P6\n%d %d\n255\n", width, height );
-	write( file_desc, header, sizeof( gchar ) * strlen( header ) );
-	g_free( header );
-
-	/* PRINCIPLES BEHING EXPORT LOOP
-	 *
-	 * Cairo surface data is composed of height * stride 32-bit numbers. The
-	 * actual data for displaying image is inside height * width boundary,
-	 * and each pixel is represented with 1 32-bit number.
-	 *
-	 * In CAIRO_FORMAT_ARGB32, first 8 bits contain alpha value, second 8
-	 * bits red value, third green and fourth 8 bits blue value.
-	 *
-	 * In CAIRO_FORMAT_RGB24, groups of 8 bits contain values for red, green
-	 * and blue color respectively. Last 8 bits are unused.
-	 *
-	 * Since guchar type contains 8 bits, it's usefull to think of cairo
-	 * surface as a height * stride gropus of 4 guchars, where each guchar
-	 * holds value for each color. And this is the principle behing my method
-	 * of export.
-	 * */
-
-	/* Output PPM data */
-	buf_size = sizeof( guchar ) * width * height * 3;
-	buffer = g_slice_alloc( buf_size );
-	tmp = buffer;
-	data = pix;
-	for( row = 0; row < height; row++ )
-	{
-		data = pix + row * stride;
-
-		for( col = 0; col < width; col++ )
-		{
-			/* Output data. This is done differenty on little endian
-			 * and big endian machines. */
-#if G_BYTE_ORDER == G_LITTLE_ENDIAN
-			/* Little endian machine sees pixel data as being stored in
-			 * BGRA format. This is why we skip the last 8 bit group and
-			 * read the other three groups in reverse order. */
-			tmp[0] = data[2];
-			tmp[1] = data[1];
-			tmp[2] = data[0];
-#elif G_BYTE_ORDER == G_BIG_ENDIAN
-			tmp[0] = data[1];
-			tmp[1] = data[2];
-			tmp[2] = data[3];
-#endif
-			data += 4;
-			tmp  += 3;
-		}
-	}
-	write( file_desc, buffer, buf_size );
-	g_slice_free1( buf_size, buffer );
-}
 
 GtkWidget *img_load_icon(gchar *filename, GtkIconSize size)
 {
@@ -201,16 +114,17 @@ void img_set_statusbar_message(img_window_struct *img_struct, gint selected)
 
 void img_load_available_transitions(img_window_struct *img)
 {
-	GDir *dir;
-	const gchar *transition_name;
-	gchar *path = NULL, *fname = NULL, *name, *filename;
-	gchar **trans, **bak;
-	GError **error = NULL;
-	GModule *module;
-	GdkPixbuf *pixbuf;
-	GtkTreeIter piter, citer;
-	GtkTreeStore *model;
-	gpointer address;
+	GDir          *dir;
+	const gchar   *transition_name;
+	gchar         *fname = NULL, *name, *filename;
+	gchar        **trans, **bak;
+	GError       **error = NULL;
+	GModule       *module;
+	GdkPixbuf     *pixbuf;
+	GtkTreeIter    piter, citer;
+	GtkTreeStore  *model;
+	gpointer       address;
+	gchar         *search_paths[3], **path;
 	void (*plugin_set_name)(gchar **, gchar ***);
 
 	model = GTK_TREE_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(img->transition_type)));
@@ -220,53 +134,84 @@ void img_load_available_transitions(img_window_struct *img)
 	gtk_tree_store_set(model, &piter, 0, NULL, 1, _("None"), 2, NULL, 3, -1, -1);
 	gtk_combo_box_set_active(GTK_COMBO_BOX(img->transition_type), 0);
 
-	path = g_strdup("./transitions");
-	//path = g_strconcat(PACKAGE_LIB_DIR,"/imagination",NULL);
-	dir = g_dir_open(path, 0, error);
-	if (dir == NULL)
-	{
-		g_free(path);
-		img->nr_transitions_loaded = 0;
-		return;
-	}
-	while (1)
-	{
-		transition_name = g_dir_read_name(dir);
-		if (transition_name == NULL)
-			break;
+	/* Create NULL terminated array of paths that we'll be looking at */
+#if PLUGINS_INSTALLED
+	search_paths[0] = g_strconcat(PACKAGE_LIB_DIR,"/imagination",NULL);
+#else
+	search_paths[0] = g_strdup("./transitions");
+#endif
+	search_paths[1] = g_strconcat( g_get_home_dir(), "/.imagination/plugins", NULL );
+	search_paths[2] = NULL;
 
-		fname = g_build_filename(path,transition_name, NULL);
-		module = g_module_open(fname, G_MODULE_BIND_LOCAL);
-		if (module && img_plugin_is_loaded(img, module) == FALSE)
+	/* Search all paths listed in array */
+	for( path = search_paths; *path; path++ )
+	{
+		/* I removed error from here since it hasn't been used and leaks away */
+		dir = g_dir_open(*path, 0, NULL);
+		if( dir == NULL )
 		{
-			/* Obtain the name from the plugin function */
-			g_module_symbol(module, "img_get_plugin_info",(void *) &plugin_set_name);
-			plugin_set_name(&name, &trans);
-
-			/* Add group name to the store */
-			gtk_tree_store_append( model, &piter, NULL );
-			gtk_tree_store_set( model, &piter, 0, NULL, 1, name, 3, 0, -1 );
-			img->plugin_list = g_slist_append(img->plugin_list, module);
-
-			/* Add transitions */
-			bak = trans;
-			for( ; *trans; trans += 3 )
-			{
-				//filename = g_strdup_printf("%s/imagination/pixmaps/imagination-%d.png", DATADIR, GPOINTER_TO_INT( trans[2] ) );
-				filename = g_strdup_printf( "./pixmaps/imagination-%d.png", GPOINTER_TO_INT( trans[2] ) );
-				pixbuf = gdk_pixbuf_new_from_file(filename, NULL);
-				g_free(filename);
-				g_module_symbol( module, trans[1], &address );
-				gtk_tree_store_append( model, &citer, &piter );
-				gtk_tree_store_set( model, &citer, 0, pixbuf, 1, trans[0], 2, address, 3, GPOINTER_TO_INT( trans[2] ), -1 );
-				img->nr_transitions_loaded++;
-			}
-			g_free( bak );
+			g_free( *path );
+			continue;
 		}
-		g_free(fname);
+		
+		while( TRUE )
+		{
+			transition_name = g_dir_read_name( dir );
+			if (transition_name == NULL)
+				break;
+			
+			fname = g_build_filename(*path, transition_name, NULL);
+			module = g_module_open(fname, G_MODULE_BIND_LOCAL);
+			if (module && img_plugin_is_loaded(img, module) == FALSE)
+			{
+				/* Obtain the name from the plugin function */
+				g_module_symbol( module, "img_get_plugin_info",
+								 (void *)&plugin_set_name);
+				plugin_set_name(&name, &trans);
+				
+				/* Add group name to the store */
+				gtk_tree_store_append( model, &piter, NULL );
+				gtk_tree_store_set( model, &piter, 0, NULL, 1, name, 3, 0, -1 );
+				img->plugin_list = g_slist_append(img->plugin_list, module);
+				
+				/* Add transitions */
+				for( bak = trans; *trans; trans += 3 )
+				{
+#if PLUGINS_INSTALLED
+					filename =
+						g_strdup_printf( "%s/imagination/pixmaps/imagination-%d.png",
+										 DATADIR, GPOINTER_TO_INT( trans[2] ) );
+#else /* PLUGINS_INSTALLED */
+					filename =
+						g_strdup_printf( "./pixmaps/imagination-%d.png",
+										 GPOINTER_TO_INT( trans[2] ) );
+#endif /* ! PLUGINS_INSTALLED */
+
+					pixbuf = gdk_pixbuf_new_from_file(filename, NULL);
+
+					/* Local plugins will fail to load images from system
+					 * folder, so we'll try to load the from home folder. */
+					if( ! pixbuf )
+					{
+						g_free( filename );
+						filename =
+							g_strdup_printf( "%s/.imagination/pixmaps/imagination-%d.png",
+											 g_get_home_dir(), GPOINTER_TO_INT( trans[2] ) );
+						pixbuf = gdk_pixbuf_new_from_file( filename, NULL );
+					}
+					g_free(filename);
+					g_module_symbol( module, trans[1], &address );
+					gtk_tree_store_append( model, &citer, &piter );
+					gtk_tree_store_set( model, &citer, 0, pixbuf, 1, trans[0], 2, address, 3, GPOINTER_TO_INT( trans[2] ), -1 );
+				img->nr_transitions_loaded++;
+				}
+				g_free( bak );
+			}
+			g_free(fname);
+		}
+		g_free(*path);
+		g_dir_close(dir);
 	}
-	g_free(path);
-	g_dir_close(dir);
 }
 
 static gboolean img_plugin_is_loaded(img_window_struct *img, GModule *module)
