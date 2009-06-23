@@ -882,11 +882,16 @@ static gpointer img_set_random_transition(img_window_struct *img, slide_struct *
 
 	/* Get number of top-levels (categories) and select one */
 	nr = gtk_tree_model_iter_n_children( model, NULL );
+
+	/* Fix crash if no modules are loaded */
+	if( nr < 2 )
+		return( NULL );
+
 	r1 = g_random_int_range( 1, nr );
 	g_snprintf( path, sizeof( path ), "%d", r1 );
 	gtk_tree_model_get_iter_from_string( model, &iter, path );
 
-	/* Gen number of transitions in selected category and select one */
+	/* Get number of transitions in selected category and select one */
 	nr = gtk_tree_model_iter_n_children( model, &iter );
 	r2 = g_random_int_range( 0, nr );
 	g_snprintf( path, sizeof( path ), "%d:%d", r1, r2 );
