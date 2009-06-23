@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-06-22 20:19+0200\n"
+"POT-Creation-Date: 2009-06-23 15:48+0200\n"
 "PO-Revision-Date: 2009-02-24 11:55+0100\n"
 "Last-Translator: tadeboro <tadeboro@gmail.com>\n"
 "Language-Team: Slovenian\n"
@@ -124,7 +124,7 @@ msgid "Random"
 msgstr "Naključno"
 
 #: ../src/main-window.c:387
-msgid "Imagination randomly decides with transition to apply"
+msgid "Imagination randomly decides which transition to apply"
 msgstr "Domišljija naključno izbere prehod"
 
 #. Transition duration
@@ -193,7 +193,7 @@ msgstr "Premakni izbrano datoteko navzdol"
 msgid "Clear all files"
 msgstr "Počisti datoteke"
 
-#: ../src/main-window.c:1019 ../src/main-window.c:1021 ../src/support.c:220
+#: ../src/main-window.c:1019 ../src/main-window.c:1021 ../src/support.c:134
 msgid "None"
 msgstr "Brez"
 
@@ -280,17 +280,17 @@ msgstr "Izberite barvo ozadja:"
 msgid "This is not an Imagination project file!"
 msgstr "Izbrana datoteka ni Domišljijin projekt!"
 
-#: ../src/support.c:184
+#: ../src/support.c:97
 #, c-format
 msgid "Welcome to Imagination - %d transitions loaded."
 msgstr "Dobrodošli v Domišljiji - %d prehodov naloženih."
 
-#: ../src/support.c:190
+#: ../src/support.c:103
 #, c-format
 msgid "%d slides selected"
 msgstr "%d diapozitivov izbranih"
 
-#: ../src/support.c:196
+#: ../src/support.c:109
 #, c-format
 msgid "%d slide imported %s"
 msgid_plural "%d slides imported %s"
@@ -299,11 +299,11 @@ msgstr[1] "%d diapozitiva uvožena %s"
 msgstr[2] "%d diapozitivi uvoženi %s"
 msgstr[3] "%d diapozitivov uvoženih %s"
 
-#: ../src/support.c:196
+#: ../src/support.c:109
 msgid " - Use the CTRL key to select/unselect or SHIFT for multiple select"
 msgstr " - Uporabite CTRL za posamično izbiranje ali SHIFT za izbiro večih"
 
-#: ../src/support.c:283
+#: ../src/support.c:228
 msgid "Please choose the slideshow project filename"
 msgstr "Prosimo izberite ime projekta"
 
@@ -337,6 +337,7 @@ msgid "Failed to launch the encoder!"
 msgstr "Ne morem zagnati šifrirnika!"
 
 #: ../src/export.c:791
+#, c-format
 msgid "Final transition export progress:"
 msgstr "Napredek izvoza zadnjega prehoda:"
 

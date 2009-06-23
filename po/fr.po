@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination 1.5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-06-22 20:19+0200\n"
+"POT-Creation-Date: 2009-06-23 15:48+0200\n"
 "PO-Revision-Date: 2009-06-13 16:46+0200\n"
 "Last-Translator: Jean-Pierre Redonnet <redonnetbrouk@aol.com>\n"
 "Language-Team: French\n"
@@ -123,7 +123,7 @@ msgid "Random"
 msgstr "Aléatoire"
 
 #: ../src/main-window.c:387
-msgid "Imagination randomly decides with transition to apply"
+msgid "Imagination randomly decides which transition to apply"
 msgstr "Imagination choisie une transition au hasard"
 
 #. Transition duration
@@ -192,7 +192,7 @@ msgstr "Déplace le fichier sélectionné en bas"
 msgid "Clear all files"
 msgstr "Efface tous les fichiers"
 
-#: ../src/main-window.c:1019 ../src/main-window.c:1021 ../src/support.c:220
+#: ../src/main-window.c:1019 ../src/main-window.c:1021 ../src/support.c:134
 msgid "None"
 msgstr "Aucun"
 
@@ -278,30 +278,30 @@ msgstr "Sélectionnez la couleur de l'arrière plan:"
 msgid "This is not an Imagination project file!"
 msgstr "Ce n'est pas un fichier de projet Imagination!"
 
-#: ../src/support.c:184
+#: ../src/support.c:97
 #, c-format
 msgid "Welcome to Imagination - %d transitions loaded."
 msgstr "Bienvenue à Imagination - %d transitions chargées."
 
-#: ../src/support.c:190
+#: ../src/support.c:103
 #, c-format
 msgid "%d slides selected"
 msgstr "%d transparents selectionnés"
 
-#: ../src/support.c:196
+#: ../src/support.c:109
 #, c-format
 msgid "%d slide imported %s"
 msgid_plural "%d slides imported %s"
 msgstr[0] "%d transparent importé %s"
 msgstr[1] "%d transparents importés %s"
 
-#: ../src/support.c:196
+#: ../src/support.c:109
 msgid " - Use the CTRL key to select/unselect or SHIFT for multiple select"
 msgstr ""
 " - Utilisez la touche CTRL pour sélectionner/déselectionner ou SHIFT pour "
 "une sélection multiple"
 
-#: ../src/support.c:283
+#: ../src/support.c:228
 msgid "Please choose the slideshow project filename"
 msgstr "SVP choisissez le nom de fichier de votre projet"
 

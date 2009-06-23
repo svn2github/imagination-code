@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-06-22 20:19+0200\n"
+"POT-Creation-Date: 2009-06-23 15:48+0200\n"
 "PO-Revision-Date: 2009-06-22 20:37-0300\n"
 "Last-Translator: elega <elega@elega.com.ar>\n"
 "Language-Team: Spanish (Spain)\n"
@@ -123,7 +123,7 @@ msgid "Random"
 msgstr "Aleatorio"
 
 #: ../src/main-window.c:387
-msgid "Imagination randomly decides with transition to apply"
+msgid "Imagination randomly decides which transition to apply"
 msgstr "Imagination elige al azar la transición a utilizar"
 
 #. Transition duration
@@ -192,7 +192,7 @@ msgstr "Bajar el archivo seleccionado"
 msgid "Clear all files"
 msgstr "Borrar todos los archivos"
 
-#: ../src/main-window.c:1019 ../src/main-window.c:1021 ../src/support.c:220
+#: ../src/main-window.c:1019 ../src/main-window.c:1021 ../src/support.c:134
 msgid "None"
 msgstr "Ninguna"
 
@@ -281,30 +281,30 @@ msgstr "Seleccione el color de fondo:"
 msgid "This is not an Imagination project file!"
 msgstr "Éste no es un archivo de proyecto de Imagination!"
 
-#: ../src/support.c:184
+#: ../src/support.c:97
 #, c-format
 msgid "Welcome to Imagination - %d transitions loaded."
 msgstr "Bienvenido a Imagination - %d transiciones cargadas."
 
-#: ../src/support.c:190
+#: ../src/support.c:103
 #, c-format
 msgid "%d slides selected"
 msgstr "%d diapositivas seleccionadas"
 
-#: ../src/support.c:196
+#: ../src/support.c:109
 #, c-format
 msgid "%d slide imported %s"
 msgid_plural "%d slides imported %s"
 msgstr[0] "%d diapositiva importada %s"
 msgstr[1] "%d diapositivas importadas %s"
 
-#: ../src/support.c:196
+#: ../src/support.c:109
 msgid " - Use the CTRL key to select/unselect or SHIFT for multiple select"
 msgstr ""
 " - Use la tecla CTRL para seleccionar/deseleccionar o MAYÚS para una "
 "selección múltiple"
 
-#: ../src/support.c:283
+#: ../src/support.c:228
 msgid "Please choose the slideshow project filename"
 msgstr ""
 "Por favor, elija el nombre de archivo para la presentación de diapositivas"

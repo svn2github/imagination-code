@@ -384,7 +384,7 @@ img_window_struct *img_create_window (void)
 	g_signal_connect (G_OBJECT (img_struct->transition_type), "changed",G_CALLBACK (img_combo_box_transition_type_changed),img_struct);
 
 	img_struct->random_button = gtk_button_new_with_mnemonic (_("Random"));
-	gtk_widget_set_tooltip_text(img_struct->random_button,_("Imagination randomly decides with transition to apply"));
+	gtk_widget_set_tooltip_text(img_struct->random_button,_("Imagination randomly decides which transition to apply"));
 	gtk_table_attach (GTK_TABLE (table), img_struct->random_button, 1, 2, 0, 1,(GtkAttachOptions) (GTK_FILL),(GtkAttachOptions) (0), 0, 0);
 	gtk_widget_set_sensitive(img_struct->random_button, FALSE);
 	g_signal_connect (G_OBJECT (img_struct->random_button),"clicked",G_CALLBACK (img_random_button_clicked),img_struct);

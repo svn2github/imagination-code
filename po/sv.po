@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-06-22 20:19+0200\n"
+"POT-Creation-Date: 2009-06-23 15:48+0200\n"
 "PO-Revision-Date: 2009-06-22 20:15+0100\n"
 "Last-Translator: Daniel Nylander <po@danielnylander.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
@@ -123,7 +123,7 @@ msgid "Random"
 msgstr "Slumpmässigt"
 
 #: ../src/main-window.c:387
-msgid "Imagination randomly decides with transition to apply"
+msgid "Imagination randomly decides which transition to apply"
 msgstr "Imagination bestämmer slumpmässigt vilken övergång att tillämpa"
 
 #. Transition duration
@@ -192,7 +192,7 @@ msgstr "Flytta markerad fil nedåt"
 msgid "Clear all files"
 msgstr "Töm alla filer"
 
-#: ../src/main-window.c:1019 ../src/main-window.c:1021 ../src/support.c:220
+#: ../src/main-window.c:1019 ../src/main-window.c:1021 ../src/support.c:134
 msgid "None"
 msgstr "Ingen"
 
@@ -282,30 +282,30 @@ msgstr "Välj bakgrundsfärg:"
 msgid "This is not an Imagination project file!"
 msgstr "Detta är inte en projektfil för Imagination!"
 
-#: ../src/support.c:184
+#: ../src/support.c:97
 #, c-format
 msgid "Welcome to Imagination - %d transitions loaded."
 msgstr "Välkommen till Imagination - %d övergångar inlästa."
 
-#: ../src/support.c:190
+#: ../src/support.c:103
 #, c-format
 msgid "%d slides selected"
 msgstr "%d bilder markerade"
 
-#: ../src/support.c:196
+#: ../src/support.c:109
 #, c-format
 msgid "%d slide imported %s"
 msgid_plural "%d slides imported %s"
 msgstr[0] "%d bild importerad %s"
 msgstr[1] "%d bilder importerade %s"
 
-#: ../src/support.c:196
+#: ../src/support.c:109
 msgid " - Use the CTRL key to select/unselect or SHIFT for multiple select"
 msgstr ""
 " - Använd CTRL-tangenten för att markera/avmarkera eller SKIFT för flera "
 "markeringar"
 
-#: ../src/support.c:283
+#: ../src/support.c:228
 msgid "Please choose the slideshow project filename"
 msgstr "Välj filnamn för bildspelsprojektet"
 

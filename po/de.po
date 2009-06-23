@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-06-22 20:19+0200\n"
+"POT-Creation-Date: 2009-06-23 15:48+0200\n"
 "PO-Revision-Date: 2009-06-14 10:48+0200\n"
 "Last-Translator: Enrico Tröger <enrico@xfce.org>\n"
 "Language-Team: German\n"
@@ -129,7 +129,7 @@ msgid "Random"
 msgstr "Zufällig"
 
 #: ../src/main-window.c:387
-msgid "Imagination randomly decides with transition to apply"
+msgid "Imagination randomly decides which transition to apply"
 msgstr "Imagination wählt einen Effekt zufäälig aus"
 
 #. Transition duration
@@ -198,7 +198,7 @@ msgstr "Die ausgewählte Datei nach unten verschieben"
 msgid "Clear all files"
 msgstr "Alle entfernen"
 
-#: ../src/main-window.c:1019 ../src/main-window.c:1021 ../src/support.c:220
+#: ../src/main-window.c:1019 ../src/main-window.c:1021 ../src/support.c:134
 msgid "None"
 msgstr "Keine"
 
@@ -285,30 +285,30 @@ msgstr "Hintergrundfarbe:"
 msgid "This is not an Imagination project file!"
 msgstr "Dies ist keine Imagination Projektdatei."
 
-#: ../src/support.c:184
+#: ../src/support.c:97
 #, c-format
 msgid "Welcome to Imagination - %d transitions loaded."
 msgstr "Willkommen zu Imagination - %d Überblend-Effekte geladen"
 
-#: ../src/support.c:190
+#: ../src/support.c:103
 #, c-format
 msgid "%d slides selected"
 msgstr "%d Dias ausgewählt"
 
-#: ../src/support.c:196
+#: ../src/support.c:109
 #, c-format
 msgid "%d slide imported %s"
 msgid_plural "%d slides imported %s"
 msgstr[0] "%d Dia importiert %s"
 msgstr[1] "%d Dias importiert %s"
 
-#: ../src/support.c:196
+#: ../src/support.c:109
 msgid " - Use the CTRL key to select/unselect or SHIFT for multiple select"
 msgstr ""
 " - Benutzen Sie zum Auswählen die Strg-Taste und die Shift-Taste für eine "
 "Mehrfachauswahl"
 
-#: ../src/support.c:283
+#: ../src/support.c:228
 msgid "Please choose the slideshow project filename"
 msgstr "Projektnamen für die Diaschau wählen"
 

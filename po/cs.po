@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-06-22 20:19+0200\n"
+"POT-Creation-Date: 2009-06-23 15:48+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Michal Várady <miko.vaji@gmail.com>\n"
 "Language-Team: \n"
@@ -122,7 +122,7 @@ msgid "Random"
 msgstr "Náhodný"
 
 #: ../src/main-window.c:387
-msgid "Imagination randomly decides with transition to apply"
+msgid "Imagination randomly decides which transition to apply"
 msgstr "Apikace Transition náhodně zvolí použitý přechod"
 
 #. Transition duration
@@ -191,7 +191,7 @@ msgstr "Přesunou vybraný soubor dolů"
 msgid "Clear all files"
 msgstr "Odebrat všechny soubory"
 
-#: ../src/main-window.c:1019 ../src/main-window.c:1021 ../src/support.c:220
+#: ../src/main-window.c:1019 ../src/main-window.c:1021 ../src/support.c:134
 msgid "None"
 msgstr "Žádný"
 
@@ -278,17 +278,17 @@ msgstr "Vybrat barvu pozadí:"
 msgid "This is not an Imagination project file!"
 msgstr "Toto není soubor projektu aplikace Imagination."
 
-#: ../src/support.c:184
+#: ../src/support.c:97
 #, c-format
 msgid "Welcome to Imagination - %d transitions loaded."
 msgstr "Vítejte v aplikaci Imagination - načteno %d přechodů"
 
-#: ../src/support.c:190
+#: ../src/support.c:103
 #, c-format
 msgid "%d slides selected"
 msgstr "Vybráno %d snímků"
 
-#: ../src/support.c:196
+#: ../src/support.c:109
 #, c-format
 msgid "%d slide imported %s"
 msgid_plural "%d slides imported %s"
@@ -296,13 +296,13 @@ msgstr[0] "%d snímek importován %s"
 msgstr[1] "%d snímky importovnány %s"
 msgstr[2] "%d snímků importovnáno %s"
 
-#: ../src/support.c:196
+#: ../src/support.c:109
 msgid " - Use the CTRL key to select/unselect or SHIFT for multiple select"
 msgstr ""
 " - Pro označení nebo odznačení použijte klávesu CTRL, pomocí klávesy SHIFT "
 "vyberete více položek"
 
-#: ../src/support.c:283
+#: ../src/support.c:228
 msgid "Please choose the slideshow project filename"
 msgstr "Zvolte název souboru projektu prezentace"
 
