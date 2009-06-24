@@ -19,12 +19,6 @@ AC_DISABLE_STATIC
 AM_PROG_LIBTOOL
 LIBTOOL="$LIBTOOL --silent"
 
-#check for ffmpeg
-AC_CHECK_PROG([have_ffmpeg], [ffmpeg], [yes], [no])
-if test "x$have_ffmpeg" = "xno"; then
-	AC_MSG_ERROR([Can't find ffmpeg executable. Please install ffmpeg package.])
-fi
-
 pkg_modules="gtk+-2.0 >= 2.12.0"
 PKG_CHECK_MODULES(PACKAGE, [$pkg_modules])
 
