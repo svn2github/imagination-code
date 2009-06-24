@@ -44,6 +44,11 @@ static void
 img_create_export_menu( GtkWidget         *item,
 						img_window_struct *img );
 
+static gboolean
+img_iconview_selection_button_press( GtkWidget         *widget,
+									 GdkEventButton    *button,
+									 img_window_struct *img );
+
 
 img_window_struct *img_create_window (void)
 {
@@ -588,6 +593,7 @@ img_window_struct *img_create_window (void)
 	gtk_container_add (GTK_CONTAINER (img_struct->thumb_scrolledwindow), img_struct->thumbnail_iconview);
 	g_signal_connect (G_OBJECT (img_struct->thumbnail_iconview),"selection-changed",G_CALLBACK (img_iconview_selection_changed),img_struct);
 	g_signal_connect (G_OBJECT (img_struct->thumbnail_iconview),"select-all",G_CALLBACK (img_iconview_selection_changed),img_struct);
+	g_signal_connect (G_OBJECT (img_struct->thumbnail_iconview),"button-press-event",G_CALLBACK (img_iconview_selection_button_press),img_struct);
 
 	/* Create the status bar */
 	img_struct->statusbar = gtk_statusbar_new ();
@@ -1069,4 +1075,22 @@ img_create_export_menu( GtkWidget         *item,
 	}
 
 	img_free_exporters_list( number, exporters );
+}
+
+/*
+ * img_iconview_selection_button_press:
+ *
+ * This is a temporary hack that should do the job of unselecting slides if
+ * single slide should be selected after select all.
+ */
+static gboolean
+img_iconview_selection_button_press( GtkWidget         *widget,
+									 GdkEventButton    *button,
+									 img_window_struct *img )
+{
+	if( button->button == 1 &&
+		! button->state & ( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) )
+		gtk_icon_view_unselect_all( GTK_ICON_VIEW( img->thumbnail_iconview ) );
+
+	return( FALSE );
 }
