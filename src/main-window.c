@@ -79,7 +79,7 @@ img_window_struct *img_create_window (void)
 	GtkWidget *new_button;
 	GtkWidget *separatortoolitem;
 	GtkWidget *toolbutton_slide_goto;
-	GtkWidget *goto_button;
+	GtkWidget *first_slide, *last_slide, *prev_slide, *next_slide, *label_of;
 	GtkWidget *hbox;
 	GtkWidget *swindow;
 	GtkWidget *viewport;
@@ -289,7 +289,6 @@ img_window_struct *img_create_window (void)
 	g_signal_connect (G_OBJECT (img_struct->remove_button),"clicked",G_CALLBACK (img_delete_selected_slides),img_struct);
 
 	separatortoolitem = GTK_WIDGET (gtk_separator_tool_item_new());
-	gtk_widget_show (separatortoolitem);
 	gtk_container_add (GTK_CONTAINER (toolbar),separatortoolitem);
 
 	img_struct->preview_button = GTK_WIDGET (gtk_tool_button_new_from_stock (GTK_STOCK_MEDIA_PLAY));
@@ -298,8 +297,17 @@ img_window_struct *img_create_window (void)
 	g_signal_connect (G_OBJECT (img_struct->preview_button),"clicked",G_CALLBACK (img_start_stop_preview),img_struct);
 
 	separatortoolitem = GTK_WIDGET (gtk_separator_tool_item_new());
-	gtk_widget_show (separatortoolitem);
 	gtk_container_add (GTK_CONTAINER (toolbar),separatortoolitem);
+
+	first_slide = GTK_WIDGET (gtk_tool_button_new_from_stock (GTK_STOCK_GOTO_FIRST));
+	gtk_container_add (GTK_CONTAINER (toolbar),first_slide);
+	gtk_widget_set_tooltip_text(first_slide, _("Goto first slide"));
+	g_signal_connect (G_OBJECT (first_slide),"clicked",G_CALLBACK (img_goto_first_slide),img_struct);
+
+	prev_slide = GTK_WIDGET (gtk_tool_button_new_from_stock (GTK_STOCK_GO_BACK));
+	gtk_container_add (GTK_CONTAINER (toolbar),prev_slide);
+	gtk_widget_set_tooltip_text(prev_slide, _("Goto previous selected slide"));
+	g_signal_connect (G_OBJECT (prev_slide),"clicked",G_CALLBACK (img_goto_prev_slide),img_struct);
 
 	toolbutton_slide_goto = GTK_WIDGET(gtk_tool_item_new ());
 	gtk_container_add (GTK_CONTAINER (toolbar), toolbutton_slide_goto);
@@ -310,11 +318,28 @@ img_window_struct *img_create_window (void)
 	gtk_container_add(GTK_CONTAINER(toolbutton_slide_goto),img_struct->slide_number_entry);
 	g_signal_connect(G_OBJECT (img_struct->slide_number_entry), "activate", G_CALLBACK(img_goto_line_entry_activate), img_struct);
 	g_signal_connect(G_OBJECT (img_struct->slide_number_entry), "insert-text", G_CALLBACK (img_check_numeric_entry), NULL );
-	
-	goto_button = GTK_WIDGET (gtk_tool_button_new_from_stock (GTK_STOCK_JUMP_TO));
-	gtk_container_add (GTK_CONTAINER (toolbar),goto_button);
-	gtk_widget_set_tooltip_text(goto_button, _("Jump to the entered slide number"));
-	g_signal_connect (G_OBJECT (goto_button),"clicked",G_CALLBACK (img_goto_line_entry_activate),img_struct);
+
+	toolbutton_slide_goto = GTK_WIDGET(gtk_tool_item_new ());
+	gtk_container_add (GTK_CONTAINER (toolbar), toolbutton_slide_goto);
+
+	label_of = gtk_label_new(_(" of "));
+	gtk_container_add (GTK_CONTAINER (toolbutton_slide_goto),label_of);
+
+	toolbutton_slide_goto = GTK_WIDGET(gtk_tool_item_new ());
+	gtk_container_add (GTK_CONTAINER (toolbar), toolbutton_slide_goto);
+
+	img_struct->total_slide_number_label = gtk_label_new(NULL);
+	gtk_container_add (GTK_CONTAINER (toolbutton_slide_goto),img_struct->total_slide_number_label);
+
+	next_slide = GTK_WIDGET (gtk_tool_button_new_from_stock (GTK_STOCK_GO_FORWARD));
+	gtk_container_add (GTK_CONTAINER (toolbar),next_slide);
+	gtk_widget_set_tooltip_text(next_slide, _("Goto next selected slide"));
+	g_signal_connect (G_OBJECT (next_slide),"clicked",G_CALLBACK (img_goto_next_slide),img_struct);
+
+	last_slide = GTK_WIDGET (gtk_tool_button_new_from_stock (GTK_STOCK_GOTO_LAST));
+	gtk_container_add (GTK_CONTAINER (toolbar),last_slide);
+	gtk_widget_set_tooltip_text(last_slide, _("Goto last slide"));
+	g_signal_connect (G_OBJECT (last_slide),"clicked",G_CALLBACK (img_goto_last_slide),img_struct);
 
 	gtk_widget_show_all (toolbar);
 
@@ -525,7 +550,7 @@ img_window_struct *img_create_window (void)
 	gtk_box_pack_start(GTK_BOX(hbox_music_label), music_time, TRUE, TRUE, 0);
 	gtk_misc_set_alignment (GTK_MISC (music_time), 0, 0.5);
 
-	img_struct->music_time_data = gtk_label_new("");
+	img_struct->music_time_data = gtk_label_new(NULL);
 	gtk_box_pack_start(GTK_BOX(hbox_music_label), img_struct->music_time_data, TRUE, TRUE, 0);
 	gtk_misc_set_alignment (GTK_MISC (img_struct->music_time_data), 1, 0.5);
 

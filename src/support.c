@@ -91,6 +91,7 @@ GtkWidget *_gtk_combo_box_new_text(gboolean pointer)
 void img_set_statusbar_message(img_window_struct *img_struct, gint selected)
 {
 	gchar *message = NULL;
+	gchar *total_slides = NULL;
 
 	if (img_struct->slides_nr == 0)
 	{
@@ -106,8 +107,11 @@ void img_set_statusbar_message(img_window_struct *img_struct, gint selected)
 	}
 	else
 	{
+		total_slides = g_strdup_printf("%d",img_struct->slides_nr);
+		gtk_label_set_text(GTK_LABEL(img_struct->total_slide_number_label),total_slides);
 		message = g_strdup_printf(ngettext("%d slide imported %s" ,"%d slides imported %s",img_struct->slides_nr),img_struct->slides_nr,_(" - Use the CTRL key to select/unselect or SHIFT for multiple select"));
 		gtk_statusbar_push(GTK_STATUSBAR(img_struct->statusbar),img_struct->context_id,message);
+		g_free(total_slides);
 		g_free(message);
 	}
 }
@@ -118,7 +122,6 @@ void img_load_available_transitions(img_window_struct *img)
 	const gchar   *transition_name;
 	gchar         *fname = NULL, *name, *filename;
 	gchar        **trans, **bak;
-	GError       **error = NULL;
 	GModule       *module;
 	GdkPixbuf     *pixbuf;
 	GtkTreeIter    piter, citer;

@@ -133,7 +133,8 @@ struct _img_window_struct
 	/* Preview related variables */
   	gboolean	preview_is_running;
   	GtkWidget	*import_slide_chooser;
-  	GtkWidget	*slide_number_entry;
+  	GtkWidget	*total_slide_number_label;
+	GtkWidget	*slide_number_entry;
 
 	/* Export dialog related stuff */
 	gint        export_is_running;  /* 0 - export is not running
