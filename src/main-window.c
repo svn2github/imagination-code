@@ -216,7 +216,7 @@ img_window_struct *img_create_window (void)
 
 	img_struct->remove_menu = gtk_image_menu_item_new_with_mnemonic (_("Dele_te"));
 	gtk_container_add (GTK_CONTAINER (slide_menu), img_struct->remove_menu);
-	gtk_widget_add_accelerator (img_struct->remove_menu,"activate",accel_group, GDK_t,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
+	gtk_widget_add_accelerator (img_struct->remove_menu,"activate",accel_group, GDK_Delete,0,GTK_ACCEL_VISIBLE);
 	g_signal_connect (G_OBJECT (img_struct->remove_menu),"activate",G_CALLBACK (img_delete_selected_slides),img_struct);
 
 	tmp_image = gtk_image_new_from_stock (GTK_STOCK_DELETE,GTK_ICON_SIZE_MENU);
