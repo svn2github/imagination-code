@@ -1,6 +1,6 @@
 Imagination changelog
 
-0x/06/09 - 1.5:
+24/06/09 - 1.5:
 		- Added ability to add audio to the slideshow.
 		- Added OGG Theora/Vorbis slideshow export.
 		- Last slide closes the slideshow with the same transition applied to the first one.
@@ -9,7 +9,8 @@ Imagination changelog
 		  Jean-Pierre Redonnet for the idea.
 		- Added ability to randomly choose the transitions.
 		- Grouped the transitions in families and added icons for describing the effect.
-		- Added new transitions effects: Barn Door Wipe, Box Tie Wipe, Four Box Wipe, Ellipse Wipe, Diagonal Wipe, Clock Wipe, Wave and Misc Diagonal Wipe families thanks to Tadej Borovšak.
+		- Added new transitions effects: Barn Door Wipe, Box Tie Wipe, Four Box Wipe, Ellipse Wipe, Diagonal Wipe,
+		  Clock Wipe, Wave, Misc Diagonal Wipe and Misc Shape Wipe families thanks to Tadej Borovšak.
 		- Added man page thanks to Alessio Treglia.
 		- Added French, Czech, Brazilian Portuguese, German and Spanish translations.
 
