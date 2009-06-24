@@ -113,7 +113,7 @@ transition_render( GdkDrawable *window,
     cairo_surface_t *surface;
     gint             width, height;
 	GdkPixbuf       *layer1, *layer2;
-	gint             w2, h2;
+	gint             w2, h2, offset;
 
     gdk_drawable_get_size( window, &width, &height );
 
@@ -146,8 +146,13 @@ transition_render( GdkDrawable *window,
 	gdk_cairo_set_source_pixbuf( cr, layer1, 0, 0 );
 	cairo_paint( cr );
 
+	if( type == 1 )
+		offset = 100;
+	else
+		offset = 40;
+
 	gdk_cairo_set_source_pixbuf( cr, layer2, 0, 0 );
-	cairo_translate( cr, w2, h2 );
+	cairo_translate( cr, w2, h2 - ( 1 - progress ) * offset );
 	cairo_scale( cr, progress, progress );
 	switch( type )
 	{
