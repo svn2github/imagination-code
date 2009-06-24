@@ -49,6 +49,11 @@ img_iconview_selection_button_press( GtkWidget         *widget,
 									 GdkEventButton    *button,
 									 img_window_struct *img );
 
+static gboolean
+img_scroll_thumb( GtkWidget         *widget,
+				  GdkEventScroll    *scroll,
+				  img_window_struct *img );
+
 
 img_window_struct *img_create_window (void)
 {
@@ -570,6 +575,8 @@ img_window_struct *img_create_window (void)
 
 	/* Create the thumbnail viewer */
 	img_struct->thumb_scrolledwindow = gtk_scrolled_window_new (NULL, NULL);
+	g_signal_connect( G_OBJECT( img_struct->thumb_scrolledwindow ), "scroll-event",
+					  G_CALLBACK( img_scroll_thumb ), img_struct );
 	gtk_box_pack_start (GTK_BOX (vbox1), img_struct->thumb_scrolledwindow, FALSE, TRUE, 0);
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (img_struct->thumb_scrolledwindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_NEVER);
 	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (img_struct->thumb_scrolledwindow), GTK_SHADOW_IN);
@@ -1093,4 +1100,33 @@ img_iconview_selection_button_press( GtkWidget         *widget,
 		gtk_icon_view_unselect_all( GTK_ICON_VIEW( img->thumbnail_iconview ) );
 
 	return( FALSE );
+}
+
+static gboolean
+img_scroll_thumb( GtkWidget         *widget,
+				  GdkEventScroll    *scroll,
+				  img_window_struct *img )
+{
+	GtkAdjustment *adj;
+	gdouble        page, step, upper, value;
+	gint           dir = 1;
+
+	if( scroll->direction == GDK_SCROLL_UP ||
+		scroll->direction == GDK_SCROLL_LEFT )
+	{
+		dir = - 1;
+	}
+
+	adj = gtk_scrolled_window_get_hadjustment( GTK_SCROLLED_WINDOW( widget ) );
+
+	page  = gtk_adjustment_get_page_size( adj );
+	step  = gtk_adjustment_get_step_increment( adj );
+	upper = gtk_adjustment_get_upper( adj );
+	value = gtk_adjustment_get_value( adj );
+
+	g_print( "%f, %f, %f, %f\n", page, step, upper, value );
+
+	gtk_adjustment_set_value( adj, CLAMP( value + step * dir, 0, upper - page ) );
+
+	return( TRUE );
 }
