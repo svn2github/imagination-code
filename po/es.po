@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-06-23 22:55+0200\n"
-"PO-Revision-Date: 2009-06-22 20:37-0300\n"
+"POT-Creation-Date: 2009-06-24 09:58+0200\n"
+"PO-Revision-Date: 2009-06-23 19:53-0300\n"
 "Last-Translator: elega <elega@elega.com.ar>\n"
 "Language-Team: Spanish (Spain)\n"
 "MIME-Version: 1.0\n"
@@ -124,12 +124,12 @@ msgstr "Aleatorio"
 
 #: ../src/main-window.c:387
 msgid "Imagination randomly decides which transition to apply"
-msgstr "Imagination elige al azar la transición a utilizar"
+msgstr "Imagination elige al azar que transición aplicar"
 
 #. Transition duration
 #: ../src/main-window.c:393
 msgid "Transition Speed:"
-msgstr "Velocidad de transición:"
+msgstr "Velocidad de la transición:"
 
 #: ../src/main-window.c:408
 msgid "Fast"
@@ -146,12 +146,12 @@ msgstr "Lento"
 #. Slide duration
 #: ../src/main-window.c:419
 msgid "Slide Duration in sec:"
-msgstr "Duración de diapositiva en segundos:"
+msgstr "Duración de la diapositiva en segundos:"
 
 #. Slide Selected
 #: ../src/main-window.c:430
 msgid "Slide Number:"
-msgstr "Número de diapositiva:"
+msgstr "Número de la diapositiva:"
 
 #. Slide Resolution
 #: ../src/main-window.c:439
@@ -231,7 +231,7 @@ msgstr ""
 #, c-format
 msgid "%d x %d pixels"
 msgid_plural "%d x %d pixels"
-msgstr[0] "%d x %d pixels"
+msgstr[0] "%d x %d píxeles"
 msgstr[1] "%d x %d pixels"
 
 #: ../src/callbacks.c:491
@@ -242,7 +242,7 @@ msgstr ""
 
 #: ../src/callbacks.c:868
 msgid "Stops the preview"
-msgstr "Detiene la previsualización"
+msgstr "Detener la previsualización"
 
 #: ../src/callbacks.c:914
 msgid "Load an Imagination slideshow project"
@@ -279,7 +279,7 @@ msgstr "Seleccione el color de fondo:"
 
 #: ../src/slideshow_project.c:129
 msgid "This is not an Imagination project file!"
-msgstr "Éste no es un archivo de proyecto de Imagination!"
+msgstr "Éste no es un archivo de un proyecto Imagination!"
 
 #: ../src/support.c:97
 #, c-format
@@ -306,8 +306,7 @@ msgstr ""
 
 #: ../src/support.c:228
 msgid "Please choose the slideshow project filename"
-msgstr ""
-"Por favor, elija el nombre de archivo para la presentación de diapositivas"
+msgstr "Por favor, elija un nombre para la presentación de diapositivas"
 
 #: ../src/export.c:204
 msgid "<b>Export Settings</b>"
@@ -315,7 +314,7 @@ msgstr "<b>Configuración de la exportación</b>"
 
 #: ../src/export.c:218
 msgid "Filename of the slideshow:"
-msgstr "Nombre de archivo de la presentación de diapositivas:"
+msgstr "Nombre de la presentación de diapositivas:"
 
 #: ../src/export.c:349
 msgid "Exporting the slideshow"
@@ -332,7 +331,7 @@ msgstr "Progreso global:"
 #: ../src/export.c:435 ../src/export.c:793
 #, c-format
 msgid "Slide %d export progress:"
-msgstr "Progreso de la exportación de diapositiva %d:"
+msgstr "Progreso de exportación de la diapositiva %d:"
 
 #: ../src/export.c:651
 msgid "Failed to launch the encoder!"
@@ -341,7 +340,7 @@ msgstr "Error al iniciar el codificador!"
 #: ../src/export.c:791
 #, c-format
 msgid "Final transition export progress:"
-msgstr "Progreso de la exportación de transición final:"
+msgstr "Progreso de exportación de la transición final:"
 
 #. Additional options - <format> only
 #. This function call should be the first thing exporter does, since this
