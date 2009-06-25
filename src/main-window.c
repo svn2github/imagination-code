@@ -82,6 +82,10 @@ img_window_struct *img_create_window (void)
 	GtkWidget *menu3;
 	GtkWidget *imagemenuitem11;
 	GtkWidget *toolbar;
+	GtkWidget *rotate_left_menu;
+	GtkWidget *rotate_right_menu;
+	GtkWidget *rotate_left_button;
+	GtkWidget *rotate_right_button;
 	GtkWidget *new_button;
 	GtkWidget *separatortoolitem;
 	GtkWidget *toolbutton_slide_goto;
@@ -225,9 +229,25 @@ img_window_struct *img_create_window (void)
 	gtk_container_add (GTK_CONTAINER (slide_menu), img_struct->remove_menu);
 	gtk_widget_add_accelerator (img_struct->remove_menu,"activate",accel_group, GDK_Delete,0,GTK_ACCEL_VISIBLE);
 	g_signal_connect (G_OBJECT (img_struct->remove_menu),"activate",G_CALLBACK (img_delete_selected_slides),img_struct);
-
+	
 	tmp_image = gtk_image_new_from_stock (GTK_STOCK_DELETE,GTK_ICON_SIZE_MENU);
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (img_struct->remove_menu),tmp_image);
+
+	rotate_left_menu = gtk_image_menu_item_new_with_mnemonic (_("Rotate Left"));
+	gtk_container_add (GTK_CONTAINER (slide_menu),rotate_left_menu);
+	//gtk_widget_add_accelerator (rotate_left_menu,"activate",accel_group, GDK_Delete,0,GTK_ACCEL_VISIBLE);
+	g_signal_connect (G_OBJECT (rotate_left_menu),"activate",G_CALLBACK (img_rotate_selected_slide_left),img_struct);
+
+	tmp_image = gtk_image_new_from_stock (GTK_STOCK_UNDO,GTK_ICON_SIZE_MENU);
+	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (rotate_left_menu),tmp_image);
+
+	rotate_right_menu = gtk_image_menu_item_new_with_mnemonic (_("Rotate Right"));
+	gtk_container_add (GTK_CONTAINER (slide_menu),rotate_right_menu);
+	//gtk_widget_add_accelerator (rotate_right_menu,"activate",accel_group, GDK_Delete,0,GTK_ACCEL_VISIBLE);
+	g_signal_connect (G_OBJECT (rotate_right_menu),"activate",G_CALLBACK (img_rotate_selected_slide_right),img_struct);
+
+	tmp_image = gtk_image_new_from_stock (GTK_STOCK_REDO,GTK_ICON_SIZE_MENU);
+	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (rotate_right_menu),tmp_image);
 
 	separator_slide_menu = gtk_separator_menu_item_new ();
 	gtk_container_add (GTK_CONTAINER (slide_menu),separator_slide_menu);
@@ -294,6 +314,16 @@ img_window_struct *img_create_window (void)
 	gtk_container_add (GTK_CONTAINER (toolbar),img_struct->remove_button);
 	gtk_widget_set_tooltip_text(img_struct->remove_button, _("Delete the selected slides"));
 	g_signal_connect (G_OBJECT (img_struct->remove_button),"clicked",G_CALLBACK (img_delete_selected_slides),img_struct);
+
+	rotate_left_button = GTK_WIDGET (gtk_tool_button_new_from_stock ("gtk-undo"));
+	gtk_container_add (GTK_CONTAINER (toolbar), rotate_left_button);
+	gtk_widget_set_tooltip_text(rotate_left_button, _("Rotate the selected slide 90° left"));
+	g_signal_connect (G_OBJECT (rotate_left_button),"clicked",G_CALLBACK (img_rotate_selected_slide_left),img_struct);
+	
+	rotate_right_button = GTK_WIDGET (gtk_tool_button_new_from_stock ("gtk-redo"));
+	gtk_container_add (GTK_CONTAINER (toolbar),rotate_right_button);
+	gtk_widget_set_tooltip_text(rotate_right_button, _("Rotate the selected slide 90° right"));
+	g_signal_connect (G_OBJECT (rotate_right_button),"clicked",G_CALLBACK (img_rotate_selected_slide_right),img_struct);
 
 	separatortoolitem = GTK_WIDGET (gtk_separator_tool_item_new());
 	gtk_container_add (GTK_CONTAINER (toolbar),separatortoolitem);

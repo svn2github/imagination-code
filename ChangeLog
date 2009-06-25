@@ -1,8 +1,9 @@
 Imagination changelog
 
 xx/09/09 - 1.x:
-				- Addded ability to import pictures with drag and drop.
+				- Added ability to import audio with drag and drop.
 				- Added first, prev, next and last buttons to move the selection on the slides.
+				- Addded ability to import pictures with drag and drop.
 				- Centered the Heart transition effect of the Misc Shape Wipe family.
 				- Removed the dependancy of ffmpeg in the configure script.
 				- Changed accelerator of menu Slide->Delete to DEL key.
