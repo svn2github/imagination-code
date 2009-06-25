@@ -72,6 +72,7 @@ int main (int argc, char *argv[])
 		img_load_slideshow(img_window);
 	}
 
+	gtk_widget_show_all( img_window->imagination_window );
 	gtk_main ();
 
 	sox_format_quit();

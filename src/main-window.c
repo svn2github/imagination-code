@@ -116,6 +116,7 @@ img_window_struct *img_create_window (void)
 	GtkIconTheme *icon_theme;
 	GdkPixbuf *icon;
 	gint x;
+	GtkWidget *eventbox;
 
 	accel_group = gtk_accel_group_new ();
 	icon_theme = gtk_icon_theme_get_default();
@@ -440,10 +441,6 @@ img_window_struct *img_create_window (void)
 
 	img_struct->trans_duration = _gtk_combo_box_new_text(FALSE);
 	gtk_table_attach (GTK_TABLE (table), img_struct->trans_duration, 1, 2, 1, 2,(GtkAttachOptions) (GTK_FILL),(GtkAttachOptions) (GTK_FILL), 0, 0);
-	/* This is BAD!!! Simple and complex API calls should not be mixed!!! */
-	/*gtk_combo_box_append_text (GTK_COMBO_BOX (img_struct->trans_duration), _("Fast"));
-	gtk_combo_box_append_text (GTK_COMBO_BOX (img_struct->trans_duration), _("Normal"));
-	gtk_combo_box_append_text (GTK_COMBO_BOX (img_struct->trans_duration), _("Slow"));*/
 	{
 		GtkTreeIter   iter;
 		GtkListStore *store = GTK_LIST_STORE( gtk_combo_box_get_model( GTK_COMBO_BOX( img_struct->trans_duration ) ) );
@@ -609,11 +606,23 @@ img_window_struct *img_create_window (void)
 	/* Create the model */
 	img_struct->thumbnail_model = gtk_list_store_new (2, GDK_TYPE_PIXBUF, G_TYPE_POINTER);
 
+	/* Add wrapper for DnD */
+	eventbox = gtk_event_box_new();
+	gtk_event_box_set_above_child( GTK_EVENT_BOX( eventbox ), FALSE );
+	gtk_event_box_set_visible_window( GTK_EVENT_BOX( eventbox ), FALSE );
+	gtk_drag_dest_set( GTK_WIDGET( eventbox ), GTK_DEST_DEFAULT_ALL,
+					   drop_targets, 1, GDK_ACTION_COPY | GDK_ACTION_MOVE |
+					   GDK_ACTION_LINK | GDK_ACTION_ASK);
+	g_signal_connect( G_OBJECT( eventbox ), "drag-data-received",
+					  G_CALLBACK( img_on_drag_data_received), img_struct );
+	gtk_box_pack_start( GTK_BOX( vbox1 ), eventbox, FALSE, TRUE, 0 );
+
 	/* Create the thumbnail viewer */
 	img_struct->thumb_scrolledwindow = gtk_scrolled_window_new (NULL, NULL);
 	g_signal_connect( G_OBJECT( img_struct->thumb_scrolledwindow ), "scroll-event",
 					  G_CALLBACK( img_scroll_thumb ), img_struct );
-	gtk_box_pack_start (GTK_BOX (vbox1), img_struct->thumb_scrolledwindow, FALSE, TRUE, 0);
+	gtk_container_add( GTK_EVENT_BOX( eventbox ),
+					   img_struct->thumb_scrolledwindow );
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (img_struct->thumb_scrolledwindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_NEVER);
 	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (img_struct->thumb_scrolledwindow), GTK_SHADOW_IN);
 	img_struct->thumbnail_iconview = gtk_icon_view_new_with_model(GTK_TREE_MODEL (img_struct->thumbnail_model));
