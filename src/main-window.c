@@ -26,6 +26,11 @@
 #include "callbacks.h"
 #include "export.h"
 
+static const GtkTargetEntry drop_targets[] =
+{
+  { "text/uri-list",0,0 },
+};
+
 static void img_combo_box_transition_type_changed (GtkComboBox *, img_window_struct *);
 static void img_random_button_clicked(GtkButton *, img_window_struct *);
 static gpointer img_set_random_transition(img_window_struct *, slide_struct *);
@@ -365,6 +370,9 @@ img_window_struct *img_create_window (void)
 	img_struct->image_area = gtk_image_new();
 	gtk_widget_set_size_request(img_struct->image_area, 720, 576);
 	gtk_container_add(GTK_CONTAINER(align), img_struct->image_area);
+	/* Set the signal for accepting images through drag and drop */
+	gtk_drag_dest_set (GTK_WIDGET(img_struct->image_area),GTK_DEST_DEFAULT_ALL,drop_targets,1,GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK | GDK_ACTION_ASK);
+	g_signal_connect (G_OBJECT (img_struct->image_area),"drag-data-received",G_CALLBACK (img_on_drag_data_received), img_struct);
 
 	viewport = gtk_bin_get_child(GTK_BIN(swindow));
 	gtk_viewport_set_shadow_type(GTK_VIEWPORT(viewport), GTK_SHADOW_NONE);
@@ -615,8 +623,10 @@ img_window_struct *img_create_window (void)
 	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (img_struct->thumbnail_iconview), pixbuf_cell, "pixbuf", 0, NULL);
 
 	/* Set some iconview properties */
-	//gtk_icon_view_enable_model_drag_source ((GtkIconView*)img_struct->thumbnail_iconview, 0, target_table, G_N_ELEMENTS (target_table), GDK_ACTION_MOVE);
-	gtk_icon_view_set_reorderable(GTK_ICON_VIEW (img_struct->thumbnail_iconview),TRUE);
+	gtk_icon_view_enable_model_drag_dest(GTK_ICON_VIEW(img_struct->thumbnail_iconview),drop_targets,1,GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK | GDK_ACTION_ASK);
+	g_signal_connect (G_OBJECT (img_struct->thumbnail_iconview),"drag-data-received",G_CALLBACK (img_on_drag_data_received), img_struct);
+
+	//gtk_icon_view_set_reorderable(GTK_ICON_VIEW (img_struct->thumbnail_iconview),TRUE);
 	gtk_icon_view_set_selection_mode (GTK_ICON_VIEW (img_struct->thumbnail_iconview), GTK_SELECTION_MULTIPLE);
 	gtk_icon_view_set_orientation (GTK_ICON_VIEW (img_struct->thumbnail_iconview), GTK_ORIENTATION_HORIZONTAL);
 	gtk_icon_view_set_column_spacing (GTK_ICON_VIEW (img_struct->thumbnail_iconview),0);

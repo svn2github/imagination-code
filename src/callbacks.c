@@ -59,7 +59,7 @@ void img_project_properties(GtkMenuItem *item, img_window_struct *img_struct)
 	img_new_slideshow_settings_dialog(img_struct, TRUE);
 }
 
-void img_add_slides_thumbnails(GtkMenuItem *item,img_window_struct *img)
+void img_add_slides_thumbnails(GtkMenuItem *item, img_window_struct *img)
 {
 	GSList	*slides = NULL, *bak;
 	GdkPixbuf *thumb;
@@ -739,6 +739,56 @@ void img_goto_last_slide(GtkWidget *button, img_window_struct *img)
 	gtk_icon_view_select_path (GTK_ICON_VIEW (img->thumbnail_iconview), path);
 	gtk_icon_view_scroll_to_path (GTK_ICON_VIEW (img->thumbnail_iconview), path, FALSE, 0, 0);
 	gtk_tree_path_free (path);
+}
+
+void img_on_drag_data_received (GtkWidget *widget,GdkDragContext *context,int x,int y,GtkSelectionData *data,unsigned int info,unsigned int time, img_window_struct *img)
+{
+	gchar **pictures = NULL;
+	gchar *filename;
+	GtkWidget *dialog;
+	GdkPixbuf *thumb;
+	GtkTreeIter iter;
+	gint len = 0, slides_cnt = 0;
+	slide_struct *slide_info;
+
+	pictures = gtk_selection_data_get_uris(data);
+	if (pictures == NULL)
+	{
+		dialog = gtk_message_dialog_new(GTK_WINDOW(img->imagination_window),GTK_DIALOG_MODAL,GTK_MESSAGE_ERROR,GTK_BUTTONS_OK,_("Sorry,I could not perform the operation!"));
+		gtk_window_set_title(GTK_WINDOW(dialog),"Imagination");
+		gtk_dialog_run (GTK_DIALOG (dialog));
+		gtk_widget_destroy (GTK_WIDGET (dialog));
+		gtk_drag_finish(context,FALSE,FALSE,time);
+		return;
+	}
+	gtk_drag_finish (context,TRUE,FALSE,time);
+	while(pictures[len])
+	{
+		filename = g_filename_from_uri (pictures[len],NULL,NULL);
+		thumb = img_load_pixbuf_from_file(filename);
+		if (thumb)
+		{
+			slide_info = img_set_slide_info(1, NORMAL, NULL, -1, "0", filename);
+			if (slide_info)
+			{
+				gtk_list_store_append (img->thumbnail_model,&iter);
+				gtk_list_store_set (img->thumbnail_model, &iter, 0, thumb, 1, slide_info, -1);
+				g_object_unref (thumb);
+				slides_cnt++;
+			}
+		}
+		g_free(filename);
+		len++;
+	}
+	if (slides_cnt > 0)
+	{
+		img->slides_nr += slides_cnt;
+		gtk_widget_show(img->thumb_scrolledwindow);
+		img->project_is_modified = TRUE;
+		img_set_total_slideshow_duration(img);
+		img_set_statusbar_message(img, 0);
+	}
+	g_strfreev (pictures);
 }
 
 gboolean img_on_expose_event(GtkWidget *widget,GdkEventExpose *event,img_window_struct *img)
