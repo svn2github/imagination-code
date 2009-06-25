@@ -122,6 +122,16 @@ img_window_struct *img_create_window (void)
 	gint x;
 	GtkWidget *eventbox;
 
+	/* Added after cleaning up the img_window_struct */
+	GtkWidget *properties_menu;
+	GtkWidget *close_menu;
+	GtkWidget *import_menu;
+	GtkWidget *import_audio_menu;
+	GtkWidget *import_button;
+	GtkWidget *import_audio_button;
+	GtkWidget *export_menu;
+	GtkWidget *thumb_scrolledwindow;
+
 	accel_group = gtk_accel_group_new ();
 	icon_theme = gtk_icon_theme_get_default();
 	icon = gtk_icon_theme_load_icon(icon_theme, "imagination", 24, 0, NULL);
@@ -165,16 +175,16 @@ img_window_struct *img_create_window (void)
 	gtk_container_add (GTK_CONTAINER (menu1), img_struct->save_as_menu);
 	g_signal_connect (G_OBJECT (img_struct->save_as_menu),"activate",G_CALLBACK (img_choose_slideshow_filename),img_struct);
 
-	img_struct->close_menu = gtk_image_menu_item_new_from_stock (GTK_STOCK_CLOSE, accel_group);
-	gtk_container_add (GTK_CONTAINER (menu1), img_struct->close_menu);
-	g_signal_connect (G_OBJECT (img_struct->close_menu),"activate",G_CALLBACK (img_close_slideshow),img_struct);
+	close_menu = gtk_image_menu_item_new_from_stock (GTK_STOCK_CLOSE, accel_group);
+	gtk_container_add (GTK_CONTAINER (menu1), close_menu);
+	g_signal_connect (G_OBJECT (close_menu),"activate",G_CALLBACK (img_close_slideshow),img_struct);
 
 	separatormenuitem1 = gtk_separator_menu_item_new ();
 	gtk_container_add (GTK_CONTAINER (menu1), separatormenuitem1);
 
-	img_struct->properties_menu = gtk_image_menu_item_new_from_stock (GTK_STOCK_PROPERTIES, accel_group);
-	gtk_container_add (GTK_CONTAINER (menu1), img_struct->properties_menu);
-	g_signal_connect (G_OBJECT (img_struct->properties_menu), "activate", G_CALLBACK (img_project_properties), img_struct);
+	properties_menu = gtk_image_menu_item_new_from_stock (GTK_STOCK_PROPERTIES, accel_group);
+	gtk_container_add (GTK_CONTAINER (menu1), properties_menu);
+	g_signal_connect (G_OBJECT (properties_menu), "activate", G_CALLBACK (img_project_properties), img_struct);
 
 	separatormenuitem1 = gtk_separator_menu_item_new ();
 	gtk_container_add (GTK_CONTAINER (menu1), separatormenuitem1);
@@ -187,14 +197,14 @@ img_window_struct *img_create_window (void)
 	tmp_image = gtk_image_new_from_stock (GTK_STOCK_MEDIA_PLAY,GTK_ICON_SIZE_MENU);
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (img_struct->preview_menu),tmp_image);
 
-	img_struct->export_menu = gtk_image_menu_item_new_with_mnemonic (_("Export"));
-	gtk_container_add (GTK_CONTAINER (menu1), img_struct->export_menu);
+	export_menu = gtk_image_menu_item_new_with_mnemonic (_("Export"));
+	gtk_container_add (GTK_CONTAINER (menu1), export_menu);
 
 	image_menu = img_load_icon ("imagination-generate.png",GTK_ICON_SIZE_MENU);
-	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (img_struct->export_menu),image_menu);
+	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (export_menu),image_menu);
 
 	/* Attach subitems to export menu */
-	img_create_export_menu( img_struct->export_menu, img_struct );
+	img_create_export_menu( export_menu, img_struct );
 
 	separatormenuitem1 = gtk_separator_menu_item_new ();
 	gtk_container_add (GTK_CONTAINER (menu1), separatormenuitem1);
@@ -209,21 +219,21 @@ img_window_struct *img_create_window (void)
 	slide_menu = gtk_menu_new ();
 	gtk_menu_item_set_submenu (GTK_MENU_ITEM (menuitem2), slide_menu);
 
-	img_struct->import_menu = gtk_image_menu_item_new_with_mnemonic (_("Import p_ictures"));
-	gtk_container_add (GTK_CONTAINER (slide_menu),img_struct->import_menu);
-	gtk_widget_add_accelerator (img_struct->import_menu,"activate",accel_group,GDK_i,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
-	g_signal_connect (G_OBJECT (img_struct->import_menu),"activate",G_CALLBACK (img_add_slides_thumbnails),img_struct);
+	import_menu = gtk_image_menu_item_new_with_mnemonic (_("Import p_ictures"));
+	gtk_container_add (GTK_CONTAINER (slide_menu),import_menu);
+	gtk_widget_add_accelerator (import_menu,"activate",accel_group,GDK_i,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
+	g_signal_connect (G_OBJECT (import_menu),"activate",G_CALLBACK (img_add_slides_thumbnails),img_struct);
 
 	image_menu = img_load_icon ("imagination-import.png",GTK_ICON_SIZE_MENU);
-	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (img_struct->import_menu),image_menu);
+	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (import_menu),image_menu);
 	
-	img_struct->import_audio_menu = gtk_image_menu_item_new_with_mnemonic (_("Import _music"));
-	gtk_container_add (GTK_CONTAINER (slide_menu),img_struct->import_audio_menu);
-	gtk_widget_add_accelerator (img_struct->import_audio_menu,"activate",accel_group,GDK_m,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
-	g_signal_connect (G_OBJECT (img_struct->import_audio_menu),"activate",G_CALLBACK (img_select_audio_files_to_add),img_struct);
+	import_audio_menu = gtk_image_menu_item_new_with_mnemonic (_("Import _music"));
+	gtk_container_add (GTK_CONTAINER (slide_menu),import_audio_menu);
+	gtk_widget_add_accelerator (import_audio_menu,"activate",accel_group,GDK_m,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
+	g_signal_connect (G_OBJECT (import_audio_menu),"activate",G_CALLBACK (img_select_audio_files_to_add),img_struct);
 
 	image_menu = img_load_icon ("imagination-audio.png",GTK_ICON_SIZE_MENU);
-	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (img_struct->import_audio_menu),image_menu);
+	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (import_audio_menu),image_menu);
 
 	img_struct->remove_menu = gtk_image_menu_item_new_with_mnemonic (_("Dele_te"));
 	gtk_container_add (GTK_CONTAINER (slide_menu), img_struct->remove_menu);
@@ -299,16 +309,16 @@ img_window_struct *img_create_window (void)
 	gtk_container_add (GTK_CONTAINER (toolbar),separatortoolitem);
 
 	tmp_image = img_load_icon("imagination-import.png",GTK_ICON_SIZE_LARGE_TOOLBAR);
-	img_struct->import_button = GTK_WIDGET (gtk_tool_button_new (tmp_image,""));
-	gtk_container_add (GTK_CONTAINER (toolbar),img_struct->import_button);
-	gtk_widget_set_tooltip_text(img_struct->import_button, _("Import pictures"));
-	g_signal_connect ((gpointer) img_struct->import_button, "clicked", G_CALLBACK (img_add_slides_thumbnails),img_struct);
+	import_button = GTK_WIDGET (gtk_tool_button_new (tmp_image,""));
+	gtk_container_add (GTK_CONTAINER (toolbar),import_button);
+	gtk_widget_set_tooltip_text(import_button, _("Import pictures"));
+	g_signal_connect ((gpointer)import_button, "clicked", G_CALLBACK (img_add_slides_thumbnails),img_struct);
 
 	tmp_image = img_load_icon("imagination-audio.png",GTK_ICON_SIZE_LARGE_TOOLBAR);
-	img_struct->import_audio_button = GTK_WIDGET (gtk_tool_button_new (tmp_image,""));
-	gtk_container_add (GTK_CONTAINER (toolbar),img_struct->import_audio_button);
-	gtk_widget_set_tooltip_text(img_struct->import_audio_button, _("Import music"));
-	g_signal_connect(G_OBJECT(img_struct->import_audio_button), "clicked", G_CALLBACK(img_select_audio_files_to_add), img_struct);
+	import_audio_button = GTK_WIDGET (gtk_tool_button_new (tmp_image,""));
+	gtk_container_add (GTK_CONTAINER (toolbar),import_audio_button);
+	gtk_widget_set_tooltip_text(import_audio_button, _("Import music"));
+	g_signal_connect(G_OBJECT(import_audio_button), "clicked", G_CALLBACK(img_select_audio_files_to_add), img_struct);
 
 	img_struct->remove_button = GTK_WIDGET (gtk_tool_button_new_from_stock ("gtk-delete"));
 	gtk_container_add (GTK_CONTAINER (toolbar),img_struct->remove_button);
@@ -648,17 +658,16 @@ img_window_struct *img_create_window (void)
 	gtk_box_pack_start( GTK_BOX( vbox1 ), eventbox, FALSE, TRUE, 0 );
 
 	/* Create the thumbnail viewer */
-	img_struct->thumb_scrolledwindow = gtk_scrolled_window_new (NULL, NULL);
-	gtk_widget_set_size_request( img_struct->thumb_scrolledwindow, -1, 125 );
-	g_signal_connect( G_OBJECT( img_struct->thumb_scrolledwindow ), "scroll-event",
+	thumb_scrolledwindow = gtk_scrolled_window_new (NULL, NULL);
+	gtk_widget_set_size_request( thumb_scrolledwindow, -1, 125 );
+	g_signal_connect( G_OBJECT( thumb_scrolledwindow ), "scroll-event",
 					  G_CALLBACK( img_scroll_thumb ), img_struct );
-	gtk_container_add( GTK_CONTAINER( eventbox ),
-					   img_struct->thumb_scrolledwindow );
-	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (img_struct->thumb_scrolledwindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_NEVER);
-	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (img_struct->thumb_scrolledwindow), GTK_SHADOW_IN);
+	gtk_container_add( GTK_CONTAINER( eventbox ), thumb_scrolledwindow );
+	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (thumb_scrolledwindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_NEVER);
+	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (thumb_scrolledwindow), GTK_SHADOW_IN);
 
 	img_struct->thumbnail_iconview = gtk_icon_view_new_with_model(GTK_TREE_MODEL (img_struct->thumbnail_model));
-	gtk_container_add( GTK_CONTAINER( img_struct->thumb_scrolledwindow ), img_struct->thumbnail_iconview );
+	gtk_container_add( GTK_CONTAINER( thumb_scrolledwindow ), img_struct->thumbnail_iconview );
 
 	/* Create the cell layout */
 	pixbuf_cell = gtk_cell_renderer_pixbuf_new();
