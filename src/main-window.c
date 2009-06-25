@@ -619,14 +619,16 @@ img_window_struct *img_create_window (void)
 
 	/* Create the thumbnail viewer */
 	img_struct->thumb_scrolledwindow = gtk_scrolled_window_new (NULL, NULL);
+	gtk_widget_set_size_request( img_struct->thumb_scrolledwindow, -1, 125 );
 	g_signal_connect( G_OBJECT( img_struct->thumb_scrolledwindow ), "scroll-event",
 					  G_CALLBACK( img_scroll_thumb ), img_struct );
-	gtk_container_add( GTK_EVENT_BOX( eventbox ),
+	gtk_container_add( GTK_CONTAINER( eventbox ),
 					   img_struct->thumb_scrolledwindow );
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (img_struct->thumb_scrolledwindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_NEVER);
 	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (img_struct->thumb_scrolledwindow), GTK_SHADOW_IN);
+
 	img_struct->thumbnail_iconview = gtk_icon_view_new_with_model(GTK_TREE_MODEL (img_struct->thumbnail_model));
-	gtk_widget_show (img_struct->thumbnail_iconview);
+	gtk_container_add( GTK_CONTAINER( img_struct->thumb_scrolledwindow ), img_struct->thumbnail_iconview );
 
 	/* Create the cell layout */
 	pixbuf_cell = gtk_cell_renderer_pixbuf_new();
@@ -635,16 +637,17 @@ img_window_struct *img_create_window (void)
 	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (img_struct->thumbnail_iconview), pixbuf_cell, "pixbuf", 0, NULL);
 
 	/* Set some iconview properties */
+	gtk_icon_view_set_text_column( GTK_ICON_VIEW( img_struct->thumbnail_iconview ), -1 );
 	gtk_icon_view_set_reorderable(GTK_ICON_VIEW (img_struct->thumbnail_iconview),TRUE);
 	gtk_icon_view_set_selection_mode (GTK_ICON_VIEW (img_struct->thumbnail_iconview), GTK_SELECTION_MULTIPLE);
 	gtk_icon_view_set_orientation (GTK_ICON_VIEW (img_struct->thumbnail_iconview), GTK_ORIENTATION_HORIZONTAL);
 	gtk_icon_view_set_column_spacing (GTK_ICON_VIEW (img_struct->thumbnail_iconview),0);
 	gtk_icon_view_set_row_spacing (GTK_ICON_VIEW (img_struct->thumbnail_iconview),0);
 	gtk_icon_view_set_columns (GTK_ICON_VIEW (img_struct->thumbnail_iconview), G_MAXINT);
-	gtk_container_add (GTK_CONTAINER (img_struct->thumb_scrolledwindow), img_struct->thumbnail_iconview);
 	g_signal_connect (G_OBJECT (img_struct->thumbnail_iconview),"selection-changed",G_CALLBACK (img_iconview_selection_changed),img_struct);
 	g_signal_connect (G_OBJECT (img_struct->thumbnail_iconview),"select-all",G_CALLBACK (img_iconview_selection_changed),img_struct);
 	g_signal_connect (G_OBJECT (img_struct->thumbnail_iconview),"button-press-event",G_CALLBACK (img_iconview_selection_button_press),img_struct);
+	gtk_widget_show_all( eventbox );
 
 	/* Create the status bar */
 	img_struct->statusbar = gtk_statusbar_new ();

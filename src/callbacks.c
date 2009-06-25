@@ -95,7 +95,6 @@ void img_add_slides_thumbnails(GtkMenuItem *item, img_window_struct *img)
 		slides = slides->next;
 	}
 	gtk_widget_hide(img->progress_bar);
-	gtk_widget_show(img->thumb_scrolledwindow);
 	g_slist_free(bak);
 	img_set_total_slideshow_duration(img);
 	img_set_statusbar_message(img,0);
@@ -463,9 +462,6 @@ void img_delete_selected_slides(GtkMenuItem *item,img_window_struct *img_struct)
 		gtk_image_set_from_pixbuf(GTK_IMAGE(img_struct->image_area),NULL);
 		img_struct->project_is_modified = TRUE;
 
-	if (img_struct->slides_nr == 0)
-		gtk_widget_hide(img_struct->thumb_scrolledwindow);
-
 	img_iconview_selection_changed(GTK_ICON_VIEW(img_struct->thumbnail_iconview),img_struct);
 }
 
@@ -785,7 +781,6 @@ void img_on_drag_data_received (GtkWidget *widget,GdkDragContext *context,int x,
 	if (slides_cnt > 0)
 	{
 		img->slides_nr += slides_cnt;
-		gtk_widget_show(img->thumb_scrolledwindow);
 		img->project_is_modified = TRUE;
 		img_set_total_slideshow_duration(img);
 		img_set_statusbar_message(img, 0);
@@ -1110,7 +1105,6 @@ void img_close_slideshow(GtkWidget *widget, img_window_struct *img)
 	gtk_widget_set_sensitive(img->random_button, FALSE);
 	gtk_widget_set_sensitive(img->transition_type, FALSE);
 	gtk_widget_set_sensitive(img->duration, FALSE);
-	gtk_widget_hide(img->thumb_scrolledwindow);
 
 	/* Reset slideshow properties */
 	img->distort_images = TRUE;

@@ -206,7 +206,6 @@ void img_load_slideshow(img_window_struct *img)
 	g_free(time);
 
 	img_set_statusbar_message(img, 0);
-	gtk_widget_show(img->thumb_scrolledwindow);
 
 	dummy = g_path_get_basename(img->project_filename);
 	img_set_window_title(img, dummy);
