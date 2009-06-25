@@ -37,6 +37,7 @@ static gpointer img_set_random_transition(img_window_struct *, slide_struct *);
 static void img_combo_box_speed_changed (GtkComboBox *,  img_window_struct *);
 static void img_spinbutton_value_changed (GtkSpinButton *, img_window_struct *);
 static void img_clear_audio_files(GtkButton *, img_window_struct *);
+static void img_on_drag_audio_data_received (GtkWidget *,GdkDragContext *, int, int, GtkSelectionData *, unsigned int, unsigned int, img_window_struct *);
 static void img_activate_remove_button_music_liststore(GtkTreeModel *, GtkTreePath *, GtkTreeIter *, img_window_struct *);
 static void img_quit_menu(GtkMenuItem *, img_window_struct *);
 static void img_select_all_thumbnails(GtkMenuItem *, img_window_struct *);
@@ -536,6 +537,9 @@ img_window_struct *img_create_window (void)
 	img_struct->music_file_treeview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(img_struct->music_file_liststore));
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(img_struct->music_file_treeview));
 
+	gtk_drag_dest_set (GTK_WIDGET(img_struct->music_file_treeview),GTK_DEST_DEFAULT_ALL,drop_targets,1,GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK | GDK_ACTION_ASK);
+	g_signal_connect (G_OBJECT (img_struct->music_file_treeview),"drag-data-received",G_CALLBACK (img_on_drag_audio_data_received), img_struct);
+
 	/* First and last column aren't displayed, so we only need two columns. */
 	for (x = 1; x < 3; x++)
 	{
@@ -580,7 +584,6 @@ img_window_struct *img_create_window (void)
 	gtk_container_add (GTK_CONTAINER (img_struct->remove_audio_button), image_buttons);
 	gtk_widget_set_tooltip_text(img_struct->remove_audio_button, _("Delete the selected file"));
 	g_signal_connect ( (gpointer) img_struct->remove_audio_button, "clicked", G_CALLBACK (img_remove_audio_files), img_struct);
-	
 
 	move_up_button = gtk_button_new();
 	gtk_box_pack_start(GTK_BOX(hbox_buttons), move_up_button, FALSE, TRUE, 0);
@@ -663,6 +666,37 @@ static void img_clear_audio_files(GtkButton *button, img_window_struct *img)
 	gtk_widget_set_sensitive(img->play_audio_button, FALSE);
 	gtk_widget_set_sensitive(img->remove_audio_button, FALSE);
 	gtk_label_set_text(GTK_LABEL(img->music_time_data), "");
+}
+
+static void img_on_drag_audio_data_received (GtkWidget *widget,GdkDragContext *context,int x,int y,GtkSelectionData *data,unsigned int info,unsigned int time, img_window_struct *img)
+{
+	gchar **audio = NULL;
+	gchar *filename,*ttime;
+	GtkWidget *dialog;
+	gint len = 0;
+
+	audio = gtk_selection_data_get_uris(data);
+	if (audio == NULL)
+	{
+		dialog = gtk_message_dialog_new(GTK_WINDOW(img->imagination_window),GTK_DIALOG_MODAL,GTK_MESSAGE_ERROR,GTK_BUTTONS_OK,_("Sorry,I could not perform the operation!"));
+		gtk_window_set_title(GTK_WINDOW(dialog),"Imagination");
+		gtk_dialog_run (GTK_DIALOG (dialog));
+		gtk_widget_destroy (GTK_WIDGET (dialog));
+		gtk_drag_finish(context,FALSE,FALSE,time);
+		return;
+	}
+	gtk_drag_finish (context,TRUE,FALSE,time);
+	while(audio[len])
+	{
+		filename = g_filename_from_uri (audio[len],NULL,NULL);
+		img_add_audio_files(filename,img);
+		g_free(filename);
+		len++;
+	}
+	ttime = img_convert_seconds_to_time(img->total_music_secs);
+	gtk_label_set_text(GTK_LABEL(img->music_time_data), ttime);
+	g_free(ttime);
+	g_strfreev (audio);
 }
 
 static void img_activate_remove_button_music_liststore(GtkTreeModel *tree_model, GtkTreePath *path, GtkTreeIter *iter, img_window_struct *img)

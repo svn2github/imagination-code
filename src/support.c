@@ -98,6 +98,7 @@ void img_set_statusbar_message(img_window_struct *img_struct, gint selected)
 		message = g_strdup_printf(_("Welcome to Imagination - %d transitions loaded."),img_struct->nr_transitions_loaded);
 		gtk_statusbar_push(GTK_STATUSBAR(img_struct->statusbar),img_struct->context_id,message);
 		g_free(message);
+		gtk_label_set_text(GTK_LABEL(img_struct->total_slide_number_label),NULL);
 	}
 	else if (selected)
 	{

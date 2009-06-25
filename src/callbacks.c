@@ -209,7 +209,10 @@ void img_select_audio_files_to_add ( GtkMenuItem* button, img_window_struct *img
 		g_slist_foreach( files, (GFunc) img_add_audio_files, img);
 	}
 	if (files != NULL)
+	{
+		g_slist_foreach(files, (GFunc) g_free, NULL);
 		g_slist_free (files);
+	}	
 
 	time = img_convert_seconds_to_time(img->total_music_secs);
 	gtk_label_set_text(GTK_LABEL(img->music_time_data), time);
@@ -238,7 +241,6 @@ void img_add_audio_files (gchar *filename, img_window_struct *img)
 	}
 	g_free(path);
 	g_free(file);
-	g_free(filename);
 }
 
 GSList *img_import_slides_file_chooser(img_window_struct *img)
