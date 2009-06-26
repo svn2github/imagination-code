@@ -1,6 +1,9 @@
+Q: I have rotated a slide and saved the slideshow but when I load it the slide is untouched.
+A: When you rotate a slide Imagination makes a copy of it and rotate this one since it's not
+an image editing program.
+
 Q: How are transition effects applied?
-A: Read the explanation at:
-http://imagination.sf.net/transitions.html#understanding
+A: Read the explanation at: http://imagination.sf.net/transitions.html#understanding
 
 Q: Why there is no XYZ transition available?
 A: Because we haven't written it yet. Our intention is to offer all transitions
@@ -26,7 +29,8 @@ A: Sure, hold down left mouse button and move the slides then release it.
 
 Q: I want to start my slideshow with a Fade-In transition, why don't you add it?
 A: Because you already have it! Select the background color from the Properties menu
-and then apply the Cross-Fade effect on the first slide.
+and then apply the Cross-Fade effect on the first slide. Do the same to have Fade-Out
+but on the last slide.
 
 Q: I have Ubuntu and ffmpeg is installed but I get this error message from ffmpeg
 in the console: "Unknown encoder 'mpeg2video' "
