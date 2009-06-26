@@ -58,7 +58,10 @@ void img_save_slideshow(img_window_struct *img)
 		gtk_tree_model_get(model, &iter,1,&entry,-1);
 		conf = g_strdup_printf("image_%d",count);
 
-		g_key_file_set_string(img_key_file, "images",			conf, entry->filename);
+		if (entry->slide_original_filename)
+			g_key_file_set_string(img_key_file, "images",		conf, entry->slide_original_filename);
+		else
+			g_key_file_set_string(img_key_file, "images",		conf, entry->filename);
 		g_key_file_set_integer(img_key_file,"transition speed", conf, entry->speed);
 		g_key_file_set_integer(img_key_file,"slide duration",	conf, entry->duration);
 		g_key_file_set_integer(img_key_file,"transition type",	conf, entry->transition_id);

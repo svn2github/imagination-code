@@ -49,6 +49,7 @@ typedef struct _slide_struct slide_struct;
 struct _slide_struct
 {
 	gchar	*filename;
+	gchar	*slide_original_filename;
 	guint	duration;
 	guint  	speed;
 	gchar	*resolution;
@@ -73,10 +74,14 @@ struct _img_window_struct
 	GtkWidget	*save_button;
 //	GtkWidget	*import_menu;
 //	GtkWidget	*import_audio_menu;
-	GtkWidget	*remove_menu;
+//	GtkWidget	*remove_menu;
+	GtkWidget   *rotate_left_menu;
+	GtkWidget   *rotate_right_menu;
+	GtkWidget   *rotate_left_button;
+	GtkWidget   *rotate_right_button;
 //	GtkWidget	*import_button;
 //	GtkWidget	*import_audio_button;
-	GtkWidget	*remove_button;
+//	GtkWidget	*remove_button;
 	GtkWidget	*preview_menu;
 	GtkWidget 	*preview_button;
 //	GtkWidget   *export_menu;
@@ -99,6 +104,7 @@ struct _img_window_struct
   	guint		context_id;
   	GtkListStore *thumbnail_model;
   	gchar		*current_dir;
+	GSList		*rotated_files;
 
 	/* Import slides dialog variables */
 	GtkWidget	*dim_label;

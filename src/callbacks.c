@@ -298,6 +298,7 @@ void img_free_allocated_memory(img_window_struct *img_struct)
 {
 	GtkTreeModel *model;
 	GtkTreeIter iter;
+	GSList *bak = NULL;
 	slide_struct *entry;
 
 	/* Free the memory allocated the single slides one by one */
@@ -315,13 +316,28 @@ void img_free_allocated_memory(img_window_struct *img_struct)
 			g_free(entry->type);
 			g_free(entry);
 			img_struct->slides_nr--;
+			if (entry->slide_original_filename)
+				g_free(entry->slide_original_filename);
 		}
 		while (gtk_tree_model_iter_next (model,&iter));
 		g_signal_handlers_block_by_func((gpointer)img_struct->thumbnail_iconview, (gpointer)img_iconview_selection_changed, img_struct);
 		gtk_list_store_clear(GTK_LIST_STORE(img_struct->thumbnail_model));
 		g_signal_handlers_unblock_by_func((gpointer)img_struct->thumbnail_iconview, (gpointer)img_iconview_selection_changed, img_struct);
 	}
-	
+
+	/* Unlink the possible created rotated pictures and free the GSlist */
+	if (img_struct->rotated_files)
+	{
+		bak = img_struct->rotated_files;
+		while(img_struct->rotated_files)
+		{
+			unlink (img_struct->rotated_files->data);
+			g_free(img_struct->rotated_files->data);
+			img_struct->rotated_files = img_struct->rotated_files->next;
+		}
+		g_slist_free(bak);
+	}
+
 	/* Delete the audio files in the liststore */
 	if (gtk_tree_model_get_iter_first(GTK_TREE_MODEL(img_struct->music_file_liststore), &iter))
 	{
@@ -349,7 +365,7 @@ gint img_ask_user_confirmation(img_window_struct *img_struct, gchar *msg)
 	GtkWidget *dialog;
 	gint response;
 
-	dialog = gtk_message_dialog_new(GTK_WINDOW(img_struct->imagination_window),GTK_DIALOG_MODAL,GTK_MESSAGE_QUESTION,GTK_BUTTONS_OK_CANCEL, msg);
+	dialog = gtk_message_dialog_new(GTK_WINDOW(img_struct->imagination_window),GTK_DIALOG_MODAL,GTK_MESSAGE_QUESTION,GTK_BUTTONS_OK_CANCEL, "%s.", msg);
 	gtk_window_set_title(GTK_WINDOW(dialog),"Imagination");
 	response = gtk_dialog_run (GTK_DIALOG (dialog));
 	gtk_widget_destroy (GTK_WIDGET (dialog));
@@ -469,14 +485,65 @@ void img_delete_selected_slides(GtkMenuItem *item,img_window_struct *img_struct)
 	img_iconview_selection_changed(GTK_ICON_VIEW(img_struct->thumbnail_iconview),img_struct);
 }
 
-void img_rotate_selected_slide_left(GtkButton *button, img_window_struct *img)
+void img_rotate_selected_slide(GtkWidget *button, img_window_struct *img)
 {
-	
-}
+	GtkTreeModel *model;
+	GtkTreeIter iter;
+	GList *selected = NULL;
+	GdkPixbuf *thumb, *rotated_thumb;
+	GError *error = NULL;
+	GtkWidget *dialog;
+	slide_struct *info_slide;
+	gchar *filename;
+	gint handle;
 
-void img_rotate_selected_slide_left(GtkButton *button, img_window_struct *img)
-{
-	
+	/* Obtain the selected slideshow filename */
+	model = gtk_icon_view_get_model(GTK_ICON_VIEW(img->thumbnail_iconview));
+	selected = gtk_icon_view_get_selected_items(GTK_ICON_VIEW(img->thumbnail_iconview));
+	gtk_tree_model_get_iter(model,&iter,selected->data);
+	gtk_tree_path_free(selected->data);
+	g_list_free (selected);
+	gtk_tree_model_get(model,&iter,1,&info_slide,-1);
+
+	/* Load the image, save a copy in the temp dir, rotate it and display it in the image area */
+	thumb = gdk_pixbuf_new_from_file(info_slide->filename, NULL);
+	if (button == img->rotate_left_button)
+		rotated_thumb = gdk_pixbuf_rotate_simple(thumb, 90);
+	else
+		rotated_thumb = gdk_pixbuf_rotate_simple(thumb, 270);
+	g_object_unref(thumb);
+
+	handle = g_file_open_tmp("img-XXXXXX.jpg", &filename, NULL);
+	if ( ! gdk_pixbuf_save(rotated_thumb, filename, "jpeg",  &error, NULL))
+	{
+		dialog = gtk_message_dialog_new(GTK_WINDOW(img->imagination_window),GTK_DIALOG_MODAL,GTK_MESSAGE_ERROR,GTK_BUTTONS_OK,_("An error occurred while trying to rotate the slide:"));
+		gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog),"%s.", error->message);
+		gtk_window_set_title(GTK_WINDOW(dialog),"Imagination");
+		gtk_dialog_run (GTK_DIALOG (dialog));
+		gtk_widget_destroy (GTK_WIDGET (dialog));
+		g_error_free(error);
+		g_free(filename);
+		close (handle);
+		return;
+	}
+	close(handle);
+	g_object_unref(rotated_thumb);
+
+	if (info_slide->slide_original_filename == NULL)
+		info_slide->slide_original_filename = g_strdup(info_slide->filename);
+
+	g_free(info_slide->filename);
+	info_slide->filename = filename;
+	img->rotated_files = g_slist_append(img->rotated_files, g_strdup(filename));
+
+	img->slide_pixbuf = img_scale_pixbuf(img, filename);
+	gtk_image_set_from_pixbuf(GTK_IMAGE (img->image_area),img->slide_pixbuf);
+	g_object_unref(img->slide_pixbuf);
+
+	/* Display the rotated image in thumbnails iconview */
+	thumb = gdk_pixbuf_new_from_file_at_scale(filename, 93, 70, TRUE, NULL);
+	gtk_list_store_set (img->thumbnail_model, &iter, 0, thumb, -1);
+	g_object_unref (thumb);
 }
 
 void img_show_about_dialog (GtkMenuItem *item,img_window_struct *img_struct)
