@@ -93,10 +93,10 @@ img_window_struct *img_create_window (void)
 	GtkWidget *image_area_frame;
 	GtkWidget *valign;
 	GtkWidget *halign;
-	GtkWidget *vbox_frames, *frame2, *frame2_alignment;
-	GtkWidget *frame1, *frame_label, *frame1_alignment;
+	GtkWidget *vbox_frames, *frame1_alignment, *frame2_alignment, *frame3_alignment;
+	GtkWidget *frame1, *frame2, *frame3, *frame_label;
 	GtkWidget *transition_label;
-	GtkWidget *vbox_info_slide;
+	GtkWidget *vbox_info_slide, *vbox_slide_motion;
 	GtkWidget *table;
 	GtkWidget *duration_label;
 	GtkWidget *trans_duration_label;
@@ -104,6 +104,8 @@ img_window_struct *img_create_window (void)
 	GtkWidget *resolution;
 	GtkWidget *total_time;
 	GtkWidget *type;
+	GtkWidget *hbox_stop_points, *stop_points_label, *left_point_button,*right_point_button;
+	GtkWidget *hbox_time_offset, *time_offset_label, *add_stop_point_button, *remove_stop_point_button;
 	GtkWidget *hbox_music_label;
 	GtkWidget *music_time;
 	GtkWidget *hbox_buttons, *move_up_button;
@@ -404,11 +406,16 @@ img_window_struct *img_create_window (void)
 	/* Create the image area and the other widgets */
 	hbox = gtk_hbox_new (FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (vbox1), hbox, TRUE, TRUE, 0);
+	
+	/* This is a job for..... Tadej: put the label and the zoom scale
+	 * inside the align so when user enalrge the window they behave like the image area */
+	GtkWidget *vbox_zoom = gtk_vbox_new(FALSE,0);
+	gtk_box_pack_start (GTK_BOX (hbox), vbox_zoom, TRUE, TRUE, 0);
 
 	swindow = gtk_scrolled_window_new(NULL, NULL);
-	gtk_container_set_border_width(GTK_CONTAINER(swindow), 10);
+	//gtk_container_set_border_width(GTK_CONTAINER(swindow), 10);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(swindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-	gtk_box_pack_start (GTK_BOX (hbox), swindow, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (vbox_zoom), swindow, TRUE, TRUE, 0);
 
 	align = gtk_alignment_new(0.5, 0.5, 0, 0);
 	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(swindow), align);
@@ -430,6 +437,17 @@ img_window_struct *img_create_window (void)
 	viewport = gtk_bin_get_child(GTK_BIN(swindow));
 	gtk_viewport_set_shadow_type(GTK_VIEWPORT(viewport), GTK_SHADOW_NONE);
 
+	GtkWidget *hbox_zoom = gtk_hbox_new(FALSE,0);
+	gtk_box_pack_start (GTK_BOX (vbox_zoom), hbox_zoom, FALSE, FALSE, 0);
+
+	GtkWidget *label = gtk_label_new(_("Zoom Factor: "));
+	gtk_misc_set_alignment(GTK_MISC(label),0.0, 0.5);
+	gtk_box_pack_start (GTK_BOX (hbox_zoom), label, FALSE, TRUE, 0);
+
+	GtkWidget *zoom_scale = gtk_hscale_new_with_range(1,30,0.10000000000000001);
+	gtk_scale_set_value_pos (GTK_SCALE(zoom_scale), GTK_POS_LEFT);
+	gtk_box_pack_start (GTK_BOX (hbox_zoom), zoom_scale, TRUE, TRUE, 0);
+
 	valign = gtk_alignment_new (1, 0, 0, 0);
 	gtk_box_pack_start (GTK_BOX (hbox), valign, FALSE, FALSE, 0);
 
@@ -449,7 +467,7 @@ img_window_struct *img_create_window (void)
 	gtk_container_add (GTK_CONTAINER (frame1), frame1_alignment);
 	gtk_alignment_set_padding (GTK_ALIGNMENT (frame1_alignment), 2, 2, 5, 5);
 
-	frame_label = gtk_label_new (_("<b>Slide settings</b>"));
+	frame_label = gtk_label_new (_("<b>Slide Settings</b>"));
 	gtk_frame_set_label_widget (GTK_FRAME (frame1), frame_label);
 	gtk_label_set_use_markup (GTK_LABEL (frame_label), TRUE);
 	gtk_misc_set_padding (GTK_MISC (frame_label), 2, 2);
@@ -463,7 +481,7 @@ img_window_struct *img_create_window (void)
 	gtk_box_pack_start (GTK_BOX (vbox_info_slide), transition_label, FALSE, FALSE, 0);
 	gtk_misc_set_alignment (GTK_MISC (transition_label), 0, -1);
 
-	/*  slide selected, slide resolution, slide type and slide total duration */
+	/* Slide selected, slide resolution, slide type and slide total duration */
 	table = gtk_table_new (7, 2, FALSE);
 	gtk_box_pack_start (GTK_BOX (vbox_info_slide), table, TRUE, TRUE, 0);
 	gtk_table_set_row_spacings (GTK_TABLE (table), 4);
@@ -554,24 +572,82 @@ img_window_struct *img_create_window (void)
 	gtk_table_attach (GTK_TABLE (table), img_struct->total_time_data, 1, 2, 6, 7,(GtkAttachOptions) (GTK_FILL),(GtkAttachOptions) (0), 0, 0);
 	gtk_misc_set_alignment (GTK_MISC (img_struct->total_time_data), 0, 0.5);
 
-	/* Background music frame */
+	/* Slide motion frame */
 	frame2 = gtk_frame_new (NULL);
 	gtk_box_pack_start (GTK_BOX (vbox_frames), frame2, FALSE, FALSE, 0);
 	gtk_frame_set_shadow_type (GTK_FRAME (frame2), GTK_SHADOW_OUT);
 
 	frame2_alignment = gtk_alignment_new (0.5, 0.5, 1, 1);
 	gtk_container_add (GTK_CONTAINER (frame2), frame2_alignment);
-	gtk_alignment_set_padding (GTK_ALIGNMENT (frame2_alignment), 5, 5, 5, 5);
+	gtk_alignment_set_padding (GTK_ALIGNMENT (frame2_alignment), 2, 2, 5, 5);
+
+	frame_label = gtk_label_new (_("<b>Slide Motion</b>"));
+	gtk_frame_set_label_widget (GTK_FRAME (frame2), frame_label);
+	gtk_label_set_use_markup (GTK_LABEL (frame_label), TRUE);
+	gtk_misc_set_padding (GTK_MISC (frame_label), 2, 2);
+
+	vbox_slide_motion = gtk_vbox_new (FALSE, 3);
+	gtk_container_add (GTK_CONTAINER (frame2_alignment), vbox_slide_motion);
+	gtk_container_set_border_width (GTK_CONTAINER (vbox_slide_motion), 2);
+
+	hbox_stop_points = gtk_hbox_new(FALSE,5);
+	gtk_box_pack_start (GTK_BOX (vbox_slide_motion), hbox_stop_points, TRUE, FALSE, 0);
+	stop_points_label = gtk_label_new(("Stop Points:"));
+	gtk_box_pack_start (GTK_BOX (hbox_stop_points), stop_points_label, TRUE, TRUE, 0);
+	gtk_misc_set_alignment(GTK_MISC(stop_points_label),0.0, 0.5);
+	left_point_button = gtk_button_new();
+	gtk_box_pack_start (GTK_BOX (hbox_stop_points), left_point_button, FALSE, TRUE, 0);
+	image_buttons = gtk_image_new_from_stock (GTK_STOCK_GO_BACK, GTK_ICON_SIZE_MENU);
+	gtk_container_add (GTK_CONTAINER (left_point_button), image_buttons);
+	img_struct->img_current_stop_point_entry = gtk_entry_new();
+	gtk_entry_set_max_length(GTK_ENTRY (img_struct->img_current_stop_point_entry), 2);
+	gtk_entry_set_width_chars(GTK_ENTRY (img_struct->img_current_stop_point_entry), 4);
+	gtk_box_pack_start (GTK_BOX (hbox_stop_points), img_struct->img_current_stop_point_entry, FALSE, TRUE, 0);
+	label_of = gtk_label_new(_(" of "));
+	gtk_box_pack_start (GTK_BOX (hbox_stop_points), label_of, FALSE, FALSE, 0);
+	img_struct->total_stop_points_label = gtk_label_new(NULL);
+	gtk_box_pack_start (GTK_BOX (hbox_stop_points), img_struct->total_stop_points_label, FALSE, FALSE, 0);
+	right_point_button = gtk_button_new();
+	gtk_box_pack_start (GTK_BOX (hbox_stop_points), right_point_button, FALSE, TRUE, 0);
+	image_buttons = gtk_image_new_from_stock (GTK_STOCK_GO_FORWARD, GTK_ICON_SIZE_MENU);
+	gtk_container_add (GTK_CONTAINER (right_point_button), image_buttons);
+
+	hbox_time_offset = gtk_hbox_new(FALSE,0);
+	gtk_box_pack_start (GTK_BOX (vbox_slide_motion), hbox_time_offset, FALSE, FALSE, 0);
+	time_offset_label = gtk_label_new(("Time Offset:"));
+	gtk_box_pack_start (GTK_BOX (hbox_time_offset), time_offset_label, TRUE, TRUE, 0);
+	gtk_misc_set_alignment(GTK_MISC(time_offset_label),0.0, 0.5);
+	img_struct->stop_point_duration = gtk_spin_button_new_with_range (1, 60, 1);
+	gtk_box_pack_start (GTK_BOX (hbox_time_offset), img_struct->stop_point_duration, FALSE, FALSE, 0);
+	gtk_spin_button_set_numeric(GTK_SPIN_BUTTON (img_struct->stop_point_duration),TRUE);
+	//g_signal_connect (G_OBJECT (img_struct->stop_point_duration),"value-changed",G_CALLBACK (img_time_offset_spin_button_value_changed),img_struct);
+
+	hbox_buttons = gtk_hbutton_box_new();
+	gtk_button_box_set_layout (GTK_BUTTON_BOX (hbox_buttons), GTK_BUTTONBOX_SPREAD);
+	gtk_box_pack_start (GTK_BOX (vbox_slide_motion), hbox_buttons, FALSE, FALSE, 0);
+	add_stop_point_button = gtk_button_new_with_label(_("Add"));
+	gtk_box_pack_start (GTK_BOX (hbox_buttons), add_stop_point_button, FALSE, FALSE, 0);
+	remove_stop_point_button = gtk_button_new_with_label(_("Remove"));
+	gtk_box_pack_start (GTK_BOX (hbox_buttons), remove_stop_point_button, FALSE, FALSE, 0);
+
+	/* Background music frame */
+	frame3 = gtk_frame_new (NULL);
+	gtk_box_pack_start (GTK_BOX (vbox_frames), frame3, FALSE, FALSE, 0);
+	gtk_frame_set_shadow_type (GTK_FRAME (frame3), GTK_SHADOW_OUT);
+
+	frame3_alignment = gtk_alignment_new (0.5, 0.5, 1, 1);
+	gtk_container_add (GTK_CONTAINER (frame3), frame3_alignment);
+	gtk_alignment_set_padding (GTK_ALIGNMENT (frame3_alignment), 5, 5, 5, 5);
 
 	frame_label = gtk_label_new (_("<b>Background Music</b>"));
-	gtk_frame_set_label_widget (GTK_FRAME (frame2), frame_label);
+	gtk_frame_set_label_widget (GTK_FRAME (frame3), frame_label);
 	gtk_label_set_use_markup (GTK_LABEL (frame_label), TRUE);
 	gtk_misc_set_padding (GTK_MISC (frame_label), 2, 2);
 
 	/* Add the liststore */
 	vbox2 = gtk_vbox_new (FALSE, 4);
 	gtk_widget_show (vbox2);
-	gtk_container_add (GTK_CONTAINER (frame2_alignment), vbox2);
+	gtk_container_add (GTK_CONTAINER (frame3_alignment), vbox2);
 	
 	scrolledwindow1 = gtk_scrolled_window_new (NULL, NULL);
 	gtk_box_pack_start (GTK_BOX (vbox2), scrolledwindow1, TRUE, TRUE, 0);
@@ -670,7 +746,7 @@ img_window_struct *img_create_window (void)
 
 	/* Create the thumbnail viewer */
 	thumb_scrolledwindow = gtk_scrolled_window_new (NULL, NULL);
-	gtk_widget_set_size_request( thumb_scrolledwindow, -1, 125 );
+	gtk_widget_set_size_request( thumb_scrolledwindow, -1, 115 );
 	g_signal_connect( G_OBJECT( thumb_scrolledwindow ), "scroll-event",
 					  G_CALLBACK( img_scroll_thumb ), img_struct );
 	gtk_container_add( GTK_CONTAINER( eventbox ), thumb_scrolledwindow );

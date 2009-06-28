@@ -89,6 +89,7 @@ struct _img_window_struct
 	GtkWidget	*transition_type;
 	GtkWidget	*random_button;
 	GtkWidget	*duration;				// Duration spin button
+	GtkWidget	*stop_point_duration;
 	GtkWidget	*trans_duration;
 	GtkWidget	*slide_selected_data;
 	GtkWidget	*type_data;
@@ -139,6 +140,8 @@ struct _img_window_struct
 	/* Preview related variables */
   	gboolean	preview_is_running;
   	GtkWidget	*import_slide_chooser;
+	GtkWidget	*img_current_stop_point_entry;
+	GtkWidget	*total_stop_points_label;
   	GtkWidget	*total_slide_number_label;
 	GtkWidget	*slide_number_entry;
 

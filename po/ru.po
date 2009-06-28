@@ -1,84 +1,74 @@
-# German translations for imagination package.
-# Copyright (C) 2009 Giuseppe Torelli
+# Russian translations for imagination package.
+# Copyright (C) 2009 THE imagination'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the imagination package.
-# Enrico Tröger <enrico@xfce.org>, 2009.
-# Fabian Nowak <timystery@arcor.de>, 2009.
-#
-# Enrico: Diese Übersetzung ist eher ein Entwurf, viele Sachen können noch stark
-#  verbessert werden!)
-# Fabian: Insbesondere könnte man mit den "Imagination Projekten" diskutieren,
-#  die VOB/OGG/FLV Exportdinger sind ebenso noch etwas unklar,
-#  z.B. "Als OGG exportieren" oder "In OGG-Datei exportieren" oder ähnlich.
-#  Die zahl-reichen Binde-Striche bei ein-fachen Worten sind auch etwas unschön
+# Dmitry Levin <levin.dmi@gmail.com>, 2009.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: imagination 1.0\n"
+"Project-Id-Version: imagination 1.5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-06-28 20:32+0200\n"
-"PO-Revision-Date: 2009-06-23 22:31+0200\n"
-"Last-Translator: Fabian Nowak <ttimystery@arcor.de>\n"
-"Language-Team: German\n"
+"PO-Revision-Date: 2009-06-28 20:30+0200\n"
+"Last-Translator: Dmitry Levin <levin.dmi@gmail.com>\n"
+"Language-Team: Russian\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
+"Content-Type: text/plain; charset=ASCII\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Poedit-Country: GERMANY\n"
-"X-Poedit-SourceCharset: utf-8\n"
-"X-Poedit-Language: German\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%"
+"10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
 #: ../imagination.desktop.in.in.h:1
 msgid "A DVD slideshow maker"
-msgstr "Programm zum Erzeugen einer DVD-Diaschau"
+msgstr ""
 
 #: ../imagination.desktop.in.in.h:2
 msgid "A lightweight DVD slideshow maker using GTK+2"
-msgstr "Ein kleines und schnelles GTK-Programm zum Erzeugen einer DVD-Diaschau"
+msgstr ""
 
 #: ../imagination.desktop.in.in.h:3
 msgid "Imagination"
-msgstr "Imagination"
+msgstr ""
 
 #: ../src/audio.c:106
 #, c-format
 msgid "Playing %s..."
-msgstr "Spiele »%s« ab ..."
+msgstr ""
 
 #: ../src/audio.c:126 ../src/main-window.c:700
 msgid "Play the selected file"
-msgstr "Ausgewählte Datei abspielen"
+msgstr ""
 
 #: ../src/audio.c:134
 msgid "Stop the playback"
-msgstr "Widergabe anhalten"
+msgstr ""
 
 #: ../src/main-window.c:157
 msgid "_Slideshow"
-msgstr "_Diaschau"
+msgstr ""
 
 #: ../src/main-window.c:193
 msgid "_Preview"
-msgstr "_Vorschau"
+msgstr ""
 
 #: ../src/main-window.c:201
 msgid "Export"
-msgstr "_Exportieren"
+msgstr ""
 
 #: ../src/main-window.c:217
 msgid "_Slide"
-msgstr "_Dia"
+msgstr ""
 
 #: ../src/main-window.c:223
 msgid "Import p_ictures"
-msgstr "_Bilder importieren"
+msgstr ""
 
 #: ../src/main-window.c:231
 msgid "Import _music"
-msgstr "_Musik importieren"
+msgstr ""
 
 #: ../src/main-window.c:239
 msgid "Dele_te"
-msgstr "Lö_schen"
+msgstr ""
 
 #: ../src/main-window.c:251
 msgid "Rotate _clockwise"
@@ -90,40 +80,39 @@ msgstr ""
 
 #: ../src/main-window.c:275
 msgid "Un_select all"
-msgstr "A_uswahl afheben"
+msgstr ""
 
 #: ../src/main-window.c:280
 msgid "_Help"
-msgstr "_Hilfe"
+msgstr ""
 
 #: ../src/main-window.c:299 ../src/new_slideshow.c:54
 msgid "Create a new slideshow"
-msgstr "Neue Diaschau anlegen"
+msgstr ""
 
 #: ../src/main-window.c:304
 msgid "Open a slideshow"
-msgstr "Eine Diaschau öffnen"
+msgstr ""
 
 #: ../src/main-window.c:309
 msgid "Save the slideshow"
-msgstr "Die Diaschau speichern"
+msgstr ""
 
 #: ../src/main-window.c:319
 msgid "Import pictures"
-msgstr "Bilder importieren"
+msgstr ""
 
 #: ../src/main-window.c:325
 msgid "Import music"
-msgstr "Musik importieren"
+msgstr ""
 
 #: ../src/main-window.c:330
 msgid "Delete the selected slides"
-msgstr "Ausgewählte Dias löschen"
+msgstr ""
 
 #: ../src/main-window.c:339
-#, fuzzy
 msgid "Rotate the slide clockwise"
-msgstr "Die Diaschau speichern"
+msgstr ""
 
 #: ../src/main-window.c:348
 msgid "Rotate the slide counter-clockwise"
@@ -131,100 +120,94 @@ msgstr ""
 
 #: ../src/main-window.c:356 ../src/callbacks.c:1084
 msgid "Starts the preview"
-msgstr "Startet die Vorschau"
+msgstr ""
 
 #: ../src/main-window.c:364
-#, fuzzy
 msgid "Goto first slide"
-msgstr "Dias importieren"
+msgstr ""
 
 #: ../src/main-window.c:369
-#, fuzzy
 msgid "Goto previous selected slide"
-msgstr "Ausgewählte Dias löschen"
+msgstr ""
 
 #: ../src/main-window.c:385 ../src/main-window.c:606
 msgid " of "
 msgstr ""
 
 #: ../src/main-window.c:396
-#, fuzzy
 msgid "Goto next selected slide"
-msgstr "Ausgewählte Dias löschen"
+msgstr ""
 
 #: ../src/main-window.c:401
-#, fuzzy
 msgid "Goto last slide"
-msgstr "Dias importieren"
+msgstr ""
 
 #: ../src/main-window.c:443
 msgid "Zoom Factor: "
 msgstr ""
 
 #: ../src/main-window.c:470
-#, fuzzy
 msgid "<b>Slide Settings</b>"
-msgstr "<b>Dia-Einstellungen</b>"
+msgstr ""
 
 #. Transition types label
 #: ../src/main-window.c:480
 msgid "Transition Type:"
-msgstr "Überblend-Effekt:"
+msgstr ""
 
 #: ../src/main-window.c:500
 msgid "Random"
-msgstr "Zufällig"
+msgstr ""
 
 #: ../src/main-window.c:501
 msgid "Imagination randomly decides which transition to apply"
-msgstr "Imagination wählt einen Effekt zufällig aus"
+msgstr ""
 
 #. Transition duration
 #: ../src/main-window.c:507
 msgid "Transition Speed:"
-msgstr "Überblendgeschwindigkeit:"
+msgstr ""
 
 #: ../src/main-window.c:518
 msgid "Fast"
-msgstr "Schnell"
+msgstr ""
 
 #: ../src/main-window.c:520
 msgid "Normal"
-msgstr "Normal"
+msgstr ""
 
 #: ../src/main-window.c:522
 msgid "Slow"
-msgstr "Langsam"
+msgstr ""
 
 #. Slide duration
 #: ../src/main-window.c:529
 msgid "Slide Duration in sec:"
-msgstr "Dia-Anzeigedauer (in Sek.):"
+msgstr ""
 
 #. Slide Selected
 #: ../src/main-window.c:540
 msgid "Slide Number:"
-msgstr "Dia-Nummer:"
+msgstr ""
 
 #. Slide Resolution
 #: ../src/main-window.c:549
 msgid "Resolution:"
-msgstr "Auflösung:"
+msgstr ""
 
 #. Slide Type
 #: ../src/main-window.c:558
 msgid "Type:"
-msgstr "Typ:"
+msgstr ""
 
 #. Slide Total Duration
 #: ../src/main-window.c:567
 msgid "Slideshow Length:"
-msgstr "Länge der Diaschau:"
+msgstr ""
 
 #: ../src/main-window.c:584
-#, fuzzy
 msgid "<b>Slide Motion</b>"
-msgstr "<b>Dia-Einstellungen</b>"
+msgstr ""
 
 #: ../src/main-window.c:627
 msgid "Add"
@@ -236,27 +219,27 @@ msgstr ""
 
 #: ../src/main-window.c:641
 msgid "<b>Background Music</b>"
-msgstr "<b>Hintergrundmusik</b>"
+msgstr ""
 
 #: ../src/main-window.c:684
 msgid "Music Duration:"
-msgstr "Dauer:"
+msgstr ""
 
 #: ../src/main-window.c:708
 msgid "Delete the selected file"
-msgstr "Die ausgewählte Datei löschen"
+msgstr ""
 
 #: ../src/main-window.c:715
 msgid "Move the selected file up"
-msgstr "Die ausgewählte Datei nach oben verschieben"
+msgstr ""
 
 #: ../src/main-window.c:722
 msgid "Move the selected file down"
-msgstr "Die ausgewählte Datei nach unten verschieben"
+msgstr ""
 
 #: ../src/main-window.c:729
 msgid "Clear all files"
-msgstr "Alle Dateien entfernen"
+msgstr ""
 
 #: ../src/main-window.c:818 ../src/callbacks.c:838
 msgid "Sorry,I could not perform the operation!"
@@ -264,45 +247,44 @@ msgstr ""
 
 #: ../src/main-window.c:1236 ../src/main-window.c:1238 ../src/support.c:138
 msgid "None"
-msgstr "Keiner"
+msgstr ""
 
 #: ../src/callbacks.c:111
 #, c-format
 msgid "Please wait, importing slide %d out of %d"
-msgstr "Bitte warten Sie, während Dia %d von %d importiert wird"
+msgstr ""
 
 #: ../src/callbacks.c:178
 msgid "Please choose the audio files to import"
-msgstr "Wählen Sie Musikdateien zum Importieren"
+msgstr ""
 
 #: ../src/callbacks.c:189
 msgid "All audio files"
-msgstr "Alle Musikdateien"
+msgstr ""
 
 #: ../src/callbacks.c:198 ../src/callbacks.c:278
 msgid "All files"
-msgstr "Alle Dateien"
+msgstr ""
 
 #: ../src/callbacks.c:252
 msgid "Import slides, use SHIFT key for multiple select"
-msgstr "Dias Importieren (Shift-Taste für Mehrfachauswahl benutzen)"
+msgstr ""
 
 #: ../src/callbacks.c:264
 msgid "All image files"
-msgstr "Alle Bilddateien"
+msgstr ""
 
 #: ../src/callbacks.c:381 ../src/callbacks.c:1181
 msgid "You didn't save your slideshow yet. Are you sure you want to close it?"
 msgstr ""
-"Sie haben die Diaschau noch nicht gespeichert. Sind Sie sicher, dass Sie "
-"diese schließen möchten?"
 
 #: ../src/callbacks.c:438
 #, c-format
 msgid "%d x %d pixels"
 msgid_plural "%d x %d pixels"
-msgstr[0] "%d x %d Bildpunkte"
-msgstr[1] "%d x %d Bildpunkte"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
 
 #: ../src/callbacks.c:521
 msgid "An error occurred while trying to rotate the slide:"
@@ -311,177 +293,151 @@ msgstr ""
 #: ../src/callbacks.c:572
 msgid "translator-credits"
 msgstr ""
-"Enrico Tröger <enrico@xfce.org>\n"
-"Fabian Nowak <timystery@arcor.de>"
 
 #: ../src/callbacks.c:1094
 msgid "Stops the preview"
-msgstr "Hält die Vorschau an"
+msgstr ""
 
 #: ../src/callbacks.c:1140
 msgid "Load an Imagination slideshow project"
-msgstr "Eine Imagination Diaschau laden"
+msgstr ""
 
 #: ../src/callbacks.c:1141
 msgid "Save an Imagination slideshow project"
-msgstr "Eine Imagination Diaschau speichern"
+msgstr ""
 
 #. Display propert title depending on the callback that is calling this function.
 #: ../src/new_slideshow.c:54
 msgid "Project properties"
-msgstr "Projekteigenschaften"
+msgstr ""
 
 #: ../src/new_slideshow.c:79
 msgid "<b>Slideshow Settings</b>"
-msgstr "<b>Diaschau-Einstellungen</b>"
+msgstr ""
 
 #: ../src/new_slideshow.c:112
 msgid "<b>Video Format</b>"
-msgstr "<b>Videoformat</b>"
+msgstr ""
 
 #: ../src/new_slideshow.c:124
 msgid "<b>Advanced Settings</b>"
-msgstr "<b>Erweiterte Einstellungen</b>"
+msgstr ""
 
 #: ../src/new_slideshow.c:131
 msgid "Rescale images to fit desired aspect ratio"
-msgstr "Bilder in das Format einpassen"
+msgstr ""
 
 #: ../src/new_slideshow.c:139
 msgid "Select background color:"
-msgstr "Hintergrundfarbe:"
+msgstr ""
 
 #: ../src/slideshow_project.c:132
 msgid "This is not an Imagination project file!"
-msgstr "Dies ist keine Imagination Projektdatei."
+msgstr ""
 
 #: ../src/support.c:98
 #, c-format
 msgid "Welcome to Imagination - %d transitions loaded."
-msgstr "Willkommen zu Imagination - %d Überblend-Effekte geladen"
+msgstr ""
 
 #: ../src/support.c:105
 #, c-format
 msgid "%d slides selected"
-msgstr "%d Dias ausgewählt"
+msgstr ""
 
 #: ../src/support.c:113
 #, c-format
 msgid "%d slide imported %s"
 msgid_plural "%d slides imported %s"
-msgstr[0] "%d Dia importiert %s"
-msgstr[1] "%d Dias importiert %s"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
 
 #: ../src/support.c:113
 msgid " - Use the CTRL key to select/unselect or SHIFT for multiple select"
 msgstr ""
-" - Benutzen Sie zum Auswählen die Strg-Taste und die Shift-Taste für eine "
-"Mehrfachauswahl"
 
 #: ../src/support.c:232
 msgid "Please choose the slideshow project filename"
-msgstr "Projektnamen für die Diaschau wählen"
+msgstr ""
 
 #: ../src/export.c:204
 msgid "<b>Export Settings</b>"
-msgstr "<b>Export-Einstellungen</b>"
+msgstr ""
 
 #: ../src/export.c:218
 msgid "Filename of the slideshow:"
-msgstr "Dateiname für die Diaschau:"
+msgstr ""
 
 #: ../src/export.c:349
 msgid "Exporting the slideshow"
-msgstr "Diaschau wird exportiert"
+msgstr ""
 
 #: ../src/export.c:360
 msgid "Preparing for export ..."
-msgstr "Export vorbereiten ..."
+msgstr ""
 
 #: ../src/export.c:371
 msgid "Overall progress:"
-msgstr "Gesamtfortschritt: "
+msgstr ""
 
 #: ../src/export.c:435 ../src/export.c:793
 #, c-format
 msgid "Slide %d export progress:"
-msgstr "Exportfortschritt bei Dia %d:"
+msgstr ""
 
 #: ../src/export.c:651
 msgid "Failed to launch the encoder!"
-msgstr "Konnte den Encoder nicht starten."
+msgstr ""
 
 #: ../src/export.c:791
 #, c-format
 msgid "Final transition export progress:"
-msgstr "Exportfortschritt beim letzten Dia:"
+msgstr ""
 
 #. Additional options - <format> only
 #. This function call should be the first thing exporter does, since this
 #. * function will take some preventive measures.
 #: ../src/export.c:892 ../src/export.c:955
 msgid "VOB export"
-msgstr "VOB exportieren"
+msgstr ""
 
 #: ../src/export.c:967 ../src/export.c:1051
 msgid "<b>Television Format</b>"
-msgstr "<b>Fernsehformat</b>"
+msgstr ""
 
 #: ../src/export.c:974 ../src/export.c:1058
 msgid "Normal 4:3"
-msgstr "Normal 4:3"
+msgstr ""
 
 #: ../src/export.c:979 ../src/export.c:1063
 msgid "Widescreen 16:9"
-msgstr "Breitbild 16:9"
+msgstr ""
 
 #. This function call should be the first thing exporter does, since this
 #. * function will take some preventive measures.
 #: ../src/export.c:1039
 msgid "OGG export"
-msgstr "OGG exportieren"
+msgstr ""
 
 #: ../src/export.c:1069 ../src/export.c:1163
 msgid "<b>Video Quality:</b>"
-msgstr "<b>Videoqualität</b>"
+msgstr ""
 
 #: ../src/export.c:1076 ../src/export.c:1170
 msgid "Low"
-msgstr "Niedrig"
+msgstr ""
 
 #: ../src/export.c:1080 ../src/export.c:1174
 msgid "Medium"
-msgstr "Mittel"
+msgstr ""
 
 #: ../src/export.c:1085 ../src/export.c:1179
 msgid "High"
-msgstr "Hoch"
+msgstr ""
 
 #. This function call should be the first thing exporter does, since this
 #. * function will take some preventive measures.
 #: ../src/export.c:1151
 msgid "FLV export"
-msgstr "FLV exportieren"
-
-#~ msgid "Jump to the entered slide number"
-#~ msgstr "Springe zu angegebenem Dia"
-
-#~ msgid "Export the DVD slideshow"
-#~ msgstr "Die DVD-Diaschau exportieren"
-
-#~ msgid ""
-#~ "The length of the audio track is longer than the video one. Do you want "
-#~ "to continue?"
-#~ msgstr "Die Audiospur ist länger als die Videosput. Möchten Sie fortfahren?"
-
-#~ msgid "Export the slideshow as:"
-#~ msgstr "Diaschau exportieren als:"
-
-#~ msgid "Import the audio files"
-#~ msgstr "Audiodateien importieren"
-
-#~ msgid "Preview the slideshow"
-#~ msgstr "Diaschau testen"
-
-#~ msgid "Clear the selection"
-#~ msgstr "Ausgewählte Dias löschen"
+msgstr ""
