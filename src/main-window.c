@@ -100,10 +100,7 @@ img_window_struct *img_create_window (void)
 	GtkWidget *table;
 	GtkWidget *duration_label;
 	GtkWidget *trans_duration_label;
-	GtkWidget *selected_slide;
-	GtkWidget *resolution;
 	GtkWidget *total_time;
-	GtkWidget *type;
 	GtkWidget *hbox_stop_points, *stop_points_label, *left_point_button,*right_point_button;
 	GtkWidget *hbox_time_offset, *time_offset_label, *add_stop_point_button, *remove_stop_point_button;
 	GtkWidget *hbox_music_label;
@@ -408,7 +405,7 @@ img_window_struct *img_create_window (void)
 	gtk_box_pack_start (GTK_BOX (vbox1), hbox, TRUE, TRUE, 0);
 	
 	/* This is a job for..... Tadej: put the label and the zoom scale
-	 * inside the align so when user enalrge the window they behave like the image area */
+	 * inside the align so when user enlarge the window it behaves like the image area */
 	GtkWidget *vbox_zoom = gtk_vbox_new(FALSE,0);
 	gtk_box_pack_start (GTK_BOX (hbox), vbox_zoom, TRUE, TRUE, 0);
 
@@ -482,7 +479,7 @@ img_window_struct *img_create_window (void)
 	gtk_misc_set_alignment (GTK_MISC (transition_label), 0, -1);
 
 	/* Slide selected, slide resolution, slide type and slide total duration */
-	table = gtk_table_new (7, 2, FALSE);
+	table = gtk_table_new (4, 2, FALSE);
 	gtk_box_pack_start (GTK_BOX (vbox_info_slide), table, TRUE, TRUE, 0);
 	gtk_table_set_row_spacings (GTK_TABLE (table), 4);
 	gtk_table_set_col_spacings (GTK_TABLE (table), 4);
@@ -536,40 +533,13 @@ img_window_struct *img_create_window (void)
 	gtk_spin_button_set_numeric(GTK_SPIN_BUTTON (img_struct->duration),TRUE);
 	g_signal_connect (G_OBJECT (img_struct->duration),"value-changed",G_CALLBACK (img_spinbutton_value_changed),img_struct);
 
-	/* Slide Selected */
-	selected_slide = gtk_label_new (_("Slide Number:"));
-	gtk_table_attach (GTK_TABLE (table), selected_slide, 0, 1, 3, 4,(GtkAttachOptions) (GTK_FILL),(GtkAttachOptions) (0), 0, 0);
-	gtk_misc_set_alignment (GTK_MISC (selected_slide), 0, 0.5);
-
-	img_struct->slide_selected_data = gtk_label_new ("");
-	gtk_table_attach (GTK_TABLE (table), img_struct->slide_selected_data, 1, 2, 3, 4,(GtkAttachOptions) (GTK_FILL),(GtkAttachOptions) (0), 0, 0);
-	gtk_misc_set_alignment (GTK_MISC (img_struct->slide_selected_data), 0, 0.5);
-
-	/* Slide Resolution */
-	resolution = gtk_label_new (_("Resolution:"));
-	gtk_table_attach (GTK_TABLE (table), resolution, 0, 1, 4, 5,(GtkAttachOptions) (GTK_FILL),(GtkAttachOptions) (0), 0, 0);
-	gtk_misc_set_alignment (GTK_MISC (resolution), 0, 0.5);
-
-	img_struct->resolution_data = gtk_label_new ("");
-	gtk_table_attach (GTK_TABLE (table), img_struct->resolution_data, 1, 2, 4, 5,(GtkAttachOptions) (GTK_FILL),(GtkAttachOptions) (0), 0, 0);
-	gtk_misc_set_alignment (GTK_MISC (img_struct->resolution_data), 0, 0.5);
-
-	/* Slide Type */
-	type = gtk_label_new (_("Type:"));
- 	gtk_table_attach (GTK_TABLE (table), type, 0, 1, 5, 6,(GtkAttachOptions) (GTK_FILL),(GtkAttachOptions) (0), 0, 0);
-	gtk_misc_set_alignment (GTK_MISC (type), 0, 0.5);
-
-	img_struct->type_data = gtk_label_new ("");
-	gtk_table_attach (GTK_TABLE (table), img_struct->type_data, 1, 2, 5, 6,(GtkAttachOptions) (GTK_FILL),(GtkAttachOptions) (0), 0, 0);
-	gtk_misc_set_alignment (GTK_MISC (img_struct->type_data), 0, 0.5);
-
 	/* Slide Total Duration */
 	total_time = gtk_label_new (_("Slideshow Length:"));
-	gtk_table_attach (GTK_TABLE (table), total_time, 0, 1, 6, 7,(GtkAttachOptions) (GTK_FILL),(GtkAttachOptions) (0), 0, 0);
+	gtk_table_attach (GTK_TABLE (table), total_time, 0, 1, 3, 4,(GtkAttachOptions) (GTK_FILL),(GtkAttachOptions) (0), 0, 0);
 	gtk_misc_set_alignment (GTK_MISC (total_time), 0, 0.5);
 
 	img_struct->total_time_data = gtk_label_new ("");
-	gtk_table_attach (GTK_TABLE (table), img_struct->total_time_data, 1, 2, 6, 7,(GtkAttachOptions) (GTK_FILL),(GtkAttachOptions) (0), 0, 0);
+	gtk_table_attach (GTK_TABLE (table), img_struct->total_time_data, 1, 2, 3, 4,(GtkAttachOptions) (GTK_FILL),(GtkAttachOptions) (0), 0, 0);
 	gtk_misc_set_alignment (GTK_MISC (img_struct->total_time_data), 0, 0.5);
 
 	/* Slide motion frame */
@@ -868,8 +838,8 @@ void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *im
 	GtkTreeIter iter;
 	GtkTreePath *path = NULL;
 	gint dummy, nr_selected = 0;
-	gchar *selected_slide = NULL;
 	GList *selected = NULL;
+	gchar *slide_info_msg = NULL;
 	slide_struct *info_slide;
 
 	if (img->preview_is_running || img->export_is_running)
@@ -889,14 +859,11 @@ void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *im
 		gtk_widget_set_sensitive(img->duration,			FALSE);
 		gtk_widget_set_sensitive(img->transition_type,	FALSE);
 		gtk_widget_set_sensitive(img->random_button,	FALSE);
-		gtk_label_set_text(GTK_LABEL (img->type_data),"");
-		gtk_label_set_text(GTK_LABEL (img->resolution_data),"");
-		gtk_label_set_text(GTK_LABEL (img->slide_selected_data),"");
 		if (img->slides_nr == 0)
 			gtk_label_set_text(GTK_LABEL (img->total_time_data),"");
 		return;
 	}
-	if (nr_selected >= 1)
+	if (nr_selected > 1)
 		img_set_statusbar_message(img,nr_selected);
 	else
 		gtk_statusbar_pop(GTK_STATUSBAR(img->statusbar), img->context_id);
@@ -907,7 +874,6 @@ void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *im
 	gtk_widget_set_sensitive(img->random_button,	TRUE);
 
 	dummy = gtk_tree_path_get_indices(selected->data)[0]+1;
-	selected_slide = g_strdup_printf("%d",dummy);
 	gtk_tree_model_get_iter(model,&iter,selected->data);
 	g_list_foreach (selected, (GFunc)gtk_tree_path_free, NULL);
 	g_list_free (selected);
@@ -952,10 +918,6 @@ void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *im
 	gtk_spin_button_set_value(GTK_SPIN_BUTTON(img->duration), info_slide->duration);
 	g_signal_handlers_unblock_by_func((gpointer)img->duration, (gpointer)img_spinbutton_value_changed, img);
 
-	gtk_label_set_text(GTK_LABEL (img->slide_selected_data),selected_slide);
-	g_free(selected_slide);
-	gtk_label_set_text(GTK_LABEL (img->type_data),info_slide->type);
-	gtk_label_set_text(GTK_LABEL (img->resolution_data),info_slide->resolution);
 	/* Added missing total label "setter". Current method is not the most
 	 * efficient one, since we're recalculating the whole duration when we
 	 * only need to display it. BTW, is total duration label hidding needed?
@@ -966,7 +928,11 @@ void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *im
 	if (nr_selected > 1)
 		img_set_statusbar_message(img,nr_selected);
 	else
-		gtk_statusbar_push(GTK_STATUSBAR (img->statusbar),img->context_id,info_slide->filename);
+	{
+		slide_info_msg = g_strdup_printf("%s    %s: %s    %s: %s",info_slide->filename, _("Resolution"), info_slide->resolution, _("Type"), info_slide->type);
+		gtk_statusbar_push(GTK_STATUSBAR (img->statusbar), img->context_id, slide_info_msg);
+		g_free(slide_info_msg);
+	}
 
 	img->slide_pixbuf = img_scale_pixbuf(img,info_slide->filename);
 	gtk_image_set_from_pixbuf(GTK_IMAGE (img->image_area),img->slide_pixbuf);

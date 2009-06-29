@@ -91,11 +91,9 @@ struct _img_window_struct
 	GtkWidget	*duration;				// Duration spin button
 	GtkWidget	*stop_point_duration;
 	GtkWidget	*trans_duration;
-	GtkWidget	*slide_selected_data;
-	GtkWidget	*type_data;
+	//GtkWidget	*slide_selected_data;
 	GtkWidget	*total_time_data;
 	GtkWidget	*filename_data;
-	GtkWidget	*resolution_data;
 //	GtkWidget	*thumb_scrolledwindow;
   	GtkWidget	*thumbnail_iconview;
   	GtkWidget	*statusbar;
