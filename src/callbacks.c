@@ -29,7 +29,8 @@ static void img_swap_toolbar_images( img_window_struct *, gboolean);
 static void img_clean_after_preview(img_window_struct *);
 static void img_increase_progressbar(img_window_struct *, gint);
 static void img_about_dialog_activate_link(GtkAboutDialog * , const gchar *, gpointer );
-
+static GdkPixbuf *img_rotate_pixbuf_c( GdkPixbuf *, GtkProgressBar *);
+static GdkPixbuf *img_rotate_pixbuf_cc( GdkPixbuf *, GtkProgressBar *);
 void img_set_window_title(img_window_struct *img, gchar *text)
 {
 	gchar *title = NULL;
@@ -501,7 +502,9 @@ void img_rotate_selected_slide(GtkWidget *button, img_window_struct *img)
 	model = gtk_icon_view_get_model(GTK_ICON_VIEW(img->thumbnail_iconview));
 	selected = gtk_icon_view_get_selected_items(GTK_ICON_VIEW(img->thumbnail_iconview));
 	if (selected == NULL)
-		return;
+		return
+
+	gtk_widget_show(img->progress_bar);
 	gtk_tree_model_get_iter(model,&iter,selected->data);
 	gtk_tree_path_free(selected->data);
 	g_list_free (selected);
@@ -510,12 +513,15 @@ void img_rotate_selected_slide(GtkWidget *button, img_window_struct *img)
 	/* Load the image, save a copy in the temp dir, rotate it and display it in the image area */
 	thumb = gdk_pixbuf_new_from_file(info_slide->filename, NULL);
 	if (button == img->rotate_left_button)
-		rotated_thumb = gdk_pixbuf_rotate_simple(thumb, 90);
+		rotated_thumb = img_rotate_pixbuf_c( thumb, GTK_PROGRESS_BAR( img->progress_bar ) );
 	else
-		rotated_thumb = gdk_pixbuf_rotate_simple(thumb, 270);
+		rotated_thumb = img_rotate_pixbuf_cc( thumb, GTK_PROGRESS_BAR( img->progress_bar ) );
 	g_object_unref(thumb);
 
+	gtk_widget_hide(img->progress_bar);
+
 	handle = g_file_open_tmp("img-XXXXXX.jpg", &filename, NULL);
+	close(handle);
 	if ( ! gdk_pixbuf_save(rotated_thumb, filename, "jpeg",  &error, NULL))
 	{
 		dialog = gtk_message_dialog_new(GTK_WINDOW(img->imagination_window),GTK_DIALOG_MODAL,GTK_MESSAGE_ERROR,GTK_BUTTONS_OK,_("An error occurred while trying to rotate the slide:"));
@@ -525,16 +531,13 @@ void img_rotate_selected_slide(GtkWidget *button, img_window_struct *img)
 		gtk_widget_destroy (GTK_WIDGET (dialog));
 		g_error_free(error);
 		g_free(filename);
-		close (handle);
 		return;
 	}
-	close(handle);
 	g_object_unref(rotated_thumb);
 
 	if (info_slide->slide_original_filename == NULL)
-		info_slide->slide_original_filename = g_strdup(info_slide->filename);
+		info_slide->slide_original_filename = info_slide->filename;
 
-	g_free(info_slide->filename);
 	info_slide->filename = filename;
 	img->rotated_files = g_slist_append(img->rotated_files, g_strdup(filename));
 
@@ -546,6 +549,112 @@ void img_rotate_selected_slide(GtkWidget *button, img_window_struct *img)
 	thumb = gdk_pixbuf_new_from_file_at_scale(filename, 93, 70, TRUE, NULL);
 	gtk_list_store_set (img->thumbnail_model, &iter, 0, thumb, -1);
 	g_object_unref (thumb);
+}
+
+/* Rotate clockwise */
+static GdkPixbuf *img_rotate_pixbuf_c( GdkPixbuf      *original,
+									   GtkProgressBar *progress )
+{
+	GdkPixbuf     *new;
+	gint           w, h, r1, r2, channels, bps;
+	GdkColorspace  colorspace;
+	gboolean       alpha;
+	guchar        *pixels1, *pixels2;
+	gint           i, j;
+
+	/* Get data from source */
+	g_object_get( G_OBJECT( original ), "width", &w,
+										"height", &h,
+										"rowstride", &r1,
+										"n_channels", &channels,
+										"bits_per_sample", &bps,
+										"colorspace", &colorspace,
+										"has_alpha", &alpha,
+										"pixels", &pixels1,
+										NULL );
+
+	/* Create new rotated image */
+	new = gdk_pixbuf_new( colorspace, alpha, bps, h, w );
+	g_object_get( G_OBJECT( new ), "rowstride", &r2,
+								   "pixels", &pixels2,
+								   NULL );
+
+	/* Copy data, applying transormation along the way */
+	for( j = 0; j < h; j++ )
+	{
+		for( i = 0; i < w; i++ )
+		{
+			int source = i * channels + r1 * j;
+			int dest   = j * channels + r2 * ( w - i - 1 );
+			int n;
+
+			for( n = 0; n < channels; n++ )
+				pixels2[dest + n] = pixels1[source + n];
+		}
+
+		if( j % 100 )
+			continue;
+
+		/* Update progress bar */
+		gtk_progress_bar_set_fraction( progress, (gdouble)( j + 1 ) / h );
+		while( gtk_events_pending() )
+			gtk_main_iteration();
+	}
+
+	return( new );
+}
+
+/* Rotate counter-clockwise */
+static GdkPixbuf *img_rotate_pixbuf_cc( GdkPixbuf      *original,
+										GtkProgressBar *progress )
+{
+	GdkPixbuf     *new;
+	gint           w, h, r1, r2, channels, bps;
+	GdkColorspace  colorspace;
+	gboolean       alpha;
+	guchar        *pixels1, *pixels2;
+	gint           i, j;
+
+	/* Get data from source */
+	g_object_get( G_OBJECT( original ), "width", &w,
+										"height", &h,
+										"rowstride", &r1,
+										"n_channels", &channels,
+										"bits_per_sample", &bps,
+										"colorspace", &colorspace,
+										"has_alpha", &alpha,
+										"pixels", &pixels1,
+										NULL );
+
+	/* Create new rotated image */
+	new = gdk_pixbuf_new( colorspace, alpha, bps, h, w );
+	g_object_get( G_OBJECT( new ), "rowstride", &r2,
+								   "pixels", &pixels2,
+								   NULL );
+
+	/* Copy data, applying transormation along the way */
+	for( j = 0; j < h; j++ )
+	{
+		for( i = 0; i < w; i++ )
+		{
+			int source = i * channels + r1 * j;
+			int dest   = ( h - j - 1 ) * channels + r2 * i;
+			int n;
+
+			for( n = 0; n < channels; n++ )
+				pixels2[dest + n] = pixels1[source + n];
+		}
+
+		if( j % 100 )
+			continue;
+
+		/* Update progress bar */
+		gtk_progress_bar_set_fraction( progress, (gdouble)( j + 1 ) / h );
+		while( gtk_events_pending() )
+			gtk_main_iteration();
+	}
+
+	return( new );
 }
 
 void img_show_about_dialog (GtkMenuItem *item,img_window_struct *img_struct)

@@ -222,7 +222,9 @@ img_window_struct *img_create_window (void)
 	gtk_widget_add_accelerator (import_menu,"activate",accel_group,GDK_i,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
 	g_signal_connect (G_OBJECT (import_menu),"activate",G_CALLBACK (img_add_slides_thumbnails),img_struct);
 
-	image_menu = img_load_icon ("imagination-import.png",GTK_ICON_SIZE_MENU);
+	pixbuf = gtk_icon_theme_load_icon(icon_theme,"image", GTK_ICON_SIZE_MENU, 0, NULL);
+	image_menu = gtk_image_new_from_pixbuf(pixbuf);
+	g_object_unref(pixbuf);
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (import_menu),image_menu);
 	
 	import_audio_menu = gtk_image_menu_item_new_with_mnemonic (_("Import _music"));
@@ -230,7 +232,9 @@ img_window_struct *img_create_window (void)
 	gtk_widget_add_accelerator (import_audio_menu,"activate",accel_group,GDK_m,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
 	g_signal_connect (G_OBJECT (import_audio_menu),"activate",G_CALLBACK (img_select_audio_files_to_add),img_struct);
 
-	image_menu = img_load_icon ("imagination-audio.png",GTK_ICON_SIZE_MENU);
+	pixbuf = gtk_icon_theme_load_icon(icon_theme,"sound", GTK_ICON_SIZE_MENU, 0, NULL);
+	image_menu = gtk_image_new_from_pixbuf(pixbuf);
+	g_object_unref(pixbuf);
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (import_audio_menu),image_menu);
 
 	remove_menu = gtk_image_menu_item_new_with_mnemonic (_("Dele_te"));
@@ -310,13 +314,19 @@ img_window_struct *img_create_window (void)
 	gtk_widget_show (separatortoolitem);
 	gtk_container_add (GTK_CONTAINER (toolbar),separatortoolitem);
 
-	tmp_image = img_load_icon("imagination-import.png",GTK_ICON_SIZE_LARGE_TOOLBAR);
+	pixbuf = gtk_icon_theme_load_icon(icon_theme,"image", 20, 0, NULL);
+	tmp_image = gtk_image_new_from_pixbuf(pixbuf);
+	g_object_unref(pixbuf);
+
 	import_button = GTK_WIDGET (gtk_tool_button_new (tmp_image,""));
 	gtk_container_add (GTK_CONTAINER (toolbar),import_button);
 	gtk_widget_set_tooltip_text(import_button, _("Import pictures"));
 	g_signal_connect ((gpointer)import_button, "clicked", G_CALLBACK (img_add_slides_thumbnails),img_struct);
 
-	tmp_image = img_load_icon("imagination-audio.png",GTK_ICON_SIZE_LARGE_TOOLBAR);
+	pixbuf = gtk_icon_theme_load_icon(icon_theme,"sound", 20, 0, NULL);
+	tmp_image = gtk_image_new_from_pixbuf(pixbuf);
+	g_object_unref(pixbuf);
+
 	import_audio_button = GTK_WIDGET (gtk_tool_button_new (tmp_image,""));
 	gtk_container_add (GTK_CONTAINER (toolbar),import_audio_button);
 	gtk_widget_set_tooltip_text(import_audio_button, _("Import music"));
