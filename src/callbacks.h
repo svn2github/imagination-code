@@ -48,6 +48,7 @@ void img_choose_slideshow_filename(GtkWidget *,img_window_struct *);
 void img_close_slideshow(GtkWidget *,img_window_struct *);
 void img_select_audio_files_to_add ( GtkMenuItem* , img_window_struct *);
 void img_add_audio_files (gchar *, img_window_struct *);
+void img_increase_progressbar(img_window_struct *, gint);
 GSList *img_import_slides_file_chooser(img_window_struct *);
 void img_free_allocated_memory(img_window_struct *);
 gint img_ask_user_confirmation(img_window_struct *, gchar *);

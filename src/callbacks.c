@@ -27,7 +27,6 @@ static gboolean img_transition_timeout(img_window_struct *);
 static gboolean img_sleep_timeout(img_window_struct *);
 static void img_swap_toolbar_images( img_window_struct *, gboolean);
 static void img_clean_after_preview(img_window_struct *);
-static void img_increase_progressbar(img_window_struct *, gint);
 static void img_about_dialog_activate_link(GtkAboutDialog * , const gchar *, gpointer );
 static GdkPixbuf *img_rotate_pixbuf_c( GdkPixbuf *, GtkProgressBar *);
 static GdkPixbuf *img_rotate_pixbuf_cc( GdkPixbuf *, GtkProgressBar *);
@@ -102,7 +101,7 @@ void img_add_slides_thumbnails(GtkMenuItem *item, img_window_struct *img)
 	img->project_is_modified = TRUE;
 }
 
-static void img_increase_progressbar(img_window_struct *img, gint nr)
+void img_increase_progressbar(img_window_struct *img, gint nr)
 {
 	gchar *message;
 	gdouble percent;

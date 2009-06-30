@@ -153,6 +153,8 @@ void img_load_slideshow(img_window_struct *img)
 
 	/* Loads the thumbnails and set the slides info */
 	number = g_key_file_get_integer(img_key_file,"images","number", NULL);
+	img->slides_nr = number;
+	gtk_widget_show(img->progress_bar);
 	for (i = 1; i <= number; i++)
 	{
 		dummy = g_strdup_printf("image_%d",i);
@@ -161,9 +163,9 @@ void img_load_slideshow(img_window_struct *img)
 		thumb = img_load_pixbuf_from_file(slide_filename);
 		if (thumb)
 		{
-			speed 	=		g_key_file_get_integer(img_key_file,"transition speed",	dummy, NULL);
-			duration= 		g_key_file_get_integer(img_key_file,"slide duration",	dummy, NULL);
-			transition_id = g_key_file_get_integer(img_key_file,"transition type",	dummy, NULL);
+			speed 	=		g_key_file_get_integer(img_key_file, "transition speed",	dummy, NULL);
+			duration= 		g_key_file_get_integer(img_key_file, "slide duration",		dummy, NULL);
+			transition_id = g_key_file_get_integer(img_key_file, "transition type",		dummy, NULL);
 
 			/* Get the mem address of the transition */
 			spath = (gchar *)g_hash_table_lookup( table, GINT_TO_POINTER( transition_id ) );
@@ -175,21 +177,26 @@ void img_load_slideshow(img_window_struct *img)
 				gtk_list_store_append( img->thumbnail_model, &iter );
 				gtk_list_store_set( img->thumbnail_model, &iter, 0, thumb, 1, slide_info, -1 );
 				g_object_unref( G_OBJECT( thumb ) );
-				img->slides_nr++;
 
 				/* If we're loading the first slide, apply some of it's
 				 * data to final pseudo-slide */
 				if( img->slides_nr == 1 )
 				{
-					img->final_transition.speed = slide_info->speed;
+					img->final_transition.speed  = slide_info->speed;
 					img->final_transition.render = slide_info->render;
 				}
 			}
 		}
+		else
+		{
+			img->slides_nr--;
+			number--;
+		}
+		img_increase_progressbar(img, i);
 		g_free(slide_filename);
 		g_free(dummy);
 	}
-
+	gtk_widget_hide(img->progress_bar);
 	/* Loads the audio files in the liststore */
 	number = g_key_file_get_integer(img_key_file, "music", "number", NULL);
 	for (i = 1; i <= number; i++)

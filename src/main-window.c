@@ -143,7 +143,7 @@ img_window_struct *img_create_window (void)
 	g_signal_connect (G_OBJECT (img_struct->imagination_window),"delete-event",G_CALLBACK (img_quit_application),img_struct);
 	g_signal_connect (G_OBJECT (img_struct->imagination_window), "destroy", G_CALLBACK (gtk_main_quit), NULL );
 
-	vbox1 = gtk_vbox_new (FALSE, 2);
+	vbox1 = gtk_vbox_new (FALSE, 0);
 	gtk_widget_show (vbox1);
 	gtk_container_add (GTK_CONTAINER (img_struct->imagination_window), vbox1);
 
