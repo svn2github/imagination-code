@@ -1305,6 +1305,7 @@ void img_close_slideshow(GtkWidget *widget, img_window_struct *img)
 		if (GTK_RESPONSE_OK != img_ask_user_confirmation(img, _("You didn't save your slideshow yet. Are you sure you want to close it?")))
 			return;
 	}
+	img->project_is_modified = FALSE;
 	img_free_allocated_memory(img);
 	img_set_window_title(img,NULL);
 	img_set_statusbar_message(img,0);

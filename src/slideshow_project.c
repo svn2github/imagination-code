@@ -111,7 +111,7 @@ void img_load_slideshow(img_window_struct *img)
 	GKeyFile *img_key_file;
 	gchar *dummy, *slide_filename, *time;
 	GtkWidget *dialog;
-	gint number,i,transition_id, height, duration;
+	gint not_found = 0,number,i,transition_id, height, duration;
 	guint speed;
 	GtkTreeModel *model;
 	void (*render);
@@ -188,14 +188,13 @@ void img_load_slideshow(img_window_struct *img)
 			}
 		}
 		else
-		{
-			img->slides_nr--;
-			number--;
-		}
+			not_found++;
+
 		img_increase_progressbar(img, i);
 		g_free(slide_filename);
 		g_free(dummy);
 	}
+	img->slides_nr -= not_found;
 	gtk_widget_hide(img->progress_bar);
 	/* Loads the audio files in the liststore */
 	number = g_key_file_get_integer(img_key_file, "music", "number", NULL);
