@@ -1271,8 +1271,8 @@ img_iconview_selection_button_press( GtkWidget         *widget,
 									 GdkEventButton    *button,
 									 img_window_struct *img )
 {
-	if( button->button == 1 &&
-		! button->state & ( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) )
+	if( ( button->button == 1 ) &&
+		! ( button->state & ( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) )
 		gtk_icon_view_unselect_all( GTK_ICON_VIEW( img->thumbnail_iconview ) );
 
 	return( FALSE );

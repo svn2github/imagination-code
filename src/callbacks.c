@@ -253,9 +253,8 @@ void img_add_audio_files (gchar *filename, img_window_struct *img)
 GSList *img_import_slides_file_chooser(img_window_struct *img)
 {
 	GtkFileFilter *all_images_filter, *all_files_filter;
-	gchar **mime_types;
-	GSList *slides = NULL, *formats = NULL, *_formats = NULL;
-	int response,i;
+	GSList *slides = NULL;
+	int response;
 
 	img->import_slide_chooser = gtk_file_chooser_dialog_new (_("Import slides, use SHIFT key for multiple select"),
 						GTK_WINDOW (img->imagination_window),
@@ -270,18 +269,6 @@ GSList *img_import_slides_file_chooser(img_window_struct *img)
 	/* Image files filter */
 	all_images_filter = gtk_file_filter_new ();
 	gtk_file_filter_set_name(all_images_filter,_("All image files"));
-#if 0
-	formats = gdk_pixbuf_get_formats ();
-	for (_formats = formats; _formats != NULL; _formats = _formats->next)
-	{
-		mime_types = gdk_pixbuf_format_get_mime_types ((GdkPixbufFormat *) _formats->data);
-		for (i = 0; mime_types[i] != NULL; i++)
-			gtk_file_filter_add_mime_type (all_images_filter, mime_types[i]);
-
-		g_strfreev (mime_types);
-	}
-#endif
-	/* This may be a bit simpler;) */
 	gtk_file_filter_add_pixbuf_formats( all_images_filter );
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(img->import_slide_chooser),all_images_filter);
 
@@ -512,7 +499,7 @@ void img_rotate_selected_slide(GtkWidget *button, img_window_struct *img)
 	/* Obtain the selected slideshow filename */
 	model = gtk_icon_view_get_model(GTK_ICON_VIEW(img->thumbnail_iconview));
 	selected = gtk_icon_view_get_selected_items(GTK_ICON_VIEW(img->thumbnail_iconview));
-	if (selected == NULL)
+	if( ! selected )
 		return
 
 	gtk_widget_show(img->progress_bar);
