@@ -151,6 +151,10 @@ void img_load_slideshow(img_window_struct *img)
 	g_free(dummy);
 	img->distort_images = g_key_file_get_boolean(img_key_file, "slideshow settings", "distort images", NULL );
 
+	/* Make loading more efficient by removing model from icon view */
+	g_object_ref( G_OBJECT( img->thumbnail_model ) );
+	gtk_icon_view_set_model( GTK_ICON_VIEW( img->thumbnail_iconview ), NULL );
+
 	/* Loads the thumbnails and set the slides info */
 	number = g_key_file_get_integer(img_key_file,"images","number", NULL);
 	img->slides_nr = number;
@@ -196,6 +200,11 @@ void img_load_slideshow(img_window_struct *img)
 	}
 	img->slides_nr -= not_found;
 	gtk_widget_hide(img->progress_bar);
+
+	gtk_icon_view_set_model( GTK_ICON_VIEW( img->thumbnail_iconview ),
+							 GTK_TREE_MODEL( img->thumbnail_model ) );
+	g_object_unref( G_OBJECT( img->thumbnail_model ) );
+
 	/* Loads the audio files in the liststore */
 	number = g_key_file_get_integer(img_key_file, "music", "number", NULL);
 	for (i = 1; i <= number; i++)

@@ -75,6 +75,10 @@ void img_add_slides_thumbnails(GtkMenuItem *item, img_window_struct *img)
 	img->slides_nr += g_slist_length(slides);
 	gtk_widget_show(img->progress_bar);
 
+	/* Remove model from thumbnail iconview for efficiency */
+	g_object_ref( G_OBJECT( img->thumbnail_model ) );
+	gtk_icon_view_set_model( GTK_ICON_VIEW( img->thumbnail_iconview ), NULL );
+
 	bak = slides;
 	while (slides)
 	{
@@ -99,6 +103,10 @@ void img_add_slides_thumbnails(GtkMenuItem *item, img_window_struct *img)
 	img_set_total_slideshow_duration(img);
 	img_set_statusbar_message(img,0);
 	img->project_is_modified = TRUE;
+
+	gtk_icon_view_set_model( GTK_ICON_VIEW( img->thumbnail_iconview ),
+							 GTK_TREE_MODEL( img->thumbnail_model ) );
+	g_object_unref( G_OBJECT( img->thumbnail_model ) );
 }
 
 void img_increase_progressbar(img_window_struct *img, gint nr)
@@ -262,6 +270,7 @@ GSList *img_import_slides_file_chooser(img_window_struct *img)
 	/* Image files filter */
 	all_images_filter = gtk_file_filter_new ();
 	gtk_file_filter_set_name(all_images_filter,_("All image files"));
+#if 0
 	formats = gdk_pixbuf_get_formats ();
 	for (_formats = formats; _formats != NULL; _formats = _formats->next)
 	{
@@ -271,6 +280,9 @@ GSList *img_import_slides_file_chooser(img_window_struct *img)
 
 		g_strfreev (mime_types);
 	}
+#endif
+	/* This may be a bit simpler;) */
+	gtk_file_filter_add_pixbuf_formats( all_images_filter );
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(img->import_slide_chooser),all_images_filter);
 
 	/* All files filter */
@@ -715,7 +727,7 @@ void img_set_total_slideshow_duration(img_window_struct *img)
 	slide_struct *entry;
 	GtkTreeModel *model;
 
-	model = gtk_icon_view_get_model(GTK_ICON_VIEW(img->thumbnail_iconview));
+	model = GTK_TREE_MODEL( img->thumbnail_model );
 	if (!gtk_tree_model_get_iter_first (model,&iter))
 		return;
 
