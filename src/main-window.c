@@ -37,6 +37,7 @@ static gpointer img_set_random_transition(img_window_struct *, slide_struct *);
 static void img_combo_box_speed_changed (GtkComboBox *,  img_window_struct *);
 static void img_spinbutton_value_changed (GtkSpinButton *, img_window_struct *);
 static void img_clear_audio_files(GtkButton *, img_window_struct *);
+static void img_expand_button_clicked(GtkButton *, img_window_struct *);
 static void img_on_drag_audio_data_received (GtkWidget *,GdkDragContext *, int, int, GtkSelectionData *, unsigned int, unsigned int, img_window_struct *);
 static void img_activate_remove_button_music_liststore(GtkTreeModel *, GtkTreePath *, GtkTreeIter *, img_window_struct *);
 static void img_quit_menu(GtkMenuItem *, img_window_struct *);
@@ -93,16 +94,17 @@ img_window_struct *img_create_window (void)
 	GtkWidget *image_area_frame;
 	GtkWidget *valign;
 	GtkWidget *halign;
-	GtkWidget *vbox_frames, *frame1_alignment, *frame2_alignment, *frame3_alignment;
-	GtkWidget *frame1, *frame2, *frame3, *frame_label;
+	GtkWidget *vbox_frames, *frame1_alignment, *frame2_alignment, *frame3_alignment,*frame4_alignment;
+	GtkWidget *frame1, *frame2, *frame3, *frame4, *frame_label;
 	GtkWidget *transition_label;
-	GtkWidget *vbox_info_slide, *vbox_slide_motion;
+	GtkWidget *vbox_info_slide, *vbox_slide_motion, *vbox_slide_caption;
 	GtkWidget *table;
 	GtkWidget *duration_label;
 	GtkWidget *trans_duration_label;
 	GtkWidget *total_time;
 	GtkWidget *hbox_stop_points, *stop_points_label, *left_point_button,*right_point_button;
 	GtkWidget *hbox_time_offset, *time_offset_label, *add_stop_point_button, *remove_stop_point_button;
+	GtkWidget *caption_textview, *hbox_textview, *font_button, *text_animation_hbox;
 	GtkWidget *hbox_music_label;
 	GtkWidget *music_time;
 	GtkWidget *hbox_buttons, *move_up_button;
@@ -420,7 +422,6 @@ img_window_struct *img_create_window (void)
 	gtk_box_pack_start (GTK_BOX (hbox), vbox_zoom, TRUE, TRUE, 0);
 
 	swindow = gtk_scrolled_window_new(NULL, NULL);
-	//gtk_container_set_border_width(GTK_CONTAINER(swindow), 10);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(swindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	gtk_box_pack_start (GTK_BOX (vbox_zoom), swindow, TRUE, TRUE, 0);
 
@@ -479,7 +480,7 @@ img_window_struct *img_create_window (void)
 	gtk_label_set_use_markup (GTK_LABEL (frame_label), TRUE);
 	gtk_misc_set_padding (GTK_MISC (frame_label), 2, 2);
 
-	vbox_info_slide = gtk_vbox_new (FALSE, 3);
+	vbox_info_slide = gtk_vbox_new (FALSE, 2);
 	gtk_container_add (GTK_CONTAINER (frame1_alignment), vbox_info_slide);
 	gtk_container_set_border_width (GTK_CONTAINER (vbox_info_slide), 2);
 	
@@ -496,7 +497,7 @@ img_window_struct *img_create_window (void)
 
 	/* Transition type */
 	img_struct->transition_type = _gtk_combo_box_new_text(TRUE);
-	gtk_table_attach (GTK_TABLE (table), img_struct->transition_type, 0, 1, 0, 1,(GtkAttachOptions) (GTK_EXPAND | GTK_FILL),(GtkAttachOptions) (GTK_FILL), 0, 0);
+	gtk_table_attach (GTK_TABLE (table), img_struct->transition_type, 0, 1, 0, 1,(GtkAttachOptions) (GTK_FILL),(GtkAttachOptions) (GTK_FILL), 0, 0);
 	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(gtk_combo_box_get_model(GTK_COMBO_BOX(img_struct->transition_type))),
 										1, GTK_SORT_ASCENDING);
 	gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(gtk_combo_box_get_model(GTK_COMBO_BOX(img_struct->transition_type))),1, img_sort_none_before_other,NULL,NULL);
@@ -566,9 +567,8 @@ img_window_struct *img_create_window (void)
 	gtk_label_set_use_markup (GTK_LABEL (frame_label), TRUE);
 	gtk_misc_set_padding (GTK_MISC (frame_label), 2, 2);
 
-	vbox_slide_motion = gtk_vbox_new (FALSE, 3);
+	vbox_slide_motion = gtk_vbox_new (FALSE, 2);
 	gtk_container_add (GTK_CONTAINER (frame2_alignment), vbox_slide_motion);
-	gtk_container_set_border_width (GTK_CONTAINER (vbox_slide_motion), 2);
 
 	hbox_stop_points = gtk_hbox_new(FALSE,5);
 	gtk_box_pack_start (GTK_BOX (vbox_slide_motion), hbox_stop_points, TRUE, FALSE, 0);
@@ -578,7 +578,7 @@ img_window_struct *img_create_window (void)
 	left_point_button = gtk_button_new();
 	gtk_box_pack_start (GTK_BOX (hbox_stop_points), left_point_button, FALSE, TRUE, 0);
 	image_buttons = gtk_image_new_from_stock (GTK_STOCK_GO_BACK, GTK_ICON_SIZE_MENU);
-	gtk_container_add (GTK_CONTAINER (left_point_button), image_buttons);
+	gtk_button_set_image(GTK_BUTTON(left_point_button), image_buttons);
 	img_struct->img_current_stop_point_entry = gtk_entry_new();
 	gtk_entry_set_max_length(GTK_ENTRY (img_struct->img_current_stop_point_entry), 2);
 	gtk_entry_set_width_chars(GTK_ENTRY (img_struct->img_current_stop_point_entry), 4);
@@ -590,7 +590,7 @@ img_window_struct *img_create_window (void)
 	right_point_button = gtk_button_new();
 	gtk_box_pack_start (GTK_BOX (hbox_stop_points), right_point_button, FALSE, TRUE, 0);
 	image_buttons = gtk_image_new_from_stock (GTK_STOCK_GO_FORWARD, GTK_ICON_SIZE_MENU);
-	gtk_container_add (GTK_CONTAINER (right_point_button), image_buttons);
+	gtk_button_set_image(GTK_BUTTON(right_point_button), image_buttons);
 
 	hbox_time_offset = gtk_hbox_new(FALSE,0);
 	gtk_box_pack_start (GTK_BOX (vbox_slide_motion), hbox_time_offset, FALSE, FALSE, 0);
@@ -610,6 +610,58 @@ img_window_struct *img_create_window (void)
 	remove_stop_point_button = gtk_button_new_with_label(_("Remove"));
 	gtk_box_pack_start (GTK_BOX (hbox_buttons), remove_stop_point_button, FALSE, FALSE, 0);
 
+	/* Slide text frame */
+	frame4 = gtk_frame_new (NULL);
+	gtk_box_pack_start (GTK_BOX (vbox_frames), frame4, FALSE, FALSE, 0);
+	gtk_frame_set_shadow_type (GTK_FRAME (frame4), GTK_SHADOW_OUT);
+
+	frame4_alignment = gtk_alignment_new (0.5, 0.5, 1, 1);
+	gtk_container_add (GTK_CONTAINER (frame4), frame4_alignment);
+	gtk_alignment_set_padding (GTK_ALIGNMENT (frame4_alignment), 5, 5, 5, 5);
+
+	frame_label = gtk_label_new (_("<b>Slide Text</b>"));
+	gtk_frame_set_label_widget (GTK_FRAME (frame4), frame_label);
+	gtk_label_set_use_markup (GTK_LABEL (frame_label), TRUE);
+	gtk_misc_set_padding (GTK_MISC (frame_label), 2, 2);
+
+	vbox_slide_caption = gtk_vbox_new (FALSE, 2);
+	gtk_container_add (GTK_CONTAINER (frame4_alignment), vbox_slide_caption);
+
+	hbox_textview = gtk_hbox_new(FALSE, 2);
+	gtk_box_pack_start (GTK_BOX (vbox_slide_caption), hbox_textview, FALSE, FALSE, 0);
+	caption_textview = gtk_text_view_new();
+	img_struct->slide_text_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(caption_textview));
+	img_struct->scrolled_win = gtk_scrolled_window_new(NULL, NULL);
+	gtk_widget_set_size_request(img_struct->scrolled_win, -1, 18);
+	g_object_set (G_OBJECT (img_struct->scrolled_win),"hscrollbar-policy",GTK_POLICY_AUTOMATIC,"shadow-type",GTK_SHADOW_OUT,"vscrollbar-policy",GTK_POLICY_AUTOMATIC,NULL);
+	gtk_container_add(GTK_CONTAINER (img_struct->scrolled_win), caption_textview);
+	gtk_box_pack_start (GTK_BOX (hbox_textview), img_struct->scrolled_win, TRUE, TRUE, 0);
+	img_struct->expand_button = gtk_button_new();
+	gtk_widget_set_tooltip_text(img_struct->expand_button, _("Click to expand the area"));
+	gtk_button_set_relief(GTK_BUTTON(img_struct->expand_button), GTK_RELIEF_NONE);
+	gtk_widget_set_size_request(img_struct->expand_button, 22, 20);
+	g_signal_connect (G_OBJECT (img_struct->expand_button),"clicked",G_CALLBACK (img_expand_button_clicked),img_struct);
+	image_buttons = gtk_image_new_from_stock (GTK_STOCK_ADD, GTK_ICON_SIZE_MENU);
+	gtk_widget_set_size_request(image_buttons, 14, 14);
+	gtk_button_set_image(GTK_BUTTON(img_struct->expand_button),image_buttons);
+	gtk_box_pack_start (GTK_BOX (hbox_textview), img_struct->expand_button, FALSE, FALSE, 0);
+	font_button = gtk_font_button_new();
+	gtk_box_pack_start (GTK_BOX (vbox_slide_caption), font_button, FALSE, FALSE, 0);
+	gtk_widget_set_tooltip_text(font_button, _("Click to choose the font"));
+	text_animation_hbox = gtk_hbox_new(FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (vbox_slide_caption), text_animation_hbox, FALSE, FALSE, 0);
+	label = gtk_label_new(_("Animation:"));
+	gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
+	gtk_box_pack_start (GTK_BOX (text_animation_hbox), label, TRUE, TRUE, 0);
+	img_struct->text_animation_combo = _gtk_combo_box_new_text(FALSE);
+	gtk_box_pack_start (GTK_BOX (text_animation_hbox), img_struct->text_animation_combo, FALSE, FALSE, 0);
+	{
+		GtkTreeIter   iter;
+		GtkListStore *store = GTK_LIST_STORE( gtk_combo_box_get_model(GTK_COMBO_BOX(img_struct->text_animation_combo)));
+		gtk_list_store_append( store, &iter );
+		gtk_list_store_set( store, &iter, 0, _("None"), -1 );
+	}
+	gtk_combo_box_set_active(GTK_COMBO_BOX(img_struct->text_animation_combo), 0);
 	/* Background music frame */
 	frame3 = gtk_frame_new (NULL);
 	gtk_box_pack_start (GTK_BOX (vbox_frames), frame3, FALSE, FALSE, 0);
@@ -625,15 +677,15 @@ img_window_struct *img_create_window (void)
 	gtk_misc_set_padding (GTK_MISC (frame_label), 2, 2);
 
 	/* Add the liststore */
-	vbox2 = gtk_vbox_new (FALSE, 4);
-	gtk_widget_show (vbox2);
+	vbox2 = gtk_vbox_new (FALSE, 2);
 	gtk_container_add (GTK_CONTAINER (frame3_alignment), vbox2);
+	gtk_container_set_border_width (GTK_CONTAINER (vbox2), 0);
 	
 	scrolledwindow1 = gtk_scrolled_window_new (NULL, NULL);
-	gtk_box_pack_start (GTK_BOX (vbox2), scrolledwindow1, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (vbox2), scrolledwindow1, FALSE, FALSE, 0);
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow1), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (scrolledwindow1), GTK_SHADOW_IN);
-	gtk_widget_set_size_request(scrolledwindow1, -1, 150);
+	gtk_widget_set_size_request(scrolledwindow1, -1, 73);
 
 	img_struct->music_file_liststore = gtk_list_store_new (4, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_INT);
 	g_signal_connect (G_OBJECT (img_struct->music_file_liststore), "row-inserted",	G_CALLBACK (img_activate_remove_button_music_liststore) , img_struct);
@@ -784,6 +836,23 @@ static void img_clear_audio_files(GtkButton *button, img_window_struct *img)
 	gtk_widget_set_sensitive(img->play_audio_button, FALSE);
 	gtk_widget_set_sensitive(img->remove_audio_button, FALSE);
 	gtk_label_set_text(GTK_LABEL(img->music_time_data), "");
+}
+
+static void img_expand_button_clicked(GtkButton *button, img_window_struct *img)
+{
+	gint width, height;
+
+	gtk_widget_get_size_request(img->scrolled_win, &width, &height);
+	if (height == 18)
+	{
+		gtk_widget_set_size_request(img->scrolled_win, -1, 90);
+		gtk_widget_set_tooltip_text(img->expand_button, _("Click to shrink the area"));
+	}
+	else
+	{
+		gtk_widget_set_size_request(img->scrolled_win, -1, 18);
+		gtk_widget_set_tooltip_text(img->expand_button, _("Click to expand the area"));
+	}
 }
 
 static void img_on_drag_audio_data_received (GtkWidget *widget,GdkDragContext *context,int x,int y,GtkSelectionData *data,unsigned int info,unsigned int time, img_window_struct *img)

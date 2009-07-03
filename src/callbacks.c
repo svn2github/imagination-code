@@ -499,8 +499,9 @@ void img_rotate_selected_slide(GtkWidget *button, img_window_struct *img)
 	/* Obtain the selected slideshow filename */
 	model = gtk_icon_view_get_model(GTK_ICON_VIEW(img->thumbnail_iconview));
 	selected = gtk_icon_view_get_selected_items(GTK_ICON_VIEW(img->thumbnail_iconview));
-	if( ! selected )
-		return
+
+	if( selected == NULL)
+		return;
 
 	gtk_widget_show(img->progress_bar);
 	gtk_tree_model_get_iter(model,&iter,selected->data);
@@ -1312,6 +1313,7 @@ void img_close_slideshow(GtkWidget *widget, img_window_struct *img)
 	gtk_widget_set_sensitive(img->random_button, FALSE);
 	gtk_widget_set_sensitive(img->transition_type, FALSE);
 	gtk_widget_set_sensitive(img->duration, FALSE);
+	gtk_label_set_text(GTK_LABEL (img->total_time_data),"");
 
 	/* Reset slideshow properties */
 	img->distort_images = TRUE;

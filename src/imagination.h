@@ -95,6 +95,10 @@ struct _img_window_struct
 	GtkWidget	*total_time_data;
 	GtkWidget	*filename_data;
 //	GtkWidget	*thumb_scrolledwindow;
+	GtkTextBuffer *slide_text_buffer;
+	GtkWidget	*text_animation_combo;
+	GtkWidget	*scrolled_win;
+	GtkWidget	*expand_button;
   	GtkWidget	*thumbnail_iconview;
   	GtkWidget	*statusbar;
   	GtkWidget	*progress_bar;

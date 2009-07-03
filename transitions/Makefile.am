@@ -13,6 +13,7 @@ diagonal_wipe_la_LDFLAGS = -module -avoid-version
 ellipse_wipe_la_LDFLAGS = -module -avoid-version
 fade_la_LDFLAGS = -module -avoid-version
 four_box_wipe_la_LDFLAGS = -module -avoid-version
+insert_la_LDFLAGS = -module -avoid-version
 push_wipe_la_LDFLAGS = -module -avoid-version
 wave_la_LDFLAGS = -module -avoid-version
 misc_diagonal_wipe_la_LDFLAGS = -module -avoid-version
@@ -29,6 +30,7 @@ plugin_LTLIBRARIES = \
 	ellipse_wipe.la		\
 	fade.la			\
 	four_box_wipe.la \
+	insert.la \
 	push_wipe.la \
 	wave.la \
 	misc_diagonal_wipe.la \
@@ -43,6 +45,7 @@ diagonal_wipe_la_SOURCES = export_to_ppm.c export_to_ppm.h diagonal_wipe.c
 ellipse_wipe_la_SOURCES = export_to_ppm.c export_to_ppm.h ellipse_wipe.c
 fade_la_SOURCES = export_to_ppm.c export_to_ppm.h fade.c
 four_box_wipe_la_SOURCES = export_to_ppm.c export_to_ppm.h four_box_wipe.c
+insert_la_SOURCES = export_to_ppm.c export_to_ppm.h insert.c
 push_wipe_la_SOURCES = export_to_ppm.c export_to_ppm.h push_wipe.c
 wave_la_SOURCES = export_to_ppm.c export_to_ppm.h wave.c
 misc_diagonal_wipe_la_SOURCES = export_to_ppm.c export_to_ppm.h misc_diagonal_wipe.c
@@ -58,6 +61,7 @@ diagonal_wipe_la_LIBADD = $(PLUGINS_LIBS)
 ellipse_wipe_la_LIBADD = $(PLUGINS_LIBS)
 fade_la_LIBADD = $(PLUGINS_LIBS)
 four_box_wipe_la_LIBADD = $(PLUGINS_LIBS)
+insert_la_LIBADD = $(PLUGINS_LIBS)
 push_wipe_la_LIBADD = $(PLUGINS_LIBS)
 wave_la_LIBADD = $(PLUGINS_LIBS)
 misc_diagonal_wipe_la_LIBADD = $(PLUGINS_LIBS)

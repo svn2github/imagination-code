@@ -1114,7 +1114,7 @@ img_exporter_ogg( img_window_struct *img )
 	cmd_line = g_strdup_printf( "ffmpeg -f image2pipe -vcodec ppm -i pipe: "
 								"-r %.02f -aspect %s -s %dx%d <#AUDIO#> "
 								"-vcodec libtheora -b %dk -acodec libvorbis "
-								"-f ogg -y \"%s.ogg\"",
+								"-f ogg -y \"%s.ogv\"",
 								img->export_fps, aspect_ratio,
 								img->image_area->allocation.width,
 								img->image_area->allocation.height,
