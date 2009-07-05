@@ -132,16 +132,11 @@ struct _img_window_struct
 
 	/* Variables common to export and preview functions */
   	slide_struct *current_slide;
-#ifdef TB_EDITS
+	/* TB_EDITS */
 	cairo_surface_t *current_image;
 	cairo_surface_t *stored_image;
 	cairo_surface_t *image1;
 	cairo_surface_t *image2;
-#else
-  	GdkPixbuf	*slide_pixbuf;
-  	GdkPixbuf	*pixbuf1;
-  	GdkPixbuf	*pixbuf2;
-#endif
   	GtkTreeIter *cur_ss_iter;
   	guint		source_id;
 	gdouble     progress;
