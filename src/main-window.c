@@ -1029,7 +1029,8 @@ void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *im
 #ifdef TB_EDITS
 	if( img->current_image )
 		cairo_surface_destroy( img->current_image );
-	img->current_image = img_scale_pixbuf( img, info_slide->filename );
+	img->current_image = img_scale_image( img, info_slide->filename, 0,
+										  img->image_area->allocation.height );
 	gtk_widget_queue_draw( img->image_area );
 #else
 	img->slide_pixbuf = img_scale_pixbuf(img,info_slide->filename);

@@ -426,7 +426,7 @@ img_start_export( img_window_struct *img )
 	gtk_tree_model_get_iter_first( model, &iter );
 	gtk_tree_model_get( model, &iter, 1, &entry, -1 );
 #ifdef TB_EDITS
-	img->image1 = img_scale_pixbuf( img, entry->filename );
+	img->image1 = img_scale_image( img, entry->filename, 0, 0 );
 #else
 	img->pixbuf2 = img_scale_pixbuf( img, entry->filename );
 #endif
@@ -559,7 +559,7 @@ img_prepare_pixbufs( img_window_struct *img )
 		cairo_surface_destroy( img->image1 );
 		img->image1 = img->image2;
 		gtk_tree_model_get( model, img->cur_ss_iter, 1, &img->current_slide, -1 );
-		img->image2 = img_scale_pixbuf( img, img->current_slide->filename );
+		img->image2 = img_scale_image( img, img->current_slide->filename, 0, 0 );
 #else
 		g_object_unref( G_OBJECT( img->pixbuf1 ) );
 		img->pixbuf1 = img->pixbuf2;

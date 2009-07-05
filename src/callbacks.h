@@ -54,7 +54,7 @@ void img_free_allocated_memory(img_window_struct *);
 gint img_ask_user_confirmation(img_window_struct *, gchar *);
 gboolean img_quit_application(GtkWidget *, GdkEvent *, img_window_struct *);
 #ifdef TB_EDITS
-cairo_surface_t *img_scale_pixbuf( img_window_struct *, gchar * );
+cairo_surface_t *img_scale_image( img_window_struct *, gchar *, gint, gint );
 #else
 GdkPixbuf *img_scale_pixbuf (img_window_struct *, gchar *);
 #endif
