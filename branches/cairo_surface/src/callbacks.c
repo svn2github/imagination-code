@@ -479,13 +479,10 @@ void img_delete_selected_slides(GtkMenuItem *item,img_window_struct *img_struct)
 	g_list_free(bak);
 
 	img_set_statusbar_message(img_struct,0);
-#ifdef TB_EDITS
+	/* TB_EDITS */
 	cairo_surface_destroy( img_struct->current_image );
 	img_struct->current_image = NULL;
 	gtk_widget_queue_draw( img_struct->image_area );
-#else
-	gtk_image_set_from_pixbuf(GTK_IMAGE(img_struct->image_area),NULL);
-#endif
 	img_struct->project_is_modified = TRUE;
 	img_iconview_selection_changed(GTK_ICON_VIEW(img_struct->thumbnail_iconview),img_struct);
 }
@@ -546,17 +543,12 @@ void img_rotate_selected_slide(GtkWidget *button, img_window_struct *img)
 	info_slide->filename = filename;
 	img->rotated_files = g_slist_append(img->rotated_files, g_strdup(filename));
 
-#ifdef TB_EDITS
+	/* TB_EDITS */
 	if( img->current_image )
 		cairo_surface_destroy( img->current_image );
 	img->current_image = img_scale_image( img, filename, 0,
 										  img->image_area->allocation.height );
 	gtk_widget_queue_draw( img->image_area );
-#else
-	img->slide_pixbuf = img_scale_pixbuf(img, filename);
-	gtk_image_set_from_pixbuf(GTK_IMAGE (img->image_area),img->slide_pixbuf);
-	g_object_unref(img->slide_pixbuf);
-#endif
 
 	/* Display the rotated image in thumbnails iconview */
 	thumb = gdk_pixbuf_new_from_file_at_scale(filename, 93, 70, TRUE, NULL);
@@ -804,27 +796,14 @@ void img_start_stop_preview(GtkWidget *button, img_window_struct *img)
 		img_swap_toolbar_images( img, FALSE );
 
 		/* Store currently displayed image and then clear image_area. */
-#ifdef TB_EDITS
+	/* TB_EDITS */
 		img->stored_image = img->current_image;
-#else
-		img->slide_pixbuf = gtk_image_get_pixbuf(GTK_IMAGE(img->image_area));
-		if (img->slide_pixbuf)
-			g_object_ref(G_OBJECT(img->slide_pixbuf));
-		gtk_image_clear(GTK_IMAGE(img->image_area));
-
-		/* Connect expose event to handler */
-		gtk_widget_set_app_paintable(img->image_area, TRUE);
-		g_signal_connect( G_OBJECT(img->image_area), "expose-event",G_CALLBACK(img_on_expose_event),img);
-#endif
 
 		/* Load the first image in the pixbuf */
 		gtk_tree_model_get(model, &iter,1,&entry,-1);
-#ifdef TB_EDITS
+	/* TB_EDITS */
 		img->image2 = img_scale_image( img, entry->filename, 0,
 									   img->image_area->allocation.height );
-#else
-		img->pixbuf2 = img_scale_pixbuf(img,entry->filename);
-#endif
 		img->current_slide = entry;
 
 		/* If we started our preview from beginning, create empty pixbuf and
@@ -837,25 +816,18 @@ void img_start_stop_preview(GtkWidget *button, img_window_struct *img)
 
 			gtk_tree_model_get_iter( model, &prev, path );
 			gtk_tree_model_get( model, &prev, 1, &entry, -1 );
-#ifdef TB_EDITS
+	/* TB_EDITS */
 			img->image1 = img_scale_image( img, entry->filename, 0,
 										   img->image_area->allocation.height );
-#else
-			img->pixbuf1 = img_scale_pixbuf(img, entry->filename);
-#endif
 			*img->cur_ss_iter = iter;
 		}
 		else
 		{
-#ifdef TB_EDITS
+	/* TB_EDITS */
 			/* FIXME: Here background color is fixed to BLACK!!! */
 			img->image1 = cairo_image_surface_create( CAIRO_FORMAT_RGB24,
 													  img->image_area->allocation.width,
 													  img->image_area->allocation.height );
-#else
-			img->pixbuf1 = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8,img->image_area->allocation.width,img->image_area->allocation.height);
-			gdk_pixbuf_fill(img->pixbuf1,img->background_color);
-#endif
 		}
 		if( path )
 			gtk_tree_path_free( path );
@@ -1031,7 +1003,7 @@ void img_on_drag_data_received (GtkWidget *widget,GdkDragContext *context,int x,
 
 gboolean img_on_expose_event(GtkWidget *widget,GdkEventExpose *event,img_window_struct *img)
 {
-#ifdef TB_EDITS
+	/* TB_EDITS */
 	/* This expose function will be responsible for two things:
 	 *  - normal rendering of still images
 	 *  - preview rendering
@@ -1065,32 +1037,9 @@ gboolean img_on_expose_event(GtkWidget *widget,GdkEventExpose *event,img_window_
 	cairo_destroy( cr );
 
 	return( TRUE );
-#else
-	/* We always pass negative number as a last parameter when we want to
-	 * draw on screen. */
-	if ((img->current_slide)->render)
-		(img->current_slide)->render (widget->window, img->pixbuf1, img->pixbuf2,img->progress, -1);
-	else
-	{
-		/* This is "None" transition renderer */
-		cairo_t *cr;
-		gint     offset_x, offset_y, width, height;
-
-		gdk_drawable_get_size(widget->window, &width, &height);
-		offset_x = (width  - gdk_pixbuf_get_width (img->pixbuf2)) / 2;
-		offset_y = (height - gdk_pixbuf_get_height(img->pixbuf2)) / 2;
-		
-		cr = gdk_cairo_create(widget->window);
-		gdk_cairo_set_source_pixbuf(cr,img->pixbuf2,offset_x,offset_y);
-		cairo_paint(cr);
-		
-		cairo_destroy(cr);
-	}
-	return FALSE;
-#endif
 }
 
-#ifdef TB_EDITS
+	/* TB_EDITS */
 /*
  * img_scale_image:
  * @img: global img_window_struct structure
@@ -1115,16 +1064,13 @@ img_scale_image( img_window_struct *img,
 				 gchar             *filename,
 				 int                width,
 				 int                height )
-#else
-GdkPixbuf *img_scale_pixbuf(img_window_struct *img, gchar *filename)
-#endif
 {
 	GdkPixbuf *pixbuf;                  /* Pixbuf used for loading */
 	gint       i_width, i_height;		/* Image dimensions */
 	gint       a_width, a_height;		/* Display dimensions */
 	gint       offset_x, offset_y;      /* Offset values for borders */
 	gdouble    a_ratio, i_ratio;        /* Export and image aspect ratios */
-#ifdef TB_EDITS
+	/* TB_EDITS */
 	cairo_surface_t *surface;           /* Surface to draw on */
 	cairo_t   *cr;                      /* Cairo, used to transform image */
 	gint       c_width, c_height;       /* Dimensions of cairo surface that
@@ -1136,12 +1082,6 @@ GdkPixbuf *img_scale_pixbuf(img_window_struct *img, gchar *filename)
 	gdouble    max_skew = 1.35;         /* Maxumum allowed distortion values */
 	gdouble    min_skew = 0.75;
 	gboolean   transform = FALSE;       /* Flag that controls scalling */
-#else
-	GdkPixbuf *compose;
-	gdouble    max_stretch = 0.1280;	/* Maximum amount of stretch */
-	gdouble    max_crop    = 0.8500;	/* Maximum amount of crop */
-	gboolean   too_small;
-#endif
 
 	/* Obtain information about display area */
 	a_width  = img->image_area->allocation.width;
@@ -1152,7 +1092,7 @@ GdkPixbuf *img_scale_pixbuf(img_window_struct *img, gchar *filename)
 	gdk_pixbuf_get_file_info( filename, &i_width, &i_height );
 	i_ratio = (gdouble)i_width / i_height;
 
-#ifdef TB_EDITS
+	/* TB_EDITS */
 	/* How distorted images would be if we scaled them */
 	skew = a_ratio / i_ratio;
 
@@ -1501,15 +1441,9 @@ static void img_clean_after_preview(img_window_struct *img)
 	g_signal_handlers_disconnect_by_func(img->image_area,img_on_expose_event,img);
 	gtk_widget_set_app_paintable(img->image_area, FALSE);
 
-#ifdef TB_EDITS
+	/* TB_EDITS */
 	img->current_image = img->stored_image;
 	gtk_widget_queue_draw( img->image_area );
-#else
-	/* Restore image that was used before preview */
-	gtk_image_set_from_pixbuf(GTK_IMAGE(img->image_area), img->slide_pixbuf);
-	if( img->slide_pixbuf )
-		g_object_unref(G_OBJECT(img->slide_pixbuf));
-#endif
 
 	/* Swap toolbar and menu icons */
 	img_swap_toolbar_images( img, TRUE );
@@ -1590,14 +1524,11 @@ void img_close_slideshow(GtkWidget *widget, img_window_struct *img)
 	img_free_allocated_memory(img);
 	img_set_window_title(img,NULL);
 	img_set_statusbar_message(img,0);
-#ifdef TB_EDITS
+	/* TB_EDITS */
 	if( img->current_image )
 		cairo_surface_destroy( img->current_image );
 	img->current_image = NULL;
 	gtk_widget_queue_draw( img->image_area );
-#else
-	gtk_image_set_from_pixbuf(GTK_IMAGE(img->image_area),NULL);
-#endif
 	gtk_widget_set_sensitive(img->random_button, FALSE);
 	gtk_widget_set_sensitive(img->transition_type, FALSE);
 	gtk_widget_set_sensitive(img->duration, FALSE);

@@ -34,17 +34,6 @@
 #define	NORMAL	4
 #define	SLOW	8
 
-/* This simple define controls the backed implementation.
- *
- * If TB_EDITS is defined, new cairo-based backed will be used,
- * else GdkPixbuf backed will do the job.
- *
- * NOTE: DO NOT TRY TO EXPORT OR PREVIEW SLIDE SHOW WHEN USING NEW
- *       CAIRO BACKEND!!! THINGS WILL DEFINITELY GO KA_BOOM!!!!
- */
-//#define TB_EDITS
-#undef TB_EDITS
-
 #define comment_string	"Imagination Slideshow Project - http://imagination.sf.net"
 
 typedef struct _plugin plugin;
