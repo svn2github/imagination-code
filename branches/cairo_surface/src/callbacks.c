@@ -1025,6 +1025,8 @@ img_on_expose_event(GtkWidget *widget,GdkEventExpose *event,img_window_struct *i
 {
 	cairo_t *cr;
 	gint     offxr, offyr; /* Relative offsets */
+	gdouble  factor;       /* Scaling factor */
+	gint     cw;           /* Width of the surface */
 
 	if( ! img->current_image )
 		/* Use default handler */
@@ -1033,9 +1035,13 @@ img_on_expose_event(GtkWidget *widget,GdkEventExpose *event,img_window_struct *i
 	cr = gdk_cairo_create( widget->window );
 
 	/* Do the drawing */
-	offxr = img->current_point.offx / img->current_point.zoom;
-	offyr = img->current_point.offy / img->current_point.zoom;
-	cairo_scale( cr, img->current_point.zoom, img->current_point.zoom );
+	cw = cairo_image_surface_get_width( img->current_image );
+	factor = (gdouble)img->image_area->allocation.width / cw * img->current_point.zoom;
+
+	offxr = img->current_point.offx / factor;
+	offyr = img->current_point.offy / factor;
+
+	cairo_scale( cr, factor, factor );
 	cairo_set_source_surface( cr, img->current_image, offxr, offyr );
 	cairo_paint( cr );
 

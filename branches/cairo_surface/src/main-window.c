@@ -1035,7 +1035,11 @@ void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *im
 	if( img->current_image )
 		cairo_surface_destroy( img->current_image );
 	img->current_image = img_scale_image( img, info_slide->filename, 0,
+#if 0
 										  img->image_area->allocation.height );
+#else
+										  0 );
+#endif
 	gtk_widget_queue_draw( img->image_area );
 }
 
