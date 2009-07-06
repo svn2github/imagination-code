@@ -56,6 +56,12 @@ int main (int argc, char *argv[])
 	img_window->slides_nr = 0;
 	img_window->distort_images = TRUE;
 
+	img_window->maxoffx = 0;
+	img_window->maxoffy = 0;
+	img_window->current_point.offx = 0;
+	img_window->current_point.offy = 0;
+	img_window->current_point.zoom = 1;
+
 	/* Last pseudo-slide has a duration of 0 */
 	img_window->final_transition.duration = 0;
 	img_window->final_transition.render = NULL;

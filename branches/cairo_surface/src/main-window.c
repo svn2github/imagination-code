@@ -437,13 +437,22 @@ img_window_struct *img_create_window (void)
 
 	/* TB_EDITS */
 	img_struct->image_area = gtk_drawing_area_new();
-	g_signal_connect( G_OBJECT( img_struct->image_area ), "expose-event",
-					  G_CALLBACK( img_on_expose_event ), img_struct );
 	gtk_widget_set_size_request(img_struct->image_area, 720, 576);
 	gtk_container_add(GTK_CONTAINER(align), img_struct->image_area);
 	/* Set the signal for accepting images through drag and drop */
 	gtk_drag_dest_set (GTK_WIDGET(img_struct->image_area),GTK_DEST_DEFAULT_ALL,drop_targets,1,GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK | GDK_ACTION_ASK);
-	g_signal_connect (G_OBJECT (img_struct->image_area),"drag-data-received",G_CALLBACK (img_on_drag_data_received), img_struct);
+	/* Dropping onto image area is disabled since it would interfere with
+	 * draging image around when using Ken Burns. */
+	/*g_signal_connect (G_OBJECT (img_struct->image_area),"drag-data-received",G_CALLBACK (img_on_drag_data_received), img_struct);*/
+	gtk_widget_add_events( img_struct->image_area, GDK_BUTTON1_MOTION_MASK
+												 | GDK_POINTER_MOTION_HINT_MASK
+												 | GDK_BUTTON_PRESS_MASK );
+	g_signal_connect( G_OBJECT( img_struct->image_area ), "expose-event",
+					  G_CALLBACK( img_on_expose_event ), img_struct );
+	g_signal_connect( G_OBJECT( img_struct->image_area ), "button-press-event",
+					  G_CALLBACK( img_image_area_button_press ), img_struct );
+	g_signal_connect( G_OBJECT( img_struct->image_area ), "motion-notify-event",
+					  G_CALLBACK( img_image_area_motion ), img_struct );
 
 	viewport = gtk_bin_get_child(GTK_BIN(swindow));
 	gtk_viewport_set_shadow_type(GTK_VIEWPORT(viewport), GTK_SHADOW_NONE);
@@ -455,9 +464,11 @@ img_window_struct *img_create_window (void)
 	gtk_misc_set_alignment(GTK_MISC(label),0.0, 0.5);
 	gtk_box_pack_start (GTK_BOX (hbox_zoom), label, FALSE, TRUE, 0);
 
-	GtkWidget *zoom_scale = gtk_hscale_new_with_range(1,30,0.10000000000000001);
-	gtk_scale_set_value_pos (GTK_SCALE(zoom_scale), GTK_POS_LEFT);
-	gtk_box_pack_start (GTK_BOX (hbox_zoom), zoom_scale, TRUE, TRUE, 0);
+	img_struct->zoom_scale = gtk_hscale_new_with_range(1,30,0.10000000000000001);
+	g_signal_connect( G_OBJECT( img_struct->zoom_scale ), "value-changed",
+					  G_CALLBACK( img_zoom_changed ), img_struct );
+	gtk_scale_set_value_pos (GTK_SCALE(img_struct->zoom_scale), GTK_POS_LEFT);
+	gtk_box_pack_start (GTK_BOX (hbox_zoom), img_struct->zoom_scale, TRUE, TRUE, 0);
 
 	valign = gtk_alignment_new (1, 0, 0, 0);
 	gtk_box_pack_start (GTK_BOX (hbox), valign, FALSE, FALSE, 0);

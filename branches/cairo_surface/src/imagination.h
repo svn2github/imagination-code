@@ -36,18 +36,23 @@
 
 #define comment_string	"Imagination Slideshow Project - http://imagination.sf.net"
 
-typedef struct _plugin plugin;
-
-struct _plugin
+typedef struct _ImgStopPoint ImgStopPoint;
+struct _ImgStopPoint
 {
-	const gchar	*name;		/* The name of the transition */
-	gpointer	address;	/* The mem address of the routine */
+	gint    time; /* Not sure yet how final implementation of time will
+					 look like since specifying time offsets might not be
+					 too user friendly, but it'll do just fine for initial
+					 implementation. */
+	gint    offx; /* X and Y offsets of zoomed image */
+	gint    offy;
+	gdouble zoom; /* Zoom level */
 };
 
 typedef struct _slide_struct slide_struct;
-
 struct _slide_struct
 {
+	/* TODO: each slide will have a GList of associated stop points for Ken
+	 * Burns effect. Stay tuned;) */
 	gchar	*filename;
 	gchar	*slide_original_filename;
 	guint	duration;
@@ -60,7 +65,6 @@ struct _slide_struct
 };
 
 typedef struct _img_window_struct img_window_struct;
-
 struct _img_window_struct
 {
 	/* Main GUI related variables */
@@ -68,33 +72,21 @@ struct _img_window_struct
 	GtkWidget	*open_menu;
 	GtkWidget	*save_menu;
 	GtkWidget	*save_as_menu;
-//	GtkWidget	*properties_menu;
-//	GtkWidget	*close_menu;
 	GtkWidget	*open_button;
 	GtkWidget	*save_button;
-//	GtkWidget	*import_menu;
-//	GtkWidget	*import_audio_menu;
-//	GtkWidget	*remove_menu;
 	GtkWidget   *rotate_left_menu;
 	GtkWidget   *rotate_right_menu;
 	GtkWidget   *rotate_left_button;
 	GtkWidget   *rotate_right_button;
-//	GtkWidget	*import_button;
-//	GtkWidget	*import_audio_button;
-//	GtkWidget	*remove_button;
 	GtkWidget	*preview_menu;
 	GtkWidget 	*preview_button;
-//	GtkWidget   *export_menu;
-//	GtkWidget   *export_button;
 	GtkWidget	*transition_type;
 	GtkWidget	*random_button;
 	GtkWidget	*duration;				// Duration spin button
 	GtkWidget	*stop_point_duration;
 	GtkWidget	*trans_duration;
-	//GtkWidget	*slide_selected_data;
 	GtkWidget	*total_time_data;
 	GtkWidget	*filename_data;
-//	GtkWidget	*thumb_scrolledwindow;
 	GtkTextBuffer *slide_text_buffer;
 	GtkWidget	*text_animation_combo;
 	GtkWidget	*scrolled_win;
@@ -102,7 +94,6 @@ struct _img_window_struct
   	GtkWidget	*thumbnail_iconview;
   	GtkWidget	*statusbar;
   	GtkWidget	*progress_bar;
-//	GtkWidget	*viewport;
   	GtkWidget	*image_area;
   	guint		context_id;
   	GtkListStore *thumbnail_model;
@@ -113,6 +104,14 @@ struct _img_window_struct
 	GtkWidget	*dim_label;
 	GtkWidget	*size_label;
   	GtkWidget	*preview_image;
+
+	/* Current image position parameters */
+	GtkWidget    *zoom_scale;    /* Zoom slider */
+	gint          x;             /* Last button press coordinates */
+	gint          y;
+	gint          maxoffx;       /* Maximal offsets for current zoom */
+	gint          maxoffy;
+	ImgStopPoint  current_point; /* Data for rendering current image */
 
 	/* Renderers and module stuff */
   	gint		nr_transitions_loaded;
@@ -132,7 +131,6 @@ struct _img_window_struct
 
 	/* Variables common to export and preview functions */
   	slide_struct *current_slide;
-	/* TB_EDITS */
 	cairo_surface_t *current_image;
 	cairo_surface_t *stored_image;
 	cairo_surface_t *image1;

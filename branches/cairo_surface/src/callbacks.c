@@ -1001,45 +1001,52 @@ void img_on_drag_data_received (GtkWidget *widget,GdkDragContext *context,int x,
 	g_strfreev (pictures);
 }
 
-gboolean img_on_expose_event(GtkWidget *widget,GdkEventExpose *event,img_window_struct *img)
+/*
+ * img_on_expose_event:
+ * @widget: preview GtkDrawingArea
+ * @event: expose event info
+ * @img: global img_window_struct structure
+ *
+ * This function is responsible for all of the drawing on preview area, thus it
+ * should handle "edit mode" (when user is constructing slide show), "preview
+ * mode" (when user is previewing his work) and "export mode" (when export is in
+ * progress).
+ *
+ * This might be seen as an overkill for single function, but since all of the
+ * actual rendering is done by helper functions, this function just merely
+ * paints the results on screen.
+ *
+ * Return value: This function returns TRUE if the area has been painted, FALSE
+ * otherwise (this way the default expose function is only called when no slide
+ * is selected).
+ */
+gboolean
+img_on_expose_event(GtkWidget *widget,GdkEventExpose *event,img_window_struct *img)
 {
-	/* TB_EDITS */
-	/* This expose function will be responsible for two things:
-	 *  - normal rendering of still images
-	 *  - preview rendering
-	 *
-	 * Currently, only still part is implemented, just to be able to test image
-	 * loading and scaling. Preview will be done after GdkPixbufs have been
-	 * replaced all over the application.
-	 *
-	 * Other things that are missing right now are:
-	 *  - separation of separate procesess into distinct function calls.
-	 *  - zoomming and panning
-	 *  - subtitles
-	 */
 	cairo_t *cr;
-	gint     wa, wc;
-	gdouble  scale;
+	gint     offxr, offyr; /* Relative offsets */
 
 	if( ! img->current_image )
 		/* Use default handler */
 		return( FALSE );
 
-	gdk_drawable_get_size( widget->window, &wa, NULL );
-	wc = cairo_image_surface_get_width( img->current_image );
-	scale = (gdouble)wa / wc;
-
 	cr = gdk_cairo_create( widget->window );
-	cairo_scale( cr, scale, scale );
-	cairo_set_source_surface( cr, img->current_image, 0, 0 );
+
+	/* Do the drawing */
+	offxr = img->current_point.offx / img->current_point.zoom;
+	offyr = img->current_point.offy / img->current_point.zoom;
+	cairo_scale( cr, img->current_point.zoom, img->current_point.zoom );
+	cairo_set_source_surface( cr, img->current_image, offxr, offyr );
 	cairo_paint( cr );
+
+	/* Add subtitles onto this image */
+	/* TODO!! */
 
 	cairo_destroy( cr );
 
 	return( TRUE );
 }
 
-	/* TB_EDITS */
 /*
  * img_scale_image:
  * @img: global img_window_struct structure
@@ -1515,3 +1522,121 @@ void img_move_audio_down( GtkButton *button, img_window_struct *img )
 	if( gtk_tree_model_iter_next( model, &iter2 ) )
 		gtk_list_store_swap( GTK_LIST_STORE( model ), &iter1, &iter2 );
 }
+
+/*
+ * img_zoom_changed:
+ * @range: GtkRange that will provide proper value for us
+ * @img: global img_window_strct structure
+ *
+ * This function modifies current zoom value and queues redraw of preview area.
+ *
+ * To keep image center in focus, we also do some calculation on offsets.
+ */
+void
+img_zoom_changed( GtkRange          *range,
+				  img_window_struct *img )
+{
+	img->current_point.zoom = gtk_range_get_value( range );
+
+	/* If zoom is 1, reset parameters to avoid drift. */
+	if( img->current_point.zoom < 1.00005 )
+	{
+		img->maxoffx = 0;
+		img->maxoffy = 0;
+		img->current_point.offx = 0;
+		img->current_point.offy = 0;
+	}
+	else
+	{
+		gdouble fracx, fracy;
+		gint    tmpoffx, tmpoffy;
+		gdouble aw2 = img->image_area->allocation.width / 2.0;
+		gdouble ah2 = img->image_area->allocation.height / 2.0;
+
+		fracx = (gdouble)( aw2 - img->current_point.offx ) /
+						 ( aw2 - img->maxoffx + img->current_point.offx );
+		fracy = (gdouble)( ah2 - img->current_point.offy ) /
+						 ( ah2 - img->maxoffy + img->current_point.offy );
+		
+		img->maxoffx = img->image_area->allocation.width *
+					   ( 1 - img->current_point.zoom );
+		img->maxoffy = img->image_area->allocation.height *
+					   ( 1 - img->current_point.zoom );
+		tmpoffx = aw2 - ( img->image_area->allocation.width * fracx *
+						  img->current_point.zoom ) / ( 1 + fracx );
+		tmpoffy = ah2 - ( img->image_area->allocation.height * fracy *
+						  img->current_point.zoom ) /
+						( 1 + fracx );
+		img->current_point.offx = CLAMP( tmpoffx, img->maxoffx, 0 );
+		img->current_point.offy = CLAMP( tmpoffy, img->maxoffy, 0 );
+	}
+
+	gtk_widget_queue_draw( img->image_area );
+}
+
+/*
+ * img_image_area_button_press:
+ * @widget: image area
+ * @event: event description
+ * @img: global img_window_struct structure
+ *
+ * This function stores initial coordinates of button press that we'll be
+ * needing for drag emulation.
+ *
+ * Return value: TRUE, indicating that we handled this event.
+ */
+gboolean
+img_image_area_button_press( GtkWidget         *widget,
+							 GdkEventButton    *event,
+							 img_window_struct *img )
+{
+	g_print( "BUTTON PRESS\n" );
+	if( event->button != 1 )
+		return( FALSE );
+
+	img->x = (gint)event->x;
+	img->y = (gint)event->y;
+
+	return( TRUE );
+}
+
+/*
+ * img_image_area_motion:
+ * @widget: image area
+ * @event: event description
+ * @img: global img_window_struct structure
+ *
+ * This function calculates offsets from stored button press coordinates and
+ * queue redraw of the preview area.
+ *
+ * Return value: TRUE if moune button 1 has been pressed during drag, else
+ * FALSE.
+ */
+gboolean
+img_image_area_motion( GtkWidget         *widget,
+					   GdkEventMotion    *event,
+					   img_window_struct *img )
+{
+	gint tmpoffx;
+	gint tmpoffy;
+
+	/* If button 1 isn't pressed, return */
+	if( ! ( event->state & GDK_BUTTON1_MASK ) )
+		return( FALSE );
+
+//	g_print( "%d, %d -> %d, %d\n", img->x, img->y, (gint)event->x, (gint)event->y );
+	tmpoffx = (gint)event->x - img->x + img->current_point.offx;
+	tmpoffy = (gint)event->y - img->y + img->current_point.offy;
+	img->current_point.offx = CLAMP( tmpoffx, img->maxoffx, 0 );
+	img->current_point.offy = CLAMP( tmpoffy, img->maxoffy, 0 );
+
+	img->x = (gint)event->x;
+	img->y = (gint)event->y;
+
+	g_print( "%d, %d -> %d, %d\n", img->current_point.offx, img->current_point.offy,
+						 img->maxoffx, img->maxoffy );
+	gtk_widget_queue_draw( img->image_area );
+
+	return( TRUE );
+}
+
