@@ -603,9 +603,11 @@ img_window_struct *img_create_window (void)
 	gtk_misc_set_alignment(GTK_MISC(label),0.0, 0.5);
 	gtk_box_pack_start (GTK_BOX (hbox_zoom), label, FALSE, TRUE, 0);
 
-	GtkWidget *zoom_scale = gtk_hscale_new_with_range(1,30,0.10000000000000001);
-	gtk_scale_set_value_pos (GTK_SCALE(zoom_scale), GTK_POS_LEFT);
-	gtk_box_pack_start (GTK_BOX (hbox_zoom), zoom_scale, TRUE, TRUE, 0);
+	img_struct->zoom_scale = gtk_hscale_new_with_range(1,30,0.10000000000000001);
+	gtk_scale_set_value_pos (GTK_SCALE(img_struct->zoom_scale), GTK_POS_LEFT);
+	gtk_box_pack_start (GTK_BOX (hbox_zoom), img_struct->zoom_scale, TRUE, TRUE, 0);
+	g_signal_connect( G_OBJECT( img_struct->zoom_scale ), "value-changed",
+					  G_CALLBACK( img_zoom_changed ), img_struct );
 	
 	hbox_buttons = gtk_hbutton_box_new();
 	gtk_button_box_set_layout (GTK_BUTTON_BOX (hbox_buttons), GTK_BUTTONBOX_SPREAD);
