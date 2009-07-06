@@ -1571,8 +1571,7 @@ img_zoom_changed( GtkRange          *range,
 		tmpoffx = aw2 - ( img->image_area->allocation.width * fracx *
 						  img->current_point.zoom ) / ( 1 + fracx );
 		tmpoffy = ah2 - ( img->image_area->allocation.height * fracy *
-						  img->current_point.zoom ) /
-						( 1 + fracx );
+						  img->current_point.zoom ) / ( 1 + fracy );
 		img->current_point.offx = CLAMP( tmpoffx, img->maxoffx, 0 );
 		img->current_point.offy = CLAMP( tmpoffy, img->maxoffy, 0 );
 	}
@@ -1596,7 +1595,6 @@ img_image_area_button_press( GtkWidget         *widget,
 							 GdkEventButton    *event,
 							 img_window_struct *img )
 {
-	g_print( "BUTTON PRESS\n" );
 	if( event->button != 1 )
 		return( FALSE );
 
@@ -1626,11 +1624,6 @@ img_image_area_motion( GtkWidget         *widget,
 	gint tmpoffx;
 	gint tmpoffy;
 
-	/* If button 1 isn't pressed, return */
-	if( ! ( event->state & GDK_BUTTON1_MASK ) )
-		return( FALSE );
-
-//	g_print( "%d, %d -> %d, %d\n", img->x, img->y, (gint)event->x, (gint)event->y );
 	tmpoffx = (gint)event->x - img->x + img->current_point.offx;
 	tmpoffy = (gint)event->y - img->y + img->current_point.offy;
 	img->current_point.offx = CLAMP( tmpoffx, img->maxoffx, 0 );
@@ -1639,8 +1632,6 @@ img_image_area_motion( GtkWidget         *widget,
 	img->x = (gint)event->x;
 	img->y = (gint)event->y;
 
-	g_print( "%d, %d -> %d, %d\n", img->current_point.offx, img->current_point.offy,
-						 img->maxoffx, img->maxoffy );
 	gtk_widget_queue_draw( img->image_area );
 
 	return( TRUE );
