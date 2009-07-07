@@ -259,11 +259,15 @@ GdkPixbuf *img_load_pixbuf_from_file(gchar *filename)
 
 slide_struct *img_set_slide_info(gint duration, guint speed, void (*render), gint transition_id, gchar *path, gchar *filename)
 {
-	slide_struct *slide_info = NULL;
+	slide_struct    *slide_info = NULL;
 	GdkPixbufFormat *pixbuf_format;
-	gint width,height;
+	gint             width, height;
+	ImgStopPoint    *point;
 
-	slide_info = g_new0(slide_struct,1);
+	/* I replaced this with slice allocator, since it's more efficint when
+	 * allocation fixed-sized blocks of memory. */
+	/*slide_info = g_new0(slide_struct,1);*/
+	slide_info = g_slice_new( slide_struct );
 	if (slide_info)
 	{
 		slide_info->duration = duration;
@@ -275,7 +279,35 @@ slide_struct *img_set_slide_info(gint duration, guint speed, void (*render), gin
 		pixbuf_format = gdk_pixbuf_get_file_info(filename,&width,&height);
 		slide_info->resolution = g_strdup_printf("%d x %d",width,height);
 		slide_info->type = gdk_pixbuf_format_get_name(pixbuf_format);
+
+		/* Ken Burns initial stop point */
+		point = g_slice_new( ImgStopPoint );
+		point->time = 1;
+		point->offx = 0;
+		point->offy = 0;
+		point->zoom = 1;
+		slide_info->points = g_list_append( NULL, point );
+		slide_info->no_points = 1;
 	}
 	return slide_info;
+}
+
+void
+img_free_slide_struct( slide_struct *entry )
+{
+	GList *tmp;
+
+	if (entry->slide_original_filename)
+		g_free(entry->slide_original_filename);
+	g_free(entry->filename);
+	g_free(entry->resolution);
+	g_free(entry->type);
+	
+	/* Free stop point list */
+	for( tmp = entry->points; tmp; tmp = g_list_next( tmp ) )
+		g_slice_free( ImgStopPoint, tmp->data );
+	g_list_free( entry->points );
+
+	g_slice_free( slide_struct, entry );
 }
 

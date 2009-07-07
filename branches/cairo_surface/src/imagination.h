@@ -51,8 +51,6 @@ struct _ImgStopPoint
 typedef struct _slide_struct slide_struct;
 struct _slide_struct
 {
-	/* TODO: each slide will have a GList of associated stop points for Ken
-	 * Burns effect. Stay tuned;) */
 	gchar	*filename;
 	gchar	*slide_original_filename;
 	guint	duration;
@@ -62,6 +60,9 @@ struct _slide_struct
 	gchar   *path;	/* transition model string path representation */
 	gint     transition_id;
 	void	(*render) (GdkDrawable*, GdkPixbuf*, GdkPixbuf*, gdouble, gint);
+
+	GList  *points;    /* List with stop points */
+	gint    no_points; /* Number of stop points in list */
 };
 
 typedef struct _img_window_struct img_window_struct;

@@ -309,13 +309,7 @@ void img_free_allocated_memory(img_window_struct *img_struct)
 		do
 		{
 			gtk_tree_model_get(model, &iter,1,&entry,-1);
-			if (entry->slide_original_filename)
-				g_free(entry->slide_original_filename);
-			g_free(entry->filename);
-			g_free(entry->path);
-			g_free(entry->resolution);
-			g_free(entry->type);
-			g_free(entry);
+			img_free_slide_struct( entry );
 			img_struct->slides_nr--;
 		}
 		while (gtk_tree_model_iter_next (model,&iter));
@@ -456,30 +450,26 @@ void img_delete_selected_slides(GtkMenuItem *item,img_window_struct *img_struct)
 		return;
 	
 	/* Free the slide struct for each slide and remove it from the iconview */
-	/* Stored list start to avoid memory leak + pulled signal blocks one level
-	 * higher to avoid calling them separately for each entry in list (we are
-	 * removing items synchronously from withing the callback, so the GUI is
-	 * already "frozen" and selection cannot be changed through the user
-	 * intervention until the callback returns). */
 	bak = selected;
-	g_signal_handlers_block_by_func((gpointer)img_struct->thumbnail_iconview,(gpointer)img_iconview_selection_changed, img_struct);
+	g_signal_handlers_block_by_func( (gpointer)img_struct->thumbnail_iconview,
+									 (gpointer)img_iconview_selection_changed,
+									 img_struct );
 	while (selected)
 	{
 		gtk_tree_model_get_iter(model, &iter,selected->data);
 		gtk_tree_model_get(model, &iter,1,&entry,-1);
-		g_free(entry->filename); g_free(entry->resolution);
-		g_free(entry->type); g_free(entry);
-
+		img_free_slide_struct( entry );
 		gtk_list_store_remove(GTK_LIST_STORE(img_struct->thumbnail_model),&iter);
- 
-		img_struct->slides_nr--; selected = selected->next;
+		img_struct->slides_nr--;
+		selected = selected->next;
 	}
-	g_signal_handlers_unblock_by_func((gpointer)img_struct->thumbnail_iconview,(gpointer)img_iconview_selection_changed, img_struct);
+	g_signal_handlers_unblock_by_func( (gpointer)img_struct->thumbnail_iconview,
+									   (gpointer)img_iconview_selection_changed,
+									   img_struct );
 	g_list_foreach (bak, (GFunc)gtk_tree_path_free, NULL);
 	g_list_free(bak);
 
 	img_set_statusbar_message(img_struct,0);
-	/* TB_EDITS */
 	cairo_surface_destroy( img_struct->current_image );
 	img_struct->current_image = NULL;
 	gtk_widget_queue_draw( img_struct->image_area );
