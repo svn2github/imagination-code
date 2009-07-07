@@ -1037,9 +1037,10 @@ gboolean
 img_on_expose_event(GtkWidget *widget,GdkEventExpose *event,img_window_struct *img)
 {
 	cairo_t *cr;
-	gint     offxr, offyr; /* Relative offsets */
-	gdouble  factor;       /* Scaling factor */
-	gint     cw;           /* Width of the surface */
+	gint     offxr, offyr;  /* Relative offsets */
+	gdouble  factor;        /* Scaling factor for cairo context*/
+	gdouble  offset_factor; /* Scaling factor for positioning */
+	gint     cw;            /* Width of the surface */
 
 	if( ! img->current_image )
 		/* Use default handler */
@@ -1049,10 +1050,12 @@ img_on_expose_event(GtkWidget *widget,GdkEventExpose *event,img_window_struct *i
 
 	/* Do the drawing */
 	cw = cairo_image_surface_get_width( img->current_image );
-	factor = (gdouble)img->image_area->allocation.width / cw * img->current_point.zoom;
+	factor = (gdouble)img->image_area->allocation.width / cw * 
+					  img->current_point.zoom;
+	offset_factor = (gdouble)img->video_size[0] / cw * img->current_point.zoom;
 
-	offxr = img->current_point.offx / factor;
-	offyr = img->current_point.offy / factor;
+	offxr = img->current_point.offx / offset_factor;
+	offyr = img->current_point.offy / offset_factor;
 
 	cairo_scale( cr, factor, factor );
 	cairo_set_source_surface( cr, img->current_image, offxr, offyr );
