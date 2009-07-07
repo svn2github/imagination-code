@@ -398,13 +398,12 @@ img_start_export( img_window_struct *img )
 	while( gtk_events_pending() )
 		gtk_main_iteration();
 
-	/* TB_EDITS */
 	img->stored_image = img->current_image;
 
 	/* FIXME: Here background color is fixed to BLACK!!! */
 	img->image1 = cairo_image_surface_create( CAIRO_FORMAT_RGB24,
-											  img->image_area->allocation.width,
-											  img->image_area->allocation.height );
+											  img->video_size[0],
+											  img->video_size[1] );
 
 	/* Load first image from model */
 	model = gtk_icon_view_get_model( GTK_ICON_VIEW( img->thumbnail_iconview ) );
@@ -544,8 +543,8 @@ img_prepare_pixbufs( img_window_struct *img )
 		img->image1 = img->image2;
 		/* FIXME: This image is always black!!! */
 		img->image2 = cairo_image_surface_create( CAIRO_FORMAT_RGB24,
-												  img->image_area->allocation.width,
-												  img->image_area->allocation.height );
+												  img->video_size[0],
+												  img->video_size[1] );
 		img->current_slide = &img->final_transition;
 
 		return( TRUE );
@@ -907,8 +906,7 @@ img_exporter_<format>( img_window_struct *img )
 								"-r %.02f -aspect %s -s %dx%d <#AUDIO#> -y "
 								"-bf 2 -target %s-dvd \"%s.vob\"",
 								img->export_fps, aspect_ratio,
-								img->image_area->allocation.width,
-								img->image_area->allocation.height,
+								img->video_size[0], img->video_size[1],
 								format, filename );
 	img->export_cmd_line = cmd_line;
 
@@ -976,7 +974,7 @@ img_exporter_vob( img_window_struct *img )
 	}
 
 	/* User is serious, so we better prepare ffmepg command line;) */
-	format = img->image_area->allocation.height == 576 ? "pal" : "ntsc";
+	format = img->video_size[1] == 576 ? "pal" : "ntsc";
 	img->export_fps = 30;
 	filename = gtk_entry_get_text( entry );
 	if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( radio1 ) ) )
@@ -988,8 +986,7 @@ img_exporter_vob( img_window_struct *img )
 								"-r %.02f -aspect %s -s %dx%d <#AUDIO#> -y "
 								"-bf 2 -target %s-dvd \"%s.vob\"",
 								img->export_fps, aspect_ratio,
-								img->image_area->allocation.width,
-								img->image_area->allocation.height,
+								img->video_size[0], img->video_size[1],
 								format, filename );
 	img->export_cmd_line = cmd_line;
 
@@ -1102,8 +1099,7 @@ img_exporter_ogg( img_window_struct *img )
 								"-vcodec libtheora -b %dk -acodec libvorbis "
 								"-f ogg -y \"%s.ogv\"",
 								img->export_fps, aspect_ratio,
-								img->image_area->allocation.width,
-								img->image_area->allocation.height,
+								img->video_size[0], img->video_size[1],
 								qualities[i], filename );
 	img->export_cmd_line = cmd_line;
 

@@ -41,10 +41,15 @@ void img_save_slideshow(img_window_struct *img)
 	g_key_file_set_comment(img_key_file, NULL, NULL, comment_string, NULL);
 
 
+#if 0
+	/* This is somewhat reduntand, I simplified it a bit */
 	if ((img->image_area)->allocation.height == 480)
 		g_key_file_set_integer(img_key_file,"slideshow settings","video format", 480);
 	else
 		g_key_file_set_integer(img_key_file,"slideshow settings","video format", 576);
+#endif
+	g_key_file_set_integer( img_key_file, "slideshow settings",
+							"video format", img->video_size[1] );
 	conf = g_strdup_printf( "%lx", (gulong)img->background_color );
 	g_key_file_set_string(img_key_file,"slideshow settings", "background color", conf);
 	g_free( conf );

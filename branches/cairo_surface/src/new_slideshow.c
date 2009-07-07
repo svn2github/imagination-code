@@ -149,7 +149,7 @@ void img_new_slideshow_settings_dialog(img_window_struct *img, gboolean flag)
 	gtk_widget_show_all(dialog_vbox1);
 
 	/* Set parameters */
-	if (img->image_area->allocation.height == 480)
+	if (img->video_size[1] == 480)
 		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (ntsc), TRUE);
 	else
 		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pal), TRUE);

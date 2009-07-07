@@ -211,6 +211,27 @@ img_window_struct *img_create_window (void)
 	gtk_container_add (GTK_CONTAINER (menu1), imagemenuitem5);
 	g_signal_connect (G_OBJECT (imagemenuitem5),"activate",G_CALLBACK (img_quit_menu),img_struct);
 
+	/* View menu */
+	/* View menu will be inserted here at some point, but currently I don't feel
+	 * like doing GUI work, so it'll have to wait.
+	 *
+	 * Or, maybe will Giuseppe do it for me? (wink, wink;)
+	 *
+	 * Structire of the menu:
+	 *  VIEW
+	 *   +-- PREVIEW QUALITY
+	 *   |    +-- LOW QUALITY  - radio item (img_quality_toggled)
+	 *   |    `-- HIGH QUALITY - radio item (NO CALLBACK HERE)
+	 *   `-- ZOOM
+	 *        +-- ZOOM IN  (img_image_area_zoom_in)
+	 *        +-- ZOOM OUT (img_image_area_zoom_out)
+	 *        `-- 1:1 ZOOM (img_image_area_zoom_reset)
+	 *
+	 * All callback functions are already written, so they can be simply
+	 * connected to proper signals.
+	 */
+
+	/* Slide menu */
 	menuitem2 = gtk_menu_item_new_with_mnemonic (_("_Slide"));
 	gtk_container_add (GTK_CONTAINER (menubar), menuitem2);
 
@@ -407,6 +428,8 @@ img_window_struct *img_create_window (void)
 	gtk_container_add (GTK_CONTAINER (toolbar),last_slide);
 	gtk_widget_set_tooltip_text(last_slide, _("Goto last slide"));
 	g_signal_connect (G_OBJECT (last_slide),"clicked",G_CALLBACK (img_goto_last_slide),img_struct);
+
+	/* FIXME!! Maybe zoom buttons should be added to toolbar to? */
 
 	gtk_widget_show_all (toolbar);
 
@@ -1024,15 +1047,16 @@ void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *im
 		g_free(slide_info_msg);
 	}
 
-	/* TB_EDITS */
 	if( img->current_image )
 		cairo_surface_destroy( img->current_image );
-	img->current_image = img_scale_image( img, info_slide->filename, 0,
-#if 0
-										  img->image_area->allocation.height );
-#else
-										  0 );
-#endif
+
+	/* Respect quality settings */
+	if( img->low_quality )
+		img->current_image = img_scale_image( img, info_slide->filename, 0,
+											  img->video_size[1] );
+	else
+		img->current_image = img_scale_image( img, info_slide->filename, 0, 0 );
+
 	gtk_widget_queue_draw( img->image_area );
 }
 

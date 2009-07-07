@@ -543,11 +543,16 @@ void img_rotate_selected_slide(GtkWidget *button, img_window_struct *img)
 	info_slide->filename = filename;
 	img->rotated_files = g_slist_append(img->rotated_files, g_strdup(filename));
 
-	/* TB_EDITS */
 	if( img->current_image )
 		cairo_surface_destroy( img->current_image );
-	img->current_image = img_scale_image( img, filename, 0,
-										  img->image_area->allocation.height );
+
+	/* Respect quality settings */
+	if( img->low_quality )
+		img->image1 = img_scale_image( img, info_slide->filename, 0,
+									   img->video_size[1] );
+	else
+		img->image1 = img_scale_image( img, info_slide->filename, 0, 0 );
+
 	gtk_widget_queue_draw( img->image_area );
 
 	/* Display the rotated image in thumbnails iconview */
@@ -796,14 +801,18 @@ void img_start_stop_preview(GtkWidget *button, img_window_struct *img)
 		img_swap_toolbar_images( img, FALSE );
 
 		/* Store currently displayed image and then clear image_area. */
-	/* TB_EDITS */
 		img->stored_image = img->current_image;
 
 		/* Load the first image in the pixbuf */
 		gtk_tree_model_get(model, &iter,1,&entry,-1);
-	/* TB_EDITS */
-		img->image2 = img_scale_image( img, entry->filename, 0,
-									   img->image_area->allocation.height );
+
+		/* Respect quality settings */
+		if( img->low_quality )
+			img->image1 = img_scale_image( img, entry->filename, 0,
+										   img->video_size[1] );
+		else
+			img->image1 = img_scale_image( img, entry->filename, 0, 0 );
+
 		img->current_slide = entry;
 
 		/* If we started our preview from beginning, create empty pixbuf and
@@ -816,18 +825,22 @@ void img_start_stop_preview(GtkWidget *button, img_window_struct *img)
 
 			gtk_tree_model_get_iter( model, &prev, path );
 			gtk_tree_model_get( model, &prev, 1, &entry, -1 );
-	/* TB_EDITS */
-			img->image1 = img_scale_image( img, entry->filename, 0,
-										   img->image_area->allocation.height );
+
+			/* Respect quality settings */
+			if( img->low_quality )
+				img->image1 = img_scale_image( img, entry->filename, 0,
+											   img->video_size[1] );
+			else
+				img->image1 = img_scale_image( img, entry->filename, 0, 0 );
+
 			*img->cur_ss_iter = iter;
 		}
 		else
 		{
-	/* TB_EDITS */
 			/* FIXME: Here background color is fixed to BLACK!!! */
 			img->image1 = cairo_image_surface_create( CAIRO_FORMAT_RGB24,
-													  img->image_area->allocation.width,
-													  img->image_area->allocation.height );
+													  img->video_size[0],
+													  img->video_size[1] );
 		}
 		if( path )
 			gtk_tree_path_free( path );
@@ -1083,7 +1096,6 @@ img_scale_image( img_window_struct *img,
 	gint       a_width, a_height;		/* Display dimensions */
 	gint       offset_x, offset_y;      /* Offset values for borders */
 	gdouble    a_ratio, i_ratio;        /* Export and image aspect ratios */
-	/* TB_EDITS */
 	cairo_surface_t *surface;           /* Surface to draw on */
 	cairo_t   *cr;                      /* Cairo, used to transform image */
 	gint       c_width, c_height;       /* Dimensions of cairo surface that
@@ -1097,8 +1109,8 @@ img_scale_image( img_window_struct *img,
 	gboolean   transform = FALSE;       /* Flag that controls scalling */
 
 	/* Obtain information about display area */
-	a_width  = img->image_area->allocation.width;
-	a_height = img->image_area->allocation.height;
+	a_width  = img->video_size[0];
+	a_height = img->video_size[1];
 	a_ratio  = (gdouble)a_width / a_height;
 
 	/* Obtain information about image being loaded */
@@ -1193,16 +1205,21 @@ img_scale_image( img_window_struct *img,
 			}
 		}
 	}
+	/* Loaded surface cannot be smaller than video size or images will look bad
+	 * even at Ken Burns zoom level 1. */
+	c_width = MAX( c_width, a_width );
+	c_height = MAX( c_height, a_height );
+
 	/* Will image be disotrted?
 	 *
 	 * Conditions:
 	 *  - user allows us to do it
 	 *  - skew is in sensible range
-	 *  - image is not smaller that requested size
+	 *  - image is not smaller than exported wideo size
 	 */
 	transform = img->distort_images &&
 				skew < max_skew && skew > min_skew &&
-				( i_width > c_width || i_height > c_height );
+				( i_width > a_width || i_height > a_height );
 
 	/* Create image surface with proper dimensions */
 	surface = cairo_image_surface_create( CAIRO_FORMAT_RGB24, c_width, c_height );
@@ -1537,6 +1554,10 @@ void img_move_audio_down( GtkButton *button, img_window_struct *img )
  * This function modifies current zoom value and queues redraw of preview area.
  *
  * To keep image center in focus, we also do some calculation on offsets.
+ *
+ * IMPORTANT: This function is part of the Ken Burns effect and doesn't change
+ * preview area size!! If you're looking for function that does that,
+ * img_image_area_change_zoom is the thing to look at.
  */
 void
 img_zoom_changed( GtkRange          *range,
@@ -1556,22 +1577,20 @@ img_zoom_changed( GtkRange          *range,
 	{
 		gdouble fracx, fracy;
 		gint    tmpoffx, tmpoffy;
-		gdouble aw2 = img->image_area->allocation.width / 2.0;
-		gdouble ah2 = img->image_area->allocation.height / 2.0;
+		gdouble aw2 = img->video_size[0] / 2.0;
+		gdouble ah2 = img->video_size[1] / 2.0;
 
 		fracx = (gdouble)( aw2 - img->current_point.offx ) /
 						 ( aw2 - img->maxoffx + img->current_point.offx );
 		fracy = (gdouble)( ah2 - img->current_point.offy ) /
 						 ( ah2 - img->maxoffy + img->current_point.offy );
 		
-		img->maxoffx = img->image_area->allocation.width *
-					   ( 1 - img->current_point.zoom );
-		img->maxoffy = img->image_area->allocation.height *
-					   ( 1 - img->current_point.zoom );
-		tmpoffx = aw2 - ( img->image_area->allocation.width * fracx *
-						  img->current_point.zoom ) / ( 1 + fracx );
-		tmpoffy = ah2 - ( img->image_area->allocation.height * fracy *
-						  img->current_point.zoom ) / ( 1 + fracy );
+		img->maxoffx = img->video_size[0] * ( 1 - img->current_point.zoom );
+		img->maxoffy = img->video_size[1] * ( 1 - img->current_point.zoom );
+		tmpoffx = aw2 - ( img->video_size[0] * fracx * img->current_point.zoom )
+						/ ( 1 + fracx );
+		tmpoffy = ah2 - ( img->video_size[1] * fracy * img->current_point.zoom )
+						/ ( 1 + fracy );
 		img->current_point.offx = CLAMP( tmpoffx, img->maxoffx, 0 );
 		img->current_point.offy = CLAMP( tmpoffy, img->maxoffy, 0 );
 	}
@@ -1635,5 +1654,69 @@ img_image_area_motion( GtkWidget         *widget,
 	gtk_widget_queue_draw( img->image_area );
 
 	return( TRUE );
+}
+
+/* Zoom callback functions */
+void
+img_image_area_zoom_in( GtkMenuItem       *item,
+						img_window_struct *img )
+{
+	img_image_area_change_zoom( 0.1, FALSE, img );
+}
+
+void
+img_image_area_zoom_out( GtkMenuItem       *item,
+						 img_window_struct *img )
+{
+	img_image_area_change_zoom( - 0.1, FALSE, img );
+}
+
+void
+img_image_area_zoom_reset( GtkMenuItem       *item,
+						   img_window_struct *img )
+{
+	img_image_area_change_zoom( 0, TRUE, img );
+}
+
+/*
+ * img_image_area_change_zoom:
+ * @step: amount of zoom to be changed
+ * @reset: do we want to reset zoom level
+ * @img: global img_widget_struct structure
+ *
+ * This function will increase/decrease/reset zoom level. If @step is less than
+ * zero, preview area will zoom out, if @step is bigger that zero, image area
+ * will zoom in.
+ *
+ * If @reset is TRUE, @step value is ignored and zoom reset to 1.
+ *
+ * Zoom level of image area is in interval [0.1, 5], but this can be easily
+ * changed by adjusting bounds array values. If the zoom would be set outside of
+ * this interval, it is clamped in between those two values.
+ */
+void
+img_image_area_change_zoom( gdouble            step,
+							gboolean           reset,
+							img_window_struct *img )
+{
+	static gdouble bounds[] = { 0.1, 5.0 };
+
+	if( reset )
+		img->image_area_zoom = 1;
+	else
+		img->image_area_zoom = CLAMP( img->image_area_zoom + step,
+									  bounds[0], bounds[1] );
+
+	/* Apply change */
+	gtk_widget_set_size_request( img->image_area,
+								 img->video_size[0] * img->image_area_zoom,
+								 img->video_size[1] * img->image_area_zoom );
+}
+
+void
+img_quality_toggled( GtkCheckMenuItem  *item,
+					 img_window_struct *img )
+{
+	img->low_quality = gtk_check_menu_item_get_active( item ) ? TRUE : FALSE;
 }
 

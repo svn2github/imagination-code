@@ -121,13 +121,14 @@ struct _img_window_struct
 	gchar       *project_filename;		// project name for saving
 	gboolean	distort_images;
 	gboolean	project_is_modified;
+	gint        video_size[2];
 	guint32     background_color;
   	gint		total_secs;
 	gint		total_music_secs;
   	gint		slides_nr;
 	slide_struct final_transition;  /* Only speed, render and duration fields
-									   of this structure are used (and duration is
-									   always 0). */
+									   of this structure are used (and duration
+									   is always 0). */
 
 	/* Variables common to export and preview functions */
   	slide_struct *current_slide;
@@ -193,6 +194,12 @@ struct _img_window_struct
 	GtkListStore *music_file_liststore;
 	GtkWidget	*music_time_data;
 	GPid		play_child_pid;
+
+	/* Application related stuff */
+	gdouble  image_area_zoom; /* Zoom to be applied to image area */
+	gboolean low_quality;     /* Preview quality:
+								  TRUE  - preview in low-res
+								  FALSE - preview in hi-res */
 };
 
 #endif
