@@ -73,4 +73,7 @@ void
 img_image_area_change_zoom( gdouble            step,
 							gboolean           reset,
 							img_window_struct *img );
+void
+img_quality_toggled( GtkCheckMenuItem  *item,
+					 img_window_struct *img );
 #endif
