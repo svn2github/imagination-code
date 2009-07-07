@@ -1717,6 +1717,6 @@ void
 img_quality_toggled( GtkCheckMenuItem  *item,
 					 img_window_struct *img )
 {
-	img->low_quality = gtk_check_menu_item_get_active( item ) ? TRUE : FALSE;
+	img->low_quality = gtk_check_menu_item_get_active( item );
 }
 

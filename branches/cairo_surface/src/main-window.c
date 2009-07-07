@@ -230,6 +230,57 @@ img_window_struct *img_create_window (void)
 	 * All callback functions are already written, so they can be simply
 	 * connected to proper signals.
 	 */
+	menuitem1 = gtk_menu_item_new_with_mnemonic( _("_View") );
+	gtk_menu_shell_append( GTK_MENU_SHELL( menubar ), menuitem1 );
+
+	menu1 = gtk_menu_new();
+	gtk_menu_item_set_submenu( GTK_MENU_ITEM( menuitem1 ), menu1 );
+
+	/* Quality settings */
+	menuitem1 = gtk_menu_item_new_with_mnemonic( _("Preview quality") );
+	gtk_menu_shell_append( GTK_MENU_SHELL( menu1 ), menuitem1 );
+
+	menu3 = gtk_menu_new();
+	gtk_menu_item_set_submenu( GTK_MENU_ITEM( menuitem1 ), menu3 );
+
+	menuitem2 = gtk_radio_menu_item_new_with_mnemonic( NULL, _("_Low") );
+	g_signal_connect( G_OBJECT( menuitem2 ), "toggled",
+					  G_CALLBACK( img_quality_toggled ), img_struct );
+	gtk_menu_shell_append( GTK_MENU_SHELL( menu3 ), menuitem2 );
+	menuitem3 = gtk_radio_menu_item_new_with_mnemonic_from_widget(
+							GTK_RADIO_MENU_ITEM( menuitem2 ), _("High") );
+	gtk_menu_shell_append( GTK_MENU_SHELL( menu3 ), menuitem3 );
+
+	/* Zoom controls */
+	menuitem1 = gtk_menu_item_new_with_mnemonic( _("_Zoom") );
+	gtk_menu_shell_append( GTK_MENU_SHELL( menu1 ), menuitem1 );
+
+	menu3 = gtk_menu_new();
+	gtk_menu_item_set_submenu( GTK_MENU_ITEM( menuitem1 ), menu3 );
+
+	menuitem2 = gtk_image_menu_item_new_from_stock( GTK_STOCK_ZOOM_IN,
+													accel_group );
+	gtk_widget_add_accelerator( menuitem2, "activate", accel_group, GDK_plus,
+								GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE );
+	g_signal_connect( G_OBJECT( menuitem2 ), "activate",
+					  G_CALLBACK( img_image_area_zoom_in ), img_struct );
+	gtk_menu_shell_append( GTK_MENU_SHELL( menu3 ), menuitem2 );
+
+	menuitem2 = gtk_image_menu_item_new_from_stock( GTK_STOCK_ZOOM_OUT,
+													accel_group );
+	gtk_widget_add_accelerator( menuitem2, "activate", accel_group, GDK_minus,
+								GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE );
+	g_signal_connect( G_OBJECT( menuitem2 ), "activate",
+					  G_CALLBACK( img_image_area_zoom_out ), img_struct );
+	gtk_menu_shell_append( GTK_MENU_SHELL( menu3 ), menuitem2 );
+
+	menuitem2 = gtk_image_menu_item_new_from_stock( GTK_STOCK_ZOOM_100,
+													accel_group );
+	gtk_widget_add_accelerator( menuitem2, "activate", accel_group, GDK_0,
+								GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE );
+	g_signal_connect( G_OBJECT( menuitem2 ), "activate",
+					  G_CALLBACK( img_image_area_zoom_reset ), img_struct );
+	gtk_menu_shell_append( GTK_MENU_SHELL( menu3 ), menuitem2 );
 
 	/* Slide menu */
 	menuitem2 = gtk_menu_item_new_with_mnemonic (_("_Slide"));
