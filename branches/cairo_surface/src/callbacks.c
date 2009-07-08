@@ -1028,8 +1028,8 @@ img_on_expose_event(GtkWidget *widget,GdkEventExpose *event,img_window_struct *i
 {
 	cairo_t *cr;
 	gint     offxr, offyr;  /* Relative offsets */
-	gdouble  factor;        /* Scaling factor for cairo context*/
-	gdouble  offset_factor; /* Scaling factor for positioning */
+	gdouble  factor_cairo;  /* Scaling factor for cairo context */
+	gdouble  factor_offset; /* Scalng factor for offset mods */
 	gint     cw;            /* Width of the surface */
 
 	if( ! img->current_image )
@@ -1040,14 +1040,17 @@ img_on_expose_event(GtkWidget *widget,GdkEventExpose *event,img_window_struct *i
 
 	/* Do the drawing */
 	cw = cairo_image_surface_get_width( img->current_image );
-	factor = (gdouble)img->image_area->allocation.width / cw * 
-					  img->current_point.zoom;
-	offset_factor = (gdouble)img->video_size[0] / cw * img->current_point.zoom;
+	factor_cairo = (gdouble)img->image_area->allocation.width /
+							cw * img->current_point.zoom;
+	factor_offset = (gdouble)img->video_size[0] /
+							 cw * img->current_point.zoom;
 
-	offxr = img->current_point.offx / offset_factor;
-	offyr = img->current_point.offy / offset_factor;
+	offxr = img->current_point.offx / factor_offset;
+	offyr = img->current_point.offy / factor_offset;
 
-	cairo_scale( cr, factor, factor );
+//	g_print( "%f -> %d, %d\n", factor_offset, offxr, offyr );
+
+	cairo_scale( cr, factor_cairo, factor_cairo );
 	cairo_set_source_surface( cr, img->current_image, offxr, offyr );
 	cairo_paint( cr );
 
@@ -1570,23 +1573,24 @@ img_zoom_changed( GtkRange          *range,
 	{
 		gdouble fracx, fracy;
 		gint    tmpoffx, tmpoffy;
-		gdouble aw2 = img->video_size[0] / 2.0;
-		gdouble ah2 = img->video_size[1] / 2.0;
+		gdouble aw  = img->video_size[0];
+		gdouble ah  = img->video_size[1];
+		gdouble aw2 = aw / 2;
+		gdouble ah2 = ah / 2;
 
 		fracx = (gdouble)( aw2 - img->current_point.offx ) /
 						 ( aw2 - img->maxoffx + img->current_point.offx );
 		fracy = (gdouble)( ah2 - img->current_point.offy ) /
 						 ( ah2 - img->maxoffy + img->current_point.offy );
-		
-		img->maxoffx = img->video_size[0] * ( 1 - img->current_point.zoom );
-		img->maxoffy = img->video_size[1] * ( 1 - img->current_point.zoom );
-		tmpoffx = aw2 - ( img->video_size[0] * fracx * img->current_point.zoom )
-						/ ( 1 + fracx );
-		tmpoffy = ah2 - ( img->video_size[1] * fracy * img->current_point.zoom )
-						/ ( 1 + fracy );
+
+		img->maxoffx = aw * ( 1 - img->current_point.zoom );
+		img->maxoffy = ah * ( 1 - img->current_point.zoom );
+		tmpoffx = ( fracx * img->maxoffx + aw2 * ( fracx - 1 ) ) / ( 1 + fracx );
+		tmpoffy = ( fracy * img->maxoffy + ah2 * ( fracy - 1 ) ) / ( 1 + fracy );
 		img->current_point.offx = CLAMP( tmpoffx, img->maxoffx, 0 );
 		img->current_point.offy = CLAMP( tmpoffy, img->maxoffy, 0 );
 	}
+	g_print( ">>> %d, %d\n", img->maxoffx, img->maxoffy );
 
 	gtk_widget_queue_draw( img->image_area );
 }
@@ -1633,13 +1637,17 @@ img_image_area_motion( GtkWidget         *widget,
 					   GdkEventMotion    *event,
 					   img_window_struct *img )
 {
-	gint tmpoffx;
-	gint tmpoffy;
+	gdouble deltax;
+	gdouble deltay;
 
-	tmpoffx = (gint)event->x - img->x + img->current_point.offx;
-	tmpoffy = (gint)event->y - img->y + img->current_point.offy;
-	img->current_point.offx = CLAMP( tmpoffx, img->maxoffx, 0 );
-	img->current_point.offy = CLAMP( tmpoffy, img->maxoffy, 0 );
+	/* 0.5 is added for proper rounding */
+	deltax = ( event->x - img->x ) / img->image_area_zoom;
+	deltay = ( event->y - img->y ) / img->image_area_zoom;
+
+	img->current_point.offx = (gint)CLAMP( deltax + img->current_point.offx,
+										   img->maxoffx, 0 );
+	img->current_point.offy = (gint)CLAMP( deltay + img->current_point.offy,
+										   img->maxoffy, 0 );
 
 	img->x = (gint)event->x;
 	img->y = (gint)event->y;
