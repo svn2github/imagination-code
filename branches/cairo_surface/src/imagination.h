@@ -110,6 +110,8 @@ struct _img_window_struct
 	GtkWidget    *zoom_scale;    /* Zoom slider */
 	gint          x;             /* Last button press coordinates */
 	gint          y;
+	gint          bak_offx;      /* Stored offset at button press */
+	gint          bak_offy;
 	gint          maxoffx;       /* Maximal offsets for current zoom */
 	gint          maxoffy;
 	ImgStopPoint  current_point; /* Data for rendering current image */

@@ -1559,6 +1559,9 @@ void
 img_zoom_changed( GtkRange          *range,
 				  img_window_struct *img )
 {
+	/* Store old zoom for calcutaions */
+	gdouble old_zoom = img->current_point.zoom;
+
 	img->current_point.zoom = gtk_range_get_value( range );
 
 	/* If zoom is 1, reset parameters to avoid drift. */
@@ -1578,19 +1581,17 @@ img_zoom_changed( GtkRange          *range,
 		gdouble aw2 = aw / 2;
 		gdouble ah2 = ah / 2;
 
-		fracx = (gdouble)( aw2 - img->current_point.offx ) /
-						 ( aw2 - img->maxoffx + img->current_point.offx );
-		fracy = (gdouble)( ah2 - img->current_point.offy ) /
-						 ( ah2 - img->maxoffy + img->current_point.offy );
-
+		fracx = (gdouble)( aw2 - img->current_point.offx ) / ( aw2 * old_zoom );
+		fracy = (gdouble)( ah2 - img->current_point.offy ) / ( ah2 * old_zoom );
 		img->maxoffx = aw * ( 1 - img->current_point.zoom );
 		img->maxoffy = ah * ( 1 - img->current_point.zoom );
-		tmpoffx = ( fracx * img->maxoffx + aw2 * ( fracx - 1 ) ) / ( 1 + fracx );
-		tmpoffy = ( fracy * img->maxoffy + ah2 * ( fracy - 1 ) ) / ( 1 + fracy );
+		tmpoffx = aw2 * ( 1 - fracx * img->current_point.zoom );
+		tmpoffy = ah2 * ( 1 - fracy * img->current_point.zoom );
+		g_print( "%d, %d\n", tmpoffx, tmpoffy );
+
 		img->current_point.offx = CLAMP( tmpoffx, img->maxoffx, 0 );
 		img->current_point.offy = CLAMP( tmpoffy, img->maxoffy, 0 );
 	}
-	g_print( ">>> %d, %d\n", img->maxoffx, img->maxoffy );
 
 	gtk_widget_queue_draw( img->image_area );
 }
@@ -1616,6 +1617,8 @@ img_image_area_button_press( GtkWidget         *widget,
 
 	img->x = (gint)event->x;
 	img->y = (gint)event->y;
+	img->bak_offx = img->current_point.offx;
+	img->bak_offy = img->current_point.offy;
 
 	return( TRUE );
 }
@@ -1637,20 +1640,14 @@ img_image_area_motion( GtkWidget         *widget,
 					   GdkEventMotion    *event,
 					   img_window_struct *img )
 {
-	gdouble deltax;
-	gdouble deltay;
+	gint deltax;
+	gint deltay;
 
-	/* 0.5 is added for proper rounding */
-	deltax = ( event->x - img->x ) / img->image_area_zoom;
-	deltay = ( event->y - img->y ) / img->image_area_zoom;
+	deltax = (gint)( ( event->x - img->x ) / img->image_area_zoom );
+	deltay = (gint)( ( event->y - img->y ) / img->image_area_zoom );
 
-	img->current_point.offx = (gint)CLAMP( deltax + img->current_point.offx,
-										   img->maxoffx, 0 );
-	img->current_point.offy = (gint)CLAMP( deltay + img->current_point.offy,
-										   img->maxoffy, 0 );
-
-	img->x = (gint)event->x;
-	img->y = (gint)event->y;
+	img->current_point.offx = CLAMP( deltax + img->bak_offx, img->maxoffx, 0 );
+	img->current_point.offy = CLAMP( deltay + img->bak_offy, img->maxoffy, 0 );
 
 	gtk_widget_queue_draw( img->image_area );
 
