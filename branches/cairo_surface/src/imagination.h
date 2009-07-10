@@ -134,14 +134,22 @@ struct _img_window_struct
 									   is always 0). */
 
 	/* Variables common to export and preview functions */
-  	slide_struct *current_slide;
-	cairo_surface_t *current_image;
-	cairo_surface_t *stored_image;
-	cairo_surface_t *image1;
+  	slide_struct    *current_slide;
+	cairo_surface_t *current_image;      /* Image in preview area */
+	cairo_surface_t *stored_image;       /* Backup location for image */
+	cairo_surface_t *image1;             /* Images used in transition rendering */
 	cairo_surface_t *image2;
-  	GtkTreeIter *cur_ss_iter;
-  	guint		source_id;
-	gdouble     progress;
+  	GtkTreeIter     *cur_ss_iter;
+  	guint		     source_id;
+	gdouble          progress;           /* This will be DEPRECATED */
+
+	guint            total_nr_frames;    /* Total number of frames */
+	guint            displayed_frame;    /* Current frame */
+	guint            slide_nr_frames;    /* Number of frames fo current slide */
+	guint            slide_cur_frame;    /* Current slide frame */
+	guint            slide_trans_frames; /* Number of frames in transition */
+	guint            slide_still_frames; /* Number of frames in still part */
+	guint            next_slide_off;     /* Time offset of next slide */
 
 	/* Preview related variables */
   	gboolean	preview_is_running;

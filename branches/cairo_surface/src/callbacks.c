@@ -24,7 +24,7 @@
 static void img_file_chooser_add_preview(img_window_struct *);
 static void img_update_preview_file_chooser(GtkFileChooser *,img_window_struct *);
 static gboolean img_transition_timeout(img_window_struct *);
-static gboolean img_sleep_timeout(img_window_struct *);
+static gboolean img_still_timeout(img_window_struct *);
 static void img_swap_toolbar_images( img_window_struct *, gboolean);
 static void img_clean_after_preview(img_window_struct *);
 static void img_about_dialog_activate_link(GtkAboutDialog * , const gchar *, gpointer );
@@ -769,21 +769,24 @@ void img_start_stop_preview(GtkWidget *button, img_window_struct *img)
 	else
 	{
 		/* Start the preview */
-		model = gtk_icon_view_get_model(GTK_ICON_VIEW(img->thumbnail_iconview));
-		list = gtk_icon_view_get_selected_items( GTK_ICON_VIEW( img->thumbnail_iconview ) );
+		model = GTK_TREE_MODEL( img->thumbnail_model );
+		list = gtk_icon_view_get_selected_items(
+					GTK_ICON_VIEW( img->thumbnail_iconview ) );
 		if( list )
-			gtk_icon_view_get_cursor(GTK_ICON_VIEW(img->thumbnail_iconview), &path, NULL);
-		if( list && path )
+			gtk_icon_view_get_cursor( GTK_ICON_VIEW(img->thumbnail_iconview),
+									  &path, NULL);
+		if( list )
 		{
 			/* Start preview from this slide */
-			gtk_tree_model_get_iter( model, &iter, path );
+			if( path )
+				gtk_tree_model_get_iter( model, &iter, path );
 			g_list_foreach( list, (GFunc)gtk_tree_path_free, NULL );
 			g_list_free( list );
 		}
 		else
 		{
 			/* Start preview from the beginning */
-			if(!gtk_tree_model_get_iter_first (model,&iter))
+			if( ! gtk_tree_model_get_iter_first( model, &iter ) )
 				return;
 		}
 
@@ -794,14 +797,14 @@ void img_start_stop_preview(GtkWidget *button, img_window_struct *img)
 		img->stored_image = img->current_image;
 
 		/* Load the first image in the pixbuf */
-		gtk_tree_model_get(model, &iter,1,&entry,-1);
+		gtk_tree_model_get( model, &iter, 1, &entry, -1);
 
 		/* Respect quality settings */
 		if( img->low_quality )
-			img->image1 = img_scale_image( img, entry->filename, 0,
+			img->image2 = img_scale_image( img, entry->filename, 0,
 										   img->video_size[1] );
 		else
-			img->image1 = img_scale_image( img, entry->filename, 0, 0 );
+			img->image2 = img_scale_image( img, entry->filename, 0, 0 );
 
 		img->current_slide = entry;
 
@@ -827,18 +830,31 @@ void img_start_stop_preview(GtkWidget *button, img_window_struct *img)
 		}
 		else
 		{
-			/* FIXME: Here background color is fixed to BLACK!!! */
+			cairo_t *cr;
+
 			img->image1 = cairo_image_surface_create( CAIRO_FORMAT_RGB24,
 													  img->video_size[0],
 													  img->video_size[1] );
+			cr = cairo_create( img->image1 );
+			cairo_set_source_rgb( cr, ( img->background_color >> 24 ) & 0xff,
+									  ( img->background_color >> 16 ) & 0xff,
+									  ( img->background_color >> 8  ) & 0xff );
+			cairo_paint( cr );
+			cairo_destroy( cr );
 		}
 		if( path )
 			gtk_tree_path_free( path );
 
 		/* Add transition timeout function */
+		/* FIXME: Ken Burns missing!!! */
 		img->preview_is_running = TRUE;
-		img->progress = 0;
-		img->source_id = g_timeout_add(1000 / PREVIEW_FPS,(GSourceFunc)img_transition_timeout,img);
+		img->total_nr_frames = img->total_secs * PREVIEW_FPS;
+		img->displayed_frame = 0;
+		img->next_slide_off = 0;
+		img_calc_next_slide_time_offset( img, PREVIEW_FPS );
+		img->source_id = g_timeout_add( 1000 / PREVIEW_FPS,
+										(GSourceFunc)img_transition_timeout,
+										img );
 	}
 	return;
 }
@@ -1104,6 +1120,7 @@ img_scale_image( img_window_struct *img,
 	gdouble    min_skew = 0.75;
 	gboolean   transform = FALSE;       /* Flag that controls scalling */
 
+	g_message( "Start ... " );
 	/* Obtain information about display area */
 	a_width  = img->video_size[0];
 	a_height = img->video_size[1];
@@ -1113,7 +1130,6 @@ img_scale_image( img_window_struct *img,
 	gdk_pixbuf_get_file_info( filename, &i_width, &i_height );
 	i_ratio = (gdouble)i_width / i_height;
 
-	/* TB_EDITS */
 	/* How distorted images would be if we scaled them */
 	skew = a_ratio / i_ratio;
 
@@ -1129,6 +1145,7 @@ img_scale_image( img_window_struct *img,
 	 *  - painting of this image surface according to stretching
 	 */
 
+	g_message( "dimensions ..." );
 	/* Calculationg surface dimensions.
 	 *
 	 * In order to be as flexible as possible, this function can load images at
@@ -1217,9 +1234,11 @@ img_scale_image( img_window_struct *img,
 				skew < max_skew && skew > min_skew &&
 				( i_width > a_width || i_height > a_height );
 
+	g_message( "Creation ..." );
 	/* Create image surface with proper dimensions */
 	surface = cairo_image_surface_create( CAIRO_FORMAT_RGB24, c_width, c_height );
 
+	g_message( "Loading %s ...", filename );
 	/* Load image into pixbuf at proper size */
 	if( transform )
 	{
@@ -1250,6 +1269,7 @@ img_scale_image( img_window_struct *img,
 	i_width  = gdk_pixbuf_get_width( pixbuf );
 	i_height = gdk_pixbuf_get_height( pixbuf );
 
+	g_message( "Painting ..." );
 	/* Paint surface with loaded image
 	 *
 	 * If image cannot be scalled, transform is FALSE. In this case, just
@@ -1277,59 +1297,78 @@ img_scale_image( img_window_struct *img,
 	cairo_paint( cr );
 
 	cairo_destroy( cr );
+	g_message( "Done!" );
 
 	return( surface );
 }
 
 static gboolean img_transition_timeout(img_window_struct *img)
 {
-	/* Increment progress variable (this is being passed as a parameter
-	 * to plug-in provided transition function).
-	 * 1000 ms / TRANSITION_TIMEOUT gives us a frame rate of preview
-	 * (currently, this is 1000 / 40 = 25 fps). */
-	img->progress += (gdouble)1 / ( img->current_slide->speed * PREVIEW_FPS );
-	
-	/* if the transition render is NULL (no transition is set for this
-	 * slide), we stop this timeout function, but still invalidate
-	 * preview area so expose event gets called. */
-	if( img->current_slide->render == NULL )
+	gdouble progress;
+
+	/* FIXME: Ken Burns missing!! */
+	/* Transition is now being calculated as factor of slide numbers.
+	 *
+	 * This new way has been implemented because previous method is not precise
+	 * enough. (On 100 slides with transitions, previous method could report for
+	 * up to a 200 frames less than expected, which is 200 / 30 ~ 7s on
+	 * 30fps video!!!) */
+	/*img->progress += (gdouble)1 / ( img->current_slide->speed * PREVIEW_FPS );*/
+
+	/* If we output all transition slides (or if there is no slides to output in
+	 * transition part), connect still preview phase. */
+	if( img->slide_cur_frame >= img->slide_trans_frames )
 	{
-		img->progress = 0;
-		img->source_id = g_timeout_add( img->current_slide->duration * 1000, (GSourceFunc)img_sleep_timeout, img );
+		img->source_id = g_timeout_add( 1000 / PREVIEW_FPS,
+										(GSourceFunc)img_still_timeout, img );
+		img->current_image = img->image2;
 		gtk_widget_queue_draw( img->image_area );
+
 		return FALSE;
 	}
 
-	/* If the progress reached 1, the transition should be finished and
-	 * it's time to stop this timeout function and add sleep timeout
-	 * function to the main loop. The 0.0000005 is added to accomodate
-	 * floating number rounding errors (if we would write this condition
-	 * as img->progress > 1, we would miss the last frame, since
-	 * (gdouble)1 > 1 */
-	if( img->progress > 1.0000005 )
-	{
-		img->progress = 0;
-		img->source_id = g_timeout_add( img->current_slide->duration * 1000,(GSourceFunc)img_sleep_timeout, img );
-		return FALSE;
-	}
+	/* Do image composing here and place result in current image */
+	progress = (gdouble)img->slide_cur_frame / img->slide_trans_frames;
+	/* FIXME!! */
 
 	/* Schedule our image redraw */
 	gtk_widget_queue_draw( img->image_area );
 
+	/* Increment counters */
+	img->slide_cur_frame++;
+	img->displayed_frame++;
+
 	return TRUE;
 }
 
-static gboolean img_sleep_timeout(img_window_struct *img)
+static gboolean img_still_timeout(img_window_struct *img)
 {
-	if(img_prepare_pixbufs(img))
+	/* Export enough still frames (FIXME: Ken Burns missing!!) */
+	if( img->slide_cur_frame < img->slide_nr_frames )
 	{
-		img->source_id = g_timeout_add( 1000 / PREVIEW_FPS,(GSourceFunc)img_transition_timeout,img );
+		/* Add Ken Burns calculations here */
+
+		/* Increment counters */
+		img->slide_cur_frame++;
+		img->displayed_frame++;
+
+		return( TRUE );
+	}
+
+	/* If there is next slide, connect transition preview, else finish
+	 * preview. */
+	if( img_prepare_pixbufs( img, TRUE ) )
+	{
+		img_calc_next_slide_time_offset( img, PREVIEW_FPS );
+		img->source_id = g_timeout_add( 1000 / PREVIEW_FPS,
+									    (GSourceFunc)img_transition_timeout,
+										img );
 	}
 	else
 	{
 		/* Clean resources used in preview and prepare application for
 		 * next preview. */
-		img_clean_after_preview(img);
+		img_clean_after_preview( img );
 	}
 
 	return FALSE;
@@ -1363,11 +1402,6 @@ static void img_swap_toolbar_images( img_window_struct *img,gboolean flag )
 
 static void img_clean_after_preview(img_window_struct *img)
 {
-	/* Disconnect expose event handler */
-	g_signal_handlers_disconnect_by_func(img->image_area,img_on_expose_event,img);
-	gtk_widget_set_app_paintable(img->image_area, FALSE);
-
-	/* TB_EDITS */
 	img->current_image = img->stored_image;
 	gtk_widget_queue_draw( img->image_area );
 
@@ -1380,6 +1414,10 @@ static void img_clean_after_preview(img_window_struct *img)
 	/* Clean the resources used by timeout handlers */
 	g_slice_free( GtkTreeIter, img->cur_ss_iter );
 	img->cur_ss_iter = NULL;
+
+	/* Destroy images that were used */
+	cairo_surface_destroy( img->image1 );
+	cairo_surface_destroy( img->image2 );
 
 	return;
 }

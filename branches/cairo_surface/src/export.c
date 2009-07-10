@@ -501,14 +501,18 @@ img_stop_export( img_window_struct *img )
 /*
  * img_prepare_pixbufs:
  * @img: global img_window_struct
+ * @preview: do we load image for preview
  *
  * This function is used when previewing or exporting slideshow. It goes
  * through the model and prepares everything for next transition.
  *
+ * If @preview is TRUE, we also respect quality settings.
+ *
  * Return value: TRUE if images have been succefully prepared, FALSE otherwise.
  */
 gboolean
-img_prepare_pixbufs( img_window_struct *img )
+img_prepare_pixbufs( img_window_struct *img,
+					 gboolean           preview )
 {
 	GtkTreeModel    *model;
 	static gboolean  last_transition = TRUE;
@@ -524,27 +528,39 @@ img_prepare_pixbufs( img_window_struct *img )
 	if( gtk_tree_model_iter_next( model, img->cur_ss_iter ) )
 	{
 		/* We have next iter, so prepare for next round */
-	/* TB_EDITS */
 		cairo_surface_destroy( img->image1 );
 		img->image1 = img->image2;
 		gtk_tree_model_get( model, img->cur_ss_iter, 1, &img->current_slide, -1 );
-		img->image2 = img_scale_image( img, img->current_slide->filename, 0, 0 );
+
+		if( preview && img->low_quality )
+			img->image2 = img_scale_image( img, img->current_slide->filename, 0,
+										   img->video_size[1] );
+		else
+			img->image2 = img_scale_image( img, img->current_slide->filename, 0, 0 );
 
 		return(TRUE);
 	}
 	else if( last_transition )
 	{
+		cairo_t *cr;
+
 		/* We displayed last image, but bye-bye transition hasn't
 		 * been displayed. */
 		last_transition = FALSE;
 
-	/* TB_EDITS */
 		cairo_surface_destroy( img->image1 );
 		img->image1 = img->image2;
-		/* FIXME: This image is always black!!! */
-		img->image2 = cairo_image_surface_create( CAIRO_FORMAT_RGB24,
+
+		img->image1 = cairo_image_surface_create( CAIRO_FORMAT_RGB24,
 												  img->video_size[0],
 												  img->video_size[1] );
+		cr = cairo_create( img->image1 );
+		cairo_set_source_rgb( cr, ( img->background_color >> 24 ) & 0xff,
+								  ( img->background_color >> 16 ) & 0xff,
+								  ( img->background_color >> 8  ) & 0xff );
+		cairo_paint( cr );
+		cairo_destroy( cr );
+
 		img->current_slide = &img->final_transition;
 
 		return( TRUE );
@@ -672,6 +688,46 @@ img_export_calc_slide_frames( img_window_struct *img )
 }
 
 /*
+ * img_calc_next_slide_time_offset:
+ * @img: global img_window_struct structure
+ * @rate: frame rate to be used for calculations
+ *
+ * This function will calculate:
+ *   - time offset of next slide (img->next_slide_off)
+ *   - number of frames for current slide (img->slide_nr_frames)
+ *   - number of slides needed for transition (img->slide_trans_frames)
+ *   - number of slides needed for still part (img->slide_still_franes)
+ *   - reset current slide counter to 0 (img->slide_cur_frame)
+ *
+ * Return value: new time offset. The same value is stored in
+ * img->next_slide_off.
+ */
+guint
+img_calc_next_slide_time_offset( img_window_struct *img,
+								 gdouble            rate )
+{
+	img->slide_trans_frames = 0;
+
+	if( img->current_slide->render )
+	{
+		img->next_slide_off += img->current_slide->duration +
+							   img->current_slide->speed;
+
+		img->slide_trans_frames = img->current_slide->speed * rate;
+	}
+	else
+	{
+		img->next_slide_off += img->current_slide->duration;
+	}
+
+	img->slide_nr_frames = img->next_slide_off * rate - img->displayed_frame;
+	img->slide_cur_frame = 0;
+	img->slide_still_frames = img->slide_nr_frames - img->slide_trans_frames;
+
+	return( img->next_slide_off );
+}
+
+/*
  * img_export_transition:
  * @img:
  *
@@ -754,7 +810,6 @@ img_export_still( img_window_struct *img )
 	/* Initialize pixbuf data buffer */
 	if( img->pixbuf_data == NULL )
 	{
-	/* TB_EDITS */
 		/* FIXME!!!! */
 	}
 
@@ -764,7 +819,7 @@ img_export_still( img_window_struct *img )
 		/* Exit still rendering and continue with next transition. */
 
 		/* Load next image from store. */
-		if( img_prepare_pixbufs( img ) )
+		if( img_prepare_pixbufs( img, FALSE ) )
 		{
 			gchar *string;
 
