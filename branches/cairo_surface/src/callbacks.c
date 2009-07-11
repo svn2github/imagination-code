@@ -793,9 +793,6 @@ void img_start_stop_preview(GtkWidget *button, img_window_struct *img)
 		/* Replace button and menu images */
 		img_swap_toolbar_images( img, FALSE );
 
-		/* Store currently displayed image and then clear image_area. */
-		img->stored_image = img->current_image;
-
 		/* Load the first image in the pixbuf */
 		gtk_tree_model_get( model, &iter, 1, &entry, -1);
 
@@ -805,6 +802,11 @@ void img_start_stop_preview(GtkWidget *button, img_window_struct *img)
 										   img->video_size[1] );
 		else
 			img->image2 = img_scale_image( img, entry->filename, 0, 0 );
+
+		/* Load first stop point */
+		img->point2 = (ImgStopPoint *)( entry->no_points ?
+										entry->points->data :
+										NULL );
 
 		img->current_slide = entry;
 
@@ -825,6 +827,11 @@ void img_start_stop_preview(GtkWidget *button, img_window_struct *img)
 											   img->video_size[1] );
 			else
 				img->image1 = img_scale_image( img, entry->filename, 0, 0 );
+			
+			/* Load last stop point */
+			img->point1 = (ImgStopPoint *)( entry->no_points ?
+											g_list_last( entry->points )->data :
+											NULL );
 
 			*img->cur_ss_iter = iter;
 		}
@@ -836,9 +843,9 @@ void img_start_stop_preview(GtkWidget *button, img_window_struct *img)
 													  img->video_size[0],
 													  img->video_size[1] );
 			cr = cairo_create( img->image1 );
-			cairo_set_source_rgb( cr, ( img->background_color >> 24 ) & 0xff,
-									  ( img->background_color >> 16 ) & 0xff,
-									  ( img->background_color >> 8  ) & 0xff );
+			cairo_set_source_rgb( cr, img->background_color[0],
+									  img->background_color[1],
+									  img->background_color[2] );
 			cairo_paint( cr );
 			cairo_destroy( cr );
 		}
@@ -846,12 +853,23 @@ void img_start_stop_preview(GtkWidget *button, img_window_struct *img)
 			gtk_tree_path_free( path );
 
 		/* Add transition timeout function */
-		/* FIXME: Ken Burns missing!!! */
 		img->preview_is_running = TRUE;
 		img->total_nr_frames = img->total_secs * PREVIEW_FPS;
 		img->displayed_frame = 0;
 		img->next_slide_off = 0;
 		img_calc_next_slide_time_offset( img, PREVIEW_FPS );
+
+		/* Create surfaces to be passed to transition renderer */
+		img->image_from = cairo_image_surface_create( CAIRO_FORMAT_RGB24,
+													  img->video_size[0],
+													  img->video_size[1] );
+		img->image_to = cairo_image_surface_create( CAIRO_FORMAT_RGB24,
+													img->video_size[0],
+													img->video_size[1] );
+		img->exported_image = cairo_image_surface_create( CAIRO_FORMAT_RGB24,
+														  img->video_size[0],
+														  img->video_size[1] );
+
 		img->source_id = g_timeout_add( 1000 / PREVIEW_FPS,
 										(GSourceFunc)img_transition_timeout,
 										img );
@@ -1040,42 +1058,94 @@ void img_on_drag_data_received (GtkWidget *widget,GdkDragContext *context,int x,
  * is selected).
  */
 gboolean
-img_on_expose_event(GtkWidget *widget,GdkEventExpose *event,img_window_struct *img)
+img_on_expose_event( GtkWidget         *widget,
+					 GdkEventExpose    *event,
+					 img_window_struct *img )
 {
 	cairo_t *cr;
-	gint     offxr, offyr;  /* Relative offsets */
-	gdouble  factor_cairo;  /* Scaling factor for cairo context */
-	gdouble  factor_offset; /* Scalng factor for offset mods */
-	gint     cw;            /* Width of the surface */
 
-	if( ! img->current_image )
-		/* Use default handler */
-		return( FALSE );
+	/* If we're previewing or exporting, only paint frame that is being
+	 * currently produced. */
+	if( img->preview_is_running || img->export_is_running )
+	{
+		gdouble factor;
 
-	cr = gdk_cairo_create( widget->window );
+		cr = gdk_cairo_create( widget->window );
+		
+		/* Do the drawing */
+		factor = (gdouble)img->image_area->allocation.width /
+						  img->video_size[0];
+		cairo_scale( cr, factor, factor );
+		cairo_set_source_surface( cr, img->exported_image, 0, 0 );
+		cairo_paint( cr );
 
-	/* Do the drawing */
-	cw = cairo_image_surface_get_width( img->current_image );
-	factor_cairo = (gdouble)img->image_area->allocation.width /
-							cw * img->current_point.zoom;
-	factor_offset = (gdouble)img->video_size[0] /
-							 cw * img->current_point.zoom;
+		cairo_destroy( cr );
+	}
+	else
+	{
+		if( ! img->current_image )
+			/* Use default handler */
+			return( FALSE );
+		
+		cr = gdk_cairo_create( widget->window );
+		
+		/* Do the drawing */
+		img_draw_image_on_surface( cr, img->image_area->allocation.width,
+								   img->current_image, &img->current_point, img );
 
-	offxr = img->current_point.offx / factor_offset;
-	offyr = img->current_point.offy / factor_offset;
-
-//	g_print( "%f -> %d, %d\n", factor_offset, offxr, offyr );
-
-	cairo_scale( cr, factor_cairo, factor_cairo );
-	cairo_set_source_surface( cr, img->current_image, offxr, offyr );
-	cairo_paint( cr );
-
-	/* Add subtitles onto this image */
-	/* TODO!! */
-
-	cairo_destroy( cr );
+		/* Add subtitles onto this image */
+		/* TODO!! */
+		
+		cairo_destroy( cr );
+	}
 
 	return( TRUE );
+}
+
+/*
+ * img_draw_image_on_surface:
+ * @cr: cairo context
+ * @width: width of the surface that @cr draws on
+ * @surface: cairo surface to be drawn on @cr
+ * @point: stop point holding zoom and offsets
+ * @img: global img_window_struct
+ *
+ * This function takes care of scaling and moving of @surface to fit properly on
+ * cairo context passed in.
+ */
+void
+img_draw_image_on_surface( cairo_t           *cr,
+						   gint               width,
+						   cairo_surface_t   *surface,
+						   ImgStopPoint      *point,
+						   img_window_struct *img )
+{
+	gint     offxr, offyr;  /* Relative offsets */
+	gdouble  factor_c;      /* Scaling factor for cairo context */
+	gdouble  factor_o;      /* Scalng factor for offset mods */
+	gint     cw;            /* Width of the surface */
+
+	/* This is stop point that we'll use if no Ken Burns is added to slide and
+	 * NULL has been passed in as a last parameter. */
+	static ImgStopPoint fallback = { 0, 0, 0, 1.0 };
+
+	if( ! point )
+		point = &fallback;
+
+	cw = cairo_image_surface_get_width( surface );
+	factor_c = (gdouble)width / cw * point->zoom;
+	factor_o = (gdouble)img->video_size[0] / cw * point->zoom;
+
+	offxr = point->offx / factor_o;
+	offyr = point->offy / factor_o;
+
+	/* Make sure that matrix modifications are only visible from this function
+	 * and they don't interfere with text drawing. */
+	cairo_save( cr );
+	cairo_scale( cr, factor_c, factor_c );
+	cairo_set_source_surface( cr, surface, offxr, offyr );
+	cairo_paint( cr );
+	cairo_restore( cr );
 }
 
 /*
@@ -1120,7 +1190,6 @@ img_scale_image( img_window_struct *img,
 	gdouble    min_skew = 0.75;
 	gboolean   transform = FALSE;       /* Flag that controls scalling */
 
-	g_message( "Start ... " );
 	/* Obtain information about display area */
 	a_width  = img->video_size[0];
 	a_height = img->video_size[1];
@@ -1145,7 +1214,6 @@ img_scale_image( img_window_struct *img,
 	 *  - painting of this image surface according to stretching
 	 */
 
-	g_message( "dimensions ..." );
 	/* Calculationg surface dimensions.
 	 *
 	 * In order to be as flexible as possible, this function can load images at
@@ -1159,12 +1227,14 @@ img_scale_image( img_window_struct *img,
 	if( width > 0 )
 	{
 		/* Calculate height according to width */
+		width = MAX( width, a_width );
 		c_width = width;
 		c_height = width / a_ratio;
 	}
 	else if( height > 0 )
 	{
 		/* Calculate width from height */
+		height = MAX( height, a_height );
 		c_height = height;
 		c_width = height * a_ratio;
 	}
@@ -1204,7 +1274,7 @@ img_scale_image( img_window_struct *img,
 		{
 			/* User wants images to be distorted and we're able to do it
 			 * without ruining images. */
-			if( a_ratio < i_ratio )
+			if( a_ratio > i_ratio )
 			{
 				/* Image will be distorted horizontally */
 				c_height = i_height;
@@ -1220,8 +1290,6 @@ img_scale_image( img_window_struct *img,
 	}
 	/* Loaded surface cannot be smaller than video size or images will look bad
 	 * even at Ken Burns zoom level 1. */
-	c_width = MAX( c_width, a_width );
-	c_height = MAX( c_height, a_height );
 
 	/* Will image be disotrted?
 	 *
@@ -1234,21 +1302,19 @@ img_scale_image( img_window_struct *img,
 				skew < max_skew && skew > min_skew &&
 				( i_width > a_width || i_height > a_height );
 
-	g_message( "Creation ..." );
 	/* Create image surface with proper dimensions */
 	surface = cairo_image_surface_create( CAIRO_FORMAT_RGB24, c_width, c_height );
 
-	g_message( "Loading %s ...", filename );
 	/* Load image into pixbuf at proper size */
 	if( transform )
 	{
 		gint lw, lh;
 
 		/* Images will be loaded at slightly modified dimensions */
-		if( a_ratio < i_ratio )
+		if( a_ratio > i_ratio )
 		{
 			/* Horizontal scaling */
-			lw = (gdouble)c_width / ( skew + 1 ) * 2;
+			lw = (gdouble)c_width * ( skew + 1 ) / 2;
 			lh = c_height;
 		}
 		else
@@ -1269,7 +1335,6 @@ img_scale_image( img_window_struct *img,
 	i_width  = gdk_pixbuf_get_width( pixbuf );
 	i_height = gdk_pixbuf_get_height( pixbuf );
 
-	g_message( "Painting ..." );
 	/* Paint surface with loaded image
 	 *
 	 * If image cannot be scalled, transform is FALSE. In this case, just
@@ -1282,13 +1347,9 @@ img_scale_image( img_window_struct *img,
 	if( ! transform )
 	{
 		/* Fill with background color */
-		gdouble red, green, blue;
-
-		red   = (gdouble)( ( img->background_color >> 24 ) & 0xff ) / 0xff;
-		green = (gdouble)( ( img->background_color >> 16 ) & 0xff ) / 0xff;
-		blue  = (gdouble)( ( img->background_color >> 8  ) & 0xff ) / 0xff;
-
-		cairo_set_source_rgb( cr, red, green, blue );
+		cairo_set_source_rgb( cr, img->background_color[0],
+								  img->background_color[1],
+								  img->background_color[2] );
 		cairo_paint( cr );
 	}
 
@@ -1297,16 +1358,15 @@ img_scale_image( img_window_struct *img,
 	cairo_paint( cr );
 
 	cairo_destroy( cr );
-	g_message( "Done!" );
 
 	return( surface );
 }
 
 static gboolean img_transition_timeout(img_window_struct *img)
 {
-	gdouble progress;
+	gdouble  progress;
+	cairo_t *cr;
 
-	/* FIXME: Ken Burns missing!! */
 	/* Transition is now being calculated as factor of slide numbers.
 	 *
 	 * This new way has been implemented because previous method is not precise
@@ -1321,15 +1381,34 @@ static gboolean img_transition_timeout(img_window_struct *img)
 	{
 		img->source_id = g_timeout_add( 1000 / PREVIEW_FPS,
 										(GSourceFunc)img_still_timeout, img );
-		img->current_image = img->image2;
-		gtk_widget_queue_draw( img->image_area );
 
 		return FALSE;
 	}
 
-	/* Do image composing here and place result in current image */
+	/* Do image composing here and place result in exported_image */
+	/* Create first image */
+	cr = cairo_create( img->image_from );
+	img_draw_image_on_surface( cr, img->video_size[0], img->image1,
+							   img->point1, img );
+	cairo_destroy( cr );
+
+	/* Create second image */
+	cr = cairo_create( img->image_to );
+	img_draw_image_on_surface( cr, img->video_size[0], img->image2,
+							   img->point2, img );
+	cairo_destroy( cr );
+
+	/* Compose them together */
 	progress = (gdouble)img->slide_cur_frame / img->slide_trans_frames;
+	cr = cairo_create( img->exported_image );
+	cairo_save( cr );
+	img->current_slide->render( cr, img->image_from, img->image_to, progress );
+	cairo_restore( cr );
+
+	/* Add subtitles here */
 	/* FIXME!! */
+
+	cairo_destroy( cr );
 
 	/* Schedule our image redraw */
 	gtk_widget_queue_draw( img->image_area );
@@ -1346,11 +1425,22 @@ static gboolean img_still_timeout(img_window_struct *img)
 	/* Export enough still frames (FIXME: Ken Burns missing!!) */
 	if( img->slide_cur_frame < img->slide_nr_frames )
 	{
+		cairo_t *cr;
+
 		/* Add Ken Burns calculations here */
+
+		/* Paint surface */
+		cr = cairo_create( img->exported_image );
+		img_draw_image_on_surface( cr, img->video_size[0], img->image2, NULL, img );
+		/* FIXME: Add subtitles here */
+		cairo_destroy( cr );
 
 		/* Increment counters */
 		img->slide_cur_frame++;
 		img->displayed_frame++;
+
+		/* Redraw */
+		gtk_widget_queue_draw( img->image_area );
 
 		return( TRUE );
 	}
@@ -1402,9 +1492,6 @@ static void img_swap_toolbar_images( img_window_struct *img,gboolean flag )
 
 static void img_clean_after_preview(img_window_struct *img)
 {
-	img->current_image = img->stored_image;
-	gtk_widget_queue_draw( img->image_area );
-
 	/* Swap toolbar and menu icons */
 	img_swap_toolbar_images( img, TRUE );
 
@@ -1418,6 +1505,11 @@ static void img_clean_after_preview(img_window_struct *img)
 	/* Destroy images that were used */
 	cairo_surface_destroy( img->image1 );
 	cairo_surface_destroy( img->image2 );
+	cairo_surface_destroy( img->image_from );
+	cairo_surface_destroy( img->image_to );
+	cairo_surface_destroy( img->exported_image );
+
+	gtk_widget_queue_draw( img->image_area );
 
 	return;
 }
@@ -1488,7 +1580,6 @@ void img_close_slideshow(GtkWidget *widget, img_window_struct *img)
 	img_free_allocated_memory(img);
 	img_set_window_title(img,NULL);
 	img_set_statusbar_message(img,0);
-	/* TB_EDITS */
 	if( img->current_image )
 		cairo_surface_destroy( img->current_image );
 	img->current_image = NULL;
@@ -1500,7 +1591,9 @@ void img_close_slideshow(GtkWidget *widget, img_window_struct *img)
 
 	/* Reset slideshow properties */
 	img->distort_images = TRUE;
-	img->background_color = 0;
+	img->background_color[0] = 0;
+	img->background_color[1] = 0;
+	img->background_color[2] = 0;
 	img->final_transition.speed = NORMAL;
 	img->final_transition.render = NULL;
 }

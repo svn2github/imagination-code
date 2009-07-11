@@ -139,9 +139,9 @@ void img_new_slideshow_settings_dialog(img_window_struct *img, gboolean flag)
 	bg_label = gtk_label_new( _("Select background color:") );
 	gtk_box_pack_start( GTK_BOX( ex_hbox ), bg_label, FALSE, FALSE, 0 );
 
-	color.red   = ( ( img->background_color >> 24 ) & 0xff ) / (gdouble)0xff * 0xffff;
-	color.green = ( ( img->background_color >> 16 ) & 0xff ) / (gdouble)0xff * 0xffff;
-	color.blue  = ( ( img->background_color >>  8 ) & 0xff ) / (gdouble)0xff * 0xffff;
+	color.red   = img->background_color[0] * 0xffff;
+	color.green = img->background_color[1] * 0xffff;
+	color.blue  = img->background_color[2] * 0xffff;
 	bg_button = gtk_color_button_new_with_color( &color );
 	g_signal_connect( G_OBJECT( bg_button ), "color-set", G_CALLBACK( img_bg_color_changed ), img );
 	gtk_box_pack_start( GTK_BOX( ex_hbox ), bg_button, FALSE, FALSE, 0 );
@@ -159,25 +159,29 @@ void img_new_slideshow_settings_dialog(img_window_struct *img, gboolean flag)
 	if (response == GTK_RESPONSE_ACCEPT)
 	{
 		if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON (pal)))
-			gtk_widget_set_size_request(img->image_area,720,576);
+			img->video_size[1] = 576;
 		else
-			gtk_widget_set_size_request(img->image_area,720,480);
+			img->video_size[1] = 480;
 
 		img->project_is_modified = TRUE;
 	}
 	gtk_widget_destroy(dialog1);
+
+	/* Redraw image area */
+	gtk_widget_set_size_request( img->image_area,
+								 img->video_size[0] * img->image_area_zoom,
+								 img->video_size[1] * img->image_area_zoom );
 }
 
 static void img_bg_color_changed( GtkColorButton *button, img_window_struct *img )
 {
 	GdkColor color;
-	gint     r, g, b;
 
 	gtk_color_button_get_color( button, &color );
-	r = ( (gdouble)color.red   / 0xffff * 0xff );
-	g = ( (gdouble)color.green / 0xffff * 0xff );
-	b = ( (gdouble)color.blue  / 0xffff * 0xff );
-	img->background_color = r  << 24 | g << 16 | b <<  8 | 0xff;
+	img->background_color[0] = (gdouble)color.red   / 0xffff;
+	img->background_color[1] = (gdouble)color.green / 0xffff;
+	img->background_color[2] = (gdouble)color.blue  / 0xffff;
+
 	img->project_is_modified = TRUE;
 }
 

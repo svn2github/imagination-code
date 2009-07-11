@@ -76,4 +76,10 @@ img_image_area_change_zoom( gdouble            step,
 void
 img_quality_toggled( GtkCheckMenuItem  *item,
 					 img_window_struct *img );
+void
+img_draw_image_on_surface( cairo_t           *cr,
+						   gint               width,
+						   cairo_surface_t   *surface,
+						   ImgStopPoint      *point,
+						   img_window_struct *img );
 #endif

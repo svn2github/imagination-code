@@ -36,13 +36,16 @@
 
 #define comment_string	"Imagination Slideshow Project - http://imagination.sf.net"
 
+/* Prototype of transition renderer */
+typedef void (*ImgRender)( cairo_t *,
+						   cairo_surface_t *,
+						   cairo_surface_t *,
+						   gdouble );
+
 typedef struct _ImgStopPoint ImgStopPoint;
 struct _ImgStopPoint
 {
-	gint    time; /* Not sure yet how final implementation of time will
-					 look like since specifying time offsets might not be
-					 too user friendly, but it'll do just fine for initial
-					 implementation. */
+	gint    time; /* Duration of this stop point */
 	gint    offx; /* X and Y offsets of zoomed image */
 	gint    offy;
 	gdouble zoom; /* Zoom level */
@@ -59,7 +62,7 @@ struct _slide_struct
 	gchar	*type;
 	gchar   *path;	/* transition model string path representation */
 	gint     transition_id;
-	void	(*render) (GdkDrawable*, GdkPixbuf*, GdkPixbuf*, gdouble, gint);
+	ImgRender render;
 
 	GList  *points;    /* List with stop points */
 	gint    no_points; /* Number of stop points in list */
@@ -125,7 +128,7 @@ struct _img_window_struct
 	gboolean	distort_images;
 	gboolean	project_is_modified;
 	gint        video_size[2];
-	guint32     background_color;
+	gdouble     background_color[3];
   	gint		total_secs;
 	gint		total_music_secs;
   	gint		slides_nr;
@@ -136,9 +139,13 @@ struct _img_window_struct
 	/* Variables common to export and preview functions */
   	slide_struct    *current_slide;
 	cairo_surface_t *current_image;      /* Image in preview area */
-	cairo_surface_t *stored_image;       /* Backup location for image */
+	cairo_surface_t *exported_image;     /* Image being exported */
 	cairo_surface_t *image1;             /* Images used in transition rendering */
 	cairo_surface_t *image2;
+	cairo_surface_t *image_from;
+	cairo_surface_t *image_to;
+	ImgStopPoint    *point1;             /* Last stop point of image1 */
+	ImgStopPoint    *point2;             /* First stop point of image2 */
   	GtkTreeIter     *cur_ss_iter;
   	guint		     source_id;
 	gdouble          progress;           /* This will be DEPRECATED */

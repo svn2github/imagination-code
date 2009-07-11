@@ -52,7 +52,9 @@ int main (int argc, char *argv[])
 	img_load_available_transitions(img_window);
 
 	/* Set some default values */
-	img_window->background_color = 0x000000ff;
+	img_window->background_color[0] = 0;
+	img_window->background_color[1] = 0;
+	img_window->background_color[2] = 0;
 	img_window->slides_nr = 0;
 	img_window->distort_images = TRUE;
 
@@ -66,10 +68,6 @@ int main (int argc, char *argv[])
 	img_window->low_quality = TRUE;
 	img_window->video_size[0] = 720;
 	img_window->video_size[1] = 576;
-
-	/* FIXME!! Remove this from final, since this is here only because I'm too
-	 * lazy to create new view menu and three toolbar buttons;) */
-	img_image_area_change_zoom( -0.2, FALSE, img_window );
 
 	/* Last pseudo-slide has a duration of 0 */
 	img_window->final_transition.duration = 0;

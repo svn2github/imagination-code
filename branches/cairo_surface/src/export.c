@@ -398,8 +398,6 @@ img_start_export( img_window_struct *img )
 	while( gtk_events_pending() )
 		gtk_main_iteration();
 
-	img->stored_image = img->current_image;
-
 	/* FIXME: Here background color is fixed to BLACK!!! */
 	img->image1 = cairo_image_surface_create( CAIRO_FORMAT_RGB24,
 											  img->video_size[0],
@@ -409,7 +407,6 @@ img_start_export( img_window_struct *img )
 	model = gtk_icon_view_get_model( GTK_ICON_VIEW( img->thumbnail_iconview ) );
 	gtk_tree_model_get_iter_first( model, &iter );
 	gtk_tree_model_get( model, &iter, 1, &entry, -1 );
-	/* TB_EDITS */
 	img->image1 = img_scale_image( img, entry->filename, 0, 0 );
 
 	/* Add export idle function and set initial values */
@@ -464,9 +461,6 @@ img_stop_export( img_window_struct *img )
 			kill( img->ffmpeg_export, SIGINT );
 			g_source_remove( img->source_id );
 
-	/* TB_EDITS */
-			img->current_image = img->stored_image;
-			
 			/* Clean other resources */
 			g_slice_free( GtkTreeIter, img->cur_ss_iter );
 			img->cur_ss_iter = NULL;
@@ -508,6 +502,8 @@ img_stop_export( img_window_struct *img )
  *
  * If @preview is TRUE, we also respect quality settings.
  *
+ * This function also sets img->point[12] that are used for transitions.
+ *
  * Return value: TRUE if images have been succefully prepared, FALSE otherwise.
  */
 gboolean
@@ -525,6 +521,11 @@ img_prepare_pixbufs( img_window_struct *img,
 		gtk_tree_model_get_iter_first( model, img->cur_ss_iter );
 	}
 
+	/* Get last stop point of current slide */
+	img->point1 = (ImgStopPoint *)( img->current_slide->no_points ?
+									g_list_last( img->current_slide->points )->data :
+									NULL );
+
 	if( gtk_tree_model_iter_next( model, img->cur_ss_iter ) )
 	{
 		/* We have next iter, so prepare for next round */
@@ -537,6 +538,11 @@ img_prepare_pixbufs( img_window_struct *img,
 										   img->video_size[1] );
 		else
 			img->image2 = img_scale_image( img, img->current_slide->filename, 0, 0 );
+
+		/* Get first stop point */
+		img->point2 = (ImgStopPoint *)( img->current_slide->no_points ?
+										img->current_slide->points->data :
+										NULL );
 
 		return(TRUE);
 	}
@@ -551,17 +557,18 @@ img_prepare_pixbufs( img_window_struct *img,
 		cairo_surface_destroy( img->image1 );
 		img->image1 = img->image2;
 
-		img->image1 = cairo_image_surface_create( CAIRO_FORMAT_RGB24,
+		img->image2 = cairo_image_surface_create( CAIRO_FORMAT_RGB24,
 												  img->video_size[0],
 												  img->video_size[1] );
-		cr = cairo_create( img->image1 );
-		cairo_set_source_rgb( cr, ( img->background_color >> 24 ) & 0xff,
-								  ( img->background_color >> 16 ) & 0xff,
-								  ( img->background_color >> 8  ) & 0xff );
+		cr = cairo_create( img->image2 );
+		cairo_set_source_rgb( cr, img->background_color[0],
+								  img->background_color[1],
+								  img->background_color[2] );
 		cairo_paint( cr );
 		cairo_destroy( cr );
 
 		img->current_slide = &img->final_transition;
+		img->point2 = NULL;
 
 		return( TRUE );
 	}

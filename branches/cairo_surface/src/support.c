@@ -150,8 +150,7 @@ void img_load_available_transitions(img_window_struct *img)
 	/* Search all paths listed in array */
 	for( path = search_paths; *path; path++ )
 	{
-		/* I removed error from here since it hasn't been used and leaks away */
-		dir = g_dir_open(*path, 0, NULL);
+		dir = g_dir_open( *path, 0, NULL );
 		if( dir == NULL )
 		{
 			g_free( *path );
@@ -161,17 +160,17 @@ void img_load_available_transitions(img_window_struct *img)
 		while( TRUE )
 		{
 			transition_name = g_dir_read_name( dir );
-			if (transition_name == NULL)
+			if ( transition_name == NULL )
 				break;
 			
-			fname = g_build_filename(*path, transition_name, NULL);
-			module = g_module_open(fname, G_MODULE_BIND_LOCAL);
-			if (module && img_plugin_is_loaded(img, module) == FALSE)
+			fname = g_build_filename( *path, transition_name, NULL );
+			module = g_module_open( fname, G_MODULE_BIND_LOCAL );
+			if( module && img_plugin_is_loaded(img, module) == FALSE )
 			{
 				/* Obtain the name from the plugin function */
 				g_module_symbol( module, "img_get_plugin_info",
 								 (void *)&plugin_set_name);
-				plugin_set_name(&name, &trans);
+				plugin_set_name( &name, &trans );
 				
 				/* Add group name to the store */
 				gtk_tree_store_append( model, &piter, NULL );
@@ -200,21 +199,26 @@ void img_load_available_transitions(img_window_struct *img)
 						g_free( filename );
 						filename =
 							g_strdup_printf( "%s/.imagination/pixmaps/imagination-%d.png",
-											 g_get_home_dir(), GPOINTER_TO_INT( trans[2] ) );
+											 g_get_home_dir(),
+											 GPOINTER_TO_INT( trans[2] ) );
 						pixbuf = gdk_pixbuf_new_from_file( filename, NULL );
 					}
-					g_free(filename);
+					g_free( filename );
 					g_module_symbol( module, trans[1], &address );
 					gtk_tree_store_append( model, &citer, &piter );
-					gtk_tree_store_set( model, &citer, 0, pixbuf, 1, trans[0], 2, address, 3, GPOINTER_TO_INT( trans[2] ), -1 );
-				img->nr_transitions_loaded++;
+					gtk_tree_store_set( model, &citer, 0, pixbuf,
+													   1, trans[0],
+													   2, address,
+													   3, GPOINTER_TO_INT( trans[2] ),
+													   -1 );
+					img->nr_transitions_loaded++;
 				}
 				g_free( bak );
 			}
-			g_free(fname);
+			g_free( fname );
 		}
-		g_free(*path);
-		g_dir_close(dir);
+		g_free( *path );
+		g_dir_close( dir );
 	}
 }
 
@@ -257,12 +261,11 @@ GdkPixbuf *img_load_pixbuf_from_file(gchar *filename)
 	return thumb;
 }
 
-slide_struct *img_set_slide_info(gint duration, guint speed, void (*render), gint transition_id, gchar *path, gchar *filename)
+slide_struct *img_set_slide_info(gint duration, guint speed, ImgRender render, gint transition_id, gchar *path, gchar *filename)
 {
 	slide_struct    *slide_info = NULL;
 	GdkPixbufFormat *pixbuf_format;
 	gint             width, height;
-	ImgStopPoint    *point;
 
 	/* I replaced this with slice allocator, since it's more efficint when
 	 * allocation fixed-sized blocks of memory. */
@@ -280,14 +283,9 @@ slide_struct *img_set_slide_info(gint duration, guint speed, void (*render), gin
 		slide_info->resolution = g_strdup_printf("%d x %d",width,height);
 		slide_info->type = gdk_pixbuf_format_get_name(pixbuf_format);
 
-		/* Ken Burns initial stop point */
-		point = g_slice_new( ImgStopPoint );
-		point->time = 1;
-		point->offx = 0;
-		point->offy = 0;
-		point->zoom = 1;
-		slide_info->points = g_list_append( NULL, point );
-		slide_info->no_points = 1;
+		/* Ken Burns (no initial stop points ) */
+		slide_info->points = NULL;
+		slide_info->no_points = 0;
 	}
 	return slide_info;
 }

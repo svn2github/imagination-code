@@ -40,19 +40,10 @@ void img_save_slideshow(img_window_struct *img)
 	/* Slideshow settings */
 	g_key_file_set_comment(img_key_file, NULL, NULL, comment_string, NULL);
 
-
-#if 0
-	/* This is somewhat reduntand, I simplified it a bit */
-	if ((img->image_area)->allocation.height == 480)
-		g_key_file_set_integer(img_key_file,"slideshow settings","video format", 480);
-	else
-		g_key_file_set_integer(img_key_file,"slideshow settings","video format", 576);
-#endif
 	g_key_file_set_integer( img_key_file, "slideshow settings",
 							"video format", img->video_size[1] );
-	conf = g_strdup_printf( "%lx", (gulong)img->background_color );
-	g_key_file_set_string(img_key_file,"slideshow settings", "background color", conf);
-	g_free( conf );
+	g_key_file_set_double_list( img_key_file, "slideshow settings",
+								"background color", img->background_color, 3 );
 	g_key_file_set_boolean(img_key_file,"slideshow settings", "distort images", img->distort_images);
 
 	/* Slide individual settings */
@@ -122,6 +113,7 @@ void img_load_slideshow(img_window_struct *img)
 	void (*render);
 	GHashTable *table;
 	gchar      *spath;
+	gdouble    *color;
 
 	img_key_file = g_key_file_new();
 	if(!g_key_file_load_from_file(img_key_file,img->project_filename,G_KEY_FILE_KEEP_COMMENTS,NULL))
@@ -151,9 +143,12 @@ void img_load_slideshow(img_window_struct *img)
 	/* Set the slideshow options */
 	height = g_key_file_get_integer(img_key_file,"slideshow settings","video format", NULL);
 	gtk_widget_set_size_request( img->image_area, 720, height );
-	dummy = g_key_file_get_string(img_key_file, "slideshow settings", "background color", NULL );
-	img->background_color = (guint32)strtoul( dummy, NULL, 16 );
-	g_free(dummy);
+	color = g_key_file_get_double_list( img_key_file, "slideshow settings",
+										"background color", NULL, NULL );
+	img->background_color[0] = color[0];
+	img->background_color[1] = color[1];
+	img->background_color[2] = color[2];
+	g_free( color );
 	img->distort_images = g_key_file_get_boolean(img_key_file, "slideshow settings", "distort images", NULL );
 
 	/* Make loading more efficient by removing model from icon view */

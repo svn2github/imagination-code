@@ -33,7 +33,7 @@ static const GtkTargetEntry drop_targets[] =
 
 static void img_combo_box_transition_type_changed (GtkComboBox *, img_window_struct *);
 static void img_random_button_clicked(GtkButton *, img_window_struct *);
-static gpointer img_set_random_transition(img_window_struct *, slide_struct *);
+static ImgRender img_set_random_transition(img_window_struct *, slide_struct *);
 static void img_combo_box_speed_changed (GtkComboBox *,  img_window_struct *);
 static void img_spinbutton_value_changed (GtkSpinButton *, img_window_struct *);
 static void img_clear_audio_files(GtkButton *, img_window_struct *);
@@ -997,7 +997,6 @@ void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *im
 	if (selected == NULL)
 	{
 		img_set_statusbar_message(img,nr_selected);
-	/* TB_EDITS */
 		if( img->current_image )
 			cairo_surface_destroy( img->current_image );
 		img->current_image = NULL;
@@ -1150,7 +1149,7 @@ static void img_combo_box_transition_type_changed (GtkComboBox *combo, img_windo
 	{
 		gtk_tree_model_get_iter(model, &iter,selected->data);
 		gtk_tree_model_get(model, &iter,1,&info_slide,-1);
-		info_slide->render = address;
+		info_slide->render = (ImgRender)address;
 		info_slide->transition_id = transition_id;
 		g_free( info_slide->path );
 		info_slide->path = g_strdup( path );
@@ -1158,7 +1157,7 @@ static void img_combo_box_transition_type_changed (GtkComboBox *combo, img_windo
 		/* If this is first slide, we need to copy transition
 		 * to the last pseudo-slide too. */
 		if( gtk_tree_path_get_indices( selected->data )[0] == 0 )
-			img->final_transition.render = address;
+			img->final_transition.render = (ImgRender)address;
 
 		selected = selected->next;
 	}
@@ -1201,7 +1200,7 @@ static void img_random_button_clicked(GtkButton *button, img_window_struct *img)
 	g_list_free(bak);
 }
 
-static gpointer img_set_random_transition(img_window_struct *img, slide_struct *info_slide)
+static ImgRender img_set_random_transition(img_window_struct *img, slide_struct *info_slide)
 {
 	gint          nr;
 	gint          r1, r2;
@@ -1244,7 +1243,7 @@ static gpointer img_set_random_transition(img_window_struct *img, slide_struct *
 	gtk_combo_box_set_active_iter(GTK_COMBO_BOX(img->transition_type), &iter);
 	g_signal_handlers_unblock_by_func((gpointer)img->transition_type, (gpointer)img_combo_box_transition_type_changed, img);	
 
-	return address;
+	return( (ImgRender)address );
 }
 
 static void img_combo_box_speed_changed (GtkComboBox *combo, img_window_struct *img)
