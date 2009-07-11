@@ -117,43 +117,50 @@ void img_load_slideshow(img_window_struct *img)
 	gboolean    old_file = FALSE;
 
 	img_key_file = g_key_file_new();
-	if(!g_key_file_load_from_file(img_key_file,img->project_filename,G_KEY_FILE_KEEP_COMMENTS,NULL))
+	if( ! g_key_file_load_from_file( img_key_file,img->project_filename,
+									 G_KEY_FILE_KEEP_COMMENTS, NULL ) )
 	{
 		g_key_file_free( img_key_file );
 		return;
 	}
 
-	dummy = g_key_file_get_comment(img_key_file,NULL,NULL,NULL);
+	dummy = g_key_file_get_comment( img_key_file, NULL, NULL, NULL);
 
-		g_print( comment_string " -> %s\n", dummy );
-	if (strncmp(dummy,comment_string,strlen(comment_string)) != 0)
+	if( strncmp( dummy, comment_string, strlen( comment_string ) ) != 0 )
 	{
-			g_print( old_comment_string " -> %s\n", dummy );
 		/* Enable loading of old projects too */
-		if( strncmp( dummy, old_comment_string, strlen( old_comment_string ) ) != 0 )
+		if( strncmp( dummy, old_comment_string,
+					 strlen( old_comment_string ) ) != 0 )
 		{
 			dialog = gtk_message_dialog_new(
 						GTK_WINDOW( img->imagination_window ), GTK_DIALOG_MODAL,
 						GTK_MESSAGE_ERROR, GTK_BUTTONS_OK,
 						_("This is not an Imagination project file!") );
-			gtk_window_set_title(GTK_WINDOW(dialog),"Imagination");
-			gtk_dialog_run (GTK_DIALOG (dialog));
-			gtk_widget_destroy (GTK_WIDGET (dialog));
-			g_free(dummy);
+			gtk_window_set_title( GTK_WINDOW( dialog ), "Imagination" );
+			gtk_dialog_run( GTK_DIALOG( dialog ) );
+			gtk_widget_destroy( GTK_WIDGET( dialog ) );
+			g_free( dummy );
 			return;
 		}
 		old_file = TRUE;
 	}
-	g_free(dummy);
+	g_free( dummy );
 
 	/* Create hash table for efficient searching */
-	table = g_hash_table_new_full( g_direct_hash, g_direct_equal, NULL, g_free );
+	table = g_hash_table_new_full( g_direct_hash, g_direct_equal,
+								   NULL, g_free );
 	model = gtk_combo_box_get_model( GTK_COMBO_BOX( img->transition_type ) );
-	gtk_tree_model_foreach( model, (GtkTreeModelForeachFunc)img_populate_hash_table, &table );
+	gtk_tree_model_foreach( model,
+							(GtkTreeModelForeachFunc)img_populate_hash_table,
+							&table );
 
 	/* Set the slideshow options */
-	height = g_key_file_get_integer(img_key_file,"slideshow settings","video format", NULL);
-	gtk_widget_set_size_request( img->image_area, 720, height );
+	img->video_size[1] = g_key_file_get_integer( img_key_file,
+												 "slideshow settings",
+												 "video format", NULL);
+	gtk_widget_set_size_request( img->image_area,
+								 img->video_size[0] * img->image_area_zoom,
+								 img->video_size[0] * img->image_area_zoom );
 
 	/* Enable loading of old projects too */
 	if( old_file )
@@ -180,7 +187,9 @@ void img_load_slideshow(img_window_struct *img)
 		g_free( color );
 	}
 
-	img->distort_images = g_key_file_get_boolean(img_key_file, "slideshow settings", "distort images", NULL );
+	img->distort_images = g_key_file_get_boolean( img_key_file,
+												  "slideshow settings",
+												  "distort images", NULL );
 
 	/* Make loading more efficient by removing model from icon view */
 	g_object_ref( G_OBJECT( img->thumbnail_model ) );
