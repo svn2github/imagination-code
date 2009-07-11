@@ -114,6 +114,7 @@ void img_load_slideshow(img_window_struct *img)
 	GHashTable *table;
 	gchar      *spath;
 	gdouble    *color;
+	gboolean    old_file = FALSE;
 
 	img_key_file = g_key_file_new();
 	if(!g_key_file_load_from_file(img_key_file,img->project_filename,G_KEY_FILE_KEEP_COMMENTS,NULL))
@@ -124,14 +125,24 @@ void img_load_slideshow(img_window_struct *img)
 
 	dummy = g_key_file_get_comment(img_key_file,NULL,NULL,NULL);
 
+		g_print( comment_string " -> %s\n", dummy );
 	if (strncmp(dummy,comment_string,strlen(comment_string)) != 0)
 	{
-		dialog = gtk_message_dialog_new(GTK_WINDOW(img->imagination_window),GTK_DIALOG_MODAL,GTK_MESSAGE_ERROR,GTK_BUTTONS_OK,_("This is not an Imagination project file!"));
-		gtk_window_set_title(GTK_WINDOW(dialog),"Imagination");
-		gtk_dialog_run (GTK_DIALOG (dialog));
-		gtk_widget_destroy (GTK_WIDGET (dialog));
-		g_free(dummy);
-		return;
+			g_print( old_comment_string " -> %s\n", dummy );
+		/* Enable loading of old projects too */
+		if( strncmp( dummy, old_comment_string, strlen( old_comment_string ) ) != 0 )
+		{
+			dialog = gtk_message_dialog_new(
+						GTK_WINDOW( img->imagination_window ), GTK_DIALOG_MODAL,
+						GTK_MESSAGE_ERROR, GTK_BUTTONS_OK,
+						_("This is not an Imagination project file!") );
+			gtk_window_set_title(GTK_WINDOW(dialog),"Imagination");
+			gtk_dialog_run (GTK_DIALOG (dialog));
+			gtk_widget_destroy (GTK_WIDGET (dialog));
+			g_free(dummy);
+			return;
+		}
+		old_file = TRUE;
 	}
 	g_free(dummy);
 
@@ -143,12 +154,32 @@ void img_load_slideshow(img_window_struct *img)
 	/* Set the slideshow options */
 	height = g_key_file_get_integer(img_key_file,"slideshow settings","video format", NULL);
 	gtk_widget_set_size_request( img->image_area, 720, height );
-	color = g_key_file_get_double_list( img_key_file, "slideshow settings",
-										"background color", NULL, NULL );
-	img->background_color[0] = color[0];
-	img->background_color[1] = color[1];
-	img->background_color[2] = color[2];
-	g_free( color );
+
+	/* Enable loading of old projects too */
+	if( old_file )
+	{
+		guint32 tmp;
+		dummy = g_key_file_get_string( img_key_file, "slideshow settings",
+									   "background color", NULL );
+		tmp = (guint32)strtoul( dummy, NULL, 16 );
+		img->background_color[0] = (gdouble)( ( tmp >> 24 ) & 0xff ) / 0xff;
+		img->background_color[1] = (gdouble)( ( tmp >> 16 ) & 0xff ) / 0xff;
+		img->background_color[2] = (gdouble)( ( tmp >>  8 ) & 0xff ) / 0xff;
+
+		g_print( "%f, %f, %f\n", img->background_color[0],
+								 img->background_color[1],
+								 img->background_color[2] );
+	}
+	else
+	{
+		color = g_key_file_get_double_list( img_key_file, "slideshow settings",
+											"background color", NULL, NULL );
+		img->background_color[0] = color[0];
+		img->background_color[1] = color[1];
+		img->background_color[2] = color[2];
+		g_free( color );
+	}
+
 	img->distort_images = g_key_file_get_boolean(img_key_file, "slideshow settings", "distort images", NULL );
 
 	/* Make loading more efficient by removing model from icon view */

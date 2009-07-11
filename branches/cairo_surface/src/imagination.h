@@ -34,7 +34,10 @@
 #define	NORMAL	4
 #define	SLOW	8
 
-#define comment_string	"Imagination Slideshow Project - http://imagination.sf.net"
+#define old_comment_string \
+	"Imagination Slideshow Project - http://imagination.sf.net"
+#define comment_string \
+	"Imagination 1.x Slideshow Project - http://imagination.sf.net"
 
 /* Prototype of transition renderer */
 typedef void (*ImgRender)( cairo_t *,
