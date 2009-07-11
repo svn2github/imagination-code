@@ -17,24 +17,22 @@
  *
  */
 
-#include "export_to_ppm.h"
-#include <gdk/gdk.h>
+#include <cairo.h>
+#include <glib.h>
 
 /* Local functions declarations */
 static void
-transition_render( GdkDrawable *window,
-				   GdkPixbuf   *image_from,
-				   GdkPixbuf   *image_to,
-				   gdouble      progress,
-				   gint         file_desc,
+transition_render( cairo_t         *cr,
+				   cairo_surface_t *image_from,
+				   cairo_surface_t *image_to,
+				   gdouble          progress,
 				   gint         direction );
 					 
 static void
-transition2_render( GdkDrawable *window,
-				   GdkPixbuf   *image_from,
-				   GdkPixbuf   *image_to,
-				   gdouble      progress,
-				   gint         file_desc,
+transition2_render( cairo_t         *cr,
+				   cairo_surface_t *image_from,
+				   cairo_surface_t *image_to,
+				   gdouble          progress,
 				   gint         direction );
 					 
 
@@ -73,70 +71,59 @@ img_get_plugin_info( gchar  **group,
 	
 }
 
-void img_spin_insert( GdkDrawable *window, GdkPixbuf *image_from, GdkPixbuf *image_to, gdouble progress, gint file_desc )
+void img_spin_insert( cairo_t *cr, cairo_surface_t *image_from, cairo_surface_t *image_to, gdouble progress )
 {
-	transition_render( window, image_from, image_to, progress, file_desc, 1 );
+	transition_render( cr, image_from, image_to, progress, 1 );
 }
 
-void img_spininv_insert( GdkDrawable *window, GdkPixbuf *image_from, GdkPixbuf *image_to, gdouble progress, gint file_desc )
+void img_spininv_insert( cairo_t *cr, cairo_surface_t *image_from, cairo_surface_t *image_to, gdouble progress )
 {
-	transition_render( window, image_from, image_to, progress, file_desc, -1 );
+	transition_render( cr, image_from, image_to, progress, -1 );
 }
 
-void img_simple_insert( GdkDrawable *window, GdkPixbuf *image_from, GdkPixbuf *image_to, gdouble progress, gint file_desc )
+void img_simple_insert( cairo_t *cr, cairo_surface_t *image_from, cairo_surface_t *image_to, gdouble progress )
 {
-	transition_render( window, image_from, image_to, progress, file_desc, 0 );
+	transition_render( cr, image_from, image_to, progress, 0 );
 }
 
-void img_upleft_insert( GdkDrawable *window, GdkPixbuf *image_from, GdkPixbuf *image_to, gdouble progress, gint file_desc )
+void img_upleft_insert( cairo_t *cr, cairo_surface_t *image_from, cairo_surface_t *image_to, gdouble progress )
 {
-	transition2_render( window, image_from, image_to, progress, file_desc, 0 );
+	transition2_render( cr, image_from, image_to, progress, 0 );
 }
 
-void img_upright_insert( GdkDrawable *window, GdkPixbuf *image_from, GdkPixbuf *image_to, gdouble progress, gint file_desc )
+void img_upright_insert( cairo_t *cr, cairo_surface_t *image_from, cairo_surface_t *image_to, gdouble progress )
 {
-	transition2_render( window, image_from, image_to, progress, file_desc, 1 );
+	transition2_render( cr, image_from, image_to, progress, 1 );
 }
 
-void img_downleft_insert( GdkDrawable *window, GdkPixbuf *image_from, GdkPixbuf *image_to, gdouble progress, gint file_desc )
+void img_downleft_insert( cairo_t *cr, cairo_surface_t *image_from, cairo_surface_t *image_to, gdouble progress )
 {
-	transition2_render( window, image_from, image_to, progress, file_desc, 2 );
+	transition2_render( cr, image_from, image_to, progress, 2 );
 }
 
-void img_downright_insert( GdkDrawable *window, GdkPixbuf *image_from, GdkPixbuf *image_to, gdouble progress, gint file_desc )
+void img_downright_insert( cairo_t *cr, cairo_surface_t *image_from, cairo_surface_t *image_to, gdouble progress )
 {
-	transition2_render( window, image_from, image_to, progress, file_desc, 3 );
+	transition2_render( cr, image_from, image_to, progress, 3 );
 }
 
 /* Local functions definitions */
 /*Rotation & insertion*/
 static void
-transition_render( GdkDrawable *window,
-				   GdkPixbuf   *image_from,
-				   GdkPixbuf   *image_to,
-				   gdouble      progress,
-				   gint         file_desc,
+transition_render( cairo_t         *cr,
+				   cairo_surface_t *image_from,
+				   cairo_surface_t *image_to,
+				   gdouble          progress,
 				   gint         direction )
 {
-	cairo_t         *cr;
-	cairo_surface_t *surface;
-	gint             width, height;
+	gint width, height;
 
-	gdk_drawable_get_size( window, &width, &height );
+	width  = cairo_image_surface_get_width( image_from );
+	height = cairo_image_surface_get_height( image_from );
 
-	if( file_desc < 0 )
-	{
-		cr = gdk_cairo_create( window );
-	}
-	else
-	{
-		surface = cairo_image_surface_create( CAIRO_FORMAT_RGB24,
-											  width, height );
-		cr = cairo_create( surface );
-	}
-
-	gdk_cairo_set_source_pixbuf( cr, image_from, 0, 0 );
+	cairo_set_source_surface( cr, image_from, 0, 0 );
 	cairo_paint( cr );
+
+	cairo_set_source_surface( cr, image_to, 0, 0 );
 	
 
 	cairo_translate (cr, 0.5*width, 0.5*height);
@@ -148,46 +135,27 @@ transition_render( GdkDrawable *window,
 	cairo_scale  (cr, progress, progress);
 	cairo_translate (cr, -0.5*width, -0.5*height);
 	
-	gdk_cairo_set_source_pixbuf( cr, image_to, 0, 0 );
+	cairo_set_source_surface( cr, image_to, 0, 0 );
 	cairo_paint( cr );
-	
-	cairo_destroy(cr);
-
-	if(file_desc < 0)
-		return;
-
-	img_export_cairo_to_ppm(surface, file_desc);
-	cairo_surface_destroy(surface);
 }
 
 /* Linear translation & insertion*/
 static void
-transition2_render( GdkDrawable *window,
-				   GdkPixbuf   *image_from,
-				   GdkPixbuf   *image_to,
-				   gdouble      progress,
-				   gint         file_desc,
+transition2_render( cairo_t         *cr,
+				   cairo_surface_t *image_from,
+				   cairo_surface_t *image_to,
+				   gdouble          progress,
 				   gint         direction )
 {
-	cairo_t         *cr;
-	cairo_surface_t *surface;
-	gint             width, height;
+	gint width, height;
 
-	gdk_drawable_get_size( window, &width, &height );
+	width  = cairo_image_surface_get_width( image_from );
+	height = cairo_image_surface_get_height( image_from );
 
-	if( file_desc < 0 )
-	{
-		cr = gdk_cairo_create( window );
-	}
-	else
-	{
-		surface = cairo_image_surface_create( CAIRO_FORMAT_RGB24,
-											  width, height );
-		cr = cairo_create( surface );
-	}
-	
-	gdk_cairo_set_source_pixbuf( cr, image_from, 0, 0 );
+	cairo_set_source_surface( cr, image_from, 0, 0 );
 	cairo_paint( cr );
+
+	cairo_set_source_surface( cr, image_to, 0, 0 );
 	
 	/*up - left*/
 	if (direction == 0) {
@@ -217,15 +185,7 @@ transition2_render( GdkDrawable *window,
 		cairo_translate (cr,progress/2*width-width, progress/2*height-height);
 	}
 	
-	gdk_cairo_set_source_pixbuf( cr, image_to, 0, 0 );
+	cairo_set_source_surface( cr, image_to, 0, 0 );
 	cairo_paint( cr );
-	
-	cairo_destroy(cr);
-
-	if(file_desc < 0)
-		return;
-
-	img_export_cairo_to_ppm(surface, file_desc);
-	cairo_surface_destroy(surface);
 }
 
