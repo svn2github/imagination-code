@@ -46,6 +46,7 @@ static void img_unselect_all_thumbnails(GtkMenuItem *, img_window_struct *);
 static void img_goto_line_entry_activate(GtkWidget *, img_window_struct *);
 static gint img_sort_none_before_other(GtkTreeModel *, GtkTreeIter *, GtkTreeIter *, gpointer);
 static void img_check_numeric_entry (GtkEditable *entry, gchar *text, gint lenght, gint *position, gpointer data);
+static void img_show_uri(GtkMenuItem *, img_window_struct *);
 
 static void
 img_create_export_menu( GtkWidget         *item,
@@ -325,9 +326,12 @@ img_window_struct *img_create_window (void)
 	gtk_container_add (GTK_CONTAINER (menubar), menuitem3);
 	menu3 = gtk_menu_new ();
 	gtk_menu_item_set_submenu (GTK_MENU_ITEM (menuitem3), menu3);
+
 	contents = gtk_image_menu_item_new_with_mnemonic (_("Contents"));
 	gtk_container_add (GTK_CONTAINER (menu3),contents);
 	gtk_widget_add_accelerator (contents,"activate",accel_group,GDK_F1,GDK_MODE_DISABLED,GTK_ACCEL_VISIBLE);
+	g_signal_connect (G_OBJECT (contents),"activate",G_CALLBACK (img_show_uri),img_struct);
+
 	tmp_image = gtk_image_new_from_stock ("gtk-help",GTK_ICON_SIZE_MENU);
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (contents),tmp_image);
 
@@ -993,6 +997,7 @@ void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *im
 
 	selected = gtk_icon_view_get_selected_items(iconview);
 	nr_selected = g_list_length(selected);
+	img_set_total_slideshow_duration(img);
 
 	if (selected == NULL)
 	{
@@ -1069,7 +1074,6 @@ void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *im
 	 * only need to display it. BTW, is total duration label hidding needed?
 	 * Even when there is no slide selected, duration stays the same. */
 	img->project_is_modified = TRUE;
-	img_set_total_slideshow_duration(img);
 
 	if (nr_selected > 1)
 		img_set_statusbar_message(img,nr_selected);
@@ -1449,4 +1453,19 @@ img_scroll_thumb( GtkWidget         *widget,
 	gtk_adjustment_set_value( adj, CLAMP( value + step * dir, 0, upper - page ) );
 
 	return( TRUE );
+}
+
+static void img_show_uri(GtkMenuItem *menuitem, img_window_struct *img)
+{
+	gchar *file = NULL;
+	gchar *lang = NULL;
+	
+	lang = g_strndup(g_getenv("LANG"),2);
+	file = g_strconcat("file://",DATADIR,"/doc/",PACKAGE,"/html/",lang,"/index.html",NULL);
+	g_free(lang);
+	g_print ("%s\n",file);
+
+	if ( !gtk_show_uri(NULL,file, GDK_CURRENT_TIME, NULL))
+		g_print ("Error!\n");
+	g_free(file);
 }
