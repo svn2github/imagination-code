@@ -36,20 +36,20 @@ plugin_LTLIBRARIES = \
 	misc_diagonal_wipe.la \
 	misc_shape_wipe.la
 
-bar_wipe_la_SOURCES	= export_to_ppm.c export_to_ppm.h bar_wipe.c
-barn_door_wipe_la_SOURCES = export_to_ppm.c export_to_ppm.h barn_door_wipe.c
-bow_tie_wipe_la_SOURCES = export_to_ppm.c export_to_ppm.h bow_tie_wipe.c
-box_wipe_la_SOURCES = export_to_ppm.c export_to_ppm.h box_wipe.c
-clock_wipe_la_SOURCES = export_to_ppm.c export_to_ppm.h clock_wipe.c
-diagonal_wipe_la_SOURCES = export_to_ppm.c export_to_ppm.h diagonal_wipe.c
-ellipse_wipe_la_SOURCES = export_to_ppm.c export_to_ppm.h ellipse_wipe.c
-fade_la_SOURCES = export_to_ppm.c export_to_ppm.h fade.c
-four_box_wipe_la_SOURCES = export_to_ppm.c export_to_ppm.h four_box_wipe.c
-insert_la_SOURCES = export_to_ppm.c export_to_ppm.h insert.c
-push_wipe_la_SOURCES = export_to_ppm.c export_to_ppm.h push_wipe.c
-wave_la_SOURCES = export_to_ppm.c export_to_ppm.h wave.c
-misc_diagonal_wipe_la_SOURCES = export_to_ppm.c export_to_ppm.h misc_diagonal_wipe.c
-misc_shape_wipe_la_SOURCES = export_to_ppm.c export_to_ppm.h misc_shape_wipe.c
+bar_wipe_la_SOURCES	= bar_wipe.c
+barn_door_wipe_la_SOURCES = barn_door_wipe.c
+bow_tie_wipe_la_SOURCES = bow_tie_wipe.c
+box_wipe_la_SOURCES = box_wipe.c
+clock_wipe_la_SOURCES = clock_wipe.c
+diagonal_wipe_la_SOURCES = diagonal_wipe.c
+ellipse_wipe_la_SOURCES = ellipse_wipe.c
+fade_la_SOURCES = fade.c
+four_box_wipe_la_SOURCES = four_box_wipe.c
+insert_la_SOURCES = insert.c
+push_wipe_la_SOURCES = push_wipe.c
+wave_la_SOURCES = wave.c
+misc_diagonal_wipe_la_SOURCES = misc_diagonal_wipe.c
+misc_shape_wipe_la_SOURCES = misc_shape_wipe.c
 
 # instead of linking against all in $(GTK_LIBS), we link only against needed libs
 bar_wipe_la_LIBADD = $(PLUGINS_LIBS)

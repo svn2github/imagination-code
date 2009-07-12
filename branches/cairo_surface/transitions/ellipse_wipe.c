@@ -18,9 +18,9 @@
  *
  */
 
-#include "export_to_ppm.h"
-#include <gdk/gdk.h>
 #include <math.h>
+#include <cairo.h>
+#include <glib.h>
 
 #define AB 0.5				/* This controls the deformation */
 #define BA ( 1 / ( AB ) )	/* Inverse value for vertical effects */

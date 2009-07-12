@@ -25,7 +25,7 @@ PKG_CHECK_MODULES(PACKAGE, [$pkg_modules])
 sox_modules="sox >= 14.2.0"
 PKG_CHECK_MODULES(SOX, [$sox_modules])
 
-plugins_modules="cairo >= 1.6 gdk-2.0 > 2.14.0"
+plugins_modules="cairo >= 1.6 glib-2.0 > 2.18.0"
 PKG_CHECK_MODULES(PLUGINS, [$plugins_modules])
 
 # get svn revision

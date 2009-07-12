@@ -107,7 +107,7 @@ void img_load_slideshow(img_window_struct *img)
 	GKeyFile *img_key_file;
 	gchar *dummy, *slide_filename, *time;
 	GtkWidget *dialog;
-	gint not_found = 0,number,i,transition_id, height, duration;
+	gint not_found = 0,number,i,transition_id, duration;
 	guint speed;
 	GtkTreeModel *model;
 	void (*render);
