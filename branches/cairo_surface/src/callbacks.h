@@ -82,4 +82,25 @@ img_draw_image_on_surface( cairo_t           *cr,
 						   cairo_surface_t   *surface,
 						   ImgStopPoint      *point,
 						   img_window_struct *img );
+void
+img_add_stop_point( GtkButton         *button,
+					img_window_struct *img );
+void
+img_update_stop_point( GtkButton         *button,
+					   img_window_struct *img );
+void
+img_delete_stop_point( GtkButton         *button,
+					   img_window_struct *img );
+void
+img_update_stop_display( img_window_struct *img,
+						 gboolean           update_pos );
+void
+img_goto_prev_point( GtkButton         *button,
+					 img_window_struct *img );
+void
+img_goto_next_point( GtkButton         *button,
+					 img_window_struct *img );
+void
+img_goto_point ( GtkEntry          *entry,
+				 img_window_struct *img );
 #endif

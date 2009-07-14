@@ -30,6 +30,11 @@ static void img_clean_after_preview(img_window_struct *);
 static void img_about_dialog_activate_link(GtkAboutDialog * , const gchar *, gpointer );
 static GdkPixbuf *img_rotate_pixbuf_c( GdkPixbuf *, GtkProgressBar *);
 static GdkPixbuf *img_rotate_pixbuf_cc( GdkPixbuf *, GtkProgressBar *);
+
+static gint
+img_calc_slide_duration_points( GList *list,
+								gint   length );
+
 void img_set_window_title(img_window_struct *img, gchar *text)
 {
 	gchar *title = NULL;
@@ -1718,7 +1723,6 @@ img_zoom_changed( GtkRange          *range,
 		img->maxoffy = ah * ( 1 - img->current_point.zoom );
 		tmpoffx = aw2 * ( 1 - fracx * img->current_point.zoom );
 		tmpoffy = ah2 * ( 1 - fracy * img->current_point.zoom );
-		g_print( "%d, %d\n", tmpoffx, tmpoffy );
 
 		img->current_point.offx = CLAMP( tmpoffx, img->maxoffx, 0 );
 		img->current_point.offy = CLAMP( tmpoffy, img->maxoffy, 0 );
@@ -1847,5 +1851,205 @@ img_quality_toggled( GtkCheckMenuItem  *item,
 					 img_window_struct *img )
 {
 	img->low_quality = gtk_check_menu_item_get_active( item );
+}
+
+void
+img_add_stop_point( GtkButton         *button,
+					img_window_struct *img )
+{
+	ImgStopPoint *point;
+	GList        *tmp;
+
+	/* Create new point */
+	point = g_slice_new( ImgStopPoint );
+	*point = img->current_point;
+	point->time = gtk_spin_button_get_value_as_int(
+						GTK_SPIN_BUTTON( img->stop_point_duration ) );
+
+	/* Append it to the list */
+	tmp = img->current_slide->points;
+	tmp = g_list_append( tmp, point );
+	img->current_slide->points = tmp;
+	img->current_slide->cur_point = img->current_slide->no_points;
+	img->current_slide->no_points++;
+
+	/* Update display */
+	img_update_stop_display( img, FALSE );
+}
+
+void
+img_update_stop_point( GtkButton         *button,
+					   img_window_struct *img )
+{
+	ImgStopPoint *point;
+
+	/* Get selected point */
+	point = g_list_nth_data( img->current_slide->points,
+							 img->current_slide->cur_point );
+
+	/* Update data */
+	*point = img->current_point;
+	point->time = gtk_spin_button_get_value_as_int(
+						GTK_SPIN_BUTTON( img->stop_point_duration ) );
+
+	/* Update display */
+	img_update_stop_display( img, FALSE );
+}
+
+void
+img_delete_stop_point( GtkButton         *button,
+					   img_window_struct *img )
+{
+	GList *node;
+
+	/* Get selected node and free it */
+	node = g_list_nth( img->current_slide->points,
+					   img->current_slide->cur_point );
+	g_slice_free( ImgStopPoint, node->data );
+	img->current_slide->points = 
+			g_list_delete_link( img->current_slide->points, node );
+
+	/* Update counters */
+	img->current_slide->no_points--;
+	img->current_slide->cur_point = MIN( img->current_slide->cur_point,
+										 img->current_slide->no_points - 1 );
+
+	/* Update display */
+	img_update_stop_display( img, TRUE );
+}
+
+void
+img_update_stop_display( img_window_struct *img,
+						 gboolean           update_pos )
+{
+	gchar        *string;
+	gint          full;
+
+	/* Disable/enable slide duration */
+	gtk_widget_set_sensitive( img->duration,
+							  img->current_slide->no_points == 0 );
+
+	/* Set slide duration */
+	full = img_calc_slide_duration_points( img->current_slide->points,
+										   img->current_slide->no_points );
+	if( ! full )
+		full = img->current_slide->duration;
+	gtk_spin_button_set_value( GTK_SPIN_BUTTON( img->duration ), full );
+
+	/* Set point count */
+	string = g_strdup_printf( "%d", img->current_slide->no_points );
+	gtk_label_set_text( GTK_LABEL( img->total_stop_points_label), string );
+	g_free( string );
+
+	/* If no point is set yet, use default values */
+	if( img->current_slide->no_points )
+	{
+		ImgStopPoint *point;
+
+		/* Set current point */
+		string = g_strdup_printf( "%d", img->current_slide->cur_point + 1 );
+		gtk_entry_set_text( GTK_ENTRY( img->current_stop_point_entry ), string );
+		g_free( string );
+		
+		/* Set duration of this point */
+		point = (ImgStopPoint *)g_list_nth_data( img->current_slide->points,
+												 img->current_slide->cur_point );
+		gtk_spin_button_set_value( GTK_SPIN_BUTTON( img->stop_point_duration ),
+								   point->time );
+		
+		/* Set zoom value */
+		gtk_range_set_value( GTK_RANGE( img->zoom_scale ), point->zoom );
+
+		/* Do we need to refresh current stop point on screen */
+		if( update_pos )
+			img->current_point = *point;
+	}
+	else
+	{
+		ImgStopPoint point = { 1, 0, 0, 1.0 };
+
+		gtk_entry_set_text( GTK_ENTRY( img->current_stop_point_entry ), "" );
+		gtk_spin_button_set_value( GTK_SPIN_BUTTON( img->stop_point_duration ), 1 );
+		if( update_pos )
+			img->current_point = point;
+	}
+
+	/* Force update on preview area */
+	gtk_widget_queue_draw( img->image_area );
+}
+
+static gint
+img_calc_slide_duration_points( GList *list,
+								gint   length )
+{
+	GList        *tmp;
+	gint          i, duration = 0;
+	ImgStopPoint *point;
+
+	/* If we have no points, return 0 */
+	if( length == 0 )
+		return( 0 );
+
+	/* Calculate length */
+	for( tmp = list, i = 0; i < length; tmp = g_list_next( tmp ), i++ )
+	{
+		point = (ImgStopPoint *)tmp->data;
+		duration += point->time;
+	}
+
+	/* If we have only one slide, no corrections are needed since we'll create
+	 * one additional point to add some duration to slide, else we remove the
+	 * last duration from sum. */
+	if( length > 1 )
+		duration -= point->time;
+
+	return( duration );
+}
+
+void
+img_goto_prev_point( GtkButton         *button,
+					 img_window_struct *img )
+{
+	if( img->current_slide && img->current_slide->no_points )
+	{
+		img->current_slide->cur_point =
+				CLAMP( img->current_slide->cur_point - 1,
+					   0, img->current_slide->no_points - 1 );
+
+		img_update_stop_display( img, TRUE );
+	}
+}
+
+void
+img_goto_next_point( GtkButton         *button,
+					 img_window_struct *img )
+{
+	if( img->current_slide && img->current_slide->no_points )
+	{
+		img->current_slide->cur_point =
+				CLAMP( img->current_slide->cur_point + 1,
+					   0, img->current_slide->no_points - 1 );
+
+		img_update_stop_display( img, TRUE );
+	}
+}
+
+void
+img_goto_point ( GtkEntry          *entry,
+				 img_window_struct *img )
+{
+	const gchar *string;
+	gint         number;
+
+	string = gtk_entry_get_text( entry );
+	number = (gint)strtol( string, NULL, 10 );
+
+	if( img->current_slide && img->current_slide->no_points )
+	{
+		img->current_slide->cur_point =
+				CLAMP( number - 1, 0, img->current_slide->no_points - 1 );
+
+		img_update_stop_display( img, TRUE );
+	}
 }
 

@@ -69,6 +69,7 @@ struct _slide_struct
 
 	GList  *points;    /* List with stop points */
 	gint    no_points; /* Number of stop points in list */
+	gint    cur_point; /* Currently active stop point */
 };
 
 typedef struct _img_window_struct img_window_struct;
@@ -164,7 +165,7 @@ struct _img_window_struct
 	/* Preview related variables */
   	gboolean	preview_is_running;
   	GtkWidget	*import_slide_chooser;
-	GtkWidget	*img_current_stop_point_entry;
+	GtkWidget	*current_stop_point_entry;
 	GtkWidget	*total_stop_points_label;
   	GtkWidget	*total_slide_number_label;
 	GtkWidget	*slide_number_entry;

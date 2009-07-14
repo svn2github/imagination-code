@@ -286,6 +286,7 @@ slide_struct *img_set_slide_info(gint duration, guint speed, ImgRender render, g
 		/* Ken Burns (no initial stop points ) */
 		slide_info->points = NULL;
 		slide_info->no_points = 0;
+		slide_info->cur_point = -1;
 	}
 	return slide_info;
 }

@@ -103,7 +103,7 @@ img_window_struct *img_create_window (void)
 	GtkWidget *trans_duration_label;
 	GtkWidget *total_time;
 	GtkWidget *hbox_stop_points, *stop_points_label, *left_point_button,*right_point_button;
-	GtkWidget *hbox_time_offset, *time_offset_label, *add_stop_point_button, *remove_stop_point_button;
+	GtkWidget *hbox_time_offset, *time_offset_label, *add_stop_point_button, *remove_stop_point_button, *update_stop_point_button;
 	GtkWidget *caption_textview, *hbox_textview, *font_button, *text_animation_hbox;
 	GtkWidget *hbox_music_label;
 	GtkWidget *music_time;
@@ -628,34 +628,48 @@ img_window_struct *img_create_window (void)
 
 	hbox_stop_points = gtk_hbox_new(FALSE,5);
 	gtk_box_pack_start (GTK_BOX (vbox_slide_motion), hbox_stop_points, TRUE, FALSE, 0);
-	stop_points_label = gtk_label_new(("Stop Points:"));
+	stop_points_label = gtk_label_new(("Stop Point:"));
 	gtk_box_pack_start (GTK_BOX (hbox_stop_points), stop_points_label, TRUE, TRUE, 0);
 	gtk_misc_set_alignment(GTK_MISC(stop_points_label),0.0, 0.5);
 	left_point_button = gtk_button_new();
+	g_signal_connect( G_OBJECT( left_point_button ), "clicked",
+					  G_CALLBACK( img_goto_prev_point ), img_struct );
 	gtk_box_pack_start (GTK_BOX (hbox_stop_points), left_point_button, FALSE, TRUE, 0);
 	image_buttons = gtk_image_new_from_stock (GTK_STOCK_GO_BACK, GTK_ICON_SIZE_MENU);
 	gtk_button_set_image(GTK_BUTTON(left_point_button), image_buttons);
-	img_struct->img_current_stop_point_entry = gtk_entry_new();
-	gtk_entry_set_max_length(GTK_ENTRY (img_struct->img_current_stop_point_entry), 2);
-	gtk_entry_set_width_chars(GTK_ENTRY (img_struct->img_current_stop_point_entry), 4);
-	gtk_box_pack_start (GTK_BOX (hbox_stop_points), img_struct->img_current_stop_point_entry, FALSE, TRUE, 0);
+	img_struct->current_stop_point_entry = gtk_entry_new();
+	gtk_entry_set_max_length(GTK_ENTRY (img_struct->current_stop_point_entry), 2);
+	gtk_entry_set_width_chars(GTK_ENTRY (img_struct->current_stop_point_entry), 4);
+	{
+		GObject *object = G_OBJECT( img_struct->current_stop_point_entry );
+	
+		g_signal_connect( object, "activate",
+						  G_CALLBACK( img_goto_point ), img_struct );
+		g_signal_connect( object, "insert-text",
+						  G_CALLBACK( img_check_numeric_entry ), NULL );
+	}
+	gtk_box_pack_start (GTK_BOX (hbox_stop_points), img_struct->current_stop_point_entry, FALSE, TRUE, 0);
 	label_of = gtk_label_new(_(" of "));
 	gtk_box_pack_start (GTK_BOX (hbox_stop_points), label_of, FALSE, FALSE, 0);
 	img_struct->total_stop_points_label = gtk_label_new(NULL);
 	gtk_box_pack_start (GTK_BOX (hbox_stop_points), img_struct->total_stop_points_label, FALSE, FALSE, 0);
 	right_point_button = gtk_button_new();
+	g_signal_connect( G_OBJECT( right_point_button ), "clicked",
+					  G_CALLBACK( img_goto_next_point ), img_struct );
 	gtk_box_pack_start (GTK_BOX (hbox_stop_points), right_point_button, FALSE, TRUE, 0);
 	image_buttons = gtk_image_new_from_stock (GTK_STOCK_GO_FORWARD, GTK_ICON_SIZE_MENU);
 	gtk_button_set_image(GTK_BUTTON(right_point_button), image_buttons);
 
 	hbox_time_offset = gtk_hbox_new(FALSE,0);
 	gtk_box_pack_start (GTK_BOX (vbox_slide_motion), hbox_time_offset, FALSE, FALSE, 0);
-	time_offset_label = gtk_label_new(("Time Offset:"));
+	time_offset_label = gtk_label_new(("Duration:"));
 	gtk_box_pack_start (GTK_BOX (hbox_time_offset), time_offset_label, TRUE, TRUE, 0);
 	gtk_misc_set_alignment(GTK_MISC(time_offset_label),0.0, 0.5);
 	img_struct->stop_point_duration = gtk_spin_button_new_with_range (1, 60, 1);
 	gtk_box_pack_start (GTK_BOX (hbox_time_offset), img_struct->stop_point_duration, FALSE, FALSE, 0);
 	gtk_spin_button_set_numeric(GTK_SPIN_BUTTON (img_struct->stop_point_duration),TRUE);
+	/* This is not needed since stop points are updated explicitly through
+	 * update button. */
 	//g_signal_connect (G_OBJECT (img_struct->stop_point_duration),"value-changed",G_CALLBACK (img_time_offset_spin_button_value_changed),img_struct);
 	GtkWidget *hbox_zoom = gtk_hbox_new(FALSE,0);
 	gtk_box_pack_start (GTK_BOX (vbox_slide_motion), hbox_zoom, FALSE, FALSE, 0);
@@ -673,9 +687,19 @@ img_window_struct *img_create_window (void)
 	hbox_buttons = gtk_hbutton_box_new();
 	gtk_button_box_set_layout (GTK_BUTTON_BOX (hbox_buttons), GTK_BUTTONBOX_SPREAD);
 	gtk_box_pack_start (GTK_BOX (vbox_slide_motion), hbox_buttons, FALSE, FALSE, 0);
+
 	add_stop_point_button = gtk_button_new_with_label(_("Add"));
+	g_signal_connect( G_OBJECT( add_stop_point_button ), "clicked",
+					  G_CALLBACK( img_add_stop_point ), img_struct );
 	gtk_box_pack_start (GTK_BOX (hbox_buttons), add_stop_point_button, FALSE, FALSE, 0);
+	update_stop_point_button = gtk_button_new_with_label( _("Update") );
+	g_signal_connect( G_OBJECT( update_stop_point_button ), "clicked",
+					  G_CALLBACK( img_update_stop_point ), img_struct );
+	gtk_box_pack_start( GTK_BOX( hbox_buttons ), update_stop_point_button,
+						FALSE, FALSE, 0 );
 	remove_stop_point_button = gtk_button_new_with_label(_("Remove"));
+	g_signal_connect( G_OBJECT( remove_stop_point_button ), "clicked",
+					  G_CALLBACK( img_delete_stop_point ), img_struct );
 	gtk_box_pack_start (GTK_BOX (hbox_buttons), remove_stop_point_button, FALSE, FALSE, 0);
 
 	/* Slide text frame */
@@ -1005,6 +1029,8 @@ void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *im
 		if( img->current_image )
 			cairo_surface_destroy( img->current_image );
 		img->current_image = NULL;
+		img->current_slide = NULL;
+		/* FIXME: Ken burns should be disabled too here */
 		gtk_widget_queue_draw( img->image_area );
 		gtk_widget_set_sensitive(img->trans_duration,	FALSE);
 		gtk_widget_set_sensitive(img->duration,			FALSE);
@@ -1029,6 +1055,7 @@ void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *im
 	g_list_foreach (selected, (GFunc)gtk_tree_path_free, NULL);
 	g_list_free (selected);
 	gtk_tree_model_get(model,&iter,1,&info_slide,-1);
+	img->current_slide = info_slide;
 
 	/* Set the transition type */
 	model = gtk_combo_box_get_model(GTK_COMBO_BOX(img->transition_type));
@@ -1069,10 +1096,6 @@ void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *im
 	gtk_spin_button_set_value(GTK_SPIN_BUTTON(img->duration), info_slide->duration);
 	g_signal_handlers_unblock_by_func((gpointer)img->duration, (gpointer)img_spinbutton_value_changed, img);
 
-	/* Added missing total label "setter". Current method is not the most
-	 * efficient one, since we're recalculating the whole duration when we
-	 * only need to display it. BTW, is total duration label hidding needed?
-	 * Even when there is no slide selected, duration stays the same. */
 	img->project_is_modified = TRUE;
 
 	if (nr_selected > 1)
@@ -1094,7 +1117,8 @@ void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *im
 	else
 		img->current_image = img_scale_image( img, info_slide->filename, 0, 0 );
 
-	gtk_widget_queue_draw( img->image_area );
+	/* Update display */
+	img_update_stop_display( img, TRUE );
 }
 
 static void img_combo_box_transition_type_changed (GtkComboBox *combo, img_window_struct *img)
