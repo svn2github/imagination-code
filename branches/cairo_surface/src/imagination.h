@@ -122,6 +122,7 @@ struct _img_window_struct
 	gint          maxoffx;       /* Maximal offsets for current zoom */
 	gint          maxoffy;
 	ImgStopPoint  current_point; /* Data for rendering current image */
+  	slide_struct *current_slide;
 
 	/* Renderers and module stuff */
   	gint		nr_transitions_loaded;
@@ -141,7 +142,7 @@ struct _img_window_struct
 									   is always 0). */
 
 	/* Variables common to export and preview functions */
-  	slide_struct    *current_slide;
+	slide_struct    *work_slide;
 	cairo_surface_t *current_image;      /* Image in preview area */
 	cairo_surface_t *exported_image;     /* Image being exported */
 	cairo_surface_t *image1;             /* Images used in transition rendering */

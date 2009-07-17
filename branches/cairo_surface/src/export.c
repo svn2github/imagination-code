@@ -411,7 +411,7 @@ img_start_export( img_window_struct *img )
 
 	/* Add export idle function and set initial values */
 	img->export_is_running = 4;
-	img->current_slide = entry;
+	img->work_slide = entry;
 	img->progress = 0;
 	img->export_frame_nr = img->total_secs * img->export_fps;
 	img->export_frame_cur = 0;
@@ -522,8 +522,8 @@ img_prepare_pixbufs( img_window_struct *img,
 	}
 
 	/* Get last stop point of current slide */
-	img->point1 = (ImgStopPoint *)( img->current_slide->no_points ?
-									g_list_last( img->current_slide->points )->data :
+	img->point1 = (ImgStopPoint *)( img->work_slide->no_points ?
+									g_list_last( img->work_slide->points )->data :
 									NULL );
 
 	if( gtk_tree_model_iter_next( model, img->cur_ss_iter ) )
@@ -531,17 +531,17 @@ img_prepare_pixbufs( img_window_struct *img,
 		/* We have next iter, so prepare for next round */
 		cairo_surface_destroy( img->image1 );
 		img->image1 = img->image2;
-		gtk_tree_model_get( model, img->cur_ss_iter, 1, &img->current_slide, -1 );
+		gtk_tree_model_get( model, img->cur_ss_iter, 1, &img->work_slide, -1 );
 
 		if( preview && img->low_quality )
-			img->image2 = img_scale_image( img, img->current_slide->filename, 0,
+			img->image2 = img_scale_image( img, img->work_slide->filename, 0,
 										   img->video_size[1] );
 		else
-			img->image2 = img_scale_image( img, img->current_slide->filename, 0, 0 );
+			img->image2 = img_scale_image( img, img->work_slide->filename, 0, 0 );
 
 		/* Get first stop point */
-		img->point2 = (ImgStopPoint *)( img->current_slide->no_points ?
-										img->current_slide->points->data :
+		img->point2 = (ImgStopPoint *)( img->work_slide->no_points ?
+										img->work_slide->points->data :
 										NULL );
 
 		return(TRUE);
@@ -567,7 +567,7 @@ img_prepare_pixbufs( img_window_struct *img,
 		cairo_paint( cr );
 		cairo_destroy( cr );
 
-		img->current_slide = &img->final_transition;
+		img->work_slide = &img->final_transition;
 		img->point2 = NULL;
 
 		return( TRUE );
@@ -683,13 +683,13 @@ static void
 img_export_calc_slide_frames( img_window_struct *img )
 {
 
-	if( img->current_slide->render )
+	if( img->work_slide->render )
 		/* Duration + transition time */
-		img->export_slide_nr = ( img->current_slide->duration +
-								 img->current_slide->speed ) * img->export_fps;
+		img->export_slide_nr = ( img->work_slide->duration +
+								 img->work_slide->speed ) * img->export_fps;
 	else
 		/* Duration only */
-		img->export_slide_nr = img->current_slide->duration * img->export_fps;
+		img->export_slide_nr = img->work_slide->duration * img->export_fps;
 
 	img->export_slide_cur = 0;
 }
@@ -715,16 +715,16 @@ img_calc_next_slide_time_offset( img_window_struct *img,
 {
 	img->slide_trans_frames = 0;
 
-	if( img->current_slide->render )
+	if( img->work_slide->render )
 	{
-		img->next_slide_off += img->current_slide->duration +
-							   img->current_slide->speed;
+		img->next_slide_off += img->work_slide->duration +
+							   img->work_slide->speed;
 
-		img->slide_trans_frames = img->current_slide->speed * rate;
+		img->slide_trans_frames = img->work_slide->speed * rate;
 	}
 	else
 	{
-		img->next_slide_off += img->current_slide->duration;
+		img->next_slide_off += img->work_slide->duration;
 	}
 
 	img->slide_nr_frames = img->next_slide_off * rate - img->displayed_frame;
@@ -752,14 +752,14 @@ img_export_transition( img_window_struct *img )
 
 	/* If no transition effect is set, just connect still export
 	 * idle function and remove itself from main loop. */
-	if( img->current_slide->render == NULL )
+	if( img->work_slide->render == NULL )
 	{
 		img->source_id = g_idle_add( (GSourceFunc)img_export_still, img );
 		return( FALSE );
 	}
 
 	/* Switch to still export phase if progress reached 1. */
-	img->progress += (gdouble)1 / ( img->current_slide->speed * img->export_fps );
+	img->progress += (gdouble)1 / ( img->work_slide->speed * img->export_fps );
 	if(img->progress > 1.00000005)
 	{
 		img->progress = 0;
@@ -834,7 +834,7 @@ img_export_still( img_window_struct *img )
 			img->export_slide++;
 
 			/* Make dialog more informative */
-			if( img->current_slide->duration == 0 )
+			if( img->work_slide->duration == 0 )
 				string = g_strdup_printf( _("Final transition export progress:") );
 			else
 				string = g_strdup_printf( _("Slide %d export progress:"),

@@ -813,7 +813,7 @@ void img_start_stop_preview(GtkWidget *button, img_window_struct *img)
 										entry->points->data :
 										NULL );
 
-		img->current_slide = entry;
+		img->work_slide = entry;
 
 		/* If we started our preview from beginning, create empty pixbuf and
 		 * fill it with background color. Else load image that is before
@@ -1372,14 +1372,6 @@ static gboolean img_transition_timeout(img_window_struct *img)
 	gdouble  progress;
 	cairo_t *cr;
 
-	/* Transition is now being calculated as factor of slide numbers.
-	 *
-	 * This new way has been implemented because previous method is not precise
-	 * enough. (On 100 slides with transitions, previous method could report for
-	 * up to a 200 frames less than expected, which is 200 / 30 ~ 7s on
-	 * 30fps video!!!) */
-	/*img->progress += (gdouble)1 / ( img->current_slide->speed * PREVIEW_FPS );*/
-
 	/* If we output all transition slides (or if there is no slides to output in
 	 * transition part), connect still preview phase. */
 	if( img->slide_cur_frame >= img->slide_trans_frames )
@@ -1407,7 +1399,7 @@ static gboolean img_transition_timeout(img_window_struct *img)
 	progress = (gdouble)img->slide_cur_frame / img->slide_trans_frames;
 	cr = cairo_create( img->exported_image );
 	cairo_save( cr );
-	img->current_slide->render( cr, img->image_from, img->image_to, progress );
+	img->work_slide->render( cr, img->image_from, img->image_to, progress );
 	cairo_restore( cr );
 
 	/* Add subtitles here */
@@ -1464,14 +1456,14 @@ static gboolean img_still_timeout(img_window_struct *img)
 	 *
 	 * If we have more than one point, we draw movement from point to point.
 	 */
-	switch( img->current_slide->no_points )
+	switch( img->work_slide->no_points )
 	{
 		case( 0 ): /* No stop points */
 			p_draw_point = NULL;
 			break;
 
 		case( 1 ): /* Single stop point */
-			p_draw_point = (ImgStopPoint *)img->current_slide->points->data;
+			p_draw_point = (ImgStopPoint *)img->work_slide->points->data;
 			break;
 
 		default:   /* Many stop points */
@@ -1483,7 +1475,7 @@ static gboolean img_still_timeout(img_window_struct *img)
 				if( ! img->cur_point )
 				{
 					/* This is initialization */
-					img->cur_point = img->current_slide->points;
+					img->cur_point = img->work_slide->points;
 					point1 = (ImgStopPoint *)img->cur_point->data;
 					img->still_offset = point1->time;
 					img->still_max = img->still_offset * PREVIEW_FPS;
@@ -1946,6 +1938,9 @@ img_update_stop_point( GtkButton         *button,
 {
 	ImgStopPoint *point;
 
+	if( ! img->current_slide->no_points )
+		return;
+
 	/* Get selected point */
 	point = g_list_nth_data( img->current_slide->points,
 							 img->current_slide->cur_point );
@@ -1964,6 +1959,9 @@ img_delete_stop_point( GtkButton         *button,
 					   img_window_struct *img )
 {
 	GList *node;
+
+	if( ! img->current_slide->no_points )
+		return;
 
 	/* Get selected node and free it */
 	node = g_list_nth( img->current_slide->points,
