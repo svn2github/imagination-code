@@ -543,10 +543,10 @@ void img_rotate_selected_slide(GtkWidget *button, img_window_struct *img)
 
 	/* Respect quality settings */
 	if( img->low_quality )
-		img->image1 = img_scale_image( img, info_slide->filename, 0,
-									   img->video_size[1] );
+		img->current_image = img_scale_image( img, info_slide->filename, 0,
+											  img->video_size[1] );
 	else
-		img->image1 = img_scale_image( img, info_slide->filename, 0, 0 );
+		img->current_image = img_scale_image( img, info_slide->filename, 0, 0 );
 
 	gtk_widget_queue_draw( img->image_area );
 
