@@ -162,6 +162,11 @@ struct _img_window_struct
 	guint            slide_still_frames; /* Number of frames in still part */
 	guint            next_slide_off;     /* Time offset of next slide */
 
+	gint   still_counter; /* Currently displayed still frame */
+	gint   still_max;     /* Number of frames per stop point */
+	gint   still_offset;  /* Offset in seconds for next stop point */
+	GList *cur_point;     /* Current stop point */
+
 	/* Preview related variables */
   	gboolean	preview_is_running;
   	GtkWidget	*import_slide_chooser;

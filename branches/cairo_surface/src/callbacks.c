@@ -1427,46 +1427,109 @@ static gboolean img_transition_timeout(img_window_struct *img)
 
 static gboolean img_still_timeout(img_window_struct *img)
 {
-	/* Export enough still frames (FIXME: Ken Burns missing!!) */
-	if( img->slide_cur_frame < img->slide_nr_frames )
-	{
-		cairo_t *cr;
-
-		/* Add Ken Burns calculations here */
-
-		/* Paint surface */
-		cr = cairo_create( img->exported_image );
-		img_draw_image_on_surface( cr, img->video_size[0], img->image2, NULL, img );
-		/* FIXME: Add subtitles here */
-		cairo_destroy( cr );
-
-		/* Increment counters */
-		img->slide_cur_frame++;
-		img->displayed_frame++;
-
-		/* Redraw */
-		gtk_widget_queue_draw( img->image_area );
-
-		return( TRUE );
-	}
+	ImgStopPoint  draw_point;   /* Calculated stop point */
+	ImgStopPoint *p_draw_point; /* Pointer to current stop point */
+	cairo_t      *cr;
+	static gint   cumulative_still_frames;
 
 	/* If there is next slide, connect transition preview, else finish
 	 * preview. */
-	if( img_prepare_pixbufs( img, TRUE ) )
+	if( img->slide_cur_frame == img->slide_nr_frames )
 	{
-		img_calc_next_slide_time_offset( img, PREVIEW_FPS );
-		img->source_id = g_timeout_add( 1000 / PREVIEW_FPS,
-									    (GSourceFunc)img_transition_timeout,
-										img );
-	}
-	else
-	{
-		/* Clean resources used in preview and prepare application for
-		 * next preview. */
-		img_clean_after_preview( img );
+		if( img_prepare_pixbufs( img, TRUE ) )
+		{
+			img_calc_next_slide_time_offset( img, PREVIEW_FPS );
+			img->source_id = g_timeout_add( 1000 / PREVIEW_FPS,
+										    (GSourceFunc)img_transition_timeout,
+											img );
+		}
+		else
+		{
+			/* Clean resources used in preview and prepare application for
+			 * next preview. */
+			img_clean_after_preview( img );
+		}
+
+		/* Indicate that we must start fresh with new slide */
+		img->cur_point = NULL;
+
+		return FALSE;
 	}
 
-	return FALSE;
+	/* If no stop points are specified, we simply draw img->image2 on each
+	 * previewed frame.
+	 *
+	 * If we have only one stop point, we draw img->image2 on each frame
+	 * properly scaled, with no movement.
+	 *
+	 * If we have more than one point, we draw movement from point to point.
+	 */
+	switch( img->current_slide->no_points )
+	{
+		case( 0 ): /* No stop points */
+			p_draw_point = NULL;
+			break;
+
+		case( 1 ): /* Single stop point */
+			p_draw_point = (ImgStopPoint *)img->current_slide->points->data;
+			break;
+
+		default:   /* Many stop points */
+			{
+				ImgStopPoint *point1,
+							 *point2;
+				gdouble       progress;
+
+				if( ! img->cur_point )
+				{
+					/* This is initialization */
+					img->cur_point = img->current_slide->points;
+					point1 = (ImgStopPoint *)img->cur_point->data;
+					img->still_offset = point1->time;
+					img->still_max = img->still_offset * PREVIEW_FPS;
+					img->still_counter = 0;
+					cumulative_still_frames = 0;
+				}
+				else if( img->still_counter == img->still_max )
+				{
+					/* This is advancing to next point */
+					img->cur_point = g_list_next( img->cur_point );
+					point1 = (ImgStopPoint *)img->cur_point->data;
+					img->still_offset += point1->time;
+					cumulative_still_frames += img->still_counter;
+					img->still_max = img->still_offset * PREVIEW_FPS -
+									 cumulative_still_frames;
+					img->still_counter = 0;
+				}
+
+				point1 = (ImgStopPoint *)img->cur_point->data;
+				point2 = (ImgStopPoint *)g_list_next( img->cur_point )->data;
+
+				progress = (gdouble)img->still_counter / ( img->still_max - 1);
+				img_calc_current_ken_point( &draw_point, point1, point2,
+											progress, 0 );
+				p_draw_point = &draw_point;
+			}
+			break;
+	}
+
+
+	/* Paint surface */
+	cr = cairo_create( img->exported_image );
+	img_draw_image_on_surface( cr, img->video_size[0], img->image2,
+							   p_draw_point, img );
+	/* FIXME: Add subtitles here */
+	cairo_destroy( cr );
+
+	/* Increment counters */
+	img->still_counter++;
+	img->slide_cur_frame++;
+	img->displayed_frame++;
+
+	/* Redraw */
+	gtk_widget_queue_draw( img->image_area );
+
+	return( TRUE );
 }
 
 static void img_swap_toolbar_images( img_window_struct *img,gboolean flag )
@@ -2051,5 +2114,37 @@ img_goto_point ( GtkEntry          *entry,
 
 		img_update_stop_display( img, TRUE );
 	}
+}
+
+
+void
+img_calc_current_ken_point( ImgStopPoint *res,
+							ImgStopPoint *from,
+							ImgStopPoint *to,
+							gdouble       progress,
+							gint          mode )
+{
+	gdouble fracx, /* Factor for x offset */
+			fracy, /* Factor for y offset */
+			fracz; /* Factor for zoom */
+
+	switch( mode )
+	{
+		case( 0 ): /* Linear mode */
+			fracx = progress;
+			fracy = progress;
+			fracz = progress;
+			break;
+
+		case( 1 ): /* Acceleration mode */
+			break;
+
+		case( 2 ): /* Deceleration mode */
+			break;
+	}
+
+	res->offx = from->offx * ( 1 - fracx ) + to->offx * fracx;
+	res->offy = from->offy * ( 1 - fracy ) + to->offy * fracy;
+	res->zoom = from->zoom * ( 1 - fracz ) + to->zoom * fracz;
 }
 

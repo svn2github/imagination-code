@@ -103,4 +103,10 @@ img_goto_next_point( GtkButton         *button,
 void
 img_goto_point ( GtkEntry          *entry,
 				 img_window_struct *img );
+void
+img_calc_current_ken_point( ImgStopPoint *res,
+							ImgStopPoint *from,
+							ImgStopPoint *to,
+							gdouble       progress,
+							gint          mode );
 #endif
