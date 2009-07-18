@@ -35,16 +35,8 @@ img_prepare_audio( img_window_struct *img );
 static gboolean
 img_start_export( img_window_struct *img );
 
-static void
-img_export_pixbuf_to_ppm( GdkPixbuf  *pixbuf,
-						  guchar   **data,
-						  guint     *lenght );
-
 static gboolean
 img_run_encoder( img_window_struct *img );
-
-static void
-img_export_calc_slide_frames( img_window_struct *img );
 
 static gboolean
 img_export_transition( img_window_struct *img );
@@ -58,6 +50,10 @@ img_export_still( img_window_struct *img );
 static void
 img_export_pause_unpause( GtkToggleButton   *button,
 						  img_window_struct *img );
+
+static void
+img_export_frame_to_ppm( cairo_surface_t *surface,
+						 gint             file_desc );
 
 static void
 img_exporter_vob( img_window_struct *img );
@@ -174,7 +170,9 @@ img_create_export_dialog( img_window_struct  *img,
 	}
 
 	/* Indicate that export has been started */
-	img->export_is_running = 1;
+	/* This has been removed since expose handler needs something in
+	 * img->work_image in order for preview to work properly!! */
+	//img->export_is_running = 1;
 
 	/* Create dialog */
 	dialog = gtk_dialog_new_with_buttons( title, parent,
@@ -330,6 +328,7 @@ img_start_export( img_window_struct *img )
 	GtkWidget    *progress;
 	GtkWidget    *button;
 	gchar        *string;
+	cairo_t      *cr;
 
 	/* Set export info */
 	img->export_is_running = 3;
@@ -395,29 +394,47 @@ img_start_export( img_window_struct *img )
 	gtk_widget_show_all( dialog );
 
 	/* Display some visual feedback */
-	while( gtk_events_pending() )
-		gtk_main_iteration();
+	/*while( gtk_events_pending() )
+		gtk_main_iteration();*/
+	/* FIXME: This is not worth the effort of maintaining it here, since audio
+	 * preparation dialog will ran it over. */
 
-	/* FIXME: Here background color is fixed to BLACK!!! */
+	/* Create first slide */
 	img->image1 = cairo_image_surface_create( CAIRO_FORMAT_RGB24,
 											  img->video_size[0],
 											  img->video_size[1] );
+	cr = cairo_create( img->image1 );
+	cairo_set_source_rgb( cr, img->background_color[0],
+							  img->background_color[1],
+							  img->background_color[2] );
+	cairo_paint( cr );
+	cairo_destroy( cr );
 
 	/* Load first image from model */
 	model = gtk_icon_view_get_model( GTK_ICON_VIEW( img->thumbnail_iconview ) );
 	gtk_tree_model_get_iter_first( model, &iter );
 	gtk_tree_model_get( model, &iter, 1, &entry, -1 );
-	img->image1 = img_scale_image( img, entry->filename, 0, 0 );
+	img->image2 = img_scale_image( img, entry->filename, 0, 0 );
 
 	/* Add export idle function and set initial values */
 	img->export_is_running = 4;
 	img->work_slide = entry;
-	img->progress = 0;
-	img->export_frame_nr = img->total_secs * img->export_fps;
-	img->export_frame_cur = 0;
+	img->total_nr_frames = img->total_secs * img->export_fps;
+	img->displayed_frame = 0;
+	img->next_slide_off = 0;
+	img_calc_next_slide_time_offset( img, img->export_fps );
 
-	/* Fix for the wrong progress bar indicators. */
-	img_export_calc_slide_frames( img );
+	/* Create surfaces to be passed to transition renderer */
+	img->image_from = cairo_image_surface_create( CAIRO_FORMAT_RGB24,
+												  img->video_size[0],
+												  img->video_size[1] );
+	img->image_to = cairo_image_surface_create( CAIRO_FORMAT_RGB24,
+												img->video_size[0],
+												img->video_size[1] );
+	img->exported_image = cairo_image_surface_create( CAIRO_FORMAT_RGB24,
+													  img->video_size[0],
+													  img->video_size[1] );
+
 
 	img->export_slide = 1;
 	img->export_idle_func = (GSourceFunc)img_export_transition;
@@ -427,6 +444,9 @@ img_start_export( img_window_struct *img )
 	/* I did this for the translators. ^^ */
 	gtk_label_set_label( GTK_LABEL( img->export_label ), string );
 	g_free( string );
+
+	/* Update display */
+	gtk_widget_queue_draw( img->image_area );
 
 	return( FALSE );
 }
@@ -464,11 +484,16 @@ img_stop_export( img_window_struct *img )
 			/* Clean other resources */
 			g_slice_free( GtkTreeIter, img->cur_ss_iter );
 			img->cur_ss_iter = NULL;
-			g_free(img->pixbuf_data);
-			img->pixbuf_data = NULL;
 			
 			close(img->file_desc);
 			g_spawn_close_pid( img->ffmpeg_export );
+
+			/* Destroy images that were used */
+			cairo_surface_destroy( img->image1 );
+			cairo_surface_destroy( img->image2 );
+			cairo_surface_destroy( img->image_from );
+			cairo_surface_destroy( img->image_to );
+			cairo_surface_destroy( img->exported_image );
 
 			/* Close export dialog */
 			gtk_widget_destroy( img->export_dialog );
@@ -488,6 +513,9 @@ img_stop_export( img_window_struct *img )
 
 	/* Indicate that export is not running any more */
 	img->export_is_running = 0;
+
+	/* Redraw preview area */
+	gtk_widget_queue_draw( img->image_area );
 
 	return( FALSE );
 }
@@ -580,53 +608,6 @@ img_prepare_pixbufs( img_window_struct *img,
 }
 
 /*
- * img_export_pixbuf_to_ppm:
- * @pixbuf: GdkPixbuf to be exported
- * @data: location for data
- * @lenght: location for @data lenght
- *
- * Converts GdkPixbuf into PPM format.
- */
-static void
-img_export_pixbuf_to_ppm( GdkPixbuf  *pixbuf,
-						  guchar    **data,
-						  guint      *lenght )
-{
-	gint      width, height, stride, channels;
-	guchar   *pixels, *tmp;
-	gint      col, row;
-	gchar    *header;
-	gint      header_lenght;
-
-	width    = gdk_pixbuf_get_width( pixbuf );
-	height   = gdk_pixbuf_get_height( pixbuf );
-	stride   = gdk_pixbuf_get_rowstride( pixbuf );
-	channels = gdk_pixbuf_get_n_channels( pixbuf );
-	pixels   = gdk_pixbuf_get_pixels( pixbuf );
-
-	header = g_strdup_printf( "P6\n%d %d\n255\n", width, height );
-	header_lenght = strlen( header ) * sizeof(gchar);
-
-	*lenght = sizeof( guchar ) * width * height * channels + header_lenght;
-	*data = g_slice_alloc( sizeof( guchar ) * *lenght);
-
-	memcpy( *data, header, header_lenght );
-	tmp = *data + header_lenght;
-	for( row = 0; row < height; row++ )
-	{
-		for( col = 0; col < width; col++ )
-		{
-			tmp[0] = pixels[0];
-			tmp[1] = pixels[1];
-			tmp[2] = pixels[2];
-
-			tmp    += 3;
-			pixels += channels;
-		}
-	}
-}
-
-/*
  * img_run_encoder:
  * @img:
  *
@@ -647,10 +628,9 @@ img_run_encoder( img_window_struct *img )
 	g_print( "%s\n", img->export_cmd_line);
 
 	ret = g_spawn_async_with_pipes( NULL, argv, NULL,
-									G_SPAWN_SEARCH_PATH /*|
-									G_SPAWN_DO_NOT_REAP_CHILD |
+									G_SPAWN_SEARCH_PATH |
 									G_SPAWN_STDOUT_TO_DEV_NULL |
-									G_SPAWN_STDERR_TO_DEV_NULL*/,
+									G_SPAWN_STDERR_TO_DEV_NULL,
 									NULL, NULL, &img->ffmpeg_export,
 									&img->file_desc, NULL, NULL, &error );
 	if( ! ret )
@@ -669,29 +649,6 @@ img_run_encoder( img_window_struct *img )
 	g_strfreev( argv );
 
 	return( ret );
-}
-
-/*
- * img_export_calc_slide_frames:
- * @img:
- *
- * This function calculates how many frames will this slide need in order to be
- * exported completely. We need this information in order to be able display
- * slide export progress.
- */
-static void
-img_export_calc_slide_frames( img_window_struct *img )
-{
-
-	if( img->work_slide->render )
-		/* Duration + transition time */
-		img->export_slide_nr = ( img->work_slide->duration +
-								 img->work_slide->speed ) * img->export_fps;
-	else
-		/* Duration only */
-		img->export_slide_nr = img->work_slide->duration * img->export_fps;
-
-	img->export_slide_cur = 0;
 }
 
 /*
@@ -750,19 +707,9 @@ img_export_transition( img_window_struct *img )
 	gchar   string[10];
 	gdouble export_progress;
 
-	/* If no transition effect is set, just connect still export
-	 * idle function and remove itself from main loop. */
-	if( img->work_slide->render == NULL )
+	/* If we rendered all transition frames, connect still export */
+	if( img->slide_cur_frame == img->slide_trans_frames )
 	{
-		img->source_id = g_idle_add( (GSourceFunc)img_export_still, img );
-		return( FALSE );
-	}
-
-	/* Switch to still export phase if progress reached 1. */
-	img->progress += (gdouble)1 / ( img->work_slide->speed * img->export_fps );
-	if(img->progress > 1.00000005)
-	{
-		img->progress = 0;
 		img->export_idle_func = (GSourceFunc)img_export_still;
 		img->source_id = g_idle_add( (GSourceFunc)img_export_still, img );
 
@@ -770,29 +717,31 @@ img_export_transition( img_window_struct *img )
 	}
 
 	/* Draw one frame of transition animation */
-	/* TB_EDITS */
-	/* FIXME!!!! */
+	img_render_transition_frame( img );
+
+	/* Export frame */
+	img_export_frame_to_ppm( img->exported_image, img->file_desc );
 
 	/* Increment global frame counters and update progress bars */
-	img->export_frame_cur++;
-	img->export_slide_cur++;
+	img->slide_cur_frame++;
+	img->displayed_frame++;
 
-	export_progress = CLAMP( (gdouble)img->export_slide_cur /
-									  img->export_slide_nr, 0, 1 );
+	export_progress = CLAMP( (gdouble)img->slide_cur_frame /
+									  img->slide_nr_frames, 0, 1 );
 	snprintf( string, 10, "%.2f%%", export_progress * 100 );
 	gtk_progress_bar_set_fraction( GTK_PROGRESS_BAR( img->export_pbar1 ),
 								   export_progress );
 	gtk_progress_bar_set_text( GTK_PROGRESS_BAR( img->export_pbar1 ), string );
 
-	export_progress = CLAMP( (gdouble)img->export_frame_cur /
-									  img->export_frame_nr, 0, 1 );
+	export_progress = CLAMP( (gdouble)img->displayed_frame /
+									  img->total_nr_frames, 0, 1 );
 	snprintf( string, 10, "%.2f%%", export_progress * 100 );
 	gtk_progress_bar_set_fraction( GTK_PROGRESS_BAR( img->export_pbar2 ),
 								   export_progress );
 	gtk_progress_bar_set_text( GTK_PROGRESS_BAR( img->export_pbar2 ), string );
 
 	/* Draw every 10th frame of animation on screen */
-	if( img->export_frame_cur % 10 == 0 )
+	if( img->displayed_frame % 10 == 0 )
 		gtk_widget_queue_draw( img->image_area );
 
 	return( TRUE );
@@ -810,27 +759,18 @@ img_export_transition( img_window_struct *img )
 static gboolean
 img_export_still( img_window_struct *img )
 {
-	static guint length;
-	gdouble      export_progress;
-	gchar        string[10];
+	gdouble export_progress;
+	gchar   string[10];
 
-	/* Initialize pixbuf data buffer */
-	if( img->pixbuf_data == NULL )
+	/* If there is next slide, connect transition preview, else finish
+	 * preview. */
+	if( img->slide_cur_frame == img->slide_nr_frames )
 	{
-		/* FIXME!!!! */
-	}
-
-	/* Draw frames until we have enough of them to fill slide duration gap. */
-	if( img->export_slide_cur > img->export_slide_nr )
-	{
-		/* Exit still rendering and continue with next transition. */
-
-		/* Load next image from store. */
 		if( img_prepare_pixbufs( img, FALSE ) )
 		{
 			gchar *string;
 
-			/* Update progress counters */
+			img_calc_next_slide_time_offset( img, img->export_fps );
 			img->export_slide++;
 
 			/* Make dialog more informative */
@@ -841,37 +781,49 @@ img_export_still( img_window_struct *img )
 										  img->export_slide );
 			gtk_label_set_label( GTK_LABEL( img->export_label ), string );
 			g_free( string );
-			img_export_calc_slide_frames( img );
 
-			g_free( img->pixbuf_data );
-			img->pixbuf_data = NULL;
 			img->export_idle_func = (GSourceFunc)img_export_transition;
 			img->source_id = g_idle_add( (GSourceFunc)img_export_transition, img );
 		}
 		else
 			img_stop_export( img );
 
-		return( FALSE );
+		/* Indicate that we must start fresh with new slide */
+		img->cur_point = NULL;
+
+		return FALSE;
 	}
-	write( img->file_desc, img->pixbuf_data, length );
+
+	/* Draw frames until we have enough of them to fill slide duration gap. */
+	img_render_still_frame( img, img->export_fps );
+
+	/* Export frame */
+	img_export_frame_to_ppm( img->exported_image, img->file_desc );
 
 	/* Increment global frame counter and update progress bar */
-	img->export_frame_cur++;
-	img->export_slide_cur++;
+	img->still_counter++;
+	img->slide_cur_frame++;
+	img->displayed_frame++;
 
 	/* CLAMPS are needed here because of the loosy conversion when switching
 	 * from floating point to integer arithmetics. */
-	export_progress = CLAMP( (gdouble)img->export_slide_cur / img->export_slide_nr, 0, 1 );
+	export_progress = CLAMP( (gdouble)img->slide_cur_frame /
+									  img->slide_nr_frames, 0, 1 );
 	snprintf( string, 10, "%.2f%%", export_progress * 100 );
 	gtk_progress_bar_set_fraction( GTK_PROGRESS_BAR( img->export_pbar1 ),
 								   export_progress );
 	gtk_progress_bar_set_text( GTK_PROGRESS_BAR( img->export_pbar1 ), string );
 
-	export_progress = CLAMP( (gdouble)img->export_frame_cur / img->export_frame_nr, 0, 1 );
+	export_progress = CLAMP( (gdouble)img->displayed_frame /
+									  img->total_nr_frames, 0, 1 );
 	snprintf( string, 10, "%.2f%%", export_progress * 100 );
 	gtk_progress_bar_set_fraction( GTK_PROGRESS_BAR( img->export_pbar2 ),
 								   export_progress );
 	gtk_progress_bar_set_text( GTK_PROGRESS_BAR( img->export_pbar2 ), string );
+
+	/* Draw every 10th frame of animation on screen */
+	if( img->displayed_frame % 10 == 0 )
+		gtk_widget_queue_draw( img->image_area );
 
 	return( TRUE );
 }
@@ -891,6 +843,201 @@ img_export_pause_unpause( GtkToggleButton   *button,
 		g_source_remove( img->source_id );
 	else
 		img->source_id = g_idle_add(img->export_idle_func, img);
+}
+
+void
+img_render_transition_frame( img_window_struct *img )
+{
+	gdouble  progress;
+	cairo_t *cr;
+
+	/* Do image composing here and place result in exported_image */
+	/* Create first image */
+	cr = cairo_create( img->image_from );
+	img_draw_image_on_surface( cr, img->video_size[0], img->image1,
+							   img->point1, img );
+	cairo_destroy( cr );
+
+	/* Create second image */
+	cr = cairo_create( img->image_to );
+	img_draw_image_on_surface( cr, img->video_size[0], img->image2,
+							   img->point2, img );
+	cairo_destroy( cr );
+
+	/* Compose them together */
+	progress = (gdouble)img->slide_cur_frame / ( img->slide_trans_frames - 1 );
+	cr = cairo_create( img->exported_image );
+	cairo_save( cr );
+	img->work_slide->render( cr, img->image_from, img->image_to, progress );
+	cairo_restore( cr );
+
+	/* FIXME: Add subtitles here */
+
+	cairo_destroy( cr );
+}
+
+void
+img_render_still_frame( img_window_struct *img,
+						gdouble            rate )
+{
+	ImgStopPoint  draw_point;   /* Calculated stop point */
+	ImgStopPoint *p_draw_point; /* Pointer to current stop point */
+	cairo_t      *cr;
+
+	/* If no stop points are specified, we simply draw img->image2 on each
+	 * previewed frame.
+	 *
+	 * If we have only one stop point, we draw img->image2 on each frame
+	 * properly scaled, with no movement.
+	 *
+	 * If we have more than one point, we draw movement from point to point.
+	 */
+	switch( img->work_slide->no_points )
+	{
+		case( 0 ): /* No stop points */
+			p_draw_point = NULL;
+			break;
+
+		case( 1 ): /* Single stop point */
+			p_draw_point = (ImgStopPoint *)img->work_slide->points->data;
+			break;
+
+		default:   /* Many stop points */
+			{
+				ImgStopPoint *point1,
+							 *point2;
+				gdouble       progress;
+
+				if( ! img->cur_point )
+				{
+					/* This is initialization */
+					img->cur_point = img->work_slide->points;
+					point1 = (ImgStopPoint *)img->cur_point->data;
+					img->still_offset = point1->time;
+					img->still_max = img->still_offset * rate;
+					img->still_counter = 0;
+					img->still_cmlt = 0;
+				}
+				else if( img->still_counter == img->still_max )
+				{
+					/* This is advancing to next point */
+					img->cur_point = g_list_next( img->cur_point );
+					point1 = (ImgStopPoint *)img->cur_point->data;
+					img->still_offset += point1->time;
+					img->still_cmlt += img->still_counter;
+					img->still_max = img->still_offset * rate -
+									 img->still_cmlt;
+					img->still_counter = 0;
+				}
+
+				point1 = (ImgStopPoint *)img->cur_point->data;
+				point2 = (ImgStopPoint *)g_list_next( img->cur_point )->data;
+
+				progress = (gdouble)img->still_counter / ( img->still_max - 1);
+				img_calc_current_ken_point( &draw_point, point1, point2,
+											progress, 0 );
+				p_draw_point = &draw_point;
+			}
+			break;
+	}
+
+	/* Paint surface */
+	cr = cairo_create( img->exported_image );
+	img_draw_image_on_surface( cr, img->video_size[0], img->image2,
+							   p_draw_point, img );
+	/* FIXME: Add subtitles here */
+	cairo_destroy( cr );
+}
+
+static void
+img_export_frame_to_ppm( cairo_surface_t *surface,
+						 gint             file_desc )
+{
+	cairo_format_t  format;
+	gint            width, height, stride, row, col;
+	guchar         *data, *pix;
+	gchar          *header;
+
+	guchar         *buffer, *tmp;
+	gint            buf_size;
+
+	/* Get info about cairo surface passed in. */
+	format = cairo_image_surface_get_format( surface );
+
+	/* For more information on diferent formats, see
+	 * www.cairographics.org/manual/cairo-image-surface.html#cairo-format-t */
+	/* Currently this exporter only handles CAIRO_FORMAT_(ARGB32|RGB24)
+	 * formats. */
+	if( ! format == CAIRO_FORMAT_ARGB32 && ! format == CAIRO_FORMAT_RGB24 )
+	{
+		g_print( "Unsupported cairo surface format!\n" );
+		return;
+	}
+
+	/* Image info and pixel data */
+	width  = cairo_image_surface_get_width( surface );
+	height = cairo_image_surface_get_height( surface );
+	stride = cairo_image_surface_get_stride( surface );
+	pix    = cairo_image_surface_get_data( surface );
+
+	/* Output PPM file header information:
+	 *   - P6 is a magic number for PPM file
+	 *   - width and height are image's dimensions
+	 *   - 255 is number of colors
+	 * */
+	header = g_strdup_printf( "P6\n%d %d\n255\n", width, height );
+	write( file_desc, header, sizeof( gchar ) * strlen( header ) );
+	g_free( header );
+
+	/* PRINCIPLES BEHING EXPORT LOOP
+	 *
+	 * Cairo surface data is composed of height * stride 32-bit numbers. The
+	 * actual data for displaying image is inside height * width boundary,
+	 * and each pixel is represented with 1 32-bit number.
+	 *
+	 * In CAIRO_FORMAT_ARGB32, first 8 bits contain alpha value, second 8
+	 * bits red value, third green and fourth 8 bits blue value.
+	 *
+	 * In CAIRO_FORMAT_RGB24, groups of 8 bits contain values for red, green
+	 * and blue color respectively. Last 8 bits are unused.
+	 *
+	 * Since guchar type contains 8 bits, it's usefull to think of cairo
+	 * surface as a height * stride gropus of 4 guchars, where each guchar
+	 * holds value for each color. And this is the principle behing my method
+	 * of export.
+	 * */
+
+	/* Output PPM data */
+	buf_size = sizeof( guchar ) * width * height * 3;
+	buffer = g_slice_alloc( buf_size );
+	tmp = buffer;
+	data = pix;
+	for( row = 0; row < height; row++ )
+	{
+		data = pix + row * stride;
+
+		for( col = 0; col < width; col++ )
+		{
+			/* Output data. This is done differenty on little endian
+			 * and big endian machines. */
+#if G_BYTE_ORDER == G_LITTLE_ENDIAN
+			/* Little endian machine sees pixel data as being stored in
+			 * BGRA format. This is why we skip the last 8 bit group and
+			 * read the other three groups in reverse order. */
+			tmp[0] = data[2];
+			tmp[1] = data[1];
+			tmp[2] = data[0];
+#elif G_BYTE_ORDER == G_BIG_ENDIAN
+			tmp[0] = data[1];
+			tmp[1] = data[2];
+			tmp[2] = data[3];
+#endif
+			data += 4;
+			tmp  += 3;
+		}
+	}
+	write( file_desc, buffer, buf_size );
+	g_slice_free1( buf_size, buffer );
 }
 
 /* ****************************************************************************
@@ -1031,11 +1178,11 @@ img_exporter_vob( img_window_struct *img )
 	if( gtk_dialog_run( GTK_DIALOG( dialog ) ) != GTK_RESPONSE_ACCEPT )
 	{
 		gtk_widget_destroy( dialog );
-		img->export_is_running = 0;
 		return;
 	}
 
 	/* User is serious, so we better prepare ffmepg command line;) */
+	img->export_is_running = 1;
 	format = img->video_size[1] == 576 ? "pal" : "ntsc";
 	img->export_fps = 30;
 	filename = gtk_entry_get_text( entry );
@@ -1136,11 +1283,11 @@ img_exporter_ogg( img_window_struct *img )
 	if( gtk_dialog_run( GTK_DIALOG( dialog ) ) != GTK_RESPONSE_ACCEPT )
 	{
 		gtk_widget_destroy( dialog );
-		img->export_is_running = 0;
 		return;
 	}
 
 	/* User is serious, so we better prepare ffmpeg command line;) */
+	img->export_is_running = 1;
 	img->export_fps = 30;
 	filename = gtk_entry_get_text( entry );
 
@@ -1229,11 +1376,11 @@ img_exporter_flv( img_window_struct *img )
 	if( gtk_dialog_run( GTK_DIALOG( dialog ) ) != GTK_RESPONSE_ACCEPT )
 	{
 		gtk_widget_destroy( dialog );
-		img->export_is_running = 0;
 		return;
 	}
 
 	/* User is serious, so we better prepare ffmpeg command line;) */
+	img->export_is_running = 1;
 	img->export_fps = 30;
 	filename = gtk_entry_get_text( entry );
 

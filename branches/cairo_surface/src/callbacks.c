@@ -1091,7 +1091,7 @@ img_on_expose_event( GtkWidget         *widget,
 		if( ! img->current_image )
 			/* Use default handler */
 			return( FALSE );
-		
+
 		cr = gdk_cairo_create( widget->window );
 		
 		/* Do the drawing */
@@ -1369,12 +1369,9 @@ img_scale_image( img_window_struct *img,
 
 static gboolean img_transition_timeout(img_window_struct *img)
 {
-	gdouble  progress;
-	cairo_t *cr;
-
 	/* If we output all transition slides (or if there is no slides to output in
 	 * transition part), connect still preview phase. */
-	if( img->slide_cur_frame >= img->slide_trans_frames )
+	if( img->slide_cur_frame == img->slide_trans_frames )
 	{
 		img->source_id = g_timeout_add( 1000 / PREVIEW_FPS,
 										(GSourceFunc)img_still_timeout, img );
@@ -1382,30 +1379,8 @@ static gboolean img_transition_timeout(img_window_struct *img)
 		return FALSE;
 	}
 
-	/* Do image composing here and place result in exported_image */
-	/* Create first image */
-	cr = cairo_create( img->image_from );
-	img_draw_image_on_surface( cr, img->video_size[0], img->image1,
-							   img->point1, img );
-	cairo_destroy( cr );
-
-	/* Create second image */
-	cr = cairo_create( img->image_to );
-	img_draw_image_on_surface( cr, img->video_size[0], img->image2,
-							   img->point2, img );
-	cairo_destroy( cr );
-
-	/* Compose them together */
-	progress = (gdouble)img->slide_cur_frame / img->slide_trans_frames;
-	cr = cairo_create( img->exported_image );
-	cairo_save( cr );
-	img->work_slide->render( cr, img->image_from, img->image_to, progress );
-	cairo_restore( cr );
-
-	/* Add subtitles here */
-	/* FIXME!! */
-
-	cairo_destroy( cr );
+	/* Render single frame */
+	img_render_transition_frame( img );
 
 	/* Schedule our image redraw */
 	gtk_widget_queue_draw( img->image_area );
@@ -1419,11 +1394,6 @@ static gboolean img_transition_timeout(img_window_struct *img)
 
 static gboolean img_still_timeout(img_window_struct *img)
 {
-	ImgStopPoint  draw_point;   /* Calculated stop point */
-	ImgStopPoint *p_draw_point; /* Pointer to current stop point */
-	cairo_t      *cr;
-	static gint   cumulative_still_frames;
-
 	/* If there is next slide, connect transition preview, else finish
 	 * preview. */
 	if( img->slide_cur_frame == img->slide_nr_frames )
@@ -1448,70 +1418,8 @@ static gboolean img_still_timeout(img_window_struct *img)
 		return FALSE;
 	}
 
-	/* If no stop points are specified, we simply draw img->image2 on each
-	 * previewed frame.
-	 *
-	 * If we have only one stop point, we draw img->image2 on each frame
-	 * properly scaled, with no movement.
-	 *
-	 * If we have more than one point, we draw movement from point to point.
-	 */
-	switch( img->work_slide->no_points )
-	{
-		case( 0 ): /* No stop points */
-			p_draw_point = NULL;
-			break;
-
-		case( 1 ): /* Single stop point */
-			p_draw_point = (ImgStopPoint *)img->work_slide->points->data;
-			break;
-
-		default:   /* Many stop points */
-			{
-				ImgStopPoint *point1,
-							 *point2;
-				gdouble       progress;
-
-				if( ! img->cur_point )
-				{
-					/* This is initialization */
-					img->cur_point = img->work_slide->points;
-					point1 = (ImgStopPoint *)img->cur_point->data;
-					img->still_offset = point1->time;
-					img->still_max = img->still_offset * PREVIEW_FPS;
-					img->still_counter = 0;
-					cumulative_still_frames = 0;
-				}
-				else if( img->still_counter == img->still_max )
-				{
-					/* This is advancing to next point */
-					img->cur_point = g_list_next( img->cur_point );
-					point1 = (ImgStopPoint *)img->cur_point->data;
-					img->still_offset += point1->time;
-					cumulative_still_frames += img->still_counter;
-					img->still_max = img->still_offset * PREVIEW_FPS -
-									 cumulative_still_frames;
-					img->still_counter = 0;
-				}
-
-				point1 = (ImgStopPoint *)img->cur_point->data;
-				point2 = (ImgStopPoint *)g_list_next( img->cur_point )->data;
-
-				progress = (gdouble)img->still_counter / ( img->still_max - 1);
-				img_calc_current_ken_point( &draw_point, point1, point2,
-											progress, 0 );
-				p_draw_point = &draw_point;
-			}
-			break;
-	}
-
-
-	/* Paint surface */
-	cr = cairo_create( img->exported_image );
-	img_draw_image_on_surface( cr, img->video_size[0], img->image2,
-							   p_draw_point, img );
-	/* FIXME: Add subtitles here */
-	cairo_destroy( cr );
+	/* Render frame */
+	img_render_still_frame( img, PREVIEW_FPS );
 
 	/* Increment counters */
 	img->still_counter++;

@@ -166,6 +166,7 @@ struct _img_window_struct
 	gint   still_counter; /* Currently displayed still frame */
 	gint   still_max;     /* Number of frames per stop point */
 	gint   still_offset;  /* Offset in seconds for next stop point */
+	guint  still_cmlt;    /* Cumulative number of still frames */
 	GList *cur_point;     /* Current stop point */
 
 	/* Preview related variables */
@@ -195,7 +196,6 @@ struct _img_window_struct
 										 . free audio_file
 										 */
 	gint        file_desc;
-	guchar      *pixbuf_data;
 	GtkWidget   *export_pbar1;
 	GtkWidget   *export_pbar2;
 	GtkWidget   *export_label;
@@ -203,13 +203,8 @@ struct _img_window_struct
 	gdouble      export_fps;        /* Frame rate for exported video */
 	gchar       *export_cmd_line;   /* ffmpeg spawn cmd line */
 	gchar       *export_audio_file; /* Full path to audio */
-	guint        export_frame_nr;	/* Total number of frames */
-	guint        export_frame_cur;	/* Current frame */
-	guint        export_slide_nr;	/* Number of frames fo current slide */
-	guint        export_slide_cur;	/* Current slide frame */
 	guint        export_slide;		/* Number of slide being exported */
-	GSourceFunc  export_idle_func;	/* If TRUE, connect transition export, else
-									   still export function. */
+	GSourceFunc  export_idle_func;	/* Stored procedure for pause */
 	GPid         ffmpeg_export;     /* ffmpeg's process id */
 	GPid         sox_export;        /* sox's process id - FIXME: This will only
 									   be needed if we decide to mangle audio

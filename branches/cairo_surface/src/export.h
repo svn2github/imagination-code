@@ -44,10 +44,17 @@ img_stop_export( img_window_struct *img );
 
 gboolean
 img_prepare_pixbufs( img_window_struct *img,
-					 gboolean           preview );
 
+					 gboolean           preview );
 guint
 img_calc_next_slide_time_offset( img_window_struct *img,
 								 gdouble            rate );
+
+void
+img_render_transition_frame( img_window_struct *img );
+
+void
+img_render_still_frame( img_window_struct *img,
+						gdouble            rate );
 
 #endif
