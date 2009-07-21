@@ -269,7 +269,6 @@ slide_struct *img_set_slide_info(gint duration, guint speed, ImgRender render, g
 
 	/* I replaced this with slice allocator, since it's more efficint when
 	 * allocation fixed-sized blocks of memory. */
-	/*slide_info = g_new0(slide_struct,1);*/
 	slide_info = g_slice_new( slide_struct );
 	if (slide_info)
 	{
@@ -287,6 +286,16 @@ slide_struct *img_set_slide_info(gint duration, guint speed, ImgRender render, g
 		slide_info->points = NULL;
 		slide_info->no_points = 0;
 		slide_info->cur_point = -1;
+
+		/* Subtitle */
+		slide_info->subtitle = NULL;
+		slide_info->anim = NULL; /* FIXME: This should be replaced by
+									default renderer */
+		slide_info->anim_duration = 0;
+		slide_info->position = IMG_SUB_POS_TOP_LEFT;
+		slide_info->placing = IMG_REL_PLACING_EXPORTED_VIDEO;
+		slide_info->font_desc = NULL; /* FIXME: This should be replaced by
+										 default font desc */
 	}
 	return slide_info;
 }

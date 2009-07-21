@@ -19,7 +19,8 @@ imagination_SOURCES = \
 	new_slideshow.c new_slideshow.h \
 	slideshow_project.c slideshow_project.h \
 	audio.c audio.h \
-	export.c export.h
+	export.c export.h \
+	subtitles.c subtitles.h
 
 imagination_CFLAGS = \
 	-DDATADIR=\"$(datadir)\"

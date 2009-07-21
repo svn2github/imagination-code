@@ -1098,8 +1098,17 @@ img_on_expose_event( GtkWidget         *widget,
 		img_draw_image_on_surface( cr, img->image_area->allocation.width,
 								   img->current_image, &img->current_point, img );
 
-		/* Add subtitles onto this image */
-		/* TODO!! */
+		/* FIXME: Add subtitles onto this image */
+		if( img->current_slide->subtitle )
+			img->current_slide->anim( cr, img->video_size[0],
+									  img->video_size[1], 1.0,
+									  img->current_slide->subtitle,
+									  img->current_slide->position,
+									  img->current_slide->font_desc,
+									  img->current_slide->placing,
+									  img->current_point.zoom,
+									  img->current_point.offx,
+									  img->current_point.offy );
 		
 		cairo_destroy( cr );
 	}

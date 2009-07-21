@@ -39,12 +39,81 @@
 #define comment_string \
 	"Imagination 1.x Slideshow Project - http://imagination.sf.net"
 
+
+/* ****************************************************************************
+ * Subtitles related definitions
+ * ************************************************************************* */
+/* Enum that holds all available positions of text. */
+typedef enum
+{
+	IMG_SUB_POS_TOP_LEFT = 0,
+	IMG_SUB_POS_TOP_CENTER,
+	IMG_SUB_POS_TOP_RIGHT,
+	IMG_SUB_POS_MIDDLE_LEFT,
+	IMG_SUB_POS_MIDDLE_CENTER,
+	IMG_SUB_POS_MIDDLE_RIGHT,
+	IMG_SUB_POS_BOTTOM_LEFT,
+	IMG_SUB_POS_BOTTOM_CENTER,
+	IMG_SUB_POS_BOTTOM_RIGHT
+}
+ImgSubPos;
+
+/* Enum with relative placings */
+typedef enum
+{
+	IMG_REL_PLACING_EXPORTED_VIDEO = 0,
+	IMG_REL_PLACING_ORIGINAL_IMAGE
+}
+ImgRelPlacing;
+
+/*
+ * TextAnimationFunc:
+ * @cr: cairo context that should be used for drawing
+ * @width: height of underlying surface of @cr
+ * @height: height of underlying surface of @cr
+ * @progress: how far animation is (0 - animation is starting,
+ *									1 - subtitle should be fixed in final
+ *										position )
+ * @position: final position of the subtitle
+ * @font_desc: pango font description
+ * @placing: controls subtitle relative placing
+ * @factor: scaling factor to be applied when drawing text
+ * @offx: x-offset of original surface
+ * @offy: y-offset of original surface
+ *
+ * This is prototype for subtitle animation function.
+ *
+ * @factor, @offx and @offy need to be specified only if @placing is
+ * IMG_REL_PLACING_ORIGINAL_IMAGE.
+ *
+ * See img_text_ani_none function for more information on how to properly write
+ * text animation function.
+ */
+typedef void (*TextAnimationFunc)( cairo_t              *cr,
+								   gint                  width,
+								   gint                  height,
+								   gdouble               progress,
+								   const gchar          *text,
+								   ImgSubPos             position,
+								   PangoFontDescription *font_desc,
+								   ImgRelPlacing         placing,
+								   gdouble               factor,
+								   gint                  offx,
+								   gint                  offy );
+
+
+/* ****************************************************************************
+ * Transition related definitions
+ * ************************************************************************* */
 /* Prototype of transition renderer */
 typedef void (*ImgRender)( cairo_t *,
 						   cairo_surface_t *,
 						   cairo_surface_t *,
 						   gdouble );
 
+/* ****************************************************************************
+ * Ken Burns effect related definitions
+ * ************************************************************************* */
 typedef struct _ImgStopPoint ImgStopPoint;
 struct _ImgStopPoint
 {
@@ -54,6 +123,9 @@ struct _ImgStopPoint
 	gdouble zoom; /* Zoom level */
 };
 
+/* ****************************************************************************
+ * Common definitions that are used all over the place
+ * ************************************************************************* */
 typedef struct _slide_struct slide_struct;
 struct _slide_struct
 {
@@ -67,9 +139,18 @@ struct _slide_struct
 	gint     transition_id;
 	ImgRender render;
 
+	/* Ken Burns effect variables */
 	GList  *points;    /* List with stop points */
 	gint    no_points; /* Number of stop points in list */
 	gint    cur_point; /* Currently active stop point */
+
+	/* Subtitle variables */
+	gchar                *subtitle;      /* Subtitle text */
+	TextAnimationFunc     anim;          /* Animation functions */
+	gint                  anim_duration; /* Duration of animation */
+	ImgSubPos             position;      /* Final position of subtitle */
+	ImgRelPlacing         placing;       /* Relative placing */
+	PangoFontDescription *font_desc;     /* Font description */
 };
 
 typedef struct _img_window_struct img_window_struct;
