@@ -856,12 +856,14 @@ img_render_transition_frame( img_window_struct *img )
 	cr = cairo_create( img->image_from );
 	img_draw_image_on_surface( cr, img->video_size[0], img->image1,
 							   img->point1, img );
+	/* FIXME: Add subtitles here */
 	cairo_destroy( cr );
 
 	/* Create second image */
 	cr = cairo_create( img->image_to );
 	img_draw_image_on_surface( cr, img->video_size[0], img->image2,
 							   img->point2, img );
+	/* FIXME: Add subtitles here */
 	cairo_destroy( cr );
 
 	/* Compose them together */
@@ -870,8 +872,6 @@ img_render_transition_frame( img_window_struct *img )
 	cairo_save( cr );
 	img->work_slide->render( cr, img->image_from, img->image_to, progress );
 	cairo_restore( cr );
-
-	/* FIXME: Add subtitles here */
 
 	cairo_destroy( cr );
 }

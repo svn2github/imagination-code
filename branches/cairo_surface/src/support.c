@@ -289,13 +289,25 @@ slide_struct *img_set_slide_info(gint duration, guint speed, ImgRender render, g
 
 		/* Subtitle */
 		slide_info->subtitle = NULL;
-		slide_info->anim = NULL; /* FIXME: This should be replaced by
-									default renderer */
+		slide_info->has_subtitle = FALSE;
+		slide_info->anim = NULL;
 		slide_info->anim_duration = 0;
+/* FIXME: This is here only for testing purposes */
+#if 1
+		slide_info->position = IMG_SUB_POS_MIDDLE_CENTER;
+#else
 		slide_info->position = IMG_SUB_POS_TOP_LEFT;
+#endif
+#if 0
 		slide_info->placing = IMG_REL_PLACING_EXPORTED_VIDEO;
-		slide_info->font_desc = NULL; /* FIXME: This should be replaced by
-										 default font desc */
+#else
+		slide_info->placing = IMG_REL_PLACING_ORIGINAL_IMAGE;
+#endif
+		slide_info->font_desc = NULL;
+		slide_info->font_color[0] = 1; /* R */
+		slide_info->font_color[1] = 1; /* G */
+		slide_info->font_color[2] = 1; /* B */
+		slide_info->font_color[3] = 1; /* A */
 	}
 	return slide_info;
 }

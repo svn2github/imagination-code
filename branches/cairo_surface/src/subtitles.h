@@ -25,8 +25,9 @@
 typedef struct _TextAnimation TextAnimation;
 struct _TextAnimation
 {
-	gchar *name;            /* Name of animation */
-	TextAnimationFunc func; /* Actual renderer */
+	gchar             *name; /* Name of animation */
+	TextAnimationFunc  func; /* Actual renderer */
+	gint               id;   /* Unique id (for save and load operations) */
 };
 
 
@@ -37,4 +38,19 @@ void
 img_free_text_animation_list( gint           no_animations,
 							  TextAnimation *animations );
 
+void
+img_render_subtitle( cairo_t              *cr,
+					 gint                  width,
+					 gint                  height,
+					 gdouble               zoom,
+					 ImgSubPos             position,
+					 ImgRelPlacing         placing,
+					 gdouble               factor,
+					 gint                  offx,
+					 gint                  offy,
+					 gchar                *subtitle,
+					 PangoFontDescription *font_desc,
+					 gdouble              *font_color,
+					 TextAnimationFunc     func,
+					 gdouble               progress );
 #endif

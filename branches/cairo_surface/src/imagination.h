@@ -69,37 +69,31 @@ ImgRelPlacing;
 /*
  * TextAnimationFunc:
  * @cr: cairo context that should be used for drawing
- * @width: height of underlying surface of @cr
- * @height: height of underlying surface of @cr
- * @progress: how far animation is (0 - animation is starting,
- *									1 - subtitle should be fixed in final
- *										position )
- * @position: final position of the subtitle
- * @font_desc: pango font description
- * @placing: controls subtitle relative placing
- * @factor: scaling factor to be applied when drawing text
- * @offx: x-offset of original surface
- * @offy: y-offset of original surface
+ * @layout: PangoLayout to be rendered
+ * @sw: surface width
+ * @sh: surface height
+ * @lw: layout width
+ * @lh: layout height
+ * @posx: final position (x coord)
+ * @posy: final position (y coord)
+ * @progress: progress of animation
+ * @font_color: array of RGBA values
  *
- * This is prototype for subtitle animation function.
+ * This is prototype for subtitle animation function. It's task it to render
+ * @layout to @cr according to  @progress, @posx and @posy.
  *
- * @factor, @offx and @offy need to be specified only if @placing is
- * IMG_REL_PLACING_ORIGINAL_IMAGE.
- *
- * See img_text_ani_none function for more information on how to properly write
- * text animation function.
+ * When @progress > 1, @layout should be drawn at (@posx, @posy).
  */
-typedef void (*TextAnimationFunc)( cairo_t              *cr,
-								   gint                  width,
-								   gint                  height,
-								   gdouble               progress,
-								   const gchar          *text,
-								   ImgSubPos             position,
-								   PangoFontDescription *font_desc,
-								   ImgRelPlacing         placing,
-								   gdouble               factor,
-								   gint                  offx,
-								   gint                  offy );
+typedef void (*TextAnimationFunc)( cairo_t     *cr,
+								   PangoLayout *layout,
+								   gint         sw,
+								   gint         sh,
+								   gint         lw,
+								   gint         lh,
+								   gint         posx,
+								   gint         posy,
+								   gdouble      progress,
+								   gdouble     *font_color );
 
 
 /* ****************************************************************************
@@ -146,11 +140,14 @@ struct _slide_struct
 
 	/* Subtitle variables */
 	gchar                *subtitle;      /* Subtitle text */
+	gboolean              has_subtitle;  /* Does slide has subtitle */
 	TextAnimationFunc     anim;          /* Animation functions */
+	gint                  anim_id;       /* Animation id */
 	gint                  anim_duration; /* Duration of animation */
 	ImgSubPos             position;      /* Final position of subtitle */
 	ImgRelPlacing         placing;       /* Relative placing */
 	PangoFontDescription *font_desc;     /* Font description */
+	gdouble               font_color[4]; /* Font color (RGBA format) */
 };
 
 typedef struct _img_window_struct img_window_struct;
@@ -178,6 +175,7 @@ struct _img_window_struct
 	GtkWidget	*filename_data;
 	GtkTextBuffer *slide_text_buffer;
 	GtkWidget	*text_animation_combo;
+	GtkWidget   *font_button;
 	GtkWidget	*scrolled_win;
 	GtkWidget	*expand_button;
   	GtkWidget	*thumbnail_iconview;
@@ -204,6 +202,9 @@ struct _img_window_struct
 	gint          maxoffy;
 	ImgStopPoint  current_point; /* Data for rendering current image */
   	slide_struct *current_slide;
+	
+	/* Subtitle update */
+	gint subtitle_update_id;
 
 	/* Renderers and module stuff */
   	gint		nr_transitions_loaded;

@@ -25,12 +25,16 @@
 #include "main-window.h"
 #include "callbacks.h"
 #include "export.h"
+#include "subtitles.h"
 
 static const GtkTargetEntry drop_targets[] =
 {
   { "text/uri-list",0,0 },
 };
 
+/* ****************************************************************************
+ * Local function declarations
+ * ************************************************************************* */
 static void img_combo_box_transition_type_changed (GtkComboBox *, img_window_struct *);
 static void img_random_button_clicked(GtkButton *, img_window_struct *);
 static ImgRender img_set_random_transition(img_window_struct *, slide_struct *);
@@ -62,7 +66,28 @@ img_scroll_thumb( GtkWidget         *widget,
 				  GdkEventScroll    *scroll,
 				  img_window_struct *img );
 
+static void
+img_queue_subtitle_update( GtkTextBuffer     *buffer,
+						   img_window_struct *img );
 
+static gboolean
+img_subtitle_update( img_window_struct *img );
+
+static GtkWidget *
+img_create_subtitle_animation_combo( void );
+
+static void
+img_text_font_set( GtkFontButton     *button,
+				   img_window_struct *img );
+
+static void
+img_text_anim_set( GtkComboBox       *combo,
+				   img_window_struct *img );
+
+
+/* ****************************************************************************
+ * Function definitions
+ * ************************************************************************* */
 img_window_struct *img_create_window (void)
 {
 	img_window_struct *img_struct = NULL;
@@ -668,9 +693,6 @@ img_window_struct *img_create_window (void)
 	img_struct->stop_point_duration = gtk_spin_button_new_with_range (1, 60, 1);
 	gtk_box_pack_start (GTK_BOX (hbox_time_offset), img_struct->stop_point_duration, FALSE, FALSE, 0);
 	gtk_spin_button_set_numeric(GTK_SPIN_BUTTON (img_struct->stop_point_duration),TRUE);
-	/* This is not needed since stop points are updated explicitly through
-	 * update button. */
-	//g_signal_connect (G_OBJECT (img_struct->stop_point_duration),"value-changed",G_CALLBACK (img_time_offset_spin_button_value_changed),img_struct);
 	GtkWidget *hbox_zoom = gtk_hbox_new(FALSE,0);
 	gtk_box_pack_start (GTK_BOX (vbox_slide_motion), hbox_zoom, FALSE, FALSE, 0);
 
@@ -723,6 +745,8 @@ img_window_struct *img_create_window (void)
 	gtk_box_pack_start (GTK_BOX (vbox_slide_caption), hbox_textview, FALSE, FALSE, 0);
 	caption_textview = gtk_text_view_new();
 	img_struct->slide_text_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(caption_textview));
+	g_signal_connect( G_OBJECT( img_struct->slide_text_buffer ), "changed",
+					  G_CALLBACK( img_queue_subtitle_update ), img_struct );
 	img_struct->scrolled_win = gtk_scrolled_window_new(NULL, NULL);
 	gtk_widget_set_size_request(img_struct->scrolled_win, -1, 18);
 	g_object_set (G_OBJECT (img_struct->scrolled_win),"hscrollbar-policy",GTK_POLICY_AUTOMATIC,"vscrollbar-policy",GTK_POLICY_AUTOMATIC,NULL);
@@ -737,23 +761,22 @@ img_window_struct *img_create_window (void)
 	gtk_widget_set_size_request(image_buttons, 14, 14);
 	gtk_button_set_image(GTK_BUTTON(img_struct->expand_button),image_buttons);
 	gtk_box_pack_start (GTK_BOX (hbox_textview), img_struct->expand_button, FALSE, FALSE, 0);
-	font_button = gtk_font_button_new();
-	gtk_box_pack_start (GTK_BOX (vbox_slide_caption), font_button, FALSE, FALSE, 0);
-	gtk_widget_set_tooltip_text(font_button, _("Click to choose the font"));
+	img_struct->font_button = gtk_font_button_new();
+	g_signal_connect( G_OBJECT( img_struct->font_button ), "font-set",
+					  G_CALLBACK( img_text_font_set ), img_struct );
+	gtk_box_pack_start (GTK_BOX (vbox_slide_caption), img_struct->font_button, FALSE, FALSE, 0);
+	gtk_widget_set_tooltip_text(img_struct->font_button, _("Click to choose the font"));
 	text_animation_hbox = gtk_hbox_new(FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (vbox_slide_caption), text_animation_hbox, FALSE, FALSE, 0);
 	GtkWidget *animation_label = gtk_label_new(_("Animation:"));
 	gtk_misc_set_alignment(GTK_MISC(animation_label), 0.0, 0.5);
 	gtk_box_pack_start (GTK_BOX (text_animation_hbox), animation_label, TRUE, TRUE, 0);
-	img_struct->text_animation_combo = _gtk_combo_box_new_text(FALSE);
-	gtk_box_pack_start (GTK_BOX (text_animation_hbox), img_struct->text_animation_combo, FALSE, FALSE, 0);
-	{
-		GtkTreeIter   iter;
-		GtkListStore *store = GTK_LIST_STORE( gtk_combo_box_get_model(GTK_COMBO_BOX(img_struct->text_animation_combo)));
-		gtk_list_store_append( store, &iter );
-		gtk_list_store_set( store, &iter, 0, _("None"), -1 );
-	}
+	img_struct->text_animation_combo = img_create_subtitle_animation_combo();
 	gtk_combo_box_set_active(GTK_COMBO_BOX(img_struct->text_animation_combo), 0);
+	g_signal_connect( G_OBJECT( img_struct->text_animation_combo ), "changed",
+					  G_CALLBACK( img_text_anim_set ), img_struct );
+	gtk_box_pack_start (GTK_BOX (text_animation_hbox), img_struct->text_animation_combo, FALSE, FALSE, 0);
+
 	/* Background music frame */
 	frame3 = gtk_frame_new (NULL);
 	gtk_box_pack_start (GTK_BOX (vbox_frames), frame3, FALSE, FALSE, 0);
@@ -1492,4 +1515,121 @@ static void img_show_uri(GtkMenuItem *menuitem, img_window_struct *img)
 	if ( !gtk_show_uri(NULL,file, GDK_CURRENT_TIME, NULL))
 		g_print ("Error!\n");
 	g_free(file);
+}
+
+static void
+img_queue_subtitle_update( GtkTextBuffer     *buffer,
+						   img_window_struct *img )
+{
+	/* This queue enables us to avid sensless copying and redrawing when typing
+	 * relatively fast (limit is cca. 3 keypresses per second) */
+	if( img->subtitle_update_id )
+		g_source_remove( img->subtitle_update_id );
+
+	img->subtitle_update_id =
+			g_timeout_add( 300, (GSourceFunc)img_subtitle_update, img );
+}
+
+static gboolean
+img_subtitle_update( img_window_struct *img )
+{
+	/* Get text from buffer and store it inside slide */
+	if( img->current_slide->subtitle )
+	{
+		g_free( img->current_slide->subtitle );
+		img->current_slide->subtitle = NULL;
+	}
+
+	img->current_slide->has_subtitle =
+			(gboolean)gtk_text_buffer_get_char_count( img->slide_text_buffer );
+	if( img->current_slide->has_subtitle )
+		g_object_get( G_OBJECT( img->slide_text_buffer ), "text",
+					  &img->current_slide->subtitle, NULL );
+
+	/* If font_desc and anim fields are not set, get values from
+	 * proper widgets */
+	if( ! img->current_slide->anim )
+	{
+		/* FIXME: Animation duration should be set here too */
+
+		/* Set font properties */
+		img_text_font_set( GTK_FONT_BUTTON( img->font_button ), img );
+
+		/* Set animation function */
+		img_text_anim_set( GTK_COMBO_BOX( img->text_animation_combo ), img );
+	}
+
+	/* Queue redraw */
+	gtk_widget_queue_draw( img->image_area );
+
+	/* Set source id to zero and remove itself from main context */
+	img->subtitle_update_id = 0;
+
+	return( FALSE );
+}
+
+
+static GtkWidget *
+img_create_subtitle_animation_combo( void )
+{
+	GtkWidget       *combo;
+	GtkListStore    *store;
+	TextAnimation   *animations;
+	gint             no_anims;
+	register gint    i;
+	GtkTreeIter      iter;
+	GtkCellRenderer *cell;
+
+	store = gtk_list_store_new( 3, G_TYPE_STRING, G_TYPE_POINTER, G_TYPE_INT );
+
+	no_anims = img_get_text_animation_list( &animations );
+	for( i = 0; i < no_anims; i++ )
+	{
+		gtk_list_store_append( store, &iter );
+		gtk_list_store_set( store, &iter, 0, animations[i].name,
+										  1, animations[i].func,
+										  2, animations[i].id,
+										  -1 );
+	}
+	img_free_text_animation_list( no_anims, animations );
+
+	combo = gtk_combo_box_new_with_model( GTK_TREE_MODEL( store ) );
+	cell = gtk_cell_renderer_text_new();
+	gtk_cell_layout_pack_start( GTK_CELL_LAYOUT( combo ), cell, TRUE );
+	gtk_cell_layout_add_attribute( GTK_CELL_LAYOUT( combo ), cell, "text", 0 );
+
+	return( combo );
+}
+
+static void
+img_text_font_set( GtkFontButton     *button,
+				   img_window_struct *img )
+{
+	const gchar *string;
+	
+	string = gtk_font_button_get_font_name( button );
+
+	if( img->current_slide->font_desc )
+		pango_font_description_free( img->current_slide->font_desc );
+
+	img->current_slide->font_desc =
+				pango_font_description_from_string( string );
+
+	gtk_widget_queue_draw( img->image_area );
+}
+
+static void
+img_text_anim_set( GtkComboBox       *combo,
+				   img_window_struct *img )
+{
+	GtkTreeModel *model;
+	GtkTreeIter   iter;
+
+	model = gtk_combo_box_get_model( combo );
+	gtk_combo_box_get_active_iter( combo, &iter );
+	gtk_tree_model_get( model, &iter, 1, &img->current_slide->anim,
+									  2, &img->current_slide->anim_id,
+									  -1 );
+
+	gtk_widget_queue_draw( img->image_area );
 }
