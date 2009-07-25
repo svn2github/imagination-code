@@ -26,6 +26,7 @@
 #include "main-window.h"
 #include "new_slideshow.h"
 #include "slideshow_project.h"
+#include "subtitles.h"
 
 void img_set_window_title(img_window_struct *,gchar *);
 void img_new_slideshow(GtkMenuItem *,img_window_struct *);

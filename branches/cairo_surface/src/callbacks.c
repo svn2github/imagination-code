@@ -90,7 +90,7 @@ void img_add_slides_thumbnails(GtkMenuItem *item, img_window_struct *img)
 		thumb = img_load_pixbuf_from_file(slides->data);
 		if (thumb)
 		{
-			slide_info = img_set_slide_info(1, NORMAL, NULL, -1, "0", slides->data);
+			slide_info = img_set_slide_info(1, NORMAL, NULL, -1, "0", slides->data, NULL, 0);
 			if (slide_info)
 			{
 				gtk_list_store_append (img->thumbnail_model,&iter);
@@ -1021,7 +1021,7 @@ void img_on_drag_data_received (GtkWidget *widget,GdkDragContext *context,int x,
 		thumb = img_load_pixbuf_from_file(filename);
 		if (thumb)
 		{
-			slide_info = img_set_slide_info(1, NORMAL, NULL, -1, "0", filename);
+			slide_info = img_set_slide_info(1, NORMAL, NULL, -1, "0", filename, NULL, 0);
 			if (slide_info)
 			{
 				gtk_list_store_append (img->thumbnail_model,&iter);
@@ -1837,6 +1837,9 @@ img_add_stop_point( GtkButton         *button,
 	ImgStopPoint *point;
 	GList        *tmp;
 
+	if (img->current_slide == NULL)
+		return;
+
 	/* Create new point */
 	point = g_slice_new( ImgStopPoint );
 	*point = img->current_point;
@@ -1860,7 +1863,7 @@ img_update_stop_point( GtkButton         *button,
 {
 	ImgStopPoint *point;
 
-	if( ! img->current_slide->no_points )
+	if( img->current_slide == NULL )
 		return;
 
 	/* Get selected point */
@@ -1882,7 +1885,7 @@ img_delete_stop_point( GtkButton         *button,
 {
 	GList *node;
 
-	if( ! img->current_slide->no_points )
+	if( img->current_slide == NULL )
 		return;
 
 	/* Get selected node and free it */
@@ -1953,6 +1956,7 @@ img_update_stop_display( img_window_struct *img,
 
 		gtk_entry_set_text( GTK_ENTRY( img->current_stop_point_entry ), "" );
 		gtk_spin_button_set_value( GTK_SPIN_BUTTON( img->stop_point_duration ), 1 );
+		gtk_range_set_value( GTK_RANGE( img->zoom_scale ), 1.0 );
 		if( update_pos )
 			img->current_point = point;
 	}

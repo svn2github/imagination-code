@@ -94,7 +94,7 @@ void img_save_slideshow(img_window_struct *img)
 			file = g_build_filename(path, filename, NULL);
 			g_free(path);
 			g_free(filename);
-			g_key_file_set_string(img_key_file, "music",			conf, file);
+			g_key_file_set_string(img_key_file, "music", conf, file);
 			g_free(file);
 			g_free(conf);
 		}
@@ -122,12 +122,12 @@ void img_load_slideshow(img_window_struct *img)
 	GKeyFile *img_key_file;
 	gchar *dummy, *slide_filename, *time;
 	GtkWidget *dialog;
-	gint not_found = 0,number,i,transition_id, duration;
+	gint not_found = 0,number,i,transition_id, duration, no_points;
 	guint speed;
 	GtkTreeModel *model;
 	void (*render);
 	GHashTable *table;
-	gchar      *spath;
+	gchar      *spath, *conf;
 	gdouble    *color;
 	gboolean    old_file = FALSE;
 
@@ -177,6 +177,10 @@ void img_load_slideshow(img_window_struct *img)
 								 img->video_size[0] * img->image_area_zoom,
 								 img->video_size[0] * img->image_area_zoom );
 
+	/* Make loading more efficient by removing model from icon view */
+	g_object_ref( G_OBJECT( img->thumbnail_model ) );
+	gtk_icon_view_set_model( GTK_ICON_VIEW( img->thumbnail_iconview ), NULL );
+
 	/* Enable loading of old projects too */
 	if( old_file )
 	{
@@ -188,71 +192,121 @@ void img_load_slideshow(img_window_struct *img)
 		img->background_color[1] = (gdouble)( ( tmp >> 16 ) & 0xff ) / 0xff;
 		img->background_color[2] = (gdouble)( ( tmp >>  8 ) & 0xff ) / 0xff;
 
-		g_print( "%f, %f, %f\n", img->background_color[0],
+		/*g_print( "%f, %f, %f\n", img->background_color[0],
 								 img->background_color[1],
-								 img->background_color[2] );
+								 img->background_color[2] );*/
+
+		/* Loads the thumbnails and set the slides info */
+		number = g_key_file_get_integer(img_key_file,"images","number", NULL);
+		img->slides_nr = number;
+		gtk_widget_show(img->progress_bar);
+		for (i = 1; i <= number; i++)
+		{
+			dummy = g_strdup_printf("image_%d",i);
+			slide_filename = g_key_file_get_string(img_key_file,"images",dummy, NULL);
+
+			thumb = img_load_pixbuf_from_file(slide_filename);
+			if (thumb)
+			{
+				speed 	=		g_key_file_get_integer(img_key_file, "transition speed",	dummy, NULL);
+				duration= 		g_key_file_get_integer(img_key_file, "slide duration",		dummy, NULL);
+				transition_id = g_key_file_get_integer(img_key_file, "transition type",		dummy, NULL);
+
+				/* Get the mem address of the transition */
+				spath = (gchar *)g_hash_table_lookup( table, GINT_TO_POINTER( transition_id ) );
+				gtk_tree_model_get_iter_from_string( model, &iter, spath );
+				gtk_tree_model_get( model, &iter, 2, &render, -1 );
+				slide_info = img_set_slide_info( duration, speed, render, transition_id, spath, slide_filename, NULL, 0 );
+				if( slide_info )
+				{
+					gtk_list_store_append( img->thumbnail_model, &iter );
+					gtk_list_store_set( img->thumbnail_model, &iter, 0, thumb, 1, slide_info, -1 );
+					g_object_unref( G_OBJECT( thumb ) );
+
+					/* If we're loading the first slide, apply some of it's
+				 	* data to final pseudo-slide */
+					if( img->slides_nr == 1 )
+					{
+						img->final_transition.speed  = slide_info->speed;
+						img->final_transition.render = slide_info->render;
+					}
+				}
+			}
+			else
+				not_found++;
+
+			img_increase_progressbar(img, i);
+			g_free(slide_filename);
+			g_free(dummy);
+		}
 	}
 	else
 	{
+		gdouble *my_points = NULL;
+		gsize length;
+
 		color = g_key_file_get_double_list( img_key_file, "slideshow settings",
 											"background color", NULL, NULL );
 		img->background_color[0] = color[0];
 		img->background_color[1] = color[1];
 		img->background_color[2] = color[2];
 		g_free( color );
+
+		/* Loads the thumbnails and set the slides info */
+		number = g_key_file_get_integer(img_key_file, "slideshow settings", "number of slides", NULL);
+		img->slides_nr = number;
+		gtk_widget_show(img->progress_bar);
+		for (i = 1; i <= number; i++)
+		{
+			conf = g_strdup_printf("slide %d", i);
+			slide_filename = g_key_file_get_string(img_key_file,conf,"filename", NULL);
+
+			thumb = img_load_pixbuf_from_file(slide_filename);
+			if (thumb)
+			{
+				duration	  = g_key_file_get_integer(img_key_file, conf, "duration", NULL);
+				transition_id = g_key_file_get_integer(img_key_file, conf, "transition_id", NULL);
+				speed 		  =	g_key_file_get_integer(img_key_file, conf, "speed",	NULL);
+				no_points	  =	g_key_file_get_integer(img_key_file, conf, "no_points",	NULL);
+				
+				/* Load the stop points if any */
+				if (no_points > 0)
+					my_points = g_key_file_get_double_list(img_key_file, conf, "points", &length, NULL);
+				else
+					my_points = NULL;
+
+				/* Get the mem address of the transition */
+				spath = (gchar *)g_hash_table_lookup( table, GINT_TO_POINTER( transition_id ) );
+				gtk_tree_model_get_iter_from_string( model, &iter, spath );
+				gtk_tree_model_get( model, &iter, 2, &render, -1 );
+				slide_info = img_set_slide_info( duration, speed, render, transition_id, spath, slide_filename, my_points, length );
+				if( slide_info )
+				{
+					gtk_list_store_append( img->thumbnail_model, &iter );
+					gtk_list_store_set( img->thumbnail_model, &iter, 0, thumb, 1, slide_info, -1 );
+					g_object_unref( G_OBJECT( thumb ) );
+
+					/* If we're loading the first slide, apply some of it's
+				 	* data to final pseudo-slide */
+					if( img->slides_nr == 1 )
+					{
+						img->final_transition.speed  = slide_info->speed;
+						img->final_transition.render = slide_info->render;
+					}
+				}
+			}
+			else
+				not_found++;
+
+			img_increase_progressbar(img, i);
+			g_free(slide_filename);
+			g_free(conf);
+		}
 	}
 
 	img->distort_images = g_key_file_get_boolean( img_key_file,
 												  "slideshow settings",
 												  "distort images", NULL );
-
-	/* Make loading more efficient by removing model from icon view */
-	g_object_ref( G_OBJECT( img->thumbnail_model ) );
-	gtk_icon_view_set_model( GTK_ICON_VIEW( img->thumbnail_iconview ), NULL );
-
-	/* Loads the thumbnails and set the slides info */
-	number = g_key_file_get_integer(img_key_file,"images","number", NULL);
-	img->slides_nr = number;
-	gtk_widget_show(img->progress_bar);
-	for (i = 1; i <= number; i++)
-	{
-		dummy = g_strdup_printf("image_%d",i);
-		slide_filename = g_key_file_get_string(img_key_file,"images",dummy, NULL);
-
-		thumb = img_load_pixbuf_from_file(slide_filename);
-		if (thumb)
-		{
-			speed 	=		g_key_file_get_integer(img_key_file, "transition speed",	dummy, NULL);
-			duration= 		g_key_file_get_integer(img_key_file, "slide duration",		dummy, NULL);
-			transition_id = g_key_file_get_integer(img_key_file, "transition type",		dummy, NULL);
-
-			/* Get the mem address of the transition */
-			spath = (gchar *)g_hash_table_lookup( table, GINT_TO_POINTER( transition_id ) );
-			gtk_tree_model_get_iter_from_string( model, &iter, spath );
-			gtk_tree_model_get( model, &iter, 2, &render, -1 );
-			slide_info = img_set_slide_info( duration, speed, render, transition_id, spath, slide_filename );
-			if( slide_info )
-			{
-				gtk_list_store_append( img->thumbnail_model, &iter );
-				gtk_list_store_set( img->thumbnail_model, &iter, 0, thumb, 1, slide_info, -1 );
-				g_object_unref( G_OBJECT( thumb ) );
-
-				/* If we're loading the first slide, apply some of it's
-				 * data to final pseudo-slide */
-				if( img->slides_nr == 1 )
-				{
-					img->final_transition.speed  = slide_info->speed;
-					img->final_transition.render = slide_info->render;
-				}
-			}
-		}
-		else
-			not_found++;
-
-		img_increase_progressbar(img, i);
-		g_free(slide_filename);
-		g_free(dummy);
-	}
 	img->slides_nr -= not_found;
 	gtk_widget_hide(img->progress_bar);
 
