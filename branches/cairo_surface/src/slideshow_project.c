@@ -27,7 +27,6 @@ void img_save_slideshow(img_window_struct *img)
 	gchar *conf, *string, *path, *filename, *file;
 	gint count = 0, point_counter = 0;
 	gsize len;
-	GString *my_point_string = NULL;
 	GtkTreeIter iter;
 	slide_struct *entry;
 	GtkTreeModel *model;
@@ -37,7 +36,6 @@ void img_save_slideshow(img_window_struct *img)
 		return;
 
 	img_key_file = g_key_file_new();
-	my_point_string = g_string_new("");
 
 	/* Slideshow settings */
 	g_key_file_set_comment(img_key_file, NULL, NULL, comment_string, NULL);
@@ -66,17 +64,18 @@ void img_save_slideshow(img_window_struct *img)
 		g_key_file_set_integer(img_key_file,conf, "no_points",		entry->no_points);
 		if (entry->no_points > 0)
 		{
+			gdouble my_points[entry->no_points * 4];
 			while (point_counter < entry->no_points)
 			{
 				ImgStopPoint *my_point = g_list_nth_data(entry->points,point_counter);
-				g_string_append_printf(my_point_string, "%d;%d;%d;%f;", my_point->time, my_point->offx, my_point->offy, my_point->zoom);	
+				my_points[ (point_counter * 4) + 0] = (gdouble)my_point->time;
+				my_points[ (point_counter * 4) + 1] = (gdouble)my_point->offx;
+				my_points[ (point_counter * 4) + 2] = (gdouble)my_point->offy;
+				my_points[ (point_counter * 4) + 3] = my_point->zoom;
 				point_counter++;
 			}
-			g_key_file_set_string(img_key_file,conf, "points", my_point_string->str);
-			g_string_free(my_point_string, TRUE);
+			g_key_file_set_double_list(img_key_file,conf, "points", my_points, (gsize) entry->no_points * 4);
 		}
-		
-		//g_key_file_set_integer_list(img_key_file,conf, "points",
 		g_free(conf);
 	}
 	while (gtk_tree_model_iter_next (model,&iter));
