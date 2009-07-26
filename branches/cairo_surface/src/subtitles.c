@@ -46,6 +46,18 @@ img_text_ani_none( cairo_t     *cr,
 				   gdouble      progress,
 				   gdouble     *font_color );
 
+static void
+img_text_ani_fade( cairo_t     *cr,
+				   PangoLayout *layout,
+				   gint         sw,
+				   gint         sh,
+				   gint         lw,
+				   gint         lh,
+				   gint         posx,
+				   gint         posy,
+				   gdouble      progress,
+				   gdouble     *font_color );
+
 /* ****************************************************************************
  * Function definitions
  * ************************************************************************* */
@@ -69,7 +81,7 @@ gint
 img_get_text_animation_list( TextAnimation **animations )
 {
 	TextAnimation *list;              /* List of all animations */
-	gint           no_animations = 1; /* Number of animations */
+	gint           no_animations = 2; /* Number of animations */
 	gint           i = 0;
 
 	if( animations )
@@ -84,7 +96,14 @@ img_get_text_animation_list( TextAnimation **animations )
 		list[i].id     = i;
 		list[i++].func = img_text_ani_none;
 
-		/* FIXME: Add more animations here */
+		list[i].name   = g_strdup( _("Fade") );
+		list[i].id     = i;
+		list[i++].func = img_text_ani_fade;
+
+		/* FIXME: Add more animations here.
+		 *
+		 * DO NOT FORGET TO UPDATE no_animations VARIABLE AT THE TOP OF THIS
+		 * FUNCTION WHEN ADDING NEW ANIMATIONS!! */
 		
 		*animations = list;
 	}
@@ -256,3 +275,25 @@ img_text_ani_none( cairo_t     *cr,
 	pango_cairo_show_layout( cr, layout );
 }
 
+static void
+img_text_ani_fade( cairo_t     *cr,
+				   PangoLayout *layout,
+				   gint         sw,
+				   gint         sh,
+				   gint         lw,
+				   gint         lh,
+				   gint         posx,
+				   gint         posy,
+				   gdouble      progress,
+				   gdouble     *font_color )
+{
+	/* Set source color */
+	cairo_set_source_rgba( cr, font_color[0],
+							   font_color[1],
+							   font_color[2],
+							   font_color[3] * progress );
+
+	/* Move to proper place and paint text */
+	cairo_move_to( cr, posx, posy );
+	pango_cairo_show_layout( cr, layout );
+}

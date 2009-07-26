@@ -84,6 +84,10 @@ static void
 img_text_anim_set( GtkComboBox       *combo,
 				   img_window_struct *img );
 
+static void
+img_font_color_changed( GtkColorButton    *button,
+						img_window_struct *img );
+
 
 /* ****************************************************************************
  * Function definitions
@@ -157,6 +161,7 @@ img_window_struct *img_create_window (void)
 	GtkWidget *export_menu;
 	GtkWidget *thumb_scrolledwindow;
 	GdkPixbuf *pixbuf;
+	GtkWidget *animation_label;
 
 	accel_group = gtk_accel_group_new();
 	icon_theme = gtk_icon_theme_get_default();
@@ -761,16 +766,26 @@ img_window_struct *img_create_window (void)
 	gtk_widget_set_size_request(image_buttons, 14, 14);
 	gtk_button_set_image(GTK_BUTTON(img_struct->expand_button),image_buttons);
 	gtk_box_pack_start (GTK_BOX (hbox_textview), img_struct->expand_button, FALSE, FALSE, 0);
+	text_animation_hbox = gtk_hbox_new( FALSE, 6 );
+	gtk_box_pack_start( GTK_BOX( vbox_slide_caption ), text_animation_hbox, FALSE, FALSE, 0 );
+
 	img_struct->font_button = gtk_font_button_new();
 	g_signal_connect( G_OBJECT( img_struct->font_button ), "font-set",
 					  G_CALLBACK( img_text_font_set ), img_struct );
-	gtk_box_pack_start (GTK_BOX (vbox_slide_caption), img_struct->font_button, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (text_animation_hbox), img_struct->font_button, TRUE, TRUE, 0);
 	gtk_widget_set_tooltip_text(img_struct->font_button, _("Click to choose the font"));
-	text_animation_hbox = gtk_hbox_new(FALSE, 0);
+
+	img_struct->font_color = gtk_color_button_new();
+	gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON( img_struct->font_color ), TRUE );
+	g_signal_connect( G_OBJECT( img_struct->font_color ), "color-set",
+					  G_CALLBACK( img_font_color_changed ), img_struct );
+	gtk_box_pack_start( GTK_BOX( text_animation_hbox ), img_struct->font_color, FALSE, FALSE, 0 );
+
+	text_animation_hbox = gtk_hbox_new(FALSE, 6);
 	gtk_box_pack_start (GTK_BOX (vbox_slide_caption), text_animation_hbox, FALSE, FALSE, 0);
-	GtkWidget *animation_label = gtk_label_new(_("Animation:"));
+	animation_label = gtk_label_new(_("Animation:"));
 	gtk_misc_set_alignment(GTK_MISC(animation_label), 0.0, 0.5);
-	gtk_box_pack_start (GTK_BOX (text_animation_hbox), animation_label, TRUE, TRUE, 0);
+	gtk_box_pack_start (GTK_BOX (text_animation_hbox), animation_label, FALSE, FALSE, 0);
 	img_struct->text_animation_combo = img_create_subtitle_animation_combo();
 	gtk_combo_box_set_active(GTK_COMBO_BOX(img_struct->text_animation_combo), 0);
 	g_signal_connect( G_OBJECT( img_struct->text_animation_combo ), "changed",
@@ -1633,3 +1648,22 @@ img_text_anim_set( GtkComboBox       *combo,
 
 	gtk_widget_queue_draw( img->image_area );
 }
+
+static void
+img_font_color_changed( GtkColorButton    *button,
+						img_window_struct *img )
+{
+	GdkColor color;
+	guint16  alpha;
+
+	gtk_color_button_get_color( button, &color );
+	alpha = gtk_color_button_get_alpha( button  );
+
+	img->current_slide->font_color[0] = (gdouble)color.red   / 0xffff;
+	img->current_slide->font_color[1] = (gdouble)color.green / 0xffff;
+	img->current_slide->font_color[2] = (gdouble)color.blue  / 0xffff;
+	img->current_slide->font_color[3] = (gdouble)alpha       / 0xffff;
+
+	gtk_widget_queue_draw( img->image_area );
+}
+

@@ -309,7 +309,7 @@ slide_struct *img_set_slide_info(gint duration, guint speed, ImgRender render, g
 		slide_info->subtitle = NULL;
 		slide_info->has_subtitle = FALSE;
 		slide_info->anim = NULL;
-		slide_info->anim_duration = 0;
+		slide_info->anim_duration = 1;
 /* FIXME: This is here only for testing purposes */
 #if 1
 		slide_info->position = IMG_SUB_POS_MIDDLE_CENTER;

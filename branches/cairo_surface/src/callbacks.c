@@ -1144,13 +1144,6 @@ img_draw_image_on_surface( cairo_t           *cr,
 	gdouble  factor_o;      /* Scalng factor for offset mods */
 	gint     cw;            /* Width of the surface */
 
-	/* This is stop point that we'll use if no Ken Burns is added to slide and
-	 * NULL has been passed in as a last parameter. */
-	static ImgStopPoint fallback = { 0, 0, 0, 1.0 };
-
-	if( ! point )
-		point = &fallback;
-
 	cw = cairo_image_surface_get_width( surface );
 	factor_c = (gdouble)width / cw * point->zoom;
 	factor_o = (gdouble)img->video_size[0] / cw * point->zoom;

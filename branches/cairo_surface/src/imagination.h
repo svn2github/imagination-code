@@ -27,7 +27,7 @@
 
 /* Transition preview frame rate. I decided to use 25 fps, which
  * should be handled on time by most machines. */
-#define PREVIEW_FPS 25
+#define PREVIEW_FPS 15
 
 /* The transition speed is defined as a duration in seconds. */
 #define	FAST	1
@@ -176,6 +176,7 @@ struct _img_window_struct
 	GtkTextBuffer *slide_text_buffer;
 	GtkWidget	*text_animation_combo;
 	GtkWidget   *font_button;
+	GtkWidget   *font_color;
 	GtkWidget	*scrolled_win;
 	GtkWidget	*expand_button;
   	GtkWidget	*thumbnail_iconview;
@@ -250,6 +251,11 @@ struct _img_window_struct
 	gint   still_offset;  /* Offset in seconds for next stop point */
 	guint  still_cmlt;    /* Cumulative number of still frames */
 	GList *cur_point;     /* Current stop point */
+
+	/* FIXME: If we'll display text during transition too, we need to add
+	 * another set of counters here to monitor both slides. */
+	gint cur_text_frame; /* Current text frame being displayed */
+	gint no_text_frames; /* All text frames */
 
 	/* Preview related variables */
   	gboolean	preview_is_running;

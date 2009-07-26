@@ -662,6 +662,8 @@ img_run_encoder( img_window_struct *img )
  *   - number of slides needed for transition (img->slide_trans_frames)
  *   - number of slides needed for still part (img->slide_still_franes)
  *   - reset current slide counter to 0 (img->slide_cur_frame)
+ *   - number of frames for subtitle animation (img->no_text_frames)
+ *   - reset current subtitle counter to 0 (img->cur_text_frame)
  *
  * Return value: new time offset. The same value is stored in
  * img->next_slide_off.
@@ -687,6 +689,13 @@ img_calc_next_slide_time_offset( img_window_struct *img,
 	img->slide_nr_frames = img->next_slide_off * rate - img->displayed_frame;
 	img->slide_cur_frame = 0;
 	img->slide_still_frames = img->slide_nr_frames - img->slide_trans_frames;
+
+	/* Calculate subtitle frames */
+	if( img->work_slide->has_subtitle )
+	{
+		img->cur_text_frame = 0;
+		img->no_text_frames = img->work_slide->anim_duration * rate;
+	}
 
 	return( img->next_slide_off );
 }
@@ -848,21 +857,22 @@ img_export_pause_unpause( GtkToggleButton   *button,
 void
 img_render_transition_frame( img_window_struct *img )
 {
-	gdouble  progress;
-	cairo_t *cr;
+	ImgStopPoint  point = { 0, 0, 0, 1.0 }; /* Default point */
+	gdouble       progress;
+	cairo_t      *cr;
 
 	/* Do image composing here and place result in exported_image */
 	/* Create first image */
 	cr = cairo_create( img->image_from );
 	img_draw_image_on_surface( cr, img->video_size[0], img->image1,
-							   img->point1, img );
+							   ( img->point1 ? img->point1 : &point ), img );
 	/* FIXME: Add subtitles here */
 	cairo_destroy( cr );
 
 	/* Create second image */
 	cr = cairo_create( img->image_to );
 	img_draw_image_on_surface( cr, img->video_size[0], img->image2,
-							   img->point2, img );
+							   ( img->point2 ? img->point2 : &point ), img );
 	/* FIXME: Add subtitles here */
 	cairo_destroy( cr );
 
@@ -880,12 +890,12 @@ void
 img_render_still_frame( img_window_struct *img,
 						gdouble            rate )
 {
-	ImgStopPoint  draw_point;   /* Calculated stop point */
-	ImgStopPoint *p_draw_point; /* Pointer to current stop point */
 	cairo_t      *cr;
+	ImgStopPoint *p_draw_point;                  /* Pointer to current sp */
+	ImgStopPoint  draw_point = { 0, 0, 0, 1.0 }; /* Calculated stop point */
 
-	/* If no stop points are specified, we simply draw img->image2 on each
-	 * previewed frame.
+	/* If no stop points are specified, we simply draw img->image2 with default
+	 * stop point on each frame.
 	 *
 	 * If we have only one stop point, we draw img->image2 on each frame
 	 * properly scaled, with no movement.
@@ -895,7 +905,7 @@ img_render_still_frame( img_window_struct *img,
 	switch( img->work_slide->no_points )
 	{
 		case( 0 ): /* No stop points */
-			p_draw_point = NULL;
+			p_draw_point = &draw_point;
 			break;
 
 		case( 1 ): /* Single stop point */
@@ -945,7 +955,35 @@ img_render_still_frame( img_window_struct *img,
 	cr = cairo_create( img->exported_image );
 	img_draw_image_on_surface( cr, img->video_size[0], img->image2,
 							   p_draw_point, img );
-	/* FIXME: Add subtitles here */
+
+	/* Render subtitle if present */
+	if( img->work_slide->has_subtitle )
+	{
+		gdouble progress; /* Text animation progress */
+
+		progress = (gdouble)img->cur_text_frame / ( img->no_text_frames - 1 );
+		progress = CLAMP( progress, 0, 1 );
+		img->cur_text_frame++;
+
+		/* We ignore image area zoom in preview/export, since video is exported
+		 * at 720x[576|480] no matter what zoom is set */
+		img_render_subtitle( cr,
+							 img->video_size[0],
+							 img->video_size[1],
+							 1.0,
+							 img->work_slide->position,
+							 img->work_slide->placing,
+							 draw_point.zoom,
+							 draw_point.offx,
+							 draw_point.offy,
+							 img->work_slide->subtitle,
+							 img->work_slide->font_desc,
+							 img->work_slide->font_color,
+							 img->work_slide->anim,
+							 progress );
+	}
+
+	/* Destroy drawing context */
 	cairo_destroy( cr );
 }
 
