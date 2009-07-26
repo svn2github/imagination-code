@@ -82,7 +82,8 @@ ImgRelPlacing;
  * This is prototype for subtitle animation function. It's task it to render
  * @layout to @cr according to  @progress, @posx and @posy.
  *
- * When @progress > 1, @layout should be drawn at (@posx, @posy).
+ * When @progress > 1, @layout should be drawn at (@posx, @posy) without any
+ * scalling.
  */
 typedef void (*TextAnimationFunc)( cairo_t     *cr,
 								   PangoLayout *layout,
