@@ -22,6 +22,9 @@
 /* Border width around image (no text is placed there) */
 #define BORDER 20
 
+/* Wrap width for subtitles (fraction of image size) */
+#define WRAP_WIDTH 0.75
+
 /* ****************************************************************************
  * Local declarations
  * ************************************************************************* */
@@ -164,14 +167,40 @@ img_render_subtitle( cairo_t              *cr,
 	else
 		cairo_scale( cr, zoom, zoom );
 
-	/* FIXME: Handle any wrapping here */
-
 	/* Create pango layout and measure it */
 	layout = pango_cairo_create_layout( cr );
 	pango_layout_set_font_description( layout, font_desc );
+	pango_layout_set_wrap( layout, PANGO_WRAP_WORD );
+	switch( position )
+	{
+		case IMG_SUB_POS_TOP_LEFT:
+		case IMG_SUB_POS_MIDDLE_LEFT:
+		case IMG_SUB_POS_BOTTOM_LEFT:
+			pango_layout_set_alignment( layout, PANGO_ALIGN_LEFT );
+			break;
+			
+		case IMG_SUB_POS_TOP_CENTER:
+		case IMG_SUB_POS_MIDDLE_CENTER:
+		case IMG_SUB_POS_BOTTOM_CENTER:
+			pango_layout_set_alignment( layout, PANGO_ALIGN_CENTER );
+			break;
+			
+		case IMG_SUB_POS_TOP_RIGHT:
+		case IMG_SUB_POS_MIDDLE_RIGHT:
+		case IMG_SUB_POS_BOTTOM_RIGHT:
+			pango_layout_set_alignment( layout, PANGO_ALIGN_RIGHT );
+			break;
+	}
 	pango_layout_set_text( layout, subtitle, -1 );
 	pango_layout_get_size( layout, &lw, &lh );
 	lw /= PANGO_SCALE;
+
+	if( lw > ( width * WRAP_WIDTH ) )
+	{
+		pango_layout_set_width( layout, width * WRAP_WIDTH * PANGO_SCALE );
+		pango_layout_get_size( layout, &lw, &lh );
+		lw /= PANGO_SCALE;
+	}
 	lh /= PANGO_SCALE;
 
 	/* Calculate relative dimensions and final position of this subtitle */
