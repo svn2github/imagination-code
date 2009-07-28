@@ -754,7 +754,7 @@ img_window_struct *img_create_window (void)
 					  G_CALLBACK( img_queue_subtitle_update ), img_struct );
 	img_struct->scrolled_win = gtk_scrolled_window_new(NULL, NULL);
 	gtk_widget_set_size_request(img_struct->scrolled_win, -1, 18);
-	g_object_set (G_OBJECT (img_struct->scrolled_win),"hscrollbar-policy",GTK_POLICY_AUTOMATIC,"vscrollbar-policy",GTK_POLICY_AUTOMATIC,NULL);
+	g_object_set (G_OBJECT (img_struct->scrolled_win),"hscrollbar-policy",GTK_POLICY_AUTOMATIC,"vscrollbar-policy",GTK_POLICY_AUTOMATIC,"shadow-type",GTK_SHADOW_IN,NULL);
 	gtk_container_add(GTK_CONTAINER (img_struct->scrolled_win), caption_textview);
 	gtk_box_pack_start (GTK_BOX (hbox_textview), img_struct->scrolled_win, TRUE, TRUE, 0);
 	img_struct->expand_button = gtk_button_new();
@@ -1048,7 +1048,7 @@ void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *im
 	GtkTreePath *path = NULL;
 	gint dummy, nr_selected = 0;
 	GList *selected = NULL;
-	gchar *slide_info_msg = NULL;
+	gchar *slide_info_msg = NULL, *selected_slide_nr = NULL;
 	slide_struct *info_slide;
 
 	if (img->preview_is_running || img->export_is_running)
@@ -1089,6 +1089,10 @@ void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *im
 	gtk_widget_set_sensitive(img->random_button,	TRUE);
 
 	dummy = gtk_tree_path_get_indices(selected->data)[0]+1;
+	selected_slide_nr = g_strdup_printf("%d",dummy);
+	gtk_entry_set_text(GTK_ENTRY(img->slide_number_entry),selected_slide_nr);
+	g_free(selected_slide_nr);
+
 	gtk_tree_model_get_iter(model,&iter,selected->data);
 	g_list_foreach (selected, (GFunc)gtk_tree_path_free, NULL);
 	g_list_free (selected);
