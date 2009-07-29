@@ -6,22 +6,33 @@ trunk.
 
 SUBTITLE RELATED:
 1.  Determine how much subtitle functionality should be exposed to the user.
+		Status: FINISHED!
 2.  Add widgets/controls that connect to exposed subtitle functionality. This
     depends on finished 1.
-3.  Add word wrapping to subtitle function. (Tadej is working on this.)
+		Status: Tadej is working on it now.
+3.  Add word wrapping to subtitle function.
+		Status: FINISHED!
 4.  Add subtitle related data to save/load procedures.
+		Status: Waiting on 2.
 5.  Add some simple text animation functions.
+		Status: Partially done (only fade animation is available).
 6.  Add proper enabling/disabling of sidebar subtitle controls. This depends on
     finished 2.
+		Status: Waiting on 2.
 7.  Add proper updating of sidebar controls when selecting/deselecting slides.
+		Status: Waiting on 2.
 
 KEN BURNS RELATED:
 8.  Add proper enabling/disabling of sidebar controls.
+		Status: Not started yet.
 9.  Check proper updating od sidebar controls when selecting/deselecting slides.
+		Status: Not started yet.
 
 BACKEND CHANGE RELATED:
 10. Test all transition effects (ellipse wipes are behaving strange).
+		Status: Not started yet.
 11. Test preview/export functionality.
+		Status: Not started yet.
 
 
 
@@ -50,15 +61,23 @@ Ad 1.:
 	   center positions, left aligned on left positions and right aligned on
 	   right positions)
 
-Ad 2.:
-	When exposed functionality is properly defined under point 1, widgets should
-	be created that will allow user to interact with available options.
+	AGREEMENT:
+	 - Font is completely customizable by the user (family, size,
+	   variant, color).
+	 - Subtitle position can be selected from nine predefined places.
+	 - Subtitle placing can be made relative to original image or exported
+	   video.
+	 - Subtitle animation can be selected from combo box.
+	 - Subtitle animation speed can be selected from combo box.
 
-	NOTE: When GTK+-2.16 reaches wide enough acceptance, I would recommend
-	migrating GUI from C code to GtkBuilder UI file, since changing GUI by using
-	Glade3 and dynamic interface builder will greatly simplify code and make it
-	easier to change GUI (under proper circumstances even without recompiling
-	the main application).
+Ad 2.:
+	Font properties can be customized by using font selector button and color
+	button. Position can be selected from custom table button with nine
+	predefined positions. Placing can be set on radio buttons. Animation and
+	animation speed can be selected from combo boxes.
+
+	NOTE: Position of these controls should be reviewed and possibly moved to
+	better fit into Imagination's interface. Giuseppe?;)
 
 Ad 3.:
 	This is being worked on. The only two things that are in need of discusion
@@ -66,6 +85,11 @@ Ad 3.:
 	 - Should we let user decide hot subtitle should be aligned?
 	 - At what width subtitle should wrap? (This is set to 75% of displayed
 	   area.)
+
+	AGREEMENT:
+	Subtitles are aligned according to position on the image. If subtitle is
+	positioned on the left side, subtitle is aligned left, ...
+	Wrapping is done on 75% of image size.
 
 Ad 4.:
 	This task should be relatively trivial to implements, since we should only
