@@ -88,6 +88,10 @@ static void
 img_font_color_changed( GtkColorButton    *button,
 						img_window_struct *img );
 
+static void
+img_combo_box_anim_speed_changed( GtkComboBox       *combo,
+								  img_window_struct *img );
+
 
 /* ****************************************************************************
  * Function definitions
@@ -147,6 +151,7 @@ img_window_struct *img_create_window (void)
 	GdkPixbuf *icon;
 	gint x;
 	GtkWidget *eventbox;
+	GtkWidget *anim_duration_label;
 
 	/* Added after cleaning up the img_window_struct */
 	GtkWidget *properties_menu;
@@ -791,6 +796,35 @@ img_window_struct *img_create_window (void)
 	g_signal_connect( G_OBJECT( img_struct->text_animation_combo ), "changed",
 					  G_CALLBACK( img_text_anim_set ), img_struct );
 	gtk_box_pack_start (GTK_BOX (text_animation_hbox), img_struct->text_animation_combo, FALSE, FALSE, 0);
+
+	text_animation_hbox = gtk_hbox_new(FALSE, 6);
+	gtk_box_pack_start( GTK_BOX( vbox_slide_caption ), text_animation_hbox, FALSE, FALSE, 0 );
+
+	anim_duration_label = gtk_label_new( _("Animation Speed:") );
+	gtk_misc_set_alignment( GTK_MISC( anim_duration_label ), 0, 0.5 );
+	gtk_box_pack_start( GTK_BOX( text_animation_hbox ), anim_duration_label,
+						TRUE, TRUE, 0 );
+
+	img_struct->anim_duration = _gtk_combo_box_new_text( FALSE );
+	gtk_box_pack_start( GTK_BOX( text_animation_hbox ), img_struct->anim_duration,
+						FALSE, FALSE, 0 );
+	{
+		GtkTreeIter   iter;
+		GtkListStore *store =
+			GTK_LIST_STORE( gtk_combo_box_get_model( GTK_COMBO_BOX( img_struct->anim_duration ) ) );
+
+		gtk_list_store_append( store, &iter );
+		gtk_list_store_set( store, &iter, 0, _("Fast"), -1 );
+		gtk_list_store_append( store, &iter );
+		gtk_list_store_set( store, &iter, 0, _("Normal"), -1 );
+		gtk_list_store_append( store, &iter );
+		gtk_list_store_set( store, &iter, 0, _("Slow"), -1 );
+	}
+	gtk_combo_box_set_active( GTK_COMBO_BOX( img_struct->anim_duration ), 1 );
+	gtk_widget_set_sensitive( img_struct->anim_duration, FALSE );
+	g_signal_connect( G_OBJECT( img_struct->anim_duration ), "changed",
+					  G_CALLBACK( img_combo_box_anim_speed_changed ), img_struct );
+
 
 	/* Background music frame */
 	frame3 = gtk_frame_new (NULL);
@@ -1669,5 +1703,11 @@ img_font_color_changed( GtkColorButton    *button,
 	img->current_slide->font_color[3] = (gdouble)alpha       / 0xffff;
 
 	gtk_widget_queue_draw( img->image_area );
+}
+
+static void
+img_combo_box_anim_speed_changed( GtkComboBox       *combo,
+								  img_window_struct *img )
+{
 }
 
