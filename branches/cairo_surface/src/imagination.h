@@ -180,6 +180,7 @@ struct _img_window_struct
 	GtkWidget   *font_color;
 	GtkWidget	*scrolled_win;
 	GtkWidget	*expand_button;
+	GtkWidget   *text_pos_button;
 	GtkWidget   *anim_duration;
   	GtkWidget	*thumbnail_iconview;
   	GtkWidget	*statusbar;

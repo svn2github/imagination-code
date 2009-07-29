@@ -92,6 +92,11 @@ static void
 img_combo_box_anim_speed_changed( GtkComboBox       *combo,
 								  img_window_struct *img );
 
+static void
+img_text_pos_changed( ImgTableButton    *button,
+					  gint               item,
+					  img_window_struct *img );
+
 
 /* ****************************************************************************
  * Function definitions
@@ -790,15 +795,12 @@ img_window_struct *img_create_window (void)
 	gtk_box_pack_start (GTK_BOX (vbox_slide_caption), text_animation_hbox, FALSE, FALSE, 0);
 	animation_label = gtk_label_new(_("Animation:"));
 	gtk_misc_set_alignment(GTK_MISC(animation_label), 0.0, 0.5);
-	gtk_box_pack_start (GTK_BOX (text_animation_hbox), animation_label, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (text_animation_hbox), animation_label, TRUE, TRUE, 0);
 	img_struct->text_animation_combo = img_create_subtitle_animation_combo();
 	gtk_combo_box_set_active(GTK_COMBO_BOX(img_struct->text_animation_combo), 0);
 	g_signal_connect( G_OBJECT( img_struct->text_animation_combo ), "changed",
 					  G_CALLBACK( img_text_anim_set ), img_struct );
 	gtk_box_pack_start (GTK_BOX (text_animation_hbox), img_struct->text_animation_combo, FALSE, FALSE, 0);
-
-	text_animation_hbox = gtk_hbox_new(FALSE, 6);
-	gtk_box_pack_start( GTK_BOX( vbox_slide_caption ), text_animation_hbox, FALSE, FALSE, 0 );
 
 	anim_duration_label = gtk_label_new( _("Animation Speed:") );
 	gtk_misc_set_alignment( GTK_MISC( anim_duration_label ), 0, 0.5 );
@@ -825,6 +827,41 @@ img_window_struct *img_create_window (void)
 	g_signal_connect( G_OBJECT( img_struct->anim_duration ), "changed",
 					  G_CALLBACK( img_combo_box_anim_speed_changed ), img_struct );
 
+	text_animation_hbox = gtk_hbox_new(FALSE, 6);
+	gtk_box_pack_start( GTK_BOX( vbox_slide_caption ), text_animation_hbox, FALSE, FALSE, 0 );
+
+	anim_duration_label = gtk_label_new( _("Subtitle position:") );
+	gtk_misc_set_alignment( GTK_MISC( anim_duration_label ), 0, 0.5 );
+	gtk_box_pack_start( GTK_BOX( text_animation_hbox ), anim_duration_label, TRUE, TRUE, 0 );
+
+	img_struct->text_pos_button = img_table_button_new();
+	gtk_box_pack_start( GTK_BOX( text_animation_hbox ), img_struct->text_pos_button, FALSE, FALSE, 0 );
+	{
+		/* Load position icons */
+		GdkPixbuf *pixs[9];
+		gint       i;
+		gchar     *path;
+
+		path = g_strconcat( DATADIR, "/imagination/pixmaps/imagination-pos", NULL );
+		for( i = 0; i < 9; i++ )
+		{
+			gchar *file;
+
+			file = g_strdup_printf( "%s-%d.png", path, i );
+			pixs[i] = gdk_pixbuf_new_from_file( file, NULL );
+			g_free( file );
+		}
+		g_free( path );
+
+		img_table_button_set_pixbufs( IMG_TABLE_BUTTON( img_struct->text_pos_button ),
+									  9, pixs );
+
+		for( i = 0; i < 9; i++ )
+			g_object_unref( G_OBJECT( pixs[i] ) );
+	}
+	img_table_button_set_active_item( IMG_TABLE_BUTTON( img_struct->text_pos_button ), 4 );
+	g_signal_connect( G_OBJECT( img_struct->text_pos_button ), "active-item-changed",
+					  G_CALLBACK( img_text_pos_changed ), img_struct );
 
 	/* Background music frame */
 	frame3 = gtk_frame_new (NULL);
@@ -1714,5 +1751,13 @@ static void
 img_combo_box_anim_speed_changed( GtkComboBox       *combo,
 								  img_window_struct *img )
 {
+}
+
+static void
+img_text_pos_changed( ImgTableButton    *button,
+					  gint               item,
+					  img_window_struct *img )
+{
+	g_message( "Active item: %d", item );
 }
 
