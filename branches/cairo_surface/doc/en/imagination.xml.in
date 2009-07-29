@@ -6,252 +6,244 @@
   <!ENTITY application "@PACKAGE_NAME@"> 
 ]>
 <article id="index" lang="en">
+	<articleinfo>
+		<title>Imagination DVD Slide Show Creator</title>
+		<pubdate>&date;</pubdate>
+		<copyright>
+			<year>2009</year>
+			<holder>Giuseppe Torelli</holder>
+		</copyright>
+		<legalnotice id="legalnotice">
+			<para>
+				Permission is granted to copy, distribute and/or modify this document
+				under the terms of the GNU Free Documentation License, Version 1.1 or
+				any later version published by the Free Software Foundation; with no
+				Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+				Texts. The complete license text is available from the
+				<ulink type="http" url="http://www.gnu.org/">Free Software Foundation</ulink>.
+			</para>
+		</legalnotice>
+		<authorgroup>
+			<author>
+				<firstname>Giuseppe</firstname>
+				<surname>Torelli</surname>
+			</author>
+			<author>
+				<firstname>Tadej</firstname>
+				<surname>Borovšak</surname>
+			</author>
+		</authorgroup>
+		<releaseinfo>
+			This manual describes version &version; of &application;.
+		</releaseinfo>
+	</articleinfo>
 
-  <!-- Header -->
-  <articleinfo>
-    <title>Imagination DVD Slide Show Creator</title>
-    <pubdate>&date;</pubdate>
-    <copyright>
-      <year>2009</year>
-      <holder>Giuseppe Torelli</holder>
-    </copyright>
-    <legalnotice id="legalnotice">
-      <para>
-        Permission is granted to copy, distribute and/or modify this document
-        under the terms of the GNU Free Documentation License, Version 1.1 or
-        any later version published by the Free Software Foundation; with no
-        Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
-        Texts. The complete license text is available from the <ulink
-        type="http" url="http://www.gnu.org/">Free Software Foundation</ulink>.
-      </para>
-    </legalnotice>
-
-    <authorgroup>
-      <author>
-        <firstname>Giuseppe</firstname>
-        <surname>Torelli</surname>
-      </author>
-	        <author>
-        <firstname>Tadej</firstname>
-        <surname>Borovšak</surname>
-      </author>
-    </authorgroup>
-
-    <releaseinfo>
-      This manual describes version &version; of &application;.
-    </releaseinfo>
-  </articleinfo>
-
-  <sect1 id="intro">
-    <title>Introduction to &application;</title>
-
-    <para>
-      Imagination is a lightweight DVD slide show creator developed in C with the GTK+2 toolkit and Cairo. Imagination is designed to be
-      be fast and easy-to-use. Its user interface is clean and intuitive, and does not include any confusing or useless options by default.
-	  It requires the ffmpeg encoder to produce the movie file and libsox to handle the audio. Yes you don't need any other third-party software!
-    </para>
-
-  <!--  <itemizedlist>
-      <listitem>Create folders and documents.</listitem>
-      <listitem>Display your files and folders.</listitem>
-      <listitem>Manage your files and folders.</listitem>
-      <listitem>Run and manage custom actions.</listitem>
-      <listitem>Access Removable Media.</listitem>
-    </itemizedlist>-->
-  </sect1>
-
-
-   <sect1 id="working-with-files-and-folders">
-    <title>Working with Files and Folders</title>
-
-
-    <sect2 id="opening-files">
-      <title>Opening Files</title>
-
-      <para>
-        When you open a file, the file manager performs the default action for that file type. For example, opening a text file
-        will display it in the default text editor, while opening an image file will display the image in the default image
-        viewer.
-      </para>
-
-      <para>
-        The file manager checks the extension of a file to determine the type of a file. If the file has no known extension, the
-        file manager examines the contents of the file.
-      </para>
-
-      <sect3 id="executing-the-default-action">
-        <title>Executing the Default Action</title>
-
-        <para>
-          To execute the default for a file, double-click on the file. For example, the default action for audio files is to
-          play the it with the default music playing application. In this case, you can double-click on the file to open the
-          file in the music player.
-        </para>
-
-        <para>
-          You can set <application>Thunar</application> preferences so that you click once on a file to execute the default
-          action. For information, see <xref linkend="preferences-behavior" />.
-        </para>
-      </sect3>
-
-      <sect3 id="executing-non-default-actions">
-        <title>Executing Non-Default Actions</title>
-
-        <para>
-          To execute actions other than the default action for a file, select the file that you want to perform an action on.
-          Choose the desired action from the <emphasis>Open With</emphasis> choices available in <guimenu>File</guimenu> menu
-          or an <guimenu>Open With</guimenu> submenu.
-        </para>
-      </sect3>
-
-      <sect3 id="adding-actions">
-        <title>Adding Actions</title>
-
-        <para>
-          To add actions associated with a file type, perform the following steps:
-        </para>
-
-        <orderedlist>
-          <listitem>
-            <para>
-              In the main area, select a file of the type to which you want to add an action.
-            </para>
-          </listitem>
-          <listitem>
-            <para>
-              Choose <menuchoice><guimenu>File</guimenu><guimenuitem>Open With Other Application...</guimenuitem></menuchoice>
-              from the main menu.
-            </para>
-          </listitem>
-          <listitem>
-            <para>
-              Either choose an application in the <guilabel>Open With</guilabel> dialog or select <guibutton>Use a custom command</guibutton>
-              and browse to the program with which you wish to open this type.
-            </para>
-          </listitem>
-        </orderedlist>
-
-        <para>
-          The action you have chosen is now added to the list of actions for that particular file type. If you enabled the
-          <guibutton>Use as default for this kind of file</guibutton> option or there was no prior action associated with the
-          type, the newly added action is the default.
-        </para>
-
-        <para>
-          You may also add actions using the <guibutton>Open With</guibutton> button under
-          <menuchoice><guimenu>File</guimenu><guimenuitem>Properties...</guimenuitem></menuchoice>.
-        </para>
-      </sect3>
-
-      <sect3 id="modifiying-actions">
-        <title>Modifying Actions</title>
-
-        <para>
-          To modify the actions associated with a file or file type, perform the following steps:
-        </para>
-
-        <orderedlist>
-          <listitem>
-            <para>
-              In the main area, select a file of the type for which you want to modify the action.
-            </para>
-          </listitem>
-          <listitem>
-            <para>
-              Choose <menuchoice><guimenu>File</guimenu><guimenuitem>Properties...</guimenuitem></menuchoice> from the main menu.
-            </para>
-          </listitem>
-          <listitem>
-            <para>
-              Select the new default action using the <guilabel>Open With</guilabel> button or add a new action by choosing
-              <guimenuitem>Open With Other Application...</guimenuitem> from the drop down menu.
-            </para>
-          </listitem>
-        </orderedlist>
-
-        <para>
-          To remove a previously added action for a file type, bring up the <guilabel>Open With</guilabel> dialog as described
-          above, right-click the action you want to remove and choose <guimenuitem>Remove Launcher</guimenuitem>.
-        </para>
-      </sect3>
-    </sect2>
-
-
-    <sect2 id="file-properties">
-      <title>File Properties</title>
-
-      <para>
-        The file properties window shows more information about any file or folder in the file manager. With this window, you can also
-        do the following:
-      </para>
-
-      <itemizedlist>
-        <listitem>
-          <para>
-            Change the icon for special files, such as application launchers and URL links.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            Add or remove emblems for a file or folder.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            Change the UNIX file permissions for a file or folder.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            Choose which application is used to open a file and other files of the same type.
-          </para>
-        </listitem>
-      </itemizedlist>
-
-      <screenshot>
-        <mediaobject>
-          <imageobject>
-            <imagedata fileref="images/file-properties.png" format="PNG"/>
-          </imageobject>
-
-          <textobject>
-            <phrase>File Properties</phrase>
-          </textobject>
-        </mediaobject>
-      </screenshot>
-
-      <para>
-        To open the file properties window, perform the following steps:
-      </para>
-
-      <orderedlist>
-        <listitem>
-          <para>
-            Select the file or folder whose properties you want to examine or change. You cannot
-            select multiple items at once and display the properties that are in common to all
-            items currently.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            Do one of the following:
-            <itemizedlist>
-              <listitem>
-                <para>Choose <menuchoice><guimenu>File</guimenu><guimenuitem>Properties...</guimenuitem></menuchoice> from the main menu.</para>
-              </listitem>
-              <listitem>
-                <para>Right-click the selected item and choose <guimenuitem>Properties...</guimenuitem> from the context menu.</para>
-              </listitem>
-              <listitem>
-                <para>Press <keycombo><keycap>Alt</keycap><keycap>Return</keycap></keycombo>.</para>
-              </listitem>
-            </itemizedlist>
-          </para>
-        </listitem>
-      </orderedlist>
-    </sect2>
-  </sect1>
+	<sect1 id="intro">
+		<title>Introduction to &application;</title>
+			<para>
+				Imagination is a lightweight DVD slide show creator developed in C with the GTK+2 toolkit and Cairo. Imagination is designed to be
+				be fast and easy-to-use. Its user interface is clean and intuitive, and does not include any confusing or useless options by default.
+				It requires the ffmpeg encoder to produce the movie file and libsox to import the audio files. Yes you don't need any other third-party software!
+			</para>
+	</sect1>
+	<sect1 id="window">
+		<title>Imagination's window</title>
+		<para>
+			This section describes the sections of the Imagination's window.
+		</para>
+		<sect2 id="toolbar">
+			<title>Toolbar</title>
+			<itemizedlist>
+				<listitem><para>New</para></listitem>
+				<listitem><para>Open</para></listitem>
+				<listitem><para>Save</para></listitem>
+				<listitem><para>Save As</para></listitem>
+				<listitem><para>Close</para></listitem>
+				<listitem><para>Properties</para></listitem>
+				<listitem><para>Preview</para></listitem>
+				<listitem><para>Export</para></listitem>
+				<listitem><para>Quit</para></listitem>
+			</itemizedlist>
+			<sect3 id="toolbar_new">
+				<title>New</title>
+				<para>
+					This menu allows you to create a new slideshow. The slideshow dialog is displayed. You can choose the video format (PAL/NTSC), if to scale the picture so that it covers the whole screen avoiding the black stripes and the background color to be displayed when the picture is too small and the rescaling doesn't succed to cover the whole screen. You can also change these options later.
+				</para>
+			</sect3>
+			<sect3 id="toolbar_open">
+				<title>Open</title>
+				<para>
+					This menu allows you to open a previously saved slideshow.
+				</para>
+			</sect3>
+		</sect2>
+		<sect2 id="image_area">
+			<title>Image Area</title>
+			<para>Cucu</para>
+		</sect2>
+		<sect2 id="Side Panel">
+			<title>Side Panel</title>
+			<para>Please refer to the Working Area section of this document for a detailed explanation.</para>
+		</sect2>
+		<sect2 id="status_bar">
+			<title>Status Bar</title>
+			<para>Cucu</para>
+		</sect2>		
+	</sect1>			
+	<sect1 id="menu">
+		<title>Imagination's menus</title>
+		<para>
+			This section describes in detail the menus of Imagination.
+		</para>
+		<sect2 id="slideshow">
+			<title>Slideshow menu</title>
+			<itemizedlist>
+				<listitem><para>New</para></listitem>
+				<listitem><para>Open</para></listitem>
+				<listitem><para>Save</para></listitem>
+				<listitem><para>Save As</para></listitem>
+				<listitem><para>Close</para></listitem>
+				<listitem><para>Properties</para></listitem>
+				<listitem><para>Preview</para></listitem>
+				<listitem><para>Export</para></listitem>
+				<listitem><para>Quit</para></listitem>
+			</itemizedlist>
+			<sect3 id="new">
+				<title>New</title>
+				<para>
+					This menu allows you to create a new slideshow. The slideshow dialog is displayed. You can choose the video format (PAL/NTSC), if to scale the picture so that it covers the whole screen avoiding the black stripes and the background color to be displayed when the picture is too small and the rescaling doesn't succed to cover the whole screen. You can also change these options later.
+				</para>
+			</sect3>
+			<sect3 id="open">
+				<title>Open</title>
+				<para>
+					This menu allows you to open a previously saved slideshow.
+				</para>
+			</sect3>
+			<sect3 id="save">
+				<title>Save</title>
+				<para>
+					This menu allows you to save a previously saved slideshow. The filename won't be asked.
+				</para>
+			</sect3>
+			<sect3 id="saveas">
+				<title>Save as</title>
+				<para>
+					This menu allows you save a slideshow with a different filename.
+				</para>
+			</sect3>
+			<sect3 id="close">
+				<title>Close</title>
+				<para>
+					This menu closes the slideshow. If the slideshow is not saved yet or you changed something Imagination will ask you to save it first.
+				</para>
+			</sect3>
+			<sect3 id="properties">
+				<title>Properties</title>
+				<para>
+					This menu displays a dialog with the slideshow properties. Please see above for an explanation of the available settings.
+				</para>
+			</sect3>
+			<sect3 id="preview_slideshow">
+				<title>Preview</title>
+				<para>
+					This menu starts the preview of the slideshow in the image area. If you want to start the preview by a specific slide just select it by left-clicking on it. The preview quality if affected by the setting in the menu <menuchoice><guimenu>Slide</guimenu><guimenuitem>Preview quality</guimenuitem></menuchoice>.
+				</para>
+			</sect3>
+			<sect3 id="export">
+				<title>Export</title>
+				<para>
+					This submenu allows you to export the slideshow in three different formats: VOB (DVD Video) OGV (Ogg Theora/Vorbis) and FLV (Flash Video).
+				</para>
+			</sect3>
+			<sect3 id="quit">
+				<title>Quit</title>
+				<para>
+					This menu quits Imagination. If the slideshow wasn't saved yet Imagination will prompt you to save it first.
+				</para>
+			</sect3>
+		</sect2>
+		<sect2 id="slide">
+			<title>Slide menu</title>
+			<itemizedlist>
+				<listitem><para>Import pictures</para></listitem>
+				<listitem><para>Import music</para></listitem>
+				<listitem><para>Delete</para></listitem>
+				<listitem><para>Preview quality</para></listitem>
+				<listitem><para>Rotate clockwise</para></listitem>
+				<listitem><para>Rotate counter-clockwise</para></listitem>
+				<listitem><para>Zoom</para></listitem>
+				<listitem><para>Select all</para></listitem>
+				<listitem><para>Unselect all</para></listitem>
+			</itemizedlist>
+			<sect3 id="import_pictures">
+				<title>Import pictures</title>
+				<para>
+					This menu opens up a file dialog allowing you to choose the pictures to import in Imagination To select more than one pictures press and hold SHIFT key while clicking on the files. A progress bar is displayed in the status bar notifying you the percentage progress of the pictures' import.
+				</para>
+			</sect3>
+			<sect3 id="import_music">
+				<title>Import music</title>
+				<para>
+					This is the same as the previous only but works for audio files. Please make sure you have installed the package <citetitle>libsox-fmt-all</citetitle> otherwise you won't be able to import MP3 files.
+				</para>
+			</sect3>
+			<sect3 id="delete">
+				<title>Delete</title>
+				<para>
+					This deletes the selected slides. Hold down the SHIFT key to select more than one slide at once.
+				</para>
+			</sect3>
+			<sect3 id="preview">
+				<title>Preview</title>
+				<para>
+					This submenu allows you to set different quality for the preview and the image quality in the image area. Tadej please, can you add more?
+				</para>
+			</sect3>
+		</sect2>
+		<sect2 id="help">
+			<title>Help menu</title>
+			<itemizedlist>
+				<listitem><para>Contents</para></listitem>
+				<listitem><para>About</para></listitem>
+			</itemizedlist>
+		</sect2>
+	</sect1>
+	<sect1 id="working_area">
+		<title>Working Area</title>
+		<para>
+			This section explains the slide settings located on the Imagination window's side panel.
+		</para>
+		<sect2 id="working_area_tools">
+			<itemizedlist>
+				<listitem><para>Slide Settings</para></listitem>
+				<listitem><para>Slide Motion</para></listitem>
+				<listitem><para>Slide Text</para></listitem>
+			</itemizedlist>
+			<sect3 id="slide_settings">
+				<title>Slide Settings</title>
+				<para>
+					This section allows you to choose a random transition or to pick one from the drop-down menu. You can set the transition speed choosing among Fast, Normal and Slow and the time in seconds that the slide must remain still. Finally you can see the total time length of the slideshow. Note: the slide (or the slides) must be selected for this section to work.
+				</para>
+			</sect3>
+			<sect3 id="slide_motion">
+				<title>Slide Motion</title>
+				<para>
+					This section allows you to apply the famous Ken Burns effects on a slide. Just begin by clicking on the Add button to add a stop point. Then use the Zoom slider to zoom in or out and then hold the left mouse button on the picture to center a detail of the picture. If you commit a mistake re-adjust your slide and then click the Update button. You can add as many stop points as you want. The Remove button deletes a stop point. Click the preview button on the toolbar or choose <menuchoice><guimenu>Slideshow</guimenu><guimenuitem>Preview</guimenuitem></menuchoice> to have a preview of the effect. Note: the slide (or the slides) must be selected for this section to work. 
+				</para>
+			</sect3>
+			<sect3 id="slide_text">
+				<title>Slide Text</title>
+				<para>
+					This section bla bla bla.
+				</para>
+			</sect3>
+		</sect2>
+	</sect1>
+	<sect1 id="license">
+		<title>License</title>
+		<para>
+			&application; is licensed under the GPL2 license.
+		</para>
+	</sect1>
 </article>
-<!--
-	vim:set ts=2 sw=2 et ai encoding=UTF-8:
--->
