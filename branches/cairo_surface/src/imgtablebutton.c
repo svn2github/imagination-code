@@ -307,21 +307,10 @@ img_table_button_destroy( GtkObject *object )
 	ImgTableButtonPrivate *priv = IMG_TABLE_BUTTON_GET_PRIVATE( object );
 	if( priv->popup )
 	{
-		gint i;
-
-		if( priv->pixbufs )
-		{
-			for( i = 0; i < priv->no_items; i++ )
-				g_object_unref( G_OBJECT( priv->labels[i] ) );
-		}
-
-		if( priv->labels )
-		{
-			for( i = 0; i < priv->no_items; i++ )
-				g_free( priv->labels[i] );
-		}
+		img_table_button_clear_items( priv );
 
 		gtk_widget_destroy( priv->popup );
+		priv->popup = NULL;
 	}
 
 	GTK_OBJECT_CLASS( img_table_button_parent_class )->destroy( object );
@@ -394,15 +383,16 @@ img_table_button_clear_items( ImgTableButtonPrivate *priv )
 		for( i = 0; i < priv->no_items; i++ )
 			g_object_unref( G_OBJECT( priv->pixbufs[i] ) );
 		g_slice_free1( sizeof( GdkPixbuf * ) * priv->no_items, priv->pixbufs );
+		priv->pixbufs = NULL;
 	}
-
-	if( priv->labels )
+	else if( priv->labels )
 	{
 		gint i;
 
 		for( i = 0; i < priv->no_items; i++ )
 			g_free( priv->labels[i] );
 		g_slice_free1( sizeof( gchar * ) * priv->no_items, priv->labels );
+		priv->labels = NULL;
 	}
 
 	priv->no_items = 0;
