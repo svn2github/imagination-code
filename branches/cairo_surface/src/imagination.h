@@ -182,6 +182,8 @@ struct _img_window_struct
 	GtkWidget	*expand_button;
 	GtkWidget   *text_pos_button;
 	GtkWidget   *anim_duration;
+	GtkWidget   *placing_video;
+	GtkWidget   *placing_image;
   	GtkWidget	*thumbnail_iconview;
   	GtkWidget	*statusbar;
   	GtkWidget	*progress_bar;

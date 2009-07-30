@@ -77,6 +77,12 @@ child_clicked( GObject        *child,
 			   ImgTableButton *parent );
 
 static void
+img_table_button_calc_popup_coords( GtkWidget             *widget,
+									ImgTableButtonPrivate *priv,
+									gint                  *x,
+									gint                  *y );
+
+static void
 img_table_button_clear_items( ImgTableButtonPrivate *priv );
 
 static void
@@ -298,6 +304,25 @@ static void
 img_table_button_destroy( GtkObject *object )
 {
 	/* Free structures here */
+	ImgTableButtonPrivate *priv = IMG_TABLE_BUTTON_GET_PRIVATE( object );
+	if( priv->popup )
+	{
+		gint i;
+
+		if( priv->pixbufs )
+		{
+			for( i = 0; i < priv->no_items; i++ )
+				g_object_unref( G_OBJECT( priv->labels[i] ) );
+		}
+
+		if( priv->labels )
+		{
+			for( i = 0; i < priv->no_items; i++ )
+				g_free( priv->labels[i] );
+		}
+
+		gtk_widget_destroy( priv->popup );
+	}
 
 	GTK_OBJECT_CLASS( img_table_button_parent_class )->destroy( object );
 }
@@ -306,14 +331,11 @@ static void
 img_table_button_clicked( GtkButton *button )
 {
 	ImgTableButtonPrivate *priv = IMG_TABLE_BUTTON_GET_PRIVATE( button );
-	GtkWidget             *widget = GTK_WIDGET( button );
 	gint                   x,
 						   y;
 
 	/* Calculate proper position */
-	gdk_window_get_origin( widget->window, &x, &y );
-	x += widget->allocation.x;
-	y += widget->allocation.y + widget->allocation.height;
+	img_table_button_calc_popup_coords( GTK_WIDGET( button ), priv, &x, &y );
 	gtk_window_move( GTK_WINDOW( priv->popup ), x, y ); 
 	gtk_widget_show( priv->popup );
 }
@@ -326,6 +348,40 @@ child_clicked( GObject        *child,
 
 	count = GPOINTER_TO_INT( g_object_get_data( child, "count" ) );
 	img_table_button_set_active_item( parent, count );
+}
+
+static void
+img_table_button_calc_popup_coords( GtkWidget             *widget,
+									ImgTableButtonPrivate *priv,
+									gint                  *x,
+									gint                  *y )
+{
+	gint            a, b,
+				    monitor_n;
+	GdkScreen      *screen;
+	GdkRectangle    monitor;
+	GtkRequisition  req;
+
+	/* Calculate proper position */
+	gdk_window_get_origin( widget->window, &a, &b );
+	a += widget->allocation.x;
+	b += widget->allocation.y + widget->allocation.height;
+	gtk_widget_size_request( priv->popup, &req );
+
+	screen = gtk_widget_get_screen( widget );
+	monitor_n = gdk_screen_get_monitor_at_window( screen, widget->window );
+	gdk_screen_get_monitor_geometry( screen, monitor_n, &monitor);
+	
+	if( a < monitor.x )
+		a = monitor.x;
+	else if( a + req.width > monitor.x + monitor.width )
+		a = monitor.x + monitor.width - req.width;
+
+	if( b + req.height > monitor.y + monitor.height )
+		b = monitor.y + monitor.height - req.height;
+
+	*x = a;
+	*y = b;
 }
 
 static void
