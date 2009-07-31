@@ -353,9 +353,9 @@ img_table_button_calc_popup_coords( GtkWidget             *widget,
 
 	/* Calculate proper position */
 	gdk_window_get_origin( widget->window, &a, &b );
-	a += widget->allocation.x;
-	b += widget->allocation.y + widget->allocation.height;
 	gtk_widget_size_request( priv->popup, &req );
+	a += widget->allocation.x - req.width;
+	b += widget->allocation.y - req.height;
 
 	screen = gtk_widget_get_screen( widget );
 	monitor_n = gdk_screen_get_monitor_at_window( screen, widget->window );
@@ -363,11 +363,9 @@ img_table_button_calc_popup_coords( GtkWidget             *widget,
 	
 	if( a < monitor.x )
 		a = monitor.x;
-	else if( a + req.width > monitor.x + monitor.width )
-		a = monitor.x + monitor.width - req.width;
 
-	if( b + req.height > monitor.y + monitor.height )
-		b = monitor.y + monitor.height - req.height;
+	if( b < monitor.y )
+		b = monitor.y;
 
 	*x = a;
 	*y = b;
