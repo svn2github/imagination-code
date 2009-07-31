@@ -98,7 +98,7 @@ img_text_pos_changed( ImgTableButton    *button,
 					  img_window_struct *img );
 
 static void
-img_placing_toggled( GtkToggleButton   *button,
+img_placing_changed( GtkComboBox   *combo,
 					 img_window_struct *img );
 
 
@@ -837,6 +837,31 @@ img_window_struct *img_create_window (void)
 	a_hbox = gtk_hbox_new(FALSE, 6);
 	gtk_box_pack_start( GTK_BOX( vbox_slide_caption ), a_hbox, FALSE, FALSE, 0 );
 
+	a_label = gtk_label_new( _("Placing is relative to:") );
+	gtk_misc_set_alignment( GTK_MISC( a_label ), 0, 0.5 );
+	gtk_box_pack_start( GTK_BOX( a_hbox ), a_label, TRUE, TRUE, 0 );
+
+	img_struct->placing_video = _gtk_combo_box_new_text( FALSE );
+	gtk_box_pack_start( GTK_BOX( a_hbox ), img_struct->placing_video,
+						FALSE, FALSE, 0 );
+	{
+		GtkTreeIter   iter;
+		GtkListStore *store =
+				GTK_LIST_STORE( gtk_combo_box_get_model(
+						GTK_COMBO_BOX( img_struct->placing_video ) ) );
+
+		gtk_list_store_append( store, &iter );
+		gtk_list_store_set( store, &iter, 0, _("Exported video"), -1 );
+		gtk_list_store_append( store, &iter );
+		gtk_list_store_set( store, &iter, 0, _("Original image"), -1 );
+	}
+	gtk_combo_box_set_active( GTK_COMBO_BOX( img_struct->placing_video ), 0 );
+	g_signal_connect( G_OBJECT( img_struct->placing_video ), "changed",
+					  G_CALLBACK( img_placing_changed ), img_struct );
+					 
+	a_hbox = gtk_hbox_new(FALSE, 6);
+	gtk_box_pack_start( GTK_BOX( vbox_slide_caption ), a_hbox, FALSE, FALSE, 0 );
+
 	a_label = gtk_label_new( _("Subtitle position:") );
 	gtk_misc_set_alignment( GTK_MISC( a_label ), 0, 0.5 );
 	gtk_box_pack_start( GTK_BOX( a_hbox ), a_label, TRUE, TRUE, 0 );
@@ -870,31 +895,6 @@ img_window_struct *img_create_window (void)
 	img_table_button_set_active_item( IMG_TABLE_BUTTON( img_struct->text_pos_button ), 4 );
 	g_signal_connect( G_OBJECT( img_struct->text_pos_button ), "active-item-changed",
 					  G_CALLBACK( img_text_pos_changed ), img_struct );
-
-	a_hbox = gtk_hbox_new(FALSE, 6);
-	gtk_box_pack_start( GTK_BOX( vbox_slide_caption ), a_hbox, FALSE, FALSE, 0 );
-
-	a_label = gtk_label_new( _("Placing is relative to:") );
-	gtk_misc_set_alignment( GTK_MISC( a_label ), 0, 0.5 );
-	gtk_box_pack_start( GTK_BOX( a_hbox ), a_label, TRUE, TRUE, 0 );
-
-	img_struct->placing_video =
-		gtk_radio_button_new_with_label( NULL, _("Exported video") );
-	g_signal_connect( G_OBJECT( img_struct->placing_video ), "toggled",
-					  G_CALLBACK( img_placing_toggled ), img_struct );
-	gtk_box_pack_start( GTK_BOX( a_hbox ), img_struct->placing_video,
-						FALSE, FALSE, 0 );
-
-	img_struct->placing_image =
-		gtk_radio_button_new_with_label_from_widget(
-				GTK_RADIO_BUTTON( img_struct->placing_video ),
-				_("Original image") );
-	gtk_toggle_button_set_active(
-			GTK_TOGGLE_BUTTON( img_struct->placing_image ), TRUE );
-	g_signal_connect( G_OBJECT( img_struct->placing_image ), "toggled",
-					  G_CALLBACK( img_placing_toggled ), img_struct );
-	gtk_box_pack_start( GTK_BOX( a_hbox ), img_struct->placing_image,
-						FALSE, FALSE, 0 );
 
 	/* Background music frame */
 	frame3 = gtk_frame_new (NULL);
@@ -1800,17 +1800,14 @@ img_text_pos_changed( ImgTableButton    *button,
 }
 
 static void
-img_placing_toggled( GtkToggleButton   *button,
+img_placing_changed( GtkComboBox   *combo,
 					 img_window_struct *img )
 {
-	if( gtk_toggle_button_get_active( button ) )
-	{
-		if( (GtkWidget *)button == img->placing_video )
-			img->current_slide->placing = IMG_REL_PLACING_EXPORTED_VIDEO;
-		else
-			img->current_slide->placing = IMG_REL_PLACING_ORIGINAL_IMAGE;
+	if( gtk_combo_box_get_active(combo) == 0 )
+		img->current_slide->placing = IMG_REL_PLACING_EXPORTED_VIDEO;
+	else
+		img->current_slide->placing = IMG_REL_PLACING_ORIGINAL_IMAGE;
 
-		gtk_widget_queue_draw( img->image_area );
-	}
+	gtk_widget_queue_draw( img->image_area );
 }
 
