@@ -917,6 +917,7 @@ img_render_still_frame( img_window_struct *img,
 				ImgStopPoint *point1,
 							 *point2;
 				gdouble       progress;
+				GList        *tmp;
 
 				if( ! img->cur_point )
 				{
@@ -941,7 +942,11 @@ img_render_still_frame( img_window_struct *img,
 				}
 
 				point1 = (ImgStopPoint *)img->cur_point->data;
-				point2 = (ImgStopPoint *)g_list_next( img->cur_point )->data;
+				tmp = g_list_next( img->cur_point );
+				if( tmp )
+					point2 = (ImgStopPoint *)tmp->data;
+				else
+					point2 = point1;
 
 				progress = (gdouble)img->still_counter / ( img->still_max - 1);
 				img_calc_current_ken_point( &draw_point, point1, point2,

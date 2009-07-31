@@ -1977,12 +1977,6 @@ img_calc_slide_duration_points( GList *list,
 		duration += point->time;
 	}
 
-	/* If we have only one slide, no corrections are needed since we'll create
-	 * one additional point to add some duration to slide, else we remove the
-	 * last duration from sum. */
-	if( length > 1 )
-		duration -= point->time;
-
 	return( duration );
 }
 
