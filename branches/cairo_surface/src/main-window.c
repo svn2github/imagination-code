@@ -1705,7 +1705,6 @@ img_subtitle_update( img_window_struct *img )
 	if( img->current_slide->has_subtitle )
 	{
 		/* Add subtitle indicator */
-		GtkTreePath *path;
 		GtkTreeIter  iter;
 		GList       *list;
 
@@ -1714,8 +1713,9 @@ img_subtitle_update( img_window_struct *img )
 
 		list = gtk_icon_view_get_selected_items(
 				GTK_ICON_VIEW( img->thumbnail_iconview ) );
-		gtk_tree_model_get_iter( img->thumbnail_model, &iter, list->data );
-		g_list_foreach( list, gtk_tree_path_free, NULL );
+		gtk_tree_model_get_iter( GTK_TREE_MODEL( img->thumbnail_model ),
+								 &iter, list->data );
+		g_list_foreach( list, (GFunc)gtk_tree_path_free, NULL );
 		g_list_free( list );
 		gtk_list_store_set( GTK_LIST_STORE( img->thumbnail_model ), &iter,
 							3, TRUE, -1 );
@@ -1723,7 +1723,6 @@ img_subtitle_update( img_window_struct *img )
 	else
 	{
 		/* Remove subtitle indicator */
-		GtkTreePath *path;
 		GtkTreeIter  iter;
 		GList       *list;
 
@@ -1732,8 +1731,9 @@ img_subtitle_update( img_window_struct *img )
 
 		list = gtk_icon_view_get_selected_items(
 				GTK_ICON_VIEW( img->thumbnail_iconview ) );
-		gtk_tree_model_get_iter( img->thumbnail_model, &iter, list->data );
-		g_list_foreach( list, gtk_tree_path_free, NULL );
+		gtk_tree_model_get_iter( GTK_TREE_MODEL( img->thumbnail_model ),
+								 &iter, list->data );
+		g_list_foreach( list, (GFunc)gtk_tree_path_free, NULL );
 		g_list_free( list );
 		gtk_list_store_set( GTK_LIST_STORE( img->thumbnail_model ), &iter,
 							3, FALSE, -1 );

@@ -218,6 +218,9 @@ img_cell_renderer_pixbuf_render( GtkCellRenderer      *cell,
 	/* Drawing context */
 	cairo_t *cr;
 
+	/* Image rectangle */
+	GdkRectangle rect;
+
 	priv = IMG_CELL_RENDERER_PIXBUF_GET_PRIVATE( cell );
 
 	/* Draw image first */
@@ -228,6 +231,14 @@ img_cell_renderer_pixbuf_render( GtkCellRenderer      *cell,
 
 	if( ( ! priv->has_text ) && ( ! priv->transition ) )
 		return;
+
+	/* Get image size */
+	pix_class->get_size( cell, widget, cell_a, &rect.x,
+						 &rect.y, &rect.width, &rect.height );
+	rect.x += cell_a->x + cell->xpad;
+	rect.y += cell_a->y + cell->ypad;
+	rect.width  -= 2 * cell->xpad;
+	rect.height -= 2 * cell->ypad;
 
 	/* Draw indicators */
 	cr = gdk_cairo_create( window );
@@ -242,13 +253,13 @@ img_cell_renderer_pixbuf_render( GtkCellRenderer      *cell,
 
 		w = gdk_pixbuf_get_width( priv->text_ico );
 		h = gdk_pixbuf_get_height( priv->text_ico );
-		wf = (gdouble)w / ( cell_a->width - 2 * ( BORDER + cell->xpad ) );
-		hf = (gdouble)h / ( cell_a->height - 4 * BORDER - 2 * cell->ypad );
+		wf = (gdouble)w / ( rect.width - 2 * BORDER );
+		hf = (gdouble)h / ( rect.height - 4 * BORDER  );
 		cf = MIN( MIN( 1.0, HORIZ_F / wf ), MIN( 1.0, VERT_F / hf ) );
 
 		cairo_save( cr );
-		cairo_translate( cr, cell_a->x + cell_a->width - BORDER - cell->xpad,
-							 cell_a->y + BORDER + cell->ypad );
+		cairo_translate( cr, rect.x + rect.width - BORDER,
+							 rect.y + BORDER );
 		gdk_cairo_set_source_pixbuf( cr, priv->text_ico, -w, 0 );
 		cairo_scale( cr, cf, cf );
 		cairo_paint( cr );
@@ -265,12 +276,12 @@ img_cell_renderer_pixbuf_render( GtkCellRenderer      *cell,
 
 		w = gdk_pixbuf_get_width( priv->transition );
 		h = gdk_pixbuf_get_height( priv->transition );
-		wf = (gdouble)w / ( cell_a->width - 2 * ( BORDER + cell->xpad ) );
-		hf = (gdouble)h / ( cell_a->height - 4 * BORDER - 2 * cell->ypad );
+		wf = (gdouble)w / ( rect.width - 2 * BORDER );
+		hf = (gdouble)h / ( rect.height - 4 * BORDER );
 		cf = MIN( MIN( 1.0, HORIZ_F / wf ), MIN( 1.0, VERT_F / hf ) );
 
-		cairo_translate( cr, cell_a->x + cell_a->width - BORDER - cell->xpad, 
-							 cell_a->y + cell_a->height - BORDER - cell->ypad );
+		cairo_translate( cr, rect.x + rect.width - BORDER, 
+							 rect.y + rect.height - BORDER );
 		gdk_cairo_set_source_pixbuf( cr, priv->transition, - w, - h );
 		cairo_scale( cr, cf, cf );
 		cairo_paint( cr );
