@@ -94,7 +94,11 @@ void img_add_slides_thumbnails(GtkMenuItem *item, img_window_struct *img)
 			if (slide_info)
 			{
 				gtk_list_store_append (img->thumbnail_model,&iter);
-				gtk_list_store_set (img->thumbnail_model, &iter, 0, thumb, 1, slide_info, -1);
+				gtk_list_store_set (img->thumbnail_model, &iter, 0, thumb,
+																 1, slide_info,
+																 2, NULL,
+																 3, FALSE,
+																 -1);
 				g_object_unref (thumb);
 				slides_cnt++;
 			}

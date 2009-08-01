@@ -26,6 +26,7 @@
 #include "callbacks.h"
 #include "export.h"
 #include "subtitles.h"
+#include "imgcellrendererpixbuf.h"
 
 static const GtkTargetEntry drop_targets[] =
 {
@@ -37,7 +38,7 @@ static const GtkTargetEntry drop_targets[] =
  * ************************************************************************* */
 static void img_combo_box_transition_type_changed (GtkComboBox *, img_window_struct *);
 static void img_random_button_clicked(GtkButton *, img_window_struct *);
-static ImgRender img_set_random_transition(img_window_struct *, slide_struct *);
+static GdkPixbuf *img_set_random_transition(img_window_struct *, slide_struct *);
 static void img_combo_box_speed_changed (GtkComboBox *,  img_window_struct *);
 static void img_spinbutton_value_changed (GtkSpinButton *, img_window_struct *);
 static void img_clear_audio_files(GtkButton *, img_window_struct *);
@@ -997,7 +998,10 @@ img_window_struct *img_create_window (void)
 	g_signal_connect ( (gpointer) clear_button, "clicked", G_CALLBACK (img_clear_audio_files), img_struct);
 
 	/* Create the model */
-	img_struct->thumbnail_model = gtk_list_store_new (2, GDK_TYPE_PIXBUF, G_TYPE_POINTER);
+	img_struct->thumbnail_model = gtk_list_store_new( 4, GDK_TYPE_PIXBUF,
+														 G_TYPE_POINTER,
+														 GDK_TYPE_PIXBUF,
+														 G_TYPE_BOOLEAN );
 
 	/* Add wrapper for DnD */
 	eventbox = gtk_event_box_new();
@@ -1023,10 +1027,25 @@ img_window_struct *img_create_window (void)
 	gtk_container_add( GTK_CONTAINER( thumb_scrolledwindow ), img_struct->thumbnail_iconview );
 
 	/* Create the cell layout */
-	pixbuf_cell = gtk_cell_renderer_pixbuf_new();
+	pixbuf_cell = img_cell_renderer_pixbuf_new();
 	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (img_struct->thumbnail_iconview), pixbuf_cell, FALSE);
-	g_object_set (G_OBJECT (pixbuf_cell), "width", 115, "ypad", 2, NULL);
-	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (img_struct->thumbnail_iconview), pixbuf_cell, "pixbuf", 0, NULL);
+	{
+		/* FIXME: Add custom icon here */
+		GdkPixbuf *text = gtk_widget_render_icon( eventbox, GTK_STOCK_BOLD,
+												  GTK_ICON_SIZE_SMALL_TOOLBAR,
+												  NULL );
+		g_object_set( G_OBJECT( pixbuf_cell ), "width", 115,
+											   "ypad", 2,
+											   "text-ico", text,
+											   NULL );
+		g_object_unref( G_OBJECT( text ) );
+	}
+	gtk_cell_layout_set_attributes(
+			GTK_CELL_LAYOUT( img_struct->thumbnail_iconview ), pixbuf_cell,
+			"pixbuf", 0,
+			"transition", 2,
+			"has-text", 3,
+			NULL );
 
 	/* Set some iconview properties */
 	gtk_icon_view_set_text_column( GTK_ICON_VIEW( img_struct->thumbnail_iconview ), -1 );
@@ -1277,11 +1296,12 @@ static void img_combo_box_transition_type_changed (GtkComboBox *combo, img_windo
 	gint transition_id;
 	GtkTreePath *p;
 	gchar       *path;
+	GdkPixbuf   *pix;
 
 	/* Get the address of the transition function stored in the model of the combo box*/
 	model = gtk_combo_box_get_model(combo);
 	gtk_combo_box_get_active_iter(combo, &iter);
-	gtk_tree_model_get(model, &iter, 2, &address, 3, &transition_id, -1);
+	gtk_tree_model_get(model, &iter, 0, &pix, 2, &address, 3, &transition_id, -1);
 
 	/* Get index of currently selected item */
 	if (transition_id == -1)
@@ -1323,6 +1343,9 @@ static void img_combo_box_transition_type_changed (GtkComboBox *combo, img_windo
 	{
 		gtk_tree_model_get_iter(model, &iter,selected->data);
 		gtk_tree_model_get(model, &iter,1,&info_slide,-1);
+		gtk_list_store_set( GTK_LIST_STORE( model ), &iter, 2, pix, -1 );
+		if( pix )
+			g_object_unref( G_OBJECT( pix ) );
 		info_slide->render = (ImgRender)address;
 		info_slide->transition_id = transition_id;
 		g_free( info_slide->path );
@@ -1344,10 +1367,12 @@ static void img_combo_box_transition_type_changed (GtkComboBox *combo, img_windo
 
 static void img_random_button_clicked(GtkButton *button, img_window_struct *img)
 {
-	GList *selected, *bak;
-	GtkTreeIter iter;
+	GList        *selected,
+				 *bak;
+	GtkTreeIter   iter;
 	GtkTreeModel *model;
 	slide_struct *info_slide;
+	GdkPixbuf    *pixbuf;
 
 	model = gtk_icon_view_get_model(GTK_ICON_VIEW (img->thumbnail_iconview));
 	selected = gtk_icon_view_get_selected_items(GTK_ICON_VIEW (img->thumbnail_iconview));
@@ -1360,7 +1385,10 @@ static void img_random_button_clicked(GtkButton *button, img_window_struct *img)
 	{
 		gtk_tree_model_get_iter(model, &iter,selected->data);
 		gtk_tree_model_get(model, &iter,1,&info_slide,-1);
-		info_slide->render = img_set_random_transition(img, info_slide);
+		pixbuf = img_set_random_transition(img, info_slide);
+		gtk_list_store_set( GTK_LIST_STORE( model ), &iter, 2, pixbuf, -1 );
+		if( pixbuf )
+			g_object_unref( G_OBJECT( pixbuf ) );
 
 		/* If this is first slide, copy transition to last
 		 * pseudo-slide */
@@ -1374,7 +1402,9 @@ static void img_random_button_clicked(GtkButton *button, img_window_struct *img)
 	g_list_free(bak);
 }
 
-static ImgRender img_set_random_transition(img_window_struct *img, slide_struct *info_slide)
+static GdkPixbuf *
+img_set_random_transition( img_window_struct *img,
+						   slide_struct      *info_slide )
 {
 	gint          nr;
 	gint          r1, r2;
@@ -1383,6 +1413,7 @@ static ImgRender img_set_random_transition(img_window_struct *img, slide_struct 
 	GtkTreeModel *model;
 	GtkTreeIter   iter;
 	gchar         path[10];
+	GdkPixbuf    *pix;
 
 	/* Get tree store that holds transitions */
 	model = gtk_combo_box_get_model( GTK_COMBO_BOX( img->transition_type ) );
@@ -1404,8 +1435,9 @@ static ImgRender img_set_random_transition(img_window_struct *img, slide_struct 
 	g_snprintf( path, sizeof( path ), "%d:%d", r1, r2 );
 	gtk_tree_model_get_iter_from_string( model, &iter, path );
 
-	gtk_tree_model_get( model, &iter, 2, &address, 3, &transition_id, -1 );
+	gtk_tree_model_get( model, &iter, 0, &pix, 2, &address, 3, &transition_id, -1 );
 	info_slide->transition_id = transition_id;
+	info_slide->render = (ImgRender)address;
 
 	/* Prevent leak here */
 	if( info_slide->path )
@@ -1417,7 +1449,7 @@ static ImgRender img_set_random_transition(img_window_struct *img, slide_struct 
 	gtk_combo_box_set_active_iter(GTK_COMBO_BOX(img->transition_type), &iter);
 	g_signal_handlers_unblock_by_func((gpointer)img->transition_type, (gpointer)img_combo_box_transition_type_changed, img);	
 
-	return( (ImgRender)address );
+	return( pix );
 }
 
 static void img_combo_box_speed_changed (GtkComboBox *combo, img_window_struct *img)
@@ -1671,8 +1703,43 @@ img_subtitle_update( img_window_struct *img )
 	img->current_slide->has_subtitle =
 			(gboolean)gtk_text_buffer_get_char_count( img->slide_text_buffer );
 	if( img->current_slide->has_subtitle )
+	{
+		/* Add subtitle indicator */
+		GtkTreePath *path;
+		GtkTreeIter  iter;
+		GList       *list;
+
 		g_object_get( G_OBJECT( img->slide_text_buffer ), "text",
 					  &img->current_slide->subtitle, NULL );
+
+		list = gtk_icon_view_get_selected_items(
+				GTK_ICON_VIEW( img->thumbnail_iconview ) );
+		gtk_tree_model_get_iter( img->thumbnail_model, &iter, list->data );
+		g_list_foreach( list, gtk_tree_path_free, NULL );
+		g_list_free( list );
+		gtk_list_store_set( GTK_LIST_STORE( img->thumbnail_model ), &iter,
+							3, TRUE, -1 );
+	}
+	else
+	{
+		/* Remove subtitle indicator */
+		GtkTreePath *path;
+		GtkTreeIter  iter;
+		GList       *list;
+
+		g_object_get( G_OBJECT( img->slide_text_buffer ), "text",
+					  &img->current_slide->subtitle, NULL );
+
+		list = gtk_icon_view_get_selected_items(
+				GTK_ICON_VIEW( img->thumbnail_iconview ) );
+		gtk_tree_model_get_iter( img->thumbnail_model, &iter, list->data );
+		g_list_foreach( list, gtk_tree_path_free, NULL );
+		g_list_free( list );
+		gtk_list_store_set( GTK_LIST_STORE( img->thumbnail_model ), &iter,
+							3, FALSE, -1 );
+	}
+
+	/* Add text indicator to the thumb */
 
 	/* If font_desc and anim fields are not set, get values from
 	 * proper widgets */

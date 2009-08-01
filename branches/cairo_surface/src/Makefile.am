@@ -21,7 +21,8 @@ imagination_SOURCES = \
 	audio.c audio.h \
 	export.c export.h \
 	subtitles.c subtitles.h \
-	imgtablebutton.c imgtablebutton.h
+	imgtablebutton.c imgtablebutton.h \
+	imgcellrendererpixbuf.c imgcellrendererpixbuf.h
 
 imagination_CFLAGS = \
 	-DDATADIR=\"$(datadir)\"
