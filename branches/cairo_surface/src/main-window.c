@@ -1030,10 +1030,14 @@ img_window_struct *img_create_window (void)
 	pixbuf_cell = img_cell_renderer_pixbuf_new();
 	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (img_struct->thumbnail_iconview), pixbuf_cell, FALSE);
 	{
-		/* FIXME: Add custom icon here */
-		GdkPixbuf *text = gtk_widget_render_icon( eventbox, GTK_STOCK_BOLD,
-												  GTK_ICON_SIZE_SMALL_TOOLBAR,
-												  NULL );
+		gchar     *path;
+		GdkPixbuf *text;
+
+		path = g_strconcat( DATADIR,
+							"/imagination/pixmaps/imagination-text.png",
+							NULL );
+		text = gdk_pixbuf_new_from_file( path, NULL );
+		g_free( path );
 		g_object_set( G_OBJECT( pixbuf_cell ), "width", 115,
 											   "ypad", 2,
 											   "text-ico", text,
