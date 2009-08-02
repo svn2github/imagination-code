@@ -140,7 +140,9 @@ Ad 8.:
 	 - slide with no stop points is selected
 		-> disable all controls except zoom slider, "Add" button and duration
 		   spin button
-	 - slide with at least one stop point is selected
+	 - slide with single stop point is selected
+		-> enable all but navigation controls
+	 - slide with more than one stop point is selected
 		-> enable all controls
 
 	These situations should be recalculated on any stop point modification.

@@ -27,4 +27,9 @@
 
 img_window_struct *img_create_window(void);
 void img_iconview_selection_changed (GtkIconView *, img_window_struct *);
+
+void
+img_ken_burns_update_sensitivity( img_window_struct *img,
+								  gboolean           slide_selected,
+								  gint               no_points );
 #endif

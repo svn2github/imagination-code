@@ -170,7 +170,6 @@ struct _img_window_struct
 	GtkWidget	*transition_type;
 	GtkWidget	*random_button;
 	GtkWidget	*duration;				// Duration spin button
-	GtkWidget	*stop_point_duration;
 	GtkWidget	*trans_duration;
 	GtkWidget	*total_time_data;
 	GtkWidget	*filename_data;
@@ -193,13 +192,22 @@ struct _img_window_struct
   	gchar		*current_dir;
 	GSList		*rotated_files;
 
+	/* Ken Burns related controls */
+	GtkWidget *ken_left;     /* Go to left stop point button */
+	GtkWidget *ken_entry;    /* Jump to stop point entry */
+	GtkWidget *ken_right;    /* Go to right stop point button */
+	GtkWidget *ken_duration; /* Stop point duration spin button */
+	GtkWidget *ken_zoom;     /* Zoom slider */
+	GtkWidget *ken_add;      /* Add stop point button */
+	GtkWidget *ken_update;   /* Update stop point button */
+	GtkWidget *ken_remove;   /* Remove stop point button */
+
 	/* Import slides dialog variables */
 	GtkWidget	*dim_label;
 	GtkWidget	*size_label;
   	GtkWidget	*preview_image;
 
 	/* Current image position parameters */
-	GtkWidget    *zoom_scale;    /* Zoom slider */
 	gint          x;             /* Last button press coordinates */
 	gint          y;
 	gint          bak_offx;      /* Stored offset at button press */
@@ -265,7 +273,6 @@ struct _img_window_struct
 	/* Preview related variables */
   	gboolean	preview_is_running;
   	GtkWidget	*import_slide_chooser;
-	GtkWidget	*current_stop_point_entry;
 	GtkWidget	*total_stop_points_label;
   	GtkWidget	*total_slide_number_label;
 	GtkWidget	*slide_number_entry;

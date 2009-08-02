@@ -1841,7 +1841,7 @@ img_add_stop_point( GtkButton         *button,
 	point = g_slice_new( ImgStopPoint );
 	*point = img->current_point;
 	point->time = gtk_spin_button_get_value_as_int(
-						GTK_SPIN_BUTTON( img->stop_point_duration ) );
+						GTK_SPIN_BUTTON( img->ken_duration ) );
 
 	/* Append it to the list */
 	tmp = img->current_slide->points;
@@ -1852,6 +1852,8 @@ img_add_stop_point( GtkButton         *button,
 
 	/* Update display */
 	img_update_stop_display( img, FALSE );
+	img_ken_burns_update_sensitivity( img, TRUE,
+									  img->current_slide->no_points );
 }
 
 void
@@ -1870,7 +1872,7 @@ img_update_stop_point( GtkButton         *button,
 	/* Update data */
 	*point = img->current_point;
 	point->time = gtk_spin_button_get_value_as_int(
-						GTK_SPIN_BUTTON( img->stop_point_duration ) );
+						GTK_SPIN_BUTTON( img->ken_duration ) );
 
 	/* Update display */
 	img_update_stop_display( img, FALSE );
@@ -1899,6 +1901,8 @@ img_delete_stop_point( GtkButton         *button,
 
 	/* Update display */
 	img_update_stop_display( img, TRUE );
+	img_ken_burns_update_sensitivity( img, TRUE,
+									  img->current_slide->no_points );
 }
 
 void
@@ -1931,17 +1935,17 @@ img_update_stop_display( img_window_struct *img,
 
 		/* Set current point */
 		string = g_strdup_printf( "%d", img->current_slide->cur_point + 1 );
-		gtk_entry_set_text( GTK_ENTRY( img->current_stop_point_entry ), string );
+		gtk_entry_set_text( GTK_ENTRY( img->ken_entry ), string );
 		g_free( string );
 		
 		/* Set duration of this point */
 		point = (ImgStopPoint *)g_list_nth_data( img->current_slide->points,
 												 img->current_slide->cur_point );
-		gtk_spin_button_set_value( GTK_SPIN_BUTTON( img->stop_point_duration ),
+		gtk_spin_button_set_value( GTK_SPIN_BUTTON( img->ken_duration ),
 								   point->time );
 		
 		/* Set zoom value */
-		gtk_range_set_value( GTK_RANGE( img->zoom_scale ), point->zoom );
+		gtk_range_set_value( GTK_RANGE( img->ken_zoom ), point->zoom );
 
 		/* Do we need to refresh current stop point on screen */
 		if( update_pos )
@@ -1951,9 +1955,9 @@ img_update_stop_display( img_window_struct *img,
 	{
 		ImgStopPoint point = { 1, 0, 0, 1.0 };
 
-		gtk_entry_set_text( GTK_ENTRY( img->current_stop_point_entry ), "" );
-		gtk_spin_button_set_value( GTK_SPIN_BUTTON( img->stop_point_duration ), 1 );
-		gtk_range_set_value( GTK_RANGE( img->zoom_scale ), 1.0 );
+		gtk_entry_set_text( GTK_ENTRY( img->ken_entry ), "" );
+		gtk_spin_button_set_value( GTK_SPIN_BUTTON( img->ken_duration ), 1 );
+		gtk_range_set_value( GTK_RANGE( img->ken_zoom ), 1.0 );
 		if( update_pos )
 			img->current_point = point;
 	}
