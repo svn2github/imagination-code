@@ -294,6 +294,7 @@ slide_struct *img_set_slide_info(gint duration, guint speed, ImgRender render, g
 			for (i = 0; i < length; i += 4)
 			{
 				/* Create new point */
+				/* FIXME: This might be problematic because of the rounding. */
 				point = g_slice_new0( ImgStopPoint );
 				point->time = (gint)stop_point[0 + i];
 				point->offx = (gint)stop_point[1 + i];

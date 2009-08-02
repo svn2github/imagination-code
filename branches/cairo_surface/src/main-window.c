@@ -1883,6 +1883,25 @@ static void
 img_combo_box_anim_speed_changed( GtkComboBox       *combo,
 								  img_window_struct *img )
 {
+	gint speed;
+
+	/* FIXME: What should proper duration be? */
+	switch( gtk_combo_box_get_active( combo ) )
+	{
+		case 0: /* Fast */
+			speed = 1;
+			break;
+
+		case 1: /* Normal */
+			speed = 2;
+			break;
+
+		case 2: /* Slow */
+			speed = 3;
+			break;
+	}
+	img_update_sub_properties( img, NULL, 0, speed, 0, 0, NULL,
+							   NULL, IMG_MASK_ANIM_DUR );
 }
 
 static void
