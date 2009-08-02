@@ -147,7 +147,7 @@ img_window_struct *img_create_window (void)
 	GtkWidget *total_time;
 	GtkWidget *hbox_stop_points, *stop_points_label;
 	GtkWidget *hbox_time_offset, *time_offset_label;
-	GtkWidget *caption_textview, *hbox_textview, *text_animation_hbox;
+	GtkWidget *hbox_textview, *text_animation_hbox;
 	GtkWidget *hbox_music_label;
 	GtkWidget *music_time;
 	GtkWidget *hbox_buttons, *move_up_button;
@@ -766,14 +766,14 @@ img_window_struct *img_create_window (void)
 
 	hbox_textview = gtk_hbox_new(FALSE, 2);
 	gtk_box_pack_start (GTK_BOX (vbox_slide_caption), hbox_textview, FALSE, FALSE, 0);
-	caption_textview = gtk_text_view_new();
-	img_struct->slide_text_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(caption_textview));
+	img_struct->sub_textview = gtk_text_view_new();
+	img_struct->slide_text_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(img_struct->sub_textview));
 	g_signal_connect( G_OBJECT( img_struct->slide_text_buffer ), "changed",
 					  G_CALLBACK( img_queue_subtitle_update ), img_struct );
 	img_struct->scrolled_win = gtk_scrolled_window_new(NULL, NULL);
 	gtk_widget_set_size_request(img_struct->scrolled_win, -1, 18);
 	g_object_set (G_OBJECT (img_struct->scrolled_win),"hscrollbar-policy",GTK_POLICY_AUTOMATIC,"vscrollbar-policy",GTK_POLICY_AUTOMATIC,"shadow-type",GTK_SHADOW_IN,NULL);
-	gtk_container_add(GTK_CONTAINER (img_struct->scrolled_win), caption_textview);
+	gtk_container_add(GTK_CONTAINER (img_struct->scrolled_win), img_struct->sub_textview);
 	gtk_box_pack_start (GTK_BOX (hbox_textview), img_struct->scrolled_win, TRUE, TRUE, 0);
 	img_struct->expand_button = gtk_button_new();
 	gtk_widget_set_tooltip_text(img_struct->expand_button, _("Click to expand the area"));
@@ -787,28 +787,28 @@ img_window_struct *img_create_window (void)
 	text_animation_hbox = gtk_hbox_new( FALSE, 6 );
 	gtk_box_pack_start( GTK_BOX( vbox_slide_caption ), text_animation_hbox, FALSE, FALSE, 0 );
 
-	img_struct->font_button = gtk_font_button_new();
-	g_signal_connect( G_OBJECT( img_struct->font_button ), "font-set",
+	img_struct->sub_font = gtk_font_button_new();
+	g_signal_connect( G_OBJECT( img_struct->sub_font ), "font-set",
 					  G_CALLBACK( img_text_font_set ), img_struct );
-	gtk_box_pack_start (GTK_BOX (text_animation_hbox), img_struct->font_button, TRUE, TRUE, 0);
-	gtk_widget_set_tooltip_text(img_struct->font_button, _("Click to choose the font"));
+	gtk_box_pack_start (GTK_BOX (text_animation_hbox), img_struct->sub_font, TRUE, TRUE, 0);
+	gtk_widget_set_tooltip_text(img_struct->sub_font, _("Click to choose the font"));
 
-	img_struct->font_color = gtk_color_button_new();
-	gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON( img_struct->font_color ), TRUE );
-	g_signal_connect( G_OBJECT( img_struct->font_color ), "color-set",
+	img_struct->sub_color = gtk_color_button_new();
+	gtk_color_button_set_use_alpha( GTK_COLOR_BUTTON( img_struct->sub_color ), TRUE );
+	g_signal_connect( G_OBJECT( img_struct->sub_color ), "color-set",
 					  G_CALLBACK( img_font_color_changed ), img_struct );
-	gtk_box_pack_start( GTK_BOX( text_animation_hbox ), img_struct->font_color, FALSE, FALSE, 0 );
+	gtk_box_pack_start( GTK_BOX( text_animation_hbox ), img_struct->sub_color, FALSE, FALSE, 0 );
 
 	a_hbox = gtk_hbox_new(FALSE, 6);
 	gtk_box_pack_start (GTK_BOX (vbox_slide_caption), a_hbox, FALSE, FALSE, 0);
 	a_label = gtk_label_new(_("Animation:"));
 	gtk_misc_set_alignment(GTK_MISC(a_label), 0.0, 0.5);
 	gtk_box_pack_start (GTK_BOX (a_hbox), a_label, TRUE, TRUE, 0);
-	img_struct->text_animation_combo = img_create_subtitle_animation_combo();
-	gtk_combo_box_set_active(GTK_COMBO_BOX(img_struct->text_animation_combo), 0);
-	g_signal_connect( G_OBJECT( img_struct->text_animation_combo ), "changed",
+	img_struct->sub_anim = img_create_subtitle_animation_combo();
+	gtk_combo_box_set_active(GTK_COMBO_BOX(img_struct->sub_anim), 0);
+	g_signal_connect( G_OBJECT( img_struct->sub_anim ), "changed",
 					  G_CALLBACK( img_text_anim_set ), img_struct );
-	gtk_box_pack_start (GTK_BOX (a_hbox), img_struct->text_animation_combo, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (a_hbox), img_struct->sub_anim, FALSE, FALSE, 0);
 
 	a_hbox = gtk_hbox_new(FALSE, 6);
 	gtk_box_pack_start (GTK_BOX (vbox_slide_caption), a_hbox, FALSE, FALSE, 0);
@@ -817,14 +817,14 @@ img_window_struct *img_create_window (void)
 	gtk_misc_set_alignment( GTK_MISC( a_label ), 0, 0.5 );
 	gtk_box_pack_start( GTK_BOX( a_hbox ), a_label, TRUE, TRUE, 0 );
 
-	img_struct->anim_duration = _gtk_combo_box_new_text( FALSE );
-	gtk_box_pack_start( GTK_BOX( a_hbox ), img_struct->anim_duration,
+	img_struct->sub_anim_duration = _gtk_combo_box_new_text( FALSE );
+	gtk_box_pack_start( GTK_BOX( a_hbox ), img_struct->sub_anim_duration,
 						FALSE, FALSE, 0 );
 	{
 		GtkTreeIter   iter;
 		GtkListStore *store =
 				GTK_LIST_STORE( gtk_combo_box_get_model(
-						GTK_COMBO_BOX( img_struct->anim_duration ) ) );
+						GTK_COMBO_BOX( img_struct->sub_anim_duration ) ) );
 
 		gtk_list_store_append( store, &iter );
 		gtk_list_store_set( store, &iter, 0, _("Fast"), -1 );
@@ -833,9 +833,9 @@ img_window_struct *img_create_window (void)
 		gtk_list_store_append( store, &iter );
 		gtk_list_store_set( store, &iter, 0, _("Slow"), -1 );
 	}
-	gtk_combo_box_set_active( GTK_COMBO_BOX( img_struct->anim_duration ), 1 );
-	gtk_widget_set_sensitive( img_struct->anim_duration, FALSE );
-	g_signal_connect( G_OBJECT( img_struct->anim_duration ), "changed",
+	gtk_combo_box_set_active( GTK_COMBO_BOX( img_struct->sub_anim_duration ), 1 );
+	gtk_widget_set_sensitive( img_struct->sub_anim_duration, FALSE );
+	g_signal_connect( G_OBJECT( img_struct->sub_anim_duration ), "changed",
 					  G_CALLBACK( img_combo_box_anim_speed_changed ), img_struct );
 
 	a_hbox = gtk_hbox_new(FALSE, 6);
@@ -845,22 +845,22 @@ img_window_struct *img_create_window (void)
 	gtk_misc_set_alignment( GTK_MISC( a_label ), 0, 0.5 );
 	gtk_box_pack_start( GTK_BOX( a_hbox ), a_label, TRUE, TRUE, 0 );
 
-	img_struct->placing_video = _gtk_combo_box_new_text( FALSE );
-	gtk_box_pack_start( GTK_BOX( a_hbox ), img_struct->placing_video,
+	img_struct->sub_placing = _gtk_combo_box_new_text( FALSE );
+	gtk_box_pack_start( GTK_BOX( a_hbox ), img_struct->sub_placing,
 						FALSE, FALSE, 0 );
 	{
 		GtkTreeIter   iter;
 		GtkListStore *store =
 				GTK_LIST_STORE( gtk_combo_box_get_model(
-						GTK_COMBO_BOX( img_struct->placing_video ) ) );
+						GTK_COMBO_BOX( img_struct->sub_placing ) ) );
 
 		gtk_list_store_append( store, &iter );
 		gtk_list_store_set( store, &iter, 0, _("Exported video"), -1 );
 		gtk_list_store_append( store, &iter );
 		gtk_list_store_set( store, &iter, 0, _("Original image"), -1 );
 	}
-	gtk_combo_box_set_active( GTK_COMBO_BOX( img_struct->placing_video ), 0 );
-	g_signal_connect( G_OBJECT( img_struct->placing_video ), "changed",
+	gtk_combo_box_set_active( GTK_COMBO_BOX( img_struct->sub_placing ), 1 );
+	g_signal_connect( G_OBJECT( img_struct->sub_placing ), "changed",
 					  G_CALLBACK( img_placing_changed ), img_struct );
 					 
 	a_hbox = gtk_hbox_new(FALSE, 6);
@@ -870,8 +870,8 @@ img_window_struct *img_create_window (void)
 	gtk_misc_set_alignment( GTK_MISC( a_label ), 0, 0.5 );
 	gtk_box_pack_start( GTK_BOX( a_hbox ), a_label, TRUE, TRUE, 0 );
 
-	img_struct->text_pos_button = img_table_button_new();
-	gtk_box_pack_start( GTK_BOX( a_hbox ), img_struct->text_pos_button,
+	img_struct->sub_pos = img_table_button_new();
+	gtk_box_pack_start( GTK_BOX( a_hbox ), img_struct->sub_pos,
 						FALSE, FALSE, 0 );
 	{
 		/* Load position icons */
@@ -890,14 +890,14 @@ img_window_struct *img_create_window (void)
 		}
 		g_free( path );
 
-		img_table_button_set_pixbufs( IMG_TABLE_BUTTON( img_struct->text_pos_button ),
+		img_table_button_set_pixbufs( IMG_TABLE_BUTTON( img_struct->sub_pos ),
 									  9, pixs );
 
 		for( i = 0; i < 9; i++ )
 			g_object_unref( G_OBJECT( pixs[i] ) );
 	}
-	img_table_button_set_active_item( IMG_TABLE_BUTTON( img_struct->text_pos_button ), 4 );
-	g_signal_connect( G_OBJECT( img_struct->text_pos_button ), "active-item-changed",
+	img_table_button_set_active_item( IMG_TABLE_BUTTON( img_struct->sub_pos ), 4 );
+	g_signal_connect( G_OBJECT( img_struct->sub_pos ), "active-item-changed",
 					  G_CALLBACK( img_text_pos_changed ), img_struct );
 
 	/* Background music frame */
@@ -1090,6 +1090,9 @@ img_window_struct *img_create_window (void)
 	/* Disable all Ken Burns controls */
 	img_ken_burns_update_sensitivity( img_struct, FALSE, 0 );
 
+	/* Disable all subtitle controls */
+	img_subtitle_update_sensitivity( img_struct, 0 );
+
 	return img_struct;
 }
 
@@ -1214,6 +1217,9 @@ void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *im
 		/* Disable Ken Burns controls */
 		img_ken_burns_update_sensitivity( img, FALSE, 0 );
 
+		/* Disable subtitle controls */
+		img_subtitle_update_sensitivity( img, 0 );
+
 		return;
 	}
 
@@ -1278,6 +1284,7 @@ void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *im
 	{
 		img_set_statusbar_message(img,nr_selected);
 		img_ken_burns_update_sensitivity( img, FALSE, 0 );
+		img_subtitle_update_sensitivity( img, 2 );
 	}
 	else
 	{
@@ -1286,6 +1293,7 @@ void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *im
 		g_free(slide_info_msg);
 
 		img_ken_burns_update_sensitivity( img, TRUE, info_slide->no_points );
+		img_subtitle_update_sensitivity( img, 1 );
 	}
 
 	if( img->current_image )
@@ -1755,8 +1763,6 @@ img_subtitle_update( img_window_struct *img )
 							3, FALSE, -1 );
 	}
 
-	/* Add text indicator to the thumb */
-
 	/* If font_desc and anim fields are not set, get values from
 	 * proper widgets */
 	if( ! img->current_slide->anim )
@@ -1764,10 +1770,10 @@ img_subtitle_update( img_window_struct *img )
 		/* FIXME: Animation duration should be set here too */
 
 		/* Set font properties */
-		img_text_font_set( GTK_FONT_BUTTON( img->font_button ), img );
+		img_text_font_set( GTK_FONT_BUTTON( img->sub_font ), img );
 
 		/* Set animation function */
-		img_text_anim_set( GTK_COMBO_BOX( img->text_animation_combo ), img );
+		img_text_anim_set( GTK_COMBO_BOX( img->sub_anim ), img );
 	}
 
 	/* Queue redraw */
@@ -1816,15 +1822,14 @@ static void
 img_text_font_set( GtkFontButton     *button,
 				   img_window_struct *img )
 {
-	const gchar *string;
+	const gchar          *string;
+	PangoFontDescription *font_desc;
 	
 	string = gtk_font_button_get_font_name( button );
+	font_desc = pango_font_description_from_string( string );
 
-	if( img->current_slide->font_desc )
-		pango_font_description_free( img->current_slide->font_desc );
-
-	img->current_slide->font_desc =
-				pango_font_description_from_string( string );
+	img_update_sub_properties( img, NULL, 0, 0, 0, 0, font_desc,
+							   NULL, IMG_MASK_FONT_DESC );
 
 	gtk_widget_queue_draw( img->image_area );
 }
@@ -1833,14 +1838,21 @@ static void
 img_text_anim_set( GtkComboBox       *combo,
 				   img_window_struct *img )
 {
-	GtkTreeModel *model;
-	GtkTreeIter   iter;
+	GtkTreeModel      *model;
+	GtkTreeIter        iter;
+	TextAnimationFunc *anim;
+	gint               anim_id;
 
 	model = gtk_combo_box_get_model( combo );
 	gtk_combo_box_get_active_iter( combo, &iter );
-	gtk_tree_model_get( model, &iter, 1, &img->current_slide->anim,
-									  2, &img->current_slide->anim_id,
-									  -1 );
+	gtk_tree_model_get( model, &iter, 1, &anim, 2, &anim_id, -1 );
+
+	img_update_sub_properties( img, anim, anim_id, 0, 0, 0, NULL,
+							   NULL, IMG_MASK_ANIM );
+
+	/* Speed should be disabled when None is in effect */
+	gtk_widget_set_sensitive( img->sub_anim_duration,
+							  (gboolean)gtk_combo_box_get_active( combo ) );
 
 	gtk_widget_queue_draw( img->image_area );
 }
@@ -1851,14 +1863,18 @@ img_font_color_changed( GtkColorButton    *button,
 {
 	GdkColor color;
 	guint16  alpha;
+	gdouble  font_color[4];
 
 	gtk_color_button_get_color( button, &color );
 	alpha = gtk_color_button_get_alpha( button  );
 
-	img->current_slide->font_color[0] = (gdouble)color.red   / 0xffff;
-	img->current_slide->font_color[1] = (gdouble)color.green / 0xffff;
-	img->current_slide->font_color[2] = (gdouble)color.blue  / 0xffff;
-	img->current_slide->font_color[3] = (gdouble)alpha       / 0xffff;
+	font_color[0] = (gdouble)color.red   / 0xffff;
+	font_color[1] = (gdouble)color.green / 0xffff;
+	font_color[2] = (gdouble)color.blue  / 0xffff;
+	font_color[3] = (gdouble)alpha       / 0xffff;
+
+	img_update_sub_properties( img, NULL, 0, 0, 0, 0, NULL,
+							   font_color, IMG_MASK_FONT_COLOR );
 
 	gtk_widget_queue_draw( img->image_area );
 }
@@ -1877,7 +1893,8 @@ img_text_pos_changed( ImgTableButton    *button,
 	/* NOTE: This can be done because we know how items are packed into table
 	 * button. For safety measures and future expandability, this should be
 	 * converted into switch statement. */
-	img->current_slide->position = item;
+	img_update_sub_properties( img, NULL, 0, 0, item, 0, NULL,
+							   NULL, IMG_MASK_POS );
 
 	gtk_widget_queue_draw( img->image_area );
 }
@@ -1886,10 +1903,15 @@ static void
 img_placing_changed( GtkComboBox   *combo,
 					 img_window_struct *img )
 {
+	ImgRelPlacing placing;
+
 	if( gtk_combo_box_get_active(combo) == 0 )
-		img->current_slide->placing = IMG_REL_PLACING_EXPORTED_VIDEO;
+		placing = IMG_REL_PLACING_EXPORTED_VIDEO;
 	else
-		img->current_slide->placing = IMG_REL_PLACING_ORIGINAL_IMAGE;
+		placing = IMG_REL_PLACING_ORIGINAL_IMAGE;
+
+	img_update_sub_properties( img, NULL, 0, 0, 0, placing, NULL,
+							   NULL, IMG_MASK_PLACING );
 
 	gtk_widget_queue_draw( img->image_area );
 }
@@ -1955,5 +1977,106 @@ img_ken_burns_update_sensitivity( img_window_struct *img,
 		case 3: /* Disable all */
 			break;
 	}
+}
+
+void
+img_subtitle_update_sensitivity( img_window_struct *img,
+								 gint               mode )
+{
+	/* Modes:
+	 *  0 - disable all
+	 *  1 - enable all
+	 *  2 - enable all but text field
+	 */
+
+	/* Text view is special, since it cannot handle multiple slides */
+	gtk_widget_set_sensitive( img->sub_textview,
+							  ( mode == 2 ? FALSE : (gboolean)mode ) );
+
+	/* Animation duration is also special, since it shoudl be disabled when None
+	 * animation is selected. */
+	if( gtk_combo_box_get_active( GTK_COMBO_BOX( img->sub_anim ) ) && mode )
+		gtk_widget_set_sensitive( img->sub_anim_duration, TRUE );
+	else
+		gtk_widget_set_sensitive( img->sub_anim_duration, FALSE );
+
+	/* All other controls are simple */
+	gtk_widget_set_sensitive( img->sub_font,    (gboolean)mode );
+	gtk_widget_set_sensitive( img->sub_color,   (gboolean)mode );
+	gtk_widget_set_sensitive( img->sub_anim,    (gboolean)mode );
+	gtk_widget_set_sensitive( img->sub_placing, (gboolean)mode );
+	gtk_widget_set_sensitive( img->sub_pos,     (gboolean)mode );
+}
+
+void
+img_update_sub_properties( img_window_struct    *img,
+						   TextAnimationFunc    *anim,
+						   gint                  anim_id,
+						   gint                  anim_duration,
+						   ImgSubPos             position,
+						   ImgRelPlacing         placing,
+						   PangoFontDescription *desc,
+						   gdouble              *color,
+						   guint                 mask )
+{
+	GList        *selected,
+				 *tmp;
+	GtkTreeIter   iter;
+	GtkTreeModel *model;
+
+	/* Get all selected slides */
+	selected = gtk_icon_view_get_selected_items(
+					GTK_ICON_VIEW( img->thumbnail_iconview ) );
+	if( ! selected )
+		return;
+
+	model = GTK_TREE_MODEL( img->thumbnail_model );
+
+	for( tmp = selected; tmp; tmp = g_list_next( tmp ) )
+	{
+		slide_struct *slide;
+
+		gtk_tree_model_get_iter( model, &iter, (GtkTreePath *)tmp->data );
+		gtk_tree_model_get( model, &iter, 1, &slide, -1 );
+		
+		/* Set animation */
+		if( mask & IMG_MASK_ANIM )
+		{
+			slide->anim = anim;
+			slide->anim_id = anim_id;
+		}
+		
+		/* Set duration of animation */
+		if( mask & IMG_MASK_ANIM_DUR )
+			slide->anim_duration = anim_duration;
+		
+		/* Set subtitle position */
+		if( mask & IMG_MASK_POS )
+			slide->position = position;
+		
+		/* Set placing */
+		if( mask & IMG_MASK_PLACING )
+			slide->placing = placing;
+		
+		/* Set font desc */
+		if( mask & IMG_MASK_FONT_DESC )
+		{
+			if( slide->font_desc )
+				pango_font_description_free( slide->font_desc );
+			slide->font_desc = desc;
+		}
+		
+		/* Set font color */
+		if( mask & IMG_MASK_FONT_COLOR )
+		{
+			slide->font_color[0] = color[0];
+			slide->font_color[1] = color[1];
+			slide->font_color[2] = color[2];
+			slide->font_color[3] = color[3];
+		}
+	}
+
+	g_list_foreach( selected, (GFunc)gtk_tree_path_free, NULL );
+	g_list_free( selected );
 }
 

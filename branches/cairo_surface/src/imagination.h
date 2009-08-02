@@ -174,15 +174,9 @@ struct _img_window_struct
 	GtkWidget	*total_time_data;
 	GtkWidget	*filename_data;
 	GtkTextBuffer *slide_text_buffer;
-	GtkWidget	*text_animation_combo;
-	GtkWidget   *font_button;
-	GtkWidget   *font_color;
 	GtkWidget	*scrolled_win;
 	GtkWidget	*expand_button;
 	GtkWidget   *text_pos_button;
-	GtkWidget   *anim_duration;
-	GtkWidget   *placing_video;
-	GtkWidget   *placing_image;
   	GtkWidget	*thumbnail_iconview;
   	GtkWidget	*statusbar;
   	GtkWidget	*progress_bar;
@@ -201,6 +195,15 @@ struct _img_window_struct
 	GtkWidget *ken_add;      /* Add stop point button */
 	GtkWidget *ken_update;   /* Update stop point button */
 	GtkWidget *ken_remove;   /* Remove stop point button */
+
+	/* Subtitle related controls */
+	GtkWidget *sub_textview;      /* Text view */
+	GtkWidget *sub_font;          /* Font button */
+	GtkWidget *sub_color;         /* Color selector button */
+	GtkWidget *sub_anim;          /* Animation combo box */
+	GtkWidget *sub_anim_duration; /* Animation duration spin button */
+	GtkWidget *sub_placing;       /* Placing combo box */
+	GtkWidget *sub_pos;           /* Position selector button */
 
 	/* Import slides dialog variables */
 	GtkWidget	*dim_label;

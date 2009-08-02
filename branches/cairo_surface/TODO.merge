@@ -11,7 +11,7 @@ SUBTITLE RELATED:
     depends on finished 1.
 		Status: FINISHED!
 3.  Add word wrapping to subtitle function.
-		Status: FINISHED!
+		Status: In reconsideration.
 4.  Add subtitle related data to save/load procedures.
 		Status: Waiting on 2.
 5.  Add some simple text animation functions.
@@ -24,9 +24,9 @@ SUBTITLE RELATED:
 
 KEN BURNS RELATED:
 8.  Add proper enabling/disabling of sidebar controls.
-		Status: Not started yet.
+		Status: FINISHED!
 9.  Check proper updating od sidebar controls when selecting/deselecting slides.
-		Status: Not started yet.
+		Status: FINISHED!
 
 BACKEND CHANGE RELATED:
 10. Test all transition effects (ellipse wipes are behaving strange).
@@ -124,6 +124,15 @@ Ad 6.:
 	 - more than one slide is selected (Tadej is not completely sure about this
 	   one: should we leave the option to add the same subtitle to many slides
 	   in one go?)
+
+	 AGREEMENT:
+	 Subtitle controls will be disabled in following conditions:
+	  - no slide is selected
+		-> disable all
+	  - single slide is selected
+		-> enable all
+	  - multiple slides are selected
+		-> enable all except text field
 
 Ad 7.:
 	When slide with subtitle already present is selected, controls should be
