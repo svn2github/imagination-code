@@ -259,6 +259,7 @@ void img_load_slideshow(img_window_struct *img)
 		gsize length;
 		gint anim_id,anim_duration, text_pos, placing;
 		PangoFontDescription *font_desc;
+		GdkPixbuf *pix;
 	
 		color = g_key_file_get_double_list( img_key_file, "slideshow settings",
 											"background color", NULL, NULL );
@@ -304,16 +305,25 @@ void img_load_slideshow(img_window_struct *img)
 				/* Get the mem address of the transition */
 				spath = (gchar *)g_hash_table_lookup( table, GINT_TO_POINTER( transition_id ) );
 				gtk_tree_model_get_iter_from_string( model, &iter, spath );
-				gtk_tree_model_get( model, &iter, 2, &render, -1 );
+				gtk_tree_model_get( model, &iter, 2, &render, 0, &pix, -1 );
 				slide_info = img_set_slide_info( duration, speed, render, transition_id, spath, slide_filename, my_points, length);
 
 				if (slide_info && subtitle)
 					img_set_slide_text_info (img, slide_info, subtitle, anim_id, anim_duration, text_pos, placing, font_desc, font_color);
+				else
+					slide_info->has_subtitle = FALSE;
+
 				if( slide_info )
 				{
 					gtk_list_store_append( img->thumbnail_model, &iter );
-					gtk_list_store_set( img->thumbnail_model, &iter, 0, thumb, 1, slide_info, -1 );
+					gtk_list_store_set( img->thumbnail_model, &iter,
+										0, thumb,
+										1, slide_info,
+										2, pix,
+										3, slide_info->has_subtitle,
+										-1 );
 					g_object_unref( G_OBJECT( thumb ) );
+					g_object_unref( G_OBJECT( pix ) );
 
 					/* If we're loading the first slide, apply some of it's
 				 	* data to final pseudo-slide */

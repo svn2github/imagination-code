@@ -1840,7 +1840,7 @@ img_text_anim_set( GtkComboBox       *combo,
 {
 	GtkTreeModel      *model;
 	GtkTreeIter        iter;
-	TextAnimationFunc *anim;
+	TextAnimationFunc  anim;
 	gint               anim_id;
 
 	model = gtk_combo_box_get_model( combo );
@@ -2029,7 +2029,7 @@ img_subtitle_update_sensitivity( img_window_struct *img,
 
 void
 img_update_sub_properties( img_window_struct    *img,
-						   TextAnimationFunc    *anim,
+						   TextAnimationFunc     anim,
 						   gint                  anim_id,
 						   gint                  anim_duration,
 						   ImgSubPos             position,

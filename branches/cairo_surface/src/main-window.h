@@ -53,7 +53,7 @@ img_subtitle_update_sensitivity( img_window_struct *img,
 
 void
 img_update_sub_properties( img_window_struct    *img,
-						   TextAnimationFunc    *anim,
+						   TextAnimationFunc     anim,
 						   gint                  anim_id,
 						   gint                  anim_duration,
 						   ImgSubPos             position,

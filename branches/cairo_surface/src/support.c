@@ -332,9 +332,23 @@ void img_set_slide_text_info (	img_window_struct *img,
 								PangoFontDescription *font_desc,
 								gdouble *font_color)
 {
+	GtkTreeModel      *model;
+	GtkTreeIter        iter;
+	gchar             *path;
+	TextAnimationFunc  func;
+
+	
+	model = gtk_combo_box_get_model( GTK_COMBO_BOX( img->sub_anim ) );
+	path = g_strdup_printf( "%d", anim_id );
+	gtk_tree_model_get_iter_from_string( model, &iter, path );
+	g_free( path );
+	gtk_tree_model_get( model, &iter, 1, &func, -1 );
+
 	/* Set the slide text info parameters */
-	slide_info->subtitle	  = g_strdup(subtitle);
-	slide_info->font_desc	  = font_desc;								
+	slide_info->has_subtitle  = TRUE;
+	slide_info->subtitle	  = g_strdup( subtitle );
+	slide_info->font_desc	  = font_desc;
+	slide_info->anim          = func;
 	slide_info->anim_id		  = anim_id;
 	slide_info->anim_duration = anim_duration;
 	slide_info->position	  = position;
