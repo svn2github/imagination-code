@@ -322,6 +322,29 @@ slide_struct *img_set_slide_info(gint duration, guint speed, ImgRender render, g
 	return slide_info;
 }
 
+void img_set_slide_text_info (	img_window_struct *img,
+								slide_struct *slide_info,
+								gchar 	*subtitle,
+								gint	anim_id,
+								gint	anim_duration,
+								gint	position,
+								gint	placing,
+								PangoFontDescription *font_desc,
+								gdouble *font_color)
+{
+	/* Set the slide text info parameters */
+	slide_info->subtitle	  = g_strdup(subtitle);
+	slide_info->font_desc	  = font_desc;								
+	slide_info->anim_id		  = anim_id;
+	slide_info->anim_duration = anim_duration;
+	slide_info->position	  = position;
+	slide_info->placing		  = placing;
+	slide_info->font_color[0] = font_color[0];
+	slide_info->font_color[1] = font_color[1];
+	slide_info->font_color[2] = font_color[2];
+	slide_info->font_color[3] = font_color[3];
+}								
+
 void
 img_free_slide_struct( slide_struct *entry )
 {

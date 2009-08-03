@@ -140,7 +140,7 @@ void img_load_slideshow(img_window_struct *img)
 	void (*render);
 	GHashTable *table;
 	gchar      *spath, *conf;
-	gdouble    *color;
+	gdouble    *color, *font_color;
 	gboolean    old_file = FALSE;
 
 	img_key_file = g_key_file_new();
@@ -254,9 +254,12 @@ void img_load_slideshow(img_window_struct *img)
 	}
 	else
 	{
+		gchar *subtitle = NULL, *string = NULL;
 		gdouble *my_points = NULL;
 		gsize length;
-
+		gint anim_id,anim_duration, text_pos, placing;
+		PangoFontDescription *font_desc;
+	
 		color = g_key_file_get_double_list( img_key_file, "slideshow settings",
 											"background color", NULL, NULL );
 		img->background_color[0] = color[0];
@@ -280,18 +283,32 @@ void img_load_slideshow(img_window_struct *img)
 				transition_id = g_key_file_get_integer(img_key_file, conf, "transition_id", NULL);
 				speed 		  =	g_key_file_get_integer(img_key_file, conf, "speed",	NULL);
 				no_points	  =	g_key_file_get_integer(img_key_file, conf, "no_points",	NULL);
-				
+				subtitle	  =	g_key_file_get_string (img_key_file, conf, "text",	NULL);
 				/* Load the stop points if any */
 				if (no_points > 0)
 					my_points = g_key_file_get_double_list(img_key_file, conf, "points", &length, NULL);
 				else
 					my_points = NULL;
-
+				/* Load the slide text info if any */
+				if (subtitle)
+				{
+					anim_id 	  = g_key_file_get_integer(img_key_file, conf, "anim id", 		NULL);
+					anim_duration = g_key_file_get_integer(img_key_file, conf, "anim duration",	NULL);
+					text_pos      = g_key_file_get_integer(img_key_file, conf, "text pos",		NULL);
+					placing 	  = g_key_file_get_integer(img_key_file, conf, "placing",		NULL);
+					string 		  = g_key_file_get_string (img_key_file, conf, "font", 			NULL);
+					font_desc 	  = pango_font_description_from_string(string);
+					g_free(string);
+					font_color 	  = g_key_file_get_double_list(img_key_file, conf, "font color", NULL, NULL );
+				}
 				/* Get the mem address of the transition */
 				spath = (gchar *)g_hash_table_lookup( table, GINT_TO_POINTER( transition_id ) );
 				gtk_tree_model_get_iter_from_string( model, &iter, spath );
 				gtk_tree_model_get( model, &iter, 2, &render, -1 );
-				slide_info = img_set_slide_info( duration, speed, render, transition_id, spath, slide_filename, my_points, length );
+				slide_info = img_set_slide_info( duration, speed, render, transition_id, spath, slide_filename, my_points, length);
+
+				if (slide_info && subtitle)
+					img_set_slide_text_info (img, slide_info, subtitle, anim_id, anim_duration, text_pos, placing, font_desc, font_color);
 				if( slide_info )
 				{
 					gtk_list_store_append( img->thumbnail_model, &iter );
@@ -312,6 +329,8 @@ void img_load_slideshow(img_window_struct *img)
 
 			img_increase_progressbar(img, i);
 			g_free(slide_filename);
+			if (subtitle)
+				g_free(subtitle);
 			g_free(conf);
 		}
 	}

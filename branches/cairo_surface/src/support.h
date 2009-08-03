@@ -59,5 +59,6 @@ void img_load_available_transitions(img_window_struct *);
 void img_show_file_chooser(SexyIconEntry *, SexyIconEntryPosition, int, img_window_struct *);
 GdkPixbuf *img_load_pixbuf_from_file(gchar *);
 slide_struct *img_set_slide_info(gint , guint , ImgRender, gint, gchar *, gchar *, gdouble *, gsize);
+void img_set_slide_text_info (img_window_struct *, slide_struct *, gchar *, gint, gint, gint, gint, PangoFontDescription *, gdouble *);
 void img_free_slide_struct( slide_struct * );
 #endif
