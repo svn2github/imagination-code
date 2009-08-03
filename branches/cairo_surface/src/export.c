@@ -89,7 +89,7 @@ img_get_exporters_list( Exporter **exporters )
 	/* Populate list with data */
 	list[i].description = g_strdup( "VOB (DVD video)" );
 	list[i++].func = G_CALLBACK( img_exporter_vob );
-	list[i].description = g_strdup( "OGG (Theora/Vorbis)" );
+	list[i].description = g_strdup( "OGV (Theora/Vorbis)" );
 	list[i++].func = G_CALLBACK( img_exporter_ogg );
 	list[i].description = g_strdup( "FLV (Flash video)" );
 	list[i++].func = G_CALLBACK( img_exporter_flv );

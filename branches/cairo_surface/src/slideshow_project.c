@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2009 Giuseppe Torelli - <colossus73@gmail.com>
+ *  Copyright (C) 2009 Giuseppe Torelli <colossus73@gmail.com>
  *  Copyright (c) 2009 Tadej Borovšak 	<tadeboro@gmail.com>
  * 
  *  This program is free software; you can redistribute it and/or modify
@@ -75,6 +75,18 @@ void img_save_slideshow(img_window_struct *img)
 				point_counter++;
 			}
 			g_key_file_set_double_list(img_key_file,conf, "points", my_points, (gsize) entry->no_points * 4);
+		}
+		if( entry->has_subtitle )
+		{
+			gchar *string = pango_font_description_to_string(entry->font_desc);
+			g_key_file_set_string (img_key_file, conf,"text",			entry->subtitle);
+			g_key_file_set_integer(img_key_file,conf, "anim id",		entry->anim_id);
+			g_key_file_set_integer(img_key_file,conf, "anim duration",	entry->anim_duration);
+			g_key_file_set_integer(img_key_file,conf, "text pos",		entry->position);
+			g_key_file_set_integer(img_key_file,conf, "placing",		entry->placing);
+			g_key_file_set_string (img_key_file, conf,"font",			string);
+			g_key_file_set_double_list(img_key_file, conf,"font color",entry->font_color,4);
+			g_free(string);
 		}
 		g_free(conf);
 	}
