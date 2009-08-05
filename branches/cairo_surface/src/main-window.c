@@ -124,12 +124,15 @@ img_window_struct *img_create_window (void)
 	GtkWidget *separatortoolitem;
 	GtkWidget *toolbutton_slide_goto;
 	GtkWidget *first_slide, *last_slide, *prev_slide, *next_slide, *label_of;
+	GtkWidget *notebook;
+	GtkWidget *video_tab;
+	GtkWidget *audio_tab;
 	GtkWidget *hbox;
 	GtkWidget *swindow, *scrollable_window;
 	GtkWidget *viewport;
 	GtkWidget *align;
 	GtkWidget *image_area_frame;
-	GtkWidget *vbox_frames, *frame1_alignment, *frame2_alignment, *frame3_alignment,*frame4_alignment;
+	GtkWidget *vbox_frames, *vbox_audio_frames, *frame1_alignment, *frame2_alignment, *frame3_alignment,*frame4_alignment;
 	GtkWidget *frame1, *frame2, *frame3, *frame4, *frame_label;
 	GtkWidget *transition_label;
 	GtkWidget *vbox_info_slide, *vbox_slide_motion, *vbox_slide_caption;
@@ -531,7 +534,6 @@ img_window_struct *img_create_window (void)
 	align = gtk_event_box_new();
 	gtk_container_add(GTK_CONTAINER(image_area_frame), align);
 
-	/* TB_EDITS */
 	img_struct->image_area = gtk_drawing_area_new();
 	gtk_widget_set_size_request(img_struct->image_area, 720, 576);
 	gtk_container_add(GTK_CONTAINER(align), img_struct->image_area);
@@ -552,7 +554,11 @@ img_window_struct *img_create_window (void)
 	scrollable_window = gtk_scrolled_window_new(NULL, NULL);
 	g_object_set (G_OBJECT (scrollable_window),"hscrollbar-policy",GTK_POLICY_AUTOMATIC,"vscrollbar-policy",GTK_POLICY_AUTOMATIC,NULL);
 	gtk_scrolled_window_add_with_viewport (GTK_SCROLLED_WINDOW (scrollable_window), vbox_frames);
-	gtk_paned_add2( GTK_PANED( hbox ), scrollable_window );
+	
+	video_tab = gtk_label_new (_("Video"));
+	notebook = gtk_notebook_new();
+	gtk_paned_add2(GTK_PANED (hbox),notebook);
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), scrollable_window, video_tab);
 	gtk_paned_set_position( GTK_PANED( hbox ), 650 );
 
 	viewport = gtk_bin_get_child(GTK_BIN(scrollable_window));
@@ -893,13 +899,18 @@ img_window_struct *img_create_window (void)
 					  G_CALLBACK( img_text_pos_changed ), img_struct );
 
 	/* Background music frame */
+	audio_tab = gtk_label_new (_("Audio"));
+	vbox_audio_frames = gtk_vbox_new(FALSE, 0);
+	gtk_container_set_border_width(GTK_CONTAINER(vbox_audio_frames), 10);
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), vbox_audio_frames, audio_tab);
+
 	frame3 = gtk_frame_new (NULL);
-	gtk_box_pack_start (GTK_BOX (vbox_frames), frame3, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (vbox_audio_frames), frame3, FALSE, FALSE, 0);
 	gtk_frame_set_shadow_type (GTK_FRAME (frame3), GTK_SHADOW_OUT);
 
 	frame3_alignment = gtk_alignment_new (0.5, 0.5, 1, 1);
 	gtk_container_add (GTK_CONTAINER (frame3), frame3_alignment);
-	gtk_alignment_set_padding (GTK_ALIGNMENT (frame3_alignment), 5, 5, 5, 5);
+	gtk_alignment_set_padding (GTK_ALIGNMENT (frame3_alignment), 2, 2, 5, 5);
 
 	frame_label = gtk_label_new (_("<b>Background Music</b>"));
 	gtk_frame_set_label_widget (GTK_FRAME (frame3), frame_label);
@@ -907,7 +918,7 @@ img_window_struct *img_create_window (void)
 	gtk_misc_set_padding (GTK_MISC (frame_label), 2, 2);
 
 	/* Add the liststore */
-	vbox2 = gtk_vbox_new (FALSE, 2);
+	vbox2 = gtk_vbox_new (FALSE, 5);
 	gtk_container_add (GTK_CONTAINER (frame3_alignment), vbox2);
 	gtk_container_set_border_width (GTK_CONTAINER (vbox2), 0);
 	
@@ -915,7 +926,7 @@ img_window_struct *img_create_window (void)
 	gtk_box_pack_start (GTK_BOX (vbox2), scrolledwindow1, FALSE, FALSE, 0);
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow1), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (scrolledwindow1), GTK_SHADOW_IN);
-	gtk_widget_set_size_request(scrolledwindow1, -1, 73);
+	gtk_widget_set_size_request(scrolledwindow1, -1, 373);
 
 	img_struct->music_file_liststore = gtk_list_store_new (4, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_INT);
 	g_signal_connect (G_OBJECT (img_struct->music_file_liststore), "row-inserted",	G_CALLBACK (img_activate_remove_button_music_liststore) , img_struct);
