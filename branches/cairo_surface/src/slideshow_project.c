@@ -380,6 +380,9 @@ void img_load_slideshow(img_window_struct *img)
 	g_free(dummy);
 
 	g_hash_table_destroy( table );
+	
+	/* Select the first slide */
+	img_goto_first_slide(NULL, img);
 }
 
 static gboolean img_populate_hash_table( GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, GHashTable **table )

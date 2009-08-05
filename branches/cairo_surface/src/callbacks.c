@@ -70,13 +70,14 @@ void img_add_slides_thumbnails(GtkMenuItem *item, img_window_struct *img)
 	GdkPixbuf *thumb;
 	GtkTreeIter iter;
 	slide_struct *slide_info;
-	gint slides_cnt = 0;
+	gint slides_cnt = 0, actual_slides = 0;
 
 	slides = img_import_slides_file_chooser(img);
 
 	if (slides == NULL)
 		return;
 
+	actual_slides = img->slides_nr;
 	img->slides_nr += g_slist_length(slides);
 	gtk_widget_show(img->progress_bar);
 
@@ -116,6 +117,23 @@ void img_add_slides_thumbnails(GtkMenuItem *item, img_window_struct *img)
 	gtk_icon_view_set_model( GTK_ICON_VIEW( img->thumbnail_iconview ),
 							 GTK_TREE_MODEL( img->thumbnail_model ) );
 	g_object_unref( G_OBJECT( img->thumbnail_model ) );
+	
+	/* Select the first slide */
+	if (actual_slides == 0)
+		img_goto_first_slide(NULL, img);
+	/* Select the first loaded slide if a previous set of slides was loaded */
+	else
+	{
+		GtkTreePath *path;
+
+		gtk_icon_view_unselect_all(GTK_ICON_VIEW (img->thumbnail_iconview));
+		path = gtk_tree_path_new_from_indices(actual_slides, -1);
+		gtk_icon_view_set_cursor (GTK_ICON_VIEW (img->thumbnail_iconview), path, NULL, FALSE);
+		gtk_icon_view_select_path (GTK_ICON_VIEW (img->thumbnail_iconview), path);
+		gtk_icon_view_scroll_to_path (GTK_ICON_VIEW (img->thumbnail_iconview), path, FALSE, 0, 0);
+		gtk_tree_path_free (path);
+	}
+	
 }
 
 void img_increase_progressbar(img_window_struct *img, gint nr)
@@ -961,9 +979,9 @@ void img_goto_next_slide(GtkWidget *button, img_window_struct *img)
 		return;
 
 	gtk_icon_view_unselect_all(GTK_ICON_VIEW (img->thumbnail_iconview));
-	path = gtk_tree_path_new_from_indices(++slide_nr,-1);
+	path = gtk_tree_path_new_from_indices(++slide_nr, -1);
 
-	slide = g_strdup_printf("%d", slide_nr+1);
+	slide = g_strdup_printf("%d", slide_nr + 1);
 	gtk_entry_set_text(GTK_ENTRY(img->slide_number_entry), slide);
 	g_free(slide);
 	gtk_icon_view_set_cursor (GTK_ICON_VIEW (img->thumbnail_iconview), path, NULL, FALSE);
