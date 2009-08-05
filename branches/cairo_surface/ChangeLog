@@ -1,7 +1,10 @@
 Imagination changelog
 
 xx/09/09 - 2.0:
+			- Added icons on the slides for indicating the transition type and if text is set on the slide.
+			- Added ability to add text on the slides.
 			- Added HTML documentation.
+			- Added Ken Burn effects.
 			- Made GUI work better on smaller screens.
 			- Added russian translation.	
 			- Changed suffix for exported OGG Theora/Vorbis slideshow to ".ogv".
