@@ -1966,6 +1966,60 @@ img_update_stop_display( img_window_struct *img,
 	gtk_widget_queue_draw( img->image_area );
 }
 
+void
+img_update_subtitles_widgets( img_window_struct *img )
+{
+	gchar *string = NULL;
+	GdkColor color;
+	GtkTextIter iter;
+
+	if (img->current_slide->has_subtitle)
+	{
+		gtk_text_buffer_get_iter_at_offset (GTK_TEXT_BUFFER(img->slide_text_buffer), &iter, 0);
+		gtk_text_buffer_insert(GTK_TEXT_BUFFER(img->slide_text_buffer), &iter, img->current_slide->subtitle, strlen(img->current_slide->subtitle) );
+
+		string = pango_font_description_to_string(img->current_slide->font_desc);	
+		gtk_font_button_set_font_name(GTK_FONT_BUTTON(img->sub_font), string);
+		g_free(string);
+
+		color.red   = img->current_slide->font_color[0] * 0xffff;
+		color.green = img->current_slide->font_color[1] * 0xffff;
+		color.blue  = img->current_slide->font_color[2] * 0xffff;
+		gtk_color_button_set_color(GTK_COLOR_BUTTON(img->sub_color), &color); 
+
+		g_signal_handlers_block_by_func((gpointer)img->sub_anim, (gpointer)img_text_anim_set, img);
+			gtk_combo_box_set_active(GTK_COMBO_BOX(img->sub_anim), img->current_slide->anim_id);
+		g_signal_handlers_unblock_by_func((gpointer)img->sub_anim, (gpointer)img_text_anim_set, img);
+
+		g_signal_handlers_block_by_func((gpointer)img->sub_anim_duration, (gpointer)img_combo_box_anim_speed_changed, img);
+			gtk_combo_box_set_active(GTK_COMBO_BOX(img->sub_anim_duration),	img->current_slide->anim_duration - 1);
+		g_signal_handlers_unblock_by_func((gpointer)img->sub_anim_duration, (gpointer)img_combo_box_anim_speed_changed, img);
+
+		gtk_combo_box_set_active(GTK_COMBO_BOX(img->sub_placing), img->current_slide->placing);
+		
+		img_table_button_set_active_item( IMG_TABLE_BUTTON( img->sub_pos ), img->current_slide->position );
+	}
+	else
+	{
+		/* Set the default values */
+		GtkTextIter start, end;
+		gtk_text_buffer_get_start_iter(GTK_TEXT_BUFFER(img->slide_text_buffer), &start);
+		gtk_text_buffer_get_end_iter  (GTK_TEXT_BUFFER(img->slide_text_buffer), &end);
+		gtk_text_buffer_delete        (GTK_TEXT_BUFFER(img->slide_text_buffer), &start, &end);
+		gtk_font_button_set_font_name(GTK_FONT_BUTTON(img->sub_font), "Sans 12");
+	
+		color.red   = 0;
+		color.green = 0;
+		color.blue  = 0;
+		gtk_color_button_set_color(GTK_COLOR_BUTTON(img->sub_color), &color);
+
+		gtk_combo_box_set_active(GTK_COMBO_BOX(img->sub_anim), 0);
+		gtk_combo_box_set_active(GTK_COMBO_BOX(img->sub_anim_duration), 1);
+		gtk_combo_box_set_active(GTK_COMBO_BOX(img->sub_placing), 0);
+		img_table_button_set_active_item( IMG_TABLE_BUTTON( img->sub_pos ), 4 );
+	}
+}
+
 static gint
 img_calc_slide_duration_points( GList *list,
 								gint   length )

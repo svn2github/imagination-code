@@ -95,6 +95,10 @@ img_delete_stop_point( GtkButton         *button,
 void
 img_update_stop_display( img_window_struct *img,
 						 gboolean           update_pos );
+						 
+void
+img_update_subtitles_widgets( img_window_struct * );
+
 void
 img_goto_prev_point( GtkButton         *button,
 					 img_window_struct *img );

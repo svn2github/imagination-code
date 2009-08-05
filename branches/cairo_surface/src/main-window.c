@@ -30,7 +30,7 @@
 
 static const GtkTargetEntry drop_targets[] =
 {
-  { "text/uri-list",0,0 },
+	{ "text/uri-list",0,0 },
 };
 
 /* ****************************************************************************
@@ -82,16 +82,8 @@ img_text_font_set( GtkFontButton     *button,
 				   img_window_struct *img );
 
 static void
-img_text_anim_set( GtkComboBox       *combo,
-				   img_window_struct *img );
-
-static void
 img_font_color_changed( GtkColorButton    *button,
 						img_window_struct *img );
-
-static void
-img_combo_box_anim_speed_changed( GtkComboBox       *combo,
-								  img_window_struct *img );
 
 static void
 img_text_pos_changed( ImgTableButton    *button,
@@ -879,7 +871,7 @@ img_window_struct *img_create_window (void)
 		gint       i;
 		gchar     *path;
 
-		path = g_strconcat( DATADIR, "/imagination/pixmaps/imagination-pos", NULL );
+		path = g_strconcat( "pixmaps/imagination-pos", NULL );
 		for( i = 0; i < 9; i++ )
 		{
 			gchar *file;
@@ -1308,6 +1300,9 @@ void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *im
 
 	/* Update display */
 	img_update_stop_display( img, TRUE );
+
+	/* Update subtitle widgets */
+	img_update_subtitles_widgets( img );
 }
 
 static void img_combo_box_transition_type_changed (GtkComboBox *combo, img_window_struct *img)
@@ -1834,7 +1829,7 @@ img_text_font_set( GtkFontButton     *button,
 	gtk_widget_queue_draw( img->image_area );
 }
 
-static void
+void
 img_text_anim_set( GtkComboBox       *combo,
 				   img_window_struct *img )
 {
@@ -1879,7 +1874,7 @@ img_font_color_changed( GtkColorButton    *button,
 	gtk_widget_queue_draw( img->image_area );
 }
 
-static void
+void
 img_combo_box_anim_speed_changed( GtkComboBox       *combo,
 								  img_window_struct *img )
 {
@@ -2002,6 +1997,8 @@ void
 img_subtitle_update_sensitivity( img_window_struct *img,
 								 gint               mode )
 {
+	GtkTextIter start, end;
+
 	/* Modes:
 	 *  0 - disable all
 	 *  1 - enable all
@@ -2011,6 +2008,15 @@ img_subtitle_update_sensitivity( img_window_struct *img,
 	/* Text view is special, since it cannot handle multiple slides */
 	gtk_widget_set_sensitive( img->sub_textview,
 							  ( mode == 2 ? FALSE : (gboolean)mode ) );
+
+	/* Let's delete the textbuffer when no slide is selected */
+	g_signal_handlers_block_by_func((gpointer)img->slide_text_buffer, (gpointer)img_queue_subtitle_update, img);
+
+	gtk_text_buffer_get_start_iter(GTK_TEXT_BUFFER(img->slide_text_buffer), &start);
+	gtk_text_buffer_get_end_iter(GTK_TEXT_BUFFER(img->slide_text_buffer), &end);
+	gtk_text_buffer_delete(GTK_TEXT_BUFFER(img->slide_text_buffer), &start, &end);
+
+	g_signal_handlers_unblock_by_func((gpointer)img->slide_text_buffer, (gpointer)img_queue_subtitle_update, img);
 
 	/* Animation duration is also special, since it shoudl be disabled when None
 	 * animation is selected. */
@@ -2064,15 +2070,15 @@ img_update_sub_properties( img_window_struct    *img,
 			slide->anim = anim;
 			slide->anim_id = anim_id;
 		}
-		
+
 		/* Set duration of animation */
 		if( mask & IMG_MASK_ANIM_DUR )
 			slide->anim_duration = anim_duration;
-		
+
 		/* Set subtitle position */
 		if( mask & IMG_MASK_POS )
 			slide->position = position;
-		
+
 		/* Set placing */
 		if( mask & IMG_MASK_PLACING )
 			slide->placing = placing;

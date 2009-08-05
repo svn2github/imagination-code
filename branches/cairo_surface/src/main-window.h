@@ -61,4 +61,12 @@ img_update_sub_properties( img_window_struct    *img,
 						   PangoFontDescription *desc,
 						   gdouble              *color,
 						   guint                 mask );
+
+void
+img_combo_box_anim_speed_changed( GtkComboBox       *combo,
+								  img_window_struct *img );
+
+void
+img_text_anim_set( GtkComboBox       *combo,
+				   img_window_struct *img );
 #endif
