@@ -1345,7 +1345,7 @@ static void img_combo_box_transition_type_changed (GtkComboBox *combo, img_windo
 	{
 		GtkTreeIter parent = iter;
 		gtk_tree_model_iter_nth_child( model, &iter, &parent, 0 );
-		gtk_tree_model_get(model, &iter, 2, &address, 3, &transition_id, -1);
+		gtk_tree_model_get(model, &iter, 0, &pix, 2, &address, 3, &transition_id, -1);
 		g_signal_handlers_block_by_func(img->transition_type,
 										img_combo_box_transition_type_changed,
 										img);
