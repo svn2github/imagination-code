@@ -156,6 +156,7 @@ struct _img_window_struct
 {
 	/* Main GUI related variables */
 	GtkWidget	*imagination_window;	// Main window
+	GtkAccelGroup *accel_group;
 	GtkWidget	*open_menu;
 	GtkWidget	*save_menu;
 	GtkWidget	*save_as_menu;
@@ -165,6 +166,7 @@ struct _img_window_struct
 	GtkWidget   *rotate_right_menu;
 	GtkWidget   *rotate_left_button;
 	GtkWidget   *rotate_right_button;
+	GtkWidget	*remove_menu;
 	GtkWidget	*preview_menu;
 	GtkWidget 	*preview_button;
 	GtkWidget	*transition_type;
