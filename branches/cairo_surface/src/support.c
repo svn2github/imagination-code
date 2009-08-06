@@ -261,102 +261,207 @@ GdkPixbuf *img_load_pixbuf_from_file(gchar *filename)
 	return thumb;
 }
 
-slide_struct *img_set_slide_info(gint duration, guint speed, ImgRender render, gint transition_id, gchar *path, gchar *filename, gdouble *stop_point, gsize length)
+slide_struct *
+img_create_new_slide( const gchar *filename )
 {
-	slide_struct    *slide_info = NULL;
-	GdkPixbufFormat *pixbuf_format;
-	gint			width, height;
-	gsize			i;
+	slide_struct    *slide = NULL;
+	GdkPixbufFormat *format;
+	gint             width,
+					 height;
 
-	slide_info = g_slice_new0( slide_struct );
-	if (slide_info)
+	slide = g_slice_new( slide_struct );
+	format = gdk_pixbuf_get_file_info( filename, &width, &height );
+	if( slide && format )
 	{
-		slide_info->duration = duration;
-		slide_info->speed = speed;
-		slide_info->render = render;
-		slide_info->transition_id = transition_id;
-		slide_info->path = g_strdup( path );
-		slide_info->filename = g_strdup(filename);
-		pixbuf_format = gdk_pixbuf_get_file_info(filename,&width,&height);
-		slide_info->resolution = g_strdup_printf("%d x %d",width,height);
-		slide_info->type = gdk_pixbuf_format_get_name(pixbuf_format);
+		/* Common data */
+		slide->filename = g_strdup( filename );
+		slide->original_filename = NULL;
+		slide->resolution = g_strdup_printf( "%d x %d", width, height );
+		slide->type = gdk_pixbuf_format_get_name( format );
 
-		/* Slide Motion */
-		if (stop_point == NULL)
-		{
-			slide_info->points = NULL;
-			slide_info->no_points = 0;
-			slide_info->cur_point = -1;
-		}
-		else
-		{
-			ImgStopPoint *point;
-			for (i = 0; i < length; i += 4)
-			{
-				/* Create new point */
-				/* FIXME: This might be problematic because of the rounding. */
-				point = g_slice_new0( ImgStopPoint );
-				point->time = (gint)stop_point[0 + i];
-				point->offx = (gint)stop_point[1 + i];
-				point->offy = (gint)stop_point[2 + i];
-				point->zoom = 		stop_point[3 + i];
+		/* Still part */
+		slide->duration = 1;
 
-				/* Append it to the list */
-				slide_info->points = g_list_append( slide_info->points, point );
-				slide_info->no_points++;
-			}
-		}
-		/* Subtitle */
-		slide_info->subtitle = NULL;
-		slide_info->has_subtitle = FALSE;
-		slide_info->anim = NULL;
-		slide_info->anim_duration = 1;
-		slide_info->position = IMG_SUB_POS_MIDDLE_CENTER;
-		slide_info->placing = IMG_REL_PLACING_ORIGINAL_IMAGE;
-		slide_info->font_desc = NULL;
-		slide_info->font_color[0] = 0; /* R */
-		slide_info->font_color[1] = 0; /* G */
-		slide_info->font_color[2] = 0; /* B */
-		slide_info->font_color[3] = 1; /* A */
+		/* Transition */
+		slide->path = g_strdup( "0" );
+		slide->transition_id = -1;
+		slide->render = NULL;
+		slide->speed = NORMAL;
+
+		/* Ken Burns */
+		slide->points = NULL;
+		slide->no_points = 0;
+		slide->cur_point = -1;
+
+		/* Subtitles */
+		slide->subtitle = NULL;
+		slide->anim = NULL;
+		slide->anim_id = 0;
+		slide->anim_duration = 2; /* FIXME: Consult about this value */
+		slide->position = IMG_SUB_POS_MIDDLE_CENTER;
+		slide->placing = IMG_REL_PLACING_EXPORTED_VIDEO;
+		slide->font_desc = pango_font_description_from_string( "Sans 12" );
+		slide->font_color[0] = 0; /* R */
+		slide->font_color[1] = 0; /* G */
+		slide->font_color[2] = 0; /* B */
+		slide->font_color[3] = 1; /* A */
 	}
-	return slide_info;
+
+	return( slide );
 }
 
-void img_set_slide_text_info (	img_window_struct *img,
-								slide_struct *slide_info,
-								gchar 	*subtitle,
-								gint	anim_id,
-								gint	anim_duration,
-								gint	position,
-								gint	placing,
-								PangoFontDescription *font_desc,
-								gdouble *font_color)
+void
+img_set_slide_still_info( slide_struct      *slide,
+						  gint               duration,
+						  img_window_struct *img )
 {
-	GtkTreeModel      *model;
-	GtkTreeIter        iter;
-	gchar             *path;
-	TextAnimationFunc  func;
+	if( slide->duration != duration )
+	{
+		slide->duration = duration;
 
-	
-	model = gtk_combo_box_get_model( GTK_COMBO_BOX( img->sub_anim ) );
-	path = g_strdup_printf( "%d", anim_id );
-	gtk_tree_model_get_iter_from_string( model, &iter, path );
-	g_free( path );
-	gtk_tree_model_get( model, &iter, 1, &func, -1 );
+		if( ! img->total_dur_id )
+			img->total_dur_id =
+				g_idle_add( (GSourceFunc)img_set_total_slideshow_duration, img );
+	}
+}
 
+void
+img_set_slide_transition_info( slide_struct      *slide,
+							   GtkListStore      *store,
+							   GtkTreeIter       *iter,
+							   GdkPixbuf         *pix,
+							   const gchar       *path,
+							   gint               transition_id,
+							   ImgRender          render,
+							   guint              speed,
+							   img_window_struct *img )
+{
+	/* Set transition render. */
+	if( path && ( slide->transition_id != transition_id ) )
+	{
+		if( slide->path )
+			g_free( slide->path );
+
+		slide->path = g_strdup( path );
+		slide->transition_id = transition_id;
+		slide->render = render;
+
+		gtk_list_store_set( store, iter, 2, pix, -1 );
+	}
+
+	if( speed && ( slide->speed != speed ) )
+	{
+		slide->speed = speed;
+
+		if( ! img->total_dur_id )
+			img->total_dur_id =
+				g_idle_add( (GSourceFunc)img_set_total_slideshow_duration, img );
+	}
+}
+
+void
+img_set_slide_ken_burns_info( slide_struct *slide,
+							  gint          cur_point,
+							  gsize         length,
+							  gdouble      *points )
+{
+	ImgStopPoint *point;
+	gint          i,
+				  full;
+
+	if( slide->no_points )
+	{
+		g_list_free( slide->points );
+		slide->no_points = 0;
+	}
+
+	for( i = 0; i < length; i += 4 )
+	{
+		/* Create new point */
+		/* FIXME: This might be problematic because of the rounding. */
+		point = g_slice_new0( ImgStopPoint );
+		point->time = (gint)points[0 + i];
+		point->offx = (gint)points[1 + i];
+		point->offy = (gint)points[2 + i];
+		point->zoom = 		points[3 + i];
+		
+		/* Append it to the list */
+		slide->points = g_list_append( slide->points, point );
+		slide->no_points++;
+	}
+
+	slide->cur_point = CLAMP( cur_point, -1, slide->no_points - 1 );
+
+	full = img_calc_slide_duration_points( slide->points,
+										   slide->no_points );
+	if( full )
+		slide->duration = full;
+}
+
+void
+img_set_slide_text_info( slide_struct      *slide,
+						 GtkListStore      *store,
+						 GtkTreeIter       *iter,
+						 const gchar       *subtitle,
+						 gint	            anim_id,
+						 gint               anim_duration,
+						 gint               position,
+						 gint               placing,
+						 const gchar       *font_desc,
+						 gdouble           *font_color,
+						 img_window_struct *img )
+{
 	/* Set the slide text info parameters */
-	slide_info->has_subtitle  = TRUE;
-	slide_info->subtitle	  = g_strdup( subtitle );
-	slide_info->font_desc	  = font_desc;
-	slide_info->anim          = func;
-	slide_info->anim_id		  = anim_id;
-	slide_info->anim_duration = anim_duration;
-	slide_info->position	  = position;
-	slide_info->placing		  = placing;
-	slide_info->font_color[0] = font_color[0];
-	slide_info->font_color[1] = font_color[1];
-	slide_info->font_color[2] = font_color[2];
-	slide_info->font_color[3] = font_color[3];
+	if( store && iter )
+	{
+		gboolean flag;
+
+		if( slide->subtitle )
+			g_free( slide->subtitle );
+		slide->subtitle = g_strdup( subtitle );
+
+		flag = ( subtitle ? TRUE : FALSE );
+		gtk_list_store_set( store, iter, 3, flag, -1 );
+	}
+
+	if( ( anim_id > -1 ) && ( anim_id != slide->anim_id ) )
+	{
+		GtkTreeModel *model;
+		gchar        *path;
+		GtkTreeIter   iter;
+
+		path = g_strdup_printf( "%d", anim_id );
+		model = gtk_combo_box_get_model( GTK_COMBO_BOX( img->sub_anim ) );
+		gtk_tree_model_get_iter_from_string( model, &iter, path );
+		g_free( path );
+
+		slide->anim_id = anim_id;
+		gtk_tree_model_get( model, &iter, 1, &slide->anim, -1 );
+	}
+
+	if( ( anim_duration > 0 ) && ( anim_duration != slide->anim_duration ) )
+		slide->anim_duration = anim_duration;
+
+	if( ( position > -1 ) && ( position != slide->position ) )
+		slide->position = position;
+
+	if( ( placing > -1 ) && ( placing != slide->placing ) )
+		slide->placing = placing;
+
+	if( font_desc )
+	{
+		if( slide->font_desc )
+			pango_font_description_free( slide->font_desc );
+		slide->font_desc = pango_font_description_from_string( font_desc );
+	}
+
+	if( font_color )
+	{
+		slide->font_color[0] = font_color[0];
+		slide->font_color[1] = font_color[1];
+		slide->font_color[2] = font_color[2];
+		slide->font_color[3] = font_color[3];
+	}
 }								
 
 void
@@ -364,8 +469,8 @@ img_free_slide_struct( slide_struct *entry )
 {
 	GList *tmp;
 
-	if (entry->slide_original_filename)
-		g_free(entry->slide_original_filename);
+	if (entry->original_filename)
+		g_free(entry->original_filename);
 	g_free(entry->filename);
 	g_free(entry->resolution);
 	g_free(entry->type);
@@ -376,5 +481,64 @@ img_free_slide_struct( slide_struct *entry )
 	g_list_free( entry->points );
 
 	g_slice_free( slide_struct, entry );
+}
+
+gboolean
+img_set_total_slideshow_duration( img_window_struct *img )
+{
+	gchar        *time;
+	GtkTreeIter   iter;
+	slide_struct *entry;
+	GtkTreeModel *model;
+
+	img->total_secs = 0;
+
+	model = GTK_TREE_MODEL( img->thumbnail_model );
+	if( gtk_tree_model_get_iter_first( model, &iter ) )
+	{
+		do
+		{
+			gtk_tree_model_get( model, &iter, 1, &entry, -1 );
+			img->total_secs += entry->duration;
+			
+			if(entry->render)
+				img->total_secs += entry->speed;
+		}
+		while( gtk_tree_model_iter_next( model, &iter ) );
+
+		/* Add time of last pseudo slide */
+		if( img->final_transition.render )
+			img->total_secs += img->final_transition.speed;
+	}
+		
+	time = img_convert_seconds_to_time(img->total_secs);
+	gtk_label_set_text(GTK_LABEL (img->total_time_data),time);
+	g_free(time);
+
+	/* This is here only to be able to add this to idle source. */
+	img->total_dur_id = 0;
+	return( FALSE );
+}
+
+gint
+img_calc_slide_duration_points( GList *list,
+								gint   length )
+{
+	GList        *tmp;
+	gint          i, duration = 0;
+	ImgStopPoint *point;
+
+	/* If we have no points, return 0 */
+	if( length == 0 )
+		return( 0 );
+
+	/* Calculate length */
+	for( tmp = list, i = 0; i < length; tmp = g_list_next( tmp ), i++ )
+	{
+		point = (ImgStopPoint *)tmp->data;
+		duration += point->time;
+	}
+
+	return( duration );
 }
 

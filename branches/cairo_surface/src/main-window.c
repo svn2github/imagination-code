@@ -69,32 +69,11 @@ img_scroll_thumb( GtkWidget         *widget,
 				  GdkEventScroll    *scroll,
 				  img_window_struct *img );
 
-static void
-img_queue_subtitle_update( GtkTextBuffer     *buffer,
-						   img_window_struct *img );
-
 static gboolean
 img_subtitle_update( img_window_struct *img );
 
 static GtkWidget *
 img_create_subtitle_animation_combo( void );
-
-static void
-img_text_font_set( GtkFontButton     *button,
-				   img_window_struct *img );
-
-static void
-img_font_color_changed( GtkColorButton    *button,
-						img_window_struct *img );
-
-static void
-img_text_pos_changed( ImgTableButton    *button,
-					  gint               item,
-					  img_window_struct *img );
-
-static void
-img_placing_changed( GtkComboBox   *combo,
-					 img_window_struct *img );
 
 
 /* ****************************************************************************
@@ -1570,10 +1549,9 @@ static void img_spinbutton_value_changed (GtkSpinButton *spinbutton, img_window_
 	{
 		gtk_tree_model_get_iter(model, &iter,selected->data);
 		gtk_tree_model_get(model, &iter,1,&info_slide,-1);
-		info_slide->duration = duration;
+		img_set_slide_still_info( info_slide, duration, img );
 		selected = selected->next;
 	}
-	img_set_total_slideshow_duration(img);
 
 	g_list_foreach (bak, (GFunc)gtk_tree_path_free, NULL);
 	g_list_free(bak);
@@ -1731,7 +1709,7 @@ static void img_show_uri(GtkMenuItem *menuitem, img_window_struct *img)
 	g_free(file);
 }
 
-static void
+void
 img_queue_subtitle_update( GtkTextBuffer     *buffer,
 						   img_window_struct *img )
 {
@@ -1743,78 +1721,6 @@ img_queue_subtitle_update( GtkTextBuffer     *buffer,
 	img->subtitle_update_id =
 			g_timeout_add( 300, (GSourceFunc)img_subtitle_update, img );
 }
-
-static gboolean
-img_subtitle_update( img_window_struct *img )
-{
-	/* Get text from buffer and store it inside slide */
-	if( img->current_slide->subtitle )
-	{
-		g_free( img->current_slide->subtitle );
-		img->current_slide->subtitle = NULL;
-	}
-
-	img->current_slide->has_subtitle =
-			(gboolean)gtk_text_buffer_get_char_count( img->slide_text_buffer );
-	if( img->current_slide->has_subtitle )
-	{
-		/* Add subtitle indicator */
-		GtkTreeIter  iter;
-		GList       *list;
-
-		g_object_get( G_OBJECT( img->slide_text_buffer ), "text",
-					  &img->current_slide->subtitle, NULL );
-
-		list = gtk_icon_view_get_selected_items(
-				GTK_ICON_VIEW( img->thumbnail_iconview ) );
-		gtk_tree_model_get_iter( GTK_TREE_MODEL( img->thumbnail_model ),
-								 &iter, list->data );
-		g_list_foreach( list, (GFunc)gtk_tree_path_free, NULL );
-		g_list_free( list );
-		gtk_list_store_set( GTK_LIST_STORE( img->thumbnail_model ), &iter,
-							3, TRUE, -1 );
-	}
-	else
-	{
-		/* Remove subtitle indicator */
-		GtkTreeIter  iter;
-		GList       *list;
-
-		g_object_get( G_OBJECT( img->slide_text_buffer ), "text",
-					  &img->current_slide->subtitle, NULL );
-
-		list = gtk_icon_view_get_selected_items(
-				GTK_ICON_VIEW( img->thumbnail_iconview ) );
-		gtk_tree_model_get_iter( GTK_TREE_MODEL( img->thumbnail_model ),
-								 &iter, list->data );
-		g_list_foreach( list, (GFunc)gtk_tree_path_free, NULL );
-		g_list_free( list );
-		gtk_list_store_set( GTK_LIST_STORE( img->thumbnail_model ), &iter,
-							3, FALSE, -1 );
-	}
-
-	/* If font_desc and anim fields are not set, get values from
-	 * proper widgets */
-	if( ! img->current_slide->anim )
-	{
-		/* FIXME: Animation duration should be set here too */
-
-		/* Set font properties */
-		img_text_font_set( GTK_FONT_BUTTON( img->sub_font ), img );
-
-		/* Set animation function */
-		img_text_anim_set( GTK_COMBO_BOX( img->sub_anim ), img );
-	}
-
-	/* Queue redraw */
-	gtk_widget_queue_draw( img->image_area );
-
-	/* Set source id to zero and remove itself from main context */
-	img->subtitle_update_id = 0;
-
-	return( FALSE );
-}
-
 
 static GtkWidget *
 img_create_subtitle_animation_combo( void )
@@ -1841,6 +1747,8 @@ img_create_subtitle_animation_combo( void )
 	img_free_text_animation_list( no_anims, animations );
 
 	combo = gtk_combo_box_new_with_model( GTK_TREE_MODEL( store ) );
+	g_object_unref( G_OBJECT( store ) );
+
 	cell = gtk_cell_renderer_text_new();
 	gtk_cell_layout_pack_start( GTK_CELL_LAYOUT( combo ), cell, TRUE );
 	gtk_cell_layout_add_attribute( GTK_CELL_LAYOUT( combo ), cell, "text", 0 );
@@ -1848,18 +1756,54 @@ img_create_subtitle_animation_combo( void )
 	return( combo );
 }
 
-static void
+static gboolean
+img_subtitle_update( img_window_struct *img )
+{
+	gboolean     has_subtitle;
+	GtkTreeIter  iter;
+	GList       *list;
+
+
+	/* Get text from buffer and store it inside slide */
+	if( img->current_slide->subtitle )
+	{
+		g_free( img->current_slide->subtitle );
+		img->current_slide->subtitle = NULL;
+	}
+
+	has_subtitle =
+			1 < gtk_text_buffer_get_char_count( img->slide_text_buffer );
+	if( has_subtitle )
+		g_object_get( G_OBJECT( img->slide_text_buffer ), "text",
+					  &img->current_slide->subtitle, NULL );
+
+	list = gtk_icon_view_get_selected_items(
+				GTK_ICON_VIEW( img->thumbnail_iconview ) );
+	gtk_tree_model_get_iter( GTK_TREE_MODEL( img->thumbnail_model ),
+							 &iter, list->data );
+	g_list_foreach( list, (GFunc)gtk_tree_path_free, NULL );
+	g_list_free( list );
+	gtk_list_store_set( GTK_LIST_STORE( img->thumbnail_model ), &iter,
+						3, has_subtitle, -1 );
+
+	/* Queue redraw */
+	gtk_widget_queue_draw( img->image_area );
+
+	/* Set source id to zero and remove itself from main context */
+	img->subtitle_update_id = 0;
+
+	return( FALSE );
+}
+
+void
 img_text_font_set( GtkFontButton     *button,
 				   img_window_struct *img )
 {
-	const gchar          *string;
-	PangoFontDescription *font_desc;
+	const gchar *string;
 	
 	string = gtk_font_button_get_font_name( button );
-	font_desc = pango_font_description_from_string( string );
 
-	img_update_sub_properties( img, NULL, 0, 0, 0, 0, font_desc,
-							   NULL, IMG_MASK_FONT_DESC );
+	img_update_sub_properties( img, NULL, -1, -1, -1, -1, string, NULL );
 
 	gtk_widget_queue_draw( img->image_area );
 }
@@ -1877,8 +1821,7 @@ img_text_anim_set( GtkComboBox       *combo,
 	gtk_combo_box_get_active_iter( combo, &iter );
 	gtk_tree_model_get( model, &iter, 1, &anim, 2, &anim_id, -1 );
 
-	img_update_sub_properties( img, anim, anim_id, 0, 0, 0, NULL,
-							   NULL, IMG_MASK_ANIM );
+	img_update_sub_properties( img, anim, anim_id, -1, -1, -1, NULL, NULL );
 
 	/* Speed should be disabled when None is in effect */
 	gtk_widget_set_sensitive( img->sub_anim_duration,
@@ -1887,7 +1830,7 @@ img_text_anim_set( GtkComboBox       *combo,
 	gtk_widget_queue_draw( img->image_area );
 }
 
-static void
+void
 img_font_color_changed( GtkColorButton    *button,
 						img_window_struct *img )
 {
@@ -1903,8 +1846,7 @@ img_font_color_changed( GtkColorButton    *button,
 	font_color[2] = (gdouble)color.blue  / 0xffff;
 	font_color[3] = (gdouble)alpha       / 0xffff;
 
-	img_update_sub_properties( img, NULL, 0, 0, 0, 0, NULL,
-							   font_color, IMG_MASK_FONT_COLOR );
+	img_update_sub_properties( img, NULL, -1, -1, -1, -1, NULL, font_color );
 
 	gtk_widget_queue_draw( img->image_area );
 }
@@ -1930,11 +1872,10 @@ img_combo_box_anim_speed_changed( GtkComboBox       *combo,
 			speed = 3;
 			break;
 	}
-	img_update_sub_properties( img, NULL, 0, speed, 0, 0, NULL,
-							   NULL, IMG_MASK_ANIM_DUR );
+	img_update_sub_properties( img, NULL, -1, speed, -1, -1, NULL, NULL );
 }
 
-static void
+void
 img_text_pos_changed( ImgTableButton    *button,
 					  gint               item,
 					  img_window_struct *img )
@@ -1942,13 +1883,12 @@ img_text_pos_changed( ImgTableButton    *button,
 	/* NOTE: This can be done because we know how items are packed into table
 	 * button. For safety measures and future expandability, this should be
 	 * converted into switch statement. */
-	img_update_sub_properties( img, NULL, 0, 0, item, 0, NULL,
-							   NULL, IMG_MASK_POS );
+	img_update_sub_properties( img, NULL, -1, -1, item, -1, NULL, NULL );
 
 	gtk_widget_queue_draw( img->image_area );
 }
 
-static void
+void
 img_placing_changed( GtkComboBox   *combo,
 					 img_window_struct *img )
 {
@@ -1959,8 +1899,7 @@ img_placing_changed( GtkComboBox   *combo,
 	else
 		placing = IMG_REL_PLACING_ORIGINAL_IMAGE;
 
-	img_update_sub_properties( img, NULL, 0, 0, 0, placing, NULL,
-							   NULL, IMG_MASK_PLACING );
+	img_update_sub_properties( img, NULL, -1, -1, -1, placing, NULL, NULL );
 
 	gtk_widget_queue_draw( img->image_area );
 }
@@ -2069,15 +2008,14 @@ img_subtitle_update_sensitivity( img_window_struct *img,
 }
 
 void
-img_update_sub_properties( img_window_struct    *img,
-						   TextAnimationFunc     anim,
-						   gint                  anim_id,
-						   gint                  anim_duration,
-						   ImgSubPos             position,
-						   ImgRelPlacing         placing,
-						   PangoFontDescription *desc,
-						   gdouble              *color,
-						   guint                 mask )
+img_update_sub_properties( img_window_struct *img,
+						   TextAnimationFunc  anim,
+						   gint               anim_id,
+						   gint               anim_duration,
+						   ImgSubPos          position,
+						   ImgRelPlacing      placing,
+						   const gchar       *desc,
+						   gdouble           *color )
 {
 	GList        *selected,
 				 *tmp;
@@ -2099,41 +2037,9 @@ img_update_sub_properties( img_window_struct    *img,
 		gtk_tree_model_get_iter( model, &iter, (GtkTreePath *)tmp->data );
 		gtk_tree_model_get( model, &iter, 1, &slide, -1 );
 		
-		/* Set animation */
-		if( mask & IMG_MASK_ANIM )
-		{
-			slide->anim = anim;
-			slide->anim_id = anim_id;
-		}
-
-		/* Set duration of animation */
-		if( mask & IMG_MASK_ANIM_DUR )
-			slide->anim_duration = anim_duration;
-
-		/* Set subtitle position */
-		if( mask & IMG_MASK_POS )
-			slide->position = position;
-
-		/* Set placing */
-		if( mask & IMG_MASK_PLACING )
-			slide->placing = placing;
-		
-		/* Set font desc */
-		if( mask & IMG_MASK_FONT_DESC )
-		{
-			if( slide->font_desc )
-				pango_font_description_free( slide->font_desc );
-			slide->font_desc = desc;
-		}
-		
-		/* Set font color */
-		if( mask & IMG_MASK_FONT_COLOR )
-		{
-			slide->font_color[0] = color[0];
-			slide->font_color[1] = color[1];
-			slide->font_color[2] = color[2];
-			slide->font_color[3] = color[3];
-		}
+		img_set_slide_text_info( slide, NULL, NULL, NULL,
+								 anim_id, anim_duration, position,
+								 placing, desc, color, img );
 	}
 
 	g_list_foreach( selected, (GFunc)gtk_tree_path_free, NULL );

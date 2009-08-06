@@ -124,24 +124,28 @@ struct _ImgStopPoint
 typedef struct _slide_struct slide_struct;
 struct _slide_struct
 {
-	gchar	*filename;
-	gchar	*slide_original_filename;
-	guint	duration;
-	guint  	speed;
-	gchar	*resolution;
-	gchar	*type;
-	gchar   *path;	/* transition model string path representation */
-	gint     transition_id;
-	ImgRender render;
+	/* Common data - always filled */
+	gchar *filename;          /* Filename of the image that slide represents */
+	gchar *original_filename; /* This is filled if the image has been rotated */
+	gchar *resolution;        /* Image dimensions */
+	gchar *type;              /* Image type */
+
+	/* Still part of the slide params */
+	guint duration; /* Duration of still part */ /* NOTE: sub1 */
+
+	/* Transition params */
+	gchar     *path;          /* Transition model path to transition */
+	gint       transition_id; /* Transition id */
+	ImgRender  render;        /* Transition render function */
+	guint      speed;         /* Transition speed */ /* NOTE: sub1 */
 
 	/* Ken Burns effect variables */
-	GList  *points;    /* List with stop points */
-	gint    no_points; /* Number of stop points in list */
-	gint    cur_point; /* Currently active stop point */
+	GList *points;    /* List with stop points */
+	gint   no_points; /* Number of stop points in list */
+	gint   cur_point; /* Currently active stop point */
 
 	/* Subtitle variables */
 	gchar                *subtitle;      /* Subtitle text */
-	gboolean              has_subtitle;  /* Does slide has subtitle */
 	TextAnimationFunc     anim;          /* Animation functions */
 	gint                  anim_id;       /* Animation id */
 	gint                  anim_duration; /* Duration of animation */
@@ -222,8 +226,9 @@ struct _img_window_struct
 	ImgStopPoint  current_point; /* Data for rendering current image */
   	slide_struct *current_slide;
 	
-	/* Subtitle update */
-	gint subtitle_update_id;
+	/* Update ids */
+	gint subtitle_update_id; /* Update subtitle display */
+	gint total_dur_id;       /* Update total duration */
 
 	/* Renderers and module stuff */
   	gint		nr_transitions_loaded;

@@ -37,7 +37,6 @@ void img_remove_foreach_func (GtkTreeModel *, GtkTreePath *, GtkTreeIter *, GLis
 void img_delete_selected_slides(GtkMenuItem *,img_window_struct *);
 void img_rotate_selected_slide(GtkWidget *, img_window_struct *);
 void img_show_about_dialog (GtkMenuItem *,img_window_struct *);
-void img_set_total_slideshow_duration(img_window_struct *);
 void img_start_stop_preview(GtkWidget *, img_window_struct *);
 void img_goto_first_slide(GtkWidget *, img_window_struct *);
 void img_goto_prev_slide(GtkWidget *, img_window_struct *);
@@ -114,4 +113,5 @@ img_calc_current_ken_point( ImgStopPoint *res,
 							ImgStopPoint *to,
 							gdouble       progress,
 							gint          mode );
+
 #endif

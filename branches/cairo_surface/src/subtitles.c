@@ -38,18 +38,6 @@ img_calc_text_pos( gint      surface_w,
 				   gint     *posy );
 
 static void
-img_text_ani_none( cairo_t     *cr,
-				   PangoLayout *layout,
-				   gint         sw,
-				   gint         sh,
-				   gint         lw,
-				   gint         lh,
-				   gint         posx,
-				   gint         posy,
-				   gdouble      progress,
-				   gdouble     *font_color );
-
-static void
 img_text_ani_fade( cairo_t     *cr,
 				   PangoLayout *layout,
 				   gint         sw,
@@ -97,7 +85,7 @@ img_get_text_animation_list( TextAnimation **animations )
 		/* No animation function (id = 0) */
 		list[i].name   = g_strdup( _("None") );
 		list[i].id     = i;
-		list[i++].func = img_text_ani_none;
+		list[i++].func = NULL;
 
 		list[i].name   = g_strdup( _("Fade") );
 		list[i].id     = i;
@@ -210,7 +198,21 @@ img_render_subtitle( cairo_t              *cr,
 		cairo_translate( cr, offx / factor, offy / factor );
 
 	/* Do animation */
-	(*func)( cr, layout, sw, sh, lw, lh, posx, posy, progress, font_color );
+	if( func )
+		(*func)( cr, layout, sw, sh, lw, lh, posx, posy, progress, font_color );
+	else
+	{
+		/* No animation renderer */
+		/* Set source color */
+		cairo_set_source_rgba( cr, font_color[0],
+								   font_color[1],
+								   font_color[2],
+								   font_color[3] );
+
+		/* Move to proper place and paint text */
+		cairo_move_to( cr, posx, posy );
+		pango_cairo_show_layout( cr, layout );
+	}
 
 	/* Destroy layout */
 	g_object_unref( G_OBJECT( layout ) );
@@ -281,29 +283,6 @@ img_calc_text_pos( gint      surface_w,
 /* ****************************************************************************
  * Text animation renderers
  * ************************************************************************* */
-static void
-img_text_ani_none( cairo_t     *cr,
-				   PangoLayout *layout,
-				   gint         sw,
-				   gint         sh,
-				   gint         lw,
-				   gint         lh,
-				   gint         posx,
-				   gint         posy,
-				   gdouble      progress,
-				   gdouble     *font_color )
-{
-	/* Set source color */
-	cairo_set_source_rgba( cr, font_color[0],
-							   font_color[1],
-							   font_color[2],
-							   font_color[3] );
-
-	/* Move to proper place and paint text */
-	cairo_move_to( cr, posx, posy );
-	pango_cairo_show_layout( cr, layout );
-}
-
 static void
 img_text_ani_fade( cairo_t     *cr,
 				   PangoLayout *layout,

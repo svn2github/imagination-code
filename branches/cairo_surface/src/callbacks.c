@@ -31,10 +31,6 @@ static void img_about_dialog_activate_link(GtkAboutDialog * , const gchar *, gpo
 static GdkPixbuf *img_rotate_pixbuf_c( GdkPixbuf *, GtkProgressBar *);
 static GdkPixbuf *img_rotate_pixbuf_cc( GdkPixbuf *, GtkProgressBar *);
 
-static gint
-img_calc_slide_duration_points( GList *list,
-								gint   length );
-
 void img_set_window_title(img_window_struct *img, gchar *text)
 {
 	gchar *title = NULL;
@@ -91,7 +87,7 @@ void img_add_slides_thumbnails(GtkMenuItem *item, img_window_struct *img)
 		thumb = img_load_pixbuf_from_file(slides->data);
 		if (thumb)
 		{
-			slide_info = img_set_slide_info(1, NORMAL, NULL, -1, "0", slides->data, NULL, 0);
+			slide_info = img_create_new_slide( slides->data );
 			if (slide_info)
 			{
 				gtk_list_store_append (img->thumbnail_model,&iter);
@@ -554,8 +550,8 @@ void img_rotate_selected_slide(GtkWidget *button, img_window_struct *img)
 	}
 	g_object_unref(rotated_thumb);
 
-	if (info_slide->slide_original_filename == NULL)
-		info_slide->slide_original_filename = info_slide->filename;
+	if (info_slide->original_filename == NULL)
+		info_slide->original_filename = info_slide->filename;
 
 	info_slide->filename = filename;
 	img->rotated_files = g_slist_append(img->rotated_files, g_strdup(filename));
@@ -734,37 +730,6 @@ static void img_about_dialog_activate_link(GtkAboutDialog * dialog, const gchar 
 	char * argv[] = { "xdg-open", (char*)link, NULL };
 
 	g_spawn_async( NULL, argv, NULL, G_SPAWN_SEARCH_PATH,NULL, NULL, NULL, NULL);
-}
-
-void img_set_total_slideshow_duration(img_window_struct *img)
-{
-	gchar *time;
-	GtkTreeIter iter;
-	slide_struct *entry;
-	GtkTreeModel *model;
-
-	model = GTK_TREE_MODEL( img->thumbnail_model );
-	if (!gtk_tree_model_get_iter_first (model,&iter))
-		return;
-
-	img->total_secs = 0;
-	do
-	{
-		gtk_tree_model_get(model, &iter,1,&entry,-1);
-		img->total_secs += entry->duration;
-
-		if(entry->render)
-			img->total_secs += entry->speed;
-	}
-	while (gtk_tree_model_iter_next (model,&iter));
-
-	/* Add time of last pseudo slide */
-	if( img->final_transition.render )
-		img->total_secs += img->final_transition.speed;
-
-	time = img_convert_seconds_to_time(img->total_secs);
-	gtk_label_set_text(GTK_LABEL (img->total_time_data),time);
-	g_free(time);
 }
 
 void img_start_stop_preview(GtkWidget *button, img_window_struct *img)
@@ -1043,7 +1008,7 @@ void img_on_drag_data_received (GtkWidget *widget,GdkDragContext *context,int x,
 		thumb = img_load_pixbuf_from_file(filename);
 		if (thumb)
 		{
-			slide_info = img_set_slide_info(1, NORMAL, NULL, -1, "0", filename, NULL, 0);
+			slide_info = img_create_new_slide( filename );
 			if (slide_info)
 			{
 				gtk_list_store_append (img->thumbnail_model,&iter);
@@ -1121,7 +1086,7 @@ img_on_expose_event( GtkWidget         *widget,
 								   img->current_image, &img->current_point, img );
 
 		/* Render subtitle if present */
-		if( img->current_slide->has_subtitle )
+		if( img->current_slide->subtitle )
 			img_render_subtitle( cr,
 								 img->video_size[0],
 								 img->video_size[1],
@@ -1987,77 +1952,78 @@ img_update_stop_display( img_window_struct *img,
 void
 img_update_subtitles_widgets( img_window_struct *img )
 {
-	gchar *string = NULL;
-	GdkColor color;
-	GtkTextIter iter;
+	gchar       *string;
+	GdkColor     color;
+	gdouble     *f_colors;
 
-	if (img->current_slide->has_subtitle)
-	{
-		gtk_text_buffer_get_iter_at_offset (GTK_TEXT_BUFFER(img->slide_text_buffer), &iter, 0);
-		gtk_text_buffer_insert(GTK_TEXT_BUFFER(img->slide_text_buffer), &iter, img->current_slide->subtitle, strlen(img->current_slide->subtitle) );
+	/* Block all handlers */
+	g_signal_handlers_block_by_func( img->slide_text_buffer,
+									 img_queue_subtitle_update, img );
+	g_signal_handlers_block_by_func( img->sub_font,
+									 img_text_font_set, img );
+	g_signal_handlers_block_by_func( img->sub_color,
+									 img_font_color_changed, img );
+	g_signal_handlers_block_by_func( img->sub_anim,
+									 img_text_anim_set, img );
+	g_signal_handlers_block_by_func( img->sub_anim_duration,
+									 img_combo_box_anim_speed_changed, img );
+	g_signal_handlers_block_by_func( img->sub_placing,
+									 img_placing_changed, img );
+	g_signal_handlers_block_by_func( img->sub_pos, img_text_pos_changed, img );
 
-		string = pango_font_description_to_string(img->current_slide->font_desc);	
-		gtk_font_button_set_font_name(GTK_FONT_BUTTON(img->sub_font), string);
-		g_free(string);
+	/* Update text field */
+	string = ( img->current_slide->subtitle ?
+			   img->current_slide->subtitle :
+			   "" );
+	g_object_set( G_OBJECT( img->slide_text_buffer ), "text", string, NULL );
 
-		color.red   = img->current_slide->font_color[0] * 0xffff;
-		color.green = img->current_slide->font_color[1] * 0xffff;
-		color.blue  = img->current_slide->font_color[2] * 0xffff;
-		gtk_color_button_set_color(GTK_COLOR_BUTTON(img->sub_color), &color); 
+	/* Update font button */
+	string = pango_font_description_to_string(img->current_slide->font_desc);	
+	gtk_font_button_set_font_name(GTK_FONT_BUTTON(img->sub_font), string);
+	g_free(string);
 
-		g_signal_handlers_block_by_func((gpointer)img->sub_anim, (gpointer)img_text_anim_set, img);
-			gtk_combo_box_set_active(GTK_COMBO_BOX(img->sub_anim), img->current_slide->anim_id);
-		g_signal_handlers_unblock_by_func((gpointer)img->sub_anim, (gpointer)img_text_anim_set, img);
+	/* Update color button */
+	f_colors = img->current_slide->font_color;
+	color.red   = (gint)f_colors[0] * 0xffff;
+	color.green = (gint)f_colors[1] * 0xffff;
+	color.blue  = (gint)f_colors[2] * 0xffff;
+	gtk_color_button_set_color( GTK_COLOR_BUTTON( img->sub_color ), &color ); 
+	gtk_color_button_set_alpha( GTK_COLOR_BUTTON( img->sub_color ),
+								(gint)(f_colors[3] * 0xffff ) );
 
-		g_signal_handlers_block_by_func((gpointer)img->sub_anim_duration, (gpointer)img_combo_box_anim_speed_changed, img);
-			gtk_combo_box_set_active(GTK_COMBO_BOX(img->sub_anim_duration),	img->current_slide->anim_duration - 1);
-		g_signal_handlers_unblock_by_func((gpointer)img->sub_anim_duration, (gpointer)img_combo_box_anim_speed_changed, img);
+	/* Update animation */
+	gtk_combo_box_set_active( GTK_COMBO_BOX( img->sub_anim ),
+							  img->current_slide->anim_id );
 
-		gtk_combo_box_set_active(GTK_COMBO_BOX(img->sub_placing), img->current_slide->placing);
-		
-		img_table_button_set_active_item( IMG_TABLE_BUTTON( img->sub_pos ), img->current_slide->position );
-	}
-	else
-	{
-		/* Set the default values */
-		GtkTextIter start, end;
-		gtk_text_buffer_get_start_iter(GTK_TEXT_BUFFER(img->slide_text_buffer), &start);
-		gtk_text_buffer_get_end_iter  (GTK_TEXT_BUFFER(img->slide_text_buffer), &end);
-		gtk_text_buffer_delete        (GTK_TEXT_BUFFER(img->slide_text_buffer), &start, &end);
-		gtk_font_button_set_font_name(GTK_FONT_BUTTON(img->sub_font), "Sans 12");
-	
-		color.red   = 0;
-		color.green = 0;
-		color.blue  = 0;
-		gtk_color_button_set_color(GTK_COLOR_BUTTON(img->sub_color), &color);
+	/* Update duration */
+	/* FIXME: This is dangerous, since we rely on the fact that durations are 1,
+	 * 2 and 3 seconds respectively! */
+	gtk_combo_box_set_active( GTK_COMBO_BOX( img->sub_anim_duration ),
+							  img->current_slide->anim_duration - 1 );
 
-		gtk_combo_box_set_active(GTK_COMBO_BOX(img->sub_anim), 0);
-		gtk_combo_box_set_active(GTK_COMBO_BOX(img->sub_anim_duration), 1);
-		gtk_combo_box_set_active(GTK_COMBO_BOX(img->sub_placing), 0);
-		img_table_button_set_active_item( IMG_TABLE_BUTTON( img->sub_pos ), 4 );
-	}
-}
+	/* Update placing */
+	gtk_combo_box_set_active( GTK_COMBO_BOX( img->sub_placing ),
+							  img->current_slide->placing );
 
-static gint
-img_calc_slide_duration_points( GList *list,
-								gint   length )
-{
-	GList        *tmp;
-	gint          i, duration = 0;
-	ImgStopPoint *point;
+	/* Update position */
+	img_table_button_set_active_item( IMG_TABLE_BUTTON( img->sub_pos ),
+									  img->current_slide->position );
 
-	/* If we have no points, return 0 */
-	if( length == 0 )
-		return( 0 );
-
-	/* Calculate length */
-	for( tmp = list, i = 0; i < length; tmp = g_list_next( tmp ), i++ )
-	{
-		point = (ImgStopPoint *)tmp->data;
-		duration += point->time;
-	}
-
-	return( duration );
+	/* Unblock all handlers */
+	g_signal_handlers_unblock_by_func( img->slide_text_buffer,
+									   img_queue_subtitle_update, img );
+	g_signal_handlers_unblock_by_func( img->sub_font,
+									   img_text_font_set, img );
+	g_signal_handlers_unblock_by_func( img->sub_color,
+									   img_font_color_changed, img );
+	g_signal_handlers_unblock_by_func( img->sub_anim,
+									   img_text_anim_set, img );
+	g_signal_handlers_unblock_by_func( img->sub_anim_duration,
+									   img_combo_box_anim_speed_changed, img );
+	g_signal_handlers_unblock_by_func( img->sub_placing,
+									   img_placing_changed, img );
+	g_signal_handlers_unblock_by_func( img->sub_pos,
+									   img_text_pos_changed, img );
 }
 
 void

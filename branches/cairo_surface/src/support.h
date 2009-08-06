@@ -58,7 +58,52 @@ void img_set_statusbar_message(img_window_struct *, gint);
 void img_load_available_transitions(img_window_struct *);
 void img_show_file_chooser(SexyIconEntry *, SexyIconEntryPosition, int, img_window_struct *);
 GdkPixbuf *img_load_pixbuf_from_file(gchar *);
-slide_struct *img_set_slide_info(gint , guint , ImgRender, gint, gchar *, gchar *, gdouble *, gsize);
-void img_set_slide_text_info (img_window_struct *, slide_struct *, gchar *, gint, gint, gint, gint, PangoFontDescription *, gdouble *);
+
+slide_struct *
+img_create_new_slide( const gchar *filename );
+
+void
+img_set_slide_still_info( slide_struct      *slide,
+						  gint               duration,
+						  img_window_struct *img );
+
+void
+img_set_slide_transition_info( slide_struct      *slide,
+							   GtkListStore      *store,
+							   GtkTreeIter       *iter,
+							   GdkPixbuf         *pix,
+							   const gchar       *path,
+							   gint               transition_id,
+							   ImgRender          render,
+							   guint              speed,
+							   img_window_struct *img );
+
+void
+img_set_slide_ken_burns_info( slide_struct *slide,
+							  gint          cur_point,
+							  gsize         length,
+							  gdouble      *points );
+
+void
+img_set_slide_text_info( slide_struct      *slide,
+						 GtkListStore      *store,
+						 GtkTreeIter       *iter,
+						 const gchar       *subtitle,
+						 gint	            anim_id,
+						 gint               anim_duration,
+						 gint               position,
+						 gint               placing,
+						 const gchar       *font_desc,
+						 gdouble           *font_color,
+						 img_window_struct *img );
+
 void img_free_slide_struct( slide_struct * );
+
+gboolean
+img_set_total_slideshow_duration( img_window_struct *img );
+
+gint
+img_calc_slide_duration_points( GList *list,
+								gint   length );
+
 #endif

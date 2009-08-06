@@ -691,7 +691,7 @@ img_calc_next_slide_time_offset( img_window_struct *img,
 	img->slide_still_frames = img->slide_nr_frames - img->slide_trans_frames;
 
 	/* Calculate subtitle frames */
-	if( img->work_slide->has_subtitle )
+	if( img->work_slide->subtitle )
 	{
 		img->cur_text_frame = 0;
 		img->no_text_frames = img->work_slide->anim_duration * rate;
@@ -964,7 +964,7 @@ img_render_still_frame( img_window_struct *img,
 							   p_draw_point, img );
 
 	/* Render subtitle if present */
-	if( img->work_slide->has_subtitle )
+	if( img->work_slide->subtitle )
 	{
 		gdouble progress; /* Text animation progress */
 
