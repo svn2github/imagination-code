@@ -1039,13 +1039,32 @@ img_window_struct *img_create_window (void)
 		gchar           *path;
 		GdkPixbuf       *text;
 
-		swindow = gtk_scrolled_window_new(NULL, NULL);
-		gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(swindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+		swindow = gtk_scrolled_window_new( NULL, NULL );
+		gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( swindow ),
+										GTK_POLICY_AUTOMATIC,
+										GTK_POLICY_AUTOMATIC );
 		gtk_box_pack_start( GTK_BOX( modes_vbox ), swindow, TRUE, TRUE, 0 );
 		img_struct->over_root = swindow;
 
 		icon = gtk_icon_view_new_with_model(
 					GTK_TREE_MODEL( img_struct->thumbnail_model ) );
+		gtk_icon_view_set_selection_mode( GTK_ICON_VIEW( icon ),
+										  GTK_SELECTION_MULTIPLE );
+		gtk_icon_view_set_orientation( GTK_ICON_VIEW( icon ),
+									   GTK_ORIENTATION_HORIZONTAL );
+		gtk_icon_view_set_column_spacing( GTK_ICON_VIEW( icon ), 0 );
+		gtk_icon_view_set_row_spacing( GTK_ICON_VIEW( icon ), 0 );
+		img_struct->over_icon = icon;
+		img_struct->active_icon = icon;
+		g_signal_connect( G_OBJECT( icon ), "selection-changed",
+						  G_CALLBACK( img_iconview_selection_changed ),
+						  img_struct );
+		g_signal_connect( G_OBJECT( icon ), "select-all",
+						  G_CALLBACK( img_iconview_selection_changed ),
+						  img_struct );
+		g_signal_connect( G_OBJECT( icon ), "button-press-event",
+						  G_CALLBACK( img_iconview_selection_button_press ),
+						  img_struct );
 		gtk_container_add( GTK_CONTAINER( swindow ), icon );
 
 		cell = img_cell_renderer_pixbuf_new();
@@ -1282,8 +1301,10 @@ void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *im
 	{
 		img_set_statusbar_message(img,nr_selected);
 		if( img->current_image )
+		{
 			cairo_surface_destroy( img->current_image );
-		img->current_image = NULL;
+			img->current_image = NULL;
+		}
 		img->current_slide = NULL;
 		gtk_widget_queue_draw( img->image_area );
 
@@ -1378,14 +1399,23 @@ void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *im
 	}
 
 	if( img->current_image )
+	{
 		cairo_surface_destroy( img->current_image );
-
-	/* Respect quality settings */
-	if( img->low_quality )
-		img->current_image = img_scale_image( img, info_slide->filename, 0,
-											  img->video_size[1] );
-	else
-		img->current_image = img_scale_image( img, info_slide->filename, 0, 0 );
+		img->current_image = NULL;
+	}
+		
+	/* This is not needed when in overview mode, since we're not displaying any
+	 * large image preview. */
+	if( img->mode == 0 )
+	{
+		/* Respect quality settings */
+		if( img->low_quality )
+			img->current_image = img_scale_image( img, info_slide->filename,
+												  0, img->video_size[1] );
+		else
+			img->current_image = img_scale_image( img, info_slide->filename,
+												  0, 0 );
+	}
 
 	/* Update display */
 	img_update_stop_display( img, TRUE );
@@ -1730,7 +1760,7 @@ img_iconview_selection_button_press( GtkWidget         *widget,
 {
 	if( ( button->button == 1 ) &&
 		! ( button->state & ( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) )
-		gtk_icon_view_unselect_all( GTK_ICON_VIEW( img->thumbnail_iconview ) );
+		gtk_icon_view_unselect_all( GTK_ICON_VIEW( widget ) );
 
 	return( FALSE );
 }
@@ -1757,10 +1787,7 @@ img_scroll_thumb( GtkWidget         *widget,
 	upper = gtk_adjustment_get_upper( adj );
 	value = gtk_adjustment_get_value( adj );
 
-	g_print( "%f, %f, %f, %f\n", page, step, upper, value );
-
 	gtk_adjustment_set_value( adj, CLAMP( value + step * dir, 0, upper - page ) );
-
 	return( TRUE );
 }
 
@@ -1853,7 +1880,7 @@ img_subtitle_update( img_window_struct *img )
 					  &img->current_slide->subtitle, NULL );
 
 	list = gtk_icon_view_get_selected_items(
-				GTK_ICON_VIEW( img->thumbnail_iconview ) );
+				GTK_ICON_VIEW( img->active_icon ) );
 	gtk_tree_model_get_iter( GTK_TREE_MODEL( img->thumbnail_model ),
 							 &iter, list->data );
 	g_list_foreach( list, (GFunc)gtk_tree_path_free, NULL );
@@ -2139,18 +2166,25 @@ static void
 img_switch_mode( img_window_struct *img,
 				 gint               mode )
 {
+	gtk_widget_hide( img->active_icon );
 	switch( mode )
 	{
 		case 0: /* Preview mode */
 			gtk_widget_hide( img->over_root );
 			gtk_widget_show( img->prev_root );
 			gtk_widget_show( img->thum_root );
+			img->active_icon = img->thumbnail_iconview;
 			break;
 
 		case 1: /* Overview mode */
 			gtk_widget_hide( img->prev_root );
 			gtk_widget_hide( img->thum_root );
 			gtk_widget_show( img->over_root );
+			img->active_icon = img->over_icon;
 			break;
 	}
+	gtk_widget_show( img->active_icon );
+
+	/* Update selections */
+	img_iconview_selection_changed( GTK_ICON_VIEW( img->active_icon ), img );
 }

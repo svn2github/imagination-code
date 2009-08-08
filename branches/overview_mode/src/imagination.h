@@ -195,9 +195,11 @@ struct _img_window_struct
 	/* Mode switching */
 	gint       mode;      /* In what mode are we in: 0 - preview
 													 1 - overview */
-	GtkWidget *prev_root; /* Preview mode root widget */
-	GtkWidget *over_root; /* Overview mode root widget */
-	GtkWidget *thum_root; /* Thumbnail root widget */
+	GtkWidget *prev_root;   /* Preview mode root widget */
+	GtkWidget *over_root;   /* Overview mode root widget */
+	GtkWidget *thum_root;   /* Thumbnail root widget */
+	GtkWidget *over_icon;   /* Overview iconview */
+	GtkWidget *active_icon; /* Currently active icon view */
 
 	/* Ken Burns related controls */
 	GtkWidget *ken_left;     /* Go to left stop point button */
