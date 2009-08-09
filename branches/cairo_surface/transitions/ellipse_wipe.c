@@ -71,7 +71,7 @@ void img_circle_in( cairo_t *cr, cairo_surface_t *image_from, cairo_surface_t *i
 
 void img_circle_out( cairo_t *cr, cairo_surface_t *image_from, cairo_surface_t *image_to, gdouble progress )
 {
-	transition_render( cr, image_from, image_to, progress, 2 );
+	transition_render( cr, image_to, image_from, progress, 2 );
 }
 
 void img_horizontal_in( cairo_t *cr, cairo_surface_t *image_from, cairo_surface_t *image_to, gdouble progress )
@@ -81,7 +81,7 @@ void img_horizontal_in( cairo_t *cr, cairo_surface_t *image_from, cairo_surface_
 
 void img_horizontal_out( cairo_t *cr, cairo_surface_t *image_from, cairo_surface_t *image_to, gdouble progress )
 {
-	transition_render( cr, image_from, image_to, progress, 4 );
+	transition_render( cr, image_to, image_from, progress, 4 );
 }
 
 void img_vertical_in( cairo_t *cr, cairo_surface_t *image_from, cairo_surface_t *image_to, gdouble progress )
@@ -91,7 +91,7 @@ void img_vertical_in( cairo_t *cr, cairo_surface_t *image_from, cairo_surface_t 
 
 void img_vertical_out( cairo_t *cr, cairo_surface_t *image_from, cairo_surface_t *image_to, gdouble progress )
 {
-	transition_render( cr, image_from, image_to, progress, 6 );
+	transition_render( cr, image_to, image_from, progress, 6 );
 }
 
 /* Local functions definitions */
