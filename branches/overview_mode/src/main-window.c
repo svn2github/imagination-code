@@ -339,19 +339,19 @@ img_window_struct *img_create_window (void)
 	menuitem2 = gtk_image_menu_item_new_from_stock( GTK_STOCK_ZOOM_IN,img_struct->accel_group );
 	gtk_widget_add_accelerator( menuitem2, "activate", img_struct->accel_group, GDK_plus,GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE );
 	g_signal_connect( G_OBJECT( menuitem2 ), "activate",
-					  G_CALLBACK( img_image_area_zoom_in ), img_struct );
+					  G_CALLBACK( img_zoom_in ), img_struct );
 	gtk_menu_shell_append( GTK_MENU_SHELL( menu3 ), menuitem2 );
 
 	menuitem2 = gtk_image_menu_item_new_from_stock( GTK_STOCK_ZOOM_OUT, img_struct->accel_group );
 	gtk_widget_add_accelerator( menuitem2, "activate", img_struct->accel_group, GDK_minus, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE );
 	g_signal_connect( G_OBJECT( menuitem2 ), "activate",
-					  G_CALLBACK( img_image_area_zoom_out ), img_struct );
+					  G_CALLBACK( img_zoom_out ), img_struct );
 	gtk_menu_shell_append( GTK_MENU_SHELL( menu3 ), menuitem2 );
 
 	menuitem2 = gtk_image_menu_item_new_from_stock( GTK_STOCK_ZOOM_100,	img_struct->accel_group );
 	gtk_widget_add_accelerator( menuitem2, "activate", img_struct->accel_group, GDK_0,GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE );
 	g_signal_connect( G_OBJECT( menuitem2 ), "activate",
-					  G_CALLBACK( img_image_area_zoom_reset ), img_struct );
+					  G_CALLBACK( img_zoom_reset ), img_struct );
 	gtk_menu_shell_append( GTK_MENU_SHELL( menu3 ), menuitem2 );
 
 	separator_slide_menu = gtk_separator_menu_item_new ();
@@ -454,17 +454,17 @@ img_window_struct *img_create_window (void)
 	zoom_in_button = GTK_WIDGET (gtk_tool_button_new_from_stock ("gtk-zoom-in"));
 	gtk_container_add (GTK_CONTAINER (toolbar),zoom_in_button);
 	gtk_widget_set_tooltip_text(zoom_in_button, _("Zoom In"));
-	g_signal_connect (G_OBJECT (zoom_in_button),"clicked",G_CALLBACK (img_image_area_zoom_in),img_struct);
+	g_signal_connect (G_OBJECT (zoom_in_button),"clicked",G_CALLBACK (img_zoom_in),img_struct);
 
 	zoom_out_button = GTK_WIDGET (gtk_tool_button_new_from_stock ("gtk-zoom-out"));
 	gtk_container_add (GTK_CONTAINER (toolbar),zoom_out_button);
 	gtk_widget_set_tooltip_text(zoom_out_button, _("Zoom Out"));
-	g_signal_connect (G_OBJECT (zoom_out_button),"clicked",G_CALLBACK (img_image_area_zoom_out),img_struct);
+	g_signal_connect (G_OBJECT (zoom_out_button),"clicked",G_CALLBACK (img_zoom_out),img_struct);
 
-	zoom_normal = GTK_WIDGET (gtk_tool_button_new_from_stock ("gtk-zoom-fit"));
+	zoom_normal = GTK_WIDGET (gtk_tool_button_new_from_stock ("gtk-zoom-100"));
 	gtk_container_add (GTK_CONTAINER (toolbar),zoom_normal);
 	gtk_widget_set_tooltip_text(zoom_normal, _("Normal Size"));
-	g_signal_connect (G_OBJECT (zoom_normal),"clicked",G_CALLBACK (img_image_area_zoom_reset),img_struct);
+	g_signal_connect (G_OBJECT (zoom_normal),"clicked",G_CALLBACK (img_zoom_reset),img_struct);
 
 	separatortoolitem = GTK_WIDGET (gtk_separator_tool_item_new());
 	gtk_container_add (GTK_CONTAINER (toolbar),separatortoolitem);
@@ -735,7 +735,7 @@ img_window_struct *img_create_window (void)
 	gtk_scale_set_value_pos (GTK_SCALE(img_struct->ken_zoom), GTK_POS_LEFT);
 	gtk_box_pack_start (GTK_BOX (hbox_zoom), img_struct->ken_zoom, TRUE, TRUE, 0);
 	g_signal_connect( G_OBJECT( img_struct->ken_zoom ), "value-changed",
-					  G_CALLBACK( img_zoom_changed ), img_struct );
+					  G_CALLBACK( img_ken_burns_zoom_changed ), img_struct );
 	
 	hbox_buttons = gtk_hbutton_box_new();
 	gtk_button_box_set_layout (GTK_BUTTON_BOX (hbox_buttons), GTK_BUTTONBOX_SPREAD);
@@ -1069,14 +1069,14 @@ img_window_struct *img_create_window (void)
 
 		cell = img_cell_renderer_pixbuf_new();
 		gtk_cell_layout_pack_start( GTK_CELL_LAYOUT( icon ), cell, FALSE );
+		img_struct->over_cell = G_OBJECT( cell );
 
 		path = g_strconcat( DATADIR,
 							"/imagination/pixmaps/imagination-text.png",
 							NULL );
 		text = gdk_pixbuf_new_from_file( path, NULL );
 		g_free( path );
-		g_object_set( G_OBJECT( cell ), "width", 115,
-										"ypad", 2,
+		g_object_set( G_OBJECT( cell ), "ypad", 2,
 										"text-ico", text,
 										NULL );
 		g_object_unref( G_OBJECT( text ) );

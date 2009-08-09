@@ -200,6 +200,7 @@ struct _img_window_struct
 	GtkWidget *thum_root;   /* Thumbnail root widget */
 	GtkWidget *over_icon;   /* Overview iconview */
 	GtkWidget *active_icon; /* Currently active icon view */
+	GObject   *over_cell;   /* Overview cell renderer */
 
 	/* Ken Burns related controls */
 	GtkWidget *ken_left;     /* Go to left stop point button */
@@ -339,6 +340,7 @@ struct _img_window_struct
 
 	/* Application related stuff */
 	gdouble  image_area_zoom; /* Zoom to be applied to image area */
+	gdouble  overview_zoom;   /* Zoom to be applied in overview mode */
 	gboolean low_quality;     /* Preview quality:
 								  TRUE  - preview in low-res
 								  FALSE - preview in hi-res */

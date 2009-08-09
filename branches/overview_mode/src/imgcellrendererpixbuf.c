@@ -33,7 +33,9 @@ enum
 	P_0,
 	P_HAS_TEXT,   /* Does selected slide contains text? */
 	P_TEXT_ICO,   /* Icon describing text */
-	P_TRANSITION  /* Transition pixbuf */
+	P_TRANSITION, /* Transition pixbuf */
+	P_PIXBUF,     /* Main pixbuf to be rendered */
+	P_ZOOM        /* Zoom factor */
 };
 
 #define IMG_CELL_RENDERER_PIXBUF_GET_PRIVATE( obj ) \
@@ -47,6 +49,8 @@ struct _ImgCellRendererPixbufPrivate
 	gboolean   has_text;
 	GdkPixbuf *text_ico;
 	GdkPixbuf *transition;
+	GdkPixbuf *pixbuf;
+	gdouble    zoom;
 };
 
 /* ****************************************************************************
@@ -74,6 +78,16 @@ img_cell_renderer_pixbuf_render( GtkCellRenderer      *cell,
 								 GtkCellRendererState  state );
 
 static void
+img_cell_renderer_pixbuf_get_size( GtkCellRenderer *cell,
+								   GtkWidget       *widget,
+								   GdkRectangle    *cell_area,
+								   gint            *x_off,
+								   gint            *y_off,
+								   gint            *width,
+								   gint            *height );
+
+
+static void
 img_cell_renderer_pixbuf_finalize( GObject *object );
 
 /* ****************************************************************************
@@ -81,7 +95,7 @@ img_cell_renderer_pixbuf_finalize( GObject *object );
  * ************************************************************************* */
 G_DEFINE_TYPE( ImgCellRendererPixbuf,
 			   img_cell_renderer_pixbuf,
-			   GTK_TYPE_CELL_RENDERER_PIXBUF );
+			   GTK_TYPE_CELL_RENDERER );
 
 static void
 img_cell_renderer_pixbuf_class_init( ImgCellRendererPixbufClass *klass )
@@ -95,6 +109,7 @@ img_cell_renderer_pixbuf_class_init( ImgCellRendererPixbufClass *klass )
 	gobject_class->finalize = img_cell_renderer_pixbuf_finalize;
 
 	renderer_class->render = img_cell_renderer_pixbuf_render;
+	renderer_class->get_size = img_cell_renderer_pixbuf_get_size;
 
 	spec = g_param_spec_boolean( "has-text",
 								 "Has text",
@@ -119,6 +134,20 @@ img_cell_renderer_pixbuf_class_init( ImgCellRendererPixbufClass *klass )
 								IMG_PARAM_READWRITE );
 	g_object_class_install_property( gobject_class, P_TRANSITION, spec );
 
+	spec = g_param_spec_object( "pixbuf",
+								"Pixbuf",
+								"Main pixbuf to be drawn.",
+								GDK_TYPE_PIXBUF,
+								IMG_PARAM_READWRITE );
+	g_object_class_install_property( gobject_class, P_PIXBUF, spec );
+
+	spec = g_param_spec_double( "zoom",
+								"Zoom",
+								"Zoom factor at which to draw image.",
+								0.1, 3.0, 1.0,
+								IMG_PARAM_READWRITE );
+	g_object_class_install_property( gobject_class, P_ZOOM, spec );
+
 	g_type_class_add_private( gobject_class,
 							  sizeof( ImgCellRendererPixbufPrivate ) );
 }
@@ -132,6 +161,8 @@ img_cell_renderer_pixbuf_init( ImgCellRendererPixbuf *cell )
 	priv->has_text = FALSE;
 	priv->text_ico = NULL;
 	priv->transition = NULL;
+	priv->pixbuf = NULL;
+	priv->zoom = 1.0;
 }
 
 /* ****************************************************************************
@@ -166,6 +197,16 @@ img_cell_renderer_pixbuf_set_property( GObject      *object,
 			priv->transition = g_value_dup_object( value );
 			break;
 
+		case P_PIXBUF:
+			if( priv->pixbuf )
+				g_object_unref( G_OBJECT( priv->pixbuf ) );
+			priv->pixbuf = g_value_dup_object( value );
+			break;
+
+		case P_ZOOM:
+			priv->zoom = g_value_get_double( value );
+			break;
+
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID( object, prop_id, pspec );
 			break;
@@ -197,6 +238,14 @@ img_cell_renderer_pixbuf_get_property( GObject    *object,
 			g_value_set_object( value, priv->transition );
 			break;
 
+		case P_PIXBUF:
+			g_value_set_object( value, priv->pixbuf );
+			break;
+
+		case P_ZOOM:
+			g_value_set_double( value, priv->zoom );
+			break;
+
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID( object, prop_id, pspec );
 			break;
@@ -212,36 +261,40 @@ img_cell_renderer_pixbuf_render( GtkCellRenderer      *cell,
 								 GdkRectangle         *expose_a,
 								 GtkCellRendererState  state )
 {
-	GtkCellRendererClass         *pix_class;
 	ImgCellRendererPixbufPrivate *priv;
 
 	/* Drawing context */
 	cairo_t *cr;
 
-	/* Image rectangle */
-	GdkRectangle rect;
+	/* Rectangles */
+	GdkRectangle rect,
+				 draw_rect;
 
 	priv = IMG_CELL_RENDERER_PIXBUF_GET_PRIVATE( cell );
 
-	/* Draw image first */
-	pix_class =
-		GTK_CELL_RENDERER_CLASS( img_cell_renderer_pixbuf_parent_class );
-	pix_class->render( cell, window, widget,
-					   background_a, cell_a, expose_a, state );
-
-	if( ( ! priv->has_text ) && ( ! priv->transition ) )
-		return;
-
 	/* Get image size */
-	pix_class->get_size( cell, widget, cell_a, &rect.x,
-						 &rect.y, &rect.width, &rect.height );
+	img_cell_renderer_pixbuf_get_size( cell, widget, cell_a, &rect.x,
+									   &rect.y, &rect.width, &rect.height );
 	rect.x += cell_a->x + cell->xpad;
 	rect.y += cell_a->y + cell->ypad;
 	rect.width  -= 2 * cell->xpad;
 	rect.height -= 2 * cell->ypad;
 
+	/* Check for overlaping */
+	if( ! gdk_rectangle_intersect( cell_a, &rect, &draw_rect ) ||
+		! gdk_rectangle_intersect( expose_a, &draw_rect, &draw_rect ) )
+		return;
+
 	/* Draw indicators */
 	cr = gdk_cairo_create( window );
+
+	/* Draw base image */
+	cairo_save( cr );
+	cairo_translate( cr, rect.x, rect.y );
+	cairo_scale( cr, priv->zoom, priv->zoom );
+	gdk_cairo_set_source_pixbuf( cr, priv->pixbuf, 0, 0 );
+	cairo_paint( cr );
+	cairo_restore( cr );
 
 	if( priv->has_text && priv->text_ico )
 	{
@@ -260,8 +313,8 @@ img_cell_renderer_pixbuf_render( GtkCellRenderer      *cell,
 		cairo_save( cr );
 		cairo_translate( cr, rect.x + rect.width - BORDER,
 							 rect.y + BORDER );
-		gdk_cairo_set_source_pixbuf( cr, priv->text_ico, -w, 0 );
 		cairo_scale( cr, cf, cf );
+		gdk_cairo_set_source_pixbuf( cr, priv->text_ico, -w, 0 );
 		cairo_paint( cr );
 		cairo_restore( cr );
 	}
@@ -282,12 +335,78 @@ img_cell_renderer_pixbuf_render( GtkCellRenderer      *cell,
 
 		cairo_translate( cr, rect.x + rect.width - BORDER, 
 							 rect.y + rect.height - BORDER );
-		gdk_cairo_set_source_pixbuf( cr, priv->transition, - w, - h );
 		cairo_scale( cr, cf, cf );
+		gdk_cairo_set_source_pixbuf( cr, priv->transition, - w, - h );
 		cairo_paint( cr );
 	}
 
 	cairo_destroy( cr );
+}
+
+static void
+img_cell_renderer_pixbuf_get_size( GtkCellRenderer *cell,
+								   GtkWidget       *widget,
+								   GdkRectangle    *cell_area,
+								   gint            *x_off,
+								   gint            *y_off,
+								   gint            *width,
+								   gint            *height )
+{
+	/* Private data */
+	ImgCellRendererPixbufPrivate *priv;
+	/* Calculated values */
+	gboolean calc_off;
+	gint     w = 0,
+			 h = 0;
+
+	priv = IMG_CELL_RENDERER_PIXBUF_GET_PRIVATE( cell );
+
+	/* Get image size */
+	if( priv->pixbuf )
+	{
+		w = gdk_pixbuf_get_width( priv->pixbuf )  * priv->zoom;
+		h = gdk_pixbuf_get_height( priv->pixbuf ) * priv->zoom;
+	}
+
+	calc_off = ( w > 0 && h > 0 ? TRUE : FALSE );
+
+	/* Add padding */
+	w += (gint)cell->xpad * 2;
+	h += (gint)cell->ypad * 2;
+
+	/* Calculate offsets */
+	if( cell_area && calc_off )
+	{
+		if( x_off )
+		{
+			gboolean dir;
+			
+			dir = ( gtk_widget_get_direction( widget ) == GTK_TEXT_DIR_LTR );
+
+			*x_off = ( dir ? cell->xalign : 1.0 - cell->xalign ) *
+					 ( cell_area->width - w );
+			*x_off = MAX( *x_off, 0 );
+		}
+
+		if( y_off )
+		{
+			*y_off = cell->yalign * ( cell_area->height - h );
+			*y_off = MAX( *y_off, 0 );
+		}
+	}
+	else
+	{
+		if( x_off )
+			*y_off = 0;
+		if( y_off )
+			*y_off = 0;
+	}
+
+	/* Return dimensions */
+	if( width )
+		*width = w;
+	if( height )
+		*height = h;
 }
 
 static void
@@ -301,6 +420,8 @@ img_cell_renderer_pixbuf_finalize( GObject *object )
 		g_object_unref( priv->text_ico );
 	if( priv->transition )
 		g_object_unref( priv->transition );
+	if( priv->pixbuf )
+		g_object_unref( priv->pixbuf );
 
 	G_OBJECT_CLASS( img_cell_renderer_pixbuf_parent_class )->finalize( object );
 }
