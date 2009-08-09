@@ -64,7 +64,8 @@ int main (int argc, char *argv[])
 	img_window->current_point.offy = 0;
 	img_window->current_point.zoom = 1;
 
-	img_window->image_area_zoom = 1;
+	img_window->image_area_zoom = 1.0;
+	img_window->overview_zoom = 1.0;
 	img_window->low_quality = TRUE;
 	img_window->video_size[0] = 720;
 	img_window->video_size[1] = 576;

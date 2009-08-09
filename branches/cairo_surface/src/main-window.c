@@ -75,6 +75,14 @@ img_subtitle_update( img_window_struct *img );
 static GtkWidget *
 img_create_subtitle_animation_combo( void );
 
+static void
+img_toggle_mode( GtkCheckMenuItem  *item,
+				 img_window_struct *img );
+
+static void
+img_switch_mode( img_window_struct *img,
+				 gint               mode );
+
 
 /* ****************************************************************************
  * Function definitions
@@ -87,6 +95,7 @@ img_window_struct *img_create_window (void)
 	GtkWidget *menuitem1;
 	GtkWidget *menu1;
 	GtkWidget *imagemenuitem1;
+	GtkWidget *imagemenuitem2;
 	GtkWidget *imagemenuitem5;
 	GtkWidget *separatormenuitem1;
 	GtkWidget *menuitem2;
@@ -138,6 +147,7 @@ img_window_struct *img_create_window (void)
 	GtkWidget *eventbox;
 	GtkWidget *a_label;
 	GtkWidget *a_hbox;
+	GtkWidget *modes_vbox;
 
 	/* Added after cleaning up the img_window_struct */
 	GtkWidget *properties_menu;
@@ -233,6 +243,22 @@ img_window_struct *img_create_window (void)
 	gtk_container_add (GTK_CONTAINER (menu1), imagemenuitem5);
 	g_signal_connect (G_OBJECT (imagemenuitem5),"activate",G_CALLBACK (img_quit_menu),img_struct);
 
+	/* View menu */
+	menuitem1 = gtk_menu_item_new_with_mnemonic (_("_View"));
+	gtk_container_add (GTK_CONTAINER (menubar), menuitem1);
+
+	menu1 = gtk_menu_new ();
+	gtk_menu_item_set_submenu (GTK_MENU_ITEM (menuitem1), menu1);
+
+	imagemenuitem1 = gtk_radio_menu_item_new_with_label( NULL, _("Preview mode") );
+	g_signal_connect( G_OBJECT( imagemenuitem1 ), "toggled",
+					  G_CALLBACK( img_toggle_mode ), img_struct );
+	gtk_menu_shell_append( GTK_MENU_SHELL( menu1 ), imagemenuitem1 );
+
+	imagemenuitem2 = gtk_radio_menu_item_new_with_label_from_widget( 
+							GTK_RADIO_MENU_ITEM( imagemenuitem1 ), _("Overview mode") );
+	gtk_menu_shell_append( GTK_MENU_SHELL( menu1 ), imagemenuitem2 );
+
 	/* Slide menu */
 	menuitem2 = gtk_menu_item_new_with_mnemonic (_("_Slide"));
 	gtk_container_add (GTK_CONTAINER (menubar), menuitem2);
@@ -313,19 +339,19 @@ img_window_struct *img_create_window (void)
 	menuitem2 = gtk_image_menu_item_new_from_stock( GTK_STOCK_ZOOM_IN,img_struct->accel_group );
 	gtk_widget_add_accelerator( menuitem2, "activate", img_struct->accel_group, GDK_plus,GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE );
 	g_signal_connect( G_OBJECT( menuitem2 ), "activate",
-					  G_CALLBACK( img_image_area_zoom_in ), img_struct );
+					  G_CALLBACK( img_zoom_in ), img_struct );
 	gtk_menu_shell_append( GTK_MENU_SHELL( menu3 ), menuitem2 );
 
 	menuitem2 = gtk_image_menu_item_new_from_stock( GTK_STOCK_ZOOM_OUT, img_struct->accel_group );
 	gtk_widget_add_accelerator( menuitem2, "activate", img_struct->accel_group, GDK_minus, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE );
 	g_signal_connect( G_OBJECT( menuitem2 ), "activate",
-					  G_CALLBACK( img_image_area_zoom_out ), img_struct );
+					  G_CALLBACK( img_zoom_out ), img_struct );
 	gtk_menu_shell_append( GTK_MENU_SHELL( menu3 ), menuitem2 );
 
 	menuitem2 = gtk_image_menu_item_new_from_stock( GTK_STOCK_ZOOM_100,	img_struct->accel_group );
 	gtk_widget_add_accelerator( menuitem2, "activate", img_struct->accel_group, GDK_0,GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE );
 	g_signal_connect( G_OBJECT( menuitem2 ), "activate",
-					  G_CALLBACK( img_image_area_zoom_reset ), img_struct );
+					  G_CALLBACK( img_zoom_reset ), img_struct );
 	gtk_menu_shell_append( GTK_MENU_SHELL( menu3 ), menuitem2 );
 
 	separator_slide_menu = gtk_separator_menu_item_new ();
@@ -428,17 +454,17 @@ img_window_struct *img_create_window (void)
 	zoom_in_button = GTK_WIDGET (gtk_tool_button_new_from_stock ("gtk-zoom-in"));
 	gtk_container_add (GTK_CONTAINER (toolbar),zoom_in_button);
 	gtk_widget_set_tooltip_text(zoom_in_button, _("Zoom In"));
-	g_signal_connect (G_OBJECT (zoom_in_button),"clicked",G_CALLBACK (img_image_area_zoom_in),img_struct);
+	g_signal_connect (G_OBJECT (zoom_in_button),"clicked",G_CALLBACK (img_zoom_in),img_struct);
 
 	zoom_out_button = GTK_WIDGET (gtk_tool_button_new_from_stock ("gtk-zoom-out"));
 	gtk_container_add (GTK_CONTAINER (toolbar),zoom_out_button);
 	gtk_widget_set_tooltip_text(zoom_out_button, _("Zoom Out"));
-	g_signal_connect (G_OBJECT (zoom_out_button),"clicked",G_CALLBACK (img_image_area_zoom_out),img_struct);
+	g_signal_connect (G_OBJECT (zoom_out_button),"clicked",G_CALLBACK (img_zoom_out),img_struct);
 
-	zoom_normal = GTK_WIDGET (gtk_tool_button_new_from_stock ("gtk-zoom-fit"));
+	zoom_normal = GTK_WIDGET (gtk_tool_button_new_from_stock ("gtk-zoom-100"));
 	gtk_container_add (GTK_CONTAINER (toolbar),zoom_normal);
 	gtk_widget_set_tooltip_text(zoom_normal, _("Normal Size"));
-	g_signal_connect (G_OBJECT (zoom_normal),"clicked",G_CALLBACK (img_image_area_zoom_reset),img_struct);
+	g_signal_connect (G_OBJECT (zoom_normal),"clicked",G_CALLBACK (img_zoom_reset),img_struct);
 
 	separatortoolitem = GTK_WIDGET (gtk_separator_tool_item_new());
 	gtk_container_add (GTK_CONTAINER (toolbar),separatortoolitem);
@@ -499,12 +525,20 @@ img_window_struct *img_create_window (void)
 	hbox = gtk_hpaned_new();
 	gtk_box_pack_start (GTK_BOX (vbox1), hbox, TRUE, TRUE, 0);
 
+	modes_vbox = gtk_vbox_new( FALSE, 0 );
+	gtk_paned_add1( GTK_PANED( hbox ), modes_vbox );
+
 	swindow = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(swindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-	gtk_paned_add1( GTK_PANED( hbox ), swindow );
+	gtk_box_pack_start( GTK_BOX( modes_vbox ), swindow, TRUE, TRUE, 0 );
+	img_struct->prev_root = swindow;
+
+	viewport = gtk_viewport_new( NULL, NULL );
+	gtk_viewport_set_shadow_type(GTK_VIEWPORT(viewport), GTK_SHADOW_NONE);
+	gtk_container_add( GTK_CONTAINER( swindow ), viewport );
 
 	align = gtk_alignment_new(0.5, 0.5, 0, 0);
-	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(swindow), align);
+	gtk_container_add( GTK_CONTAINER( viewport ), align );
 
 	image_area_frame = gtk_frame_new(NULL);
 	gtk_frame_set_shadow_type(GTK_FRAME(image_area_frame), GTK_SHADOW_IN);
@@ -525,9 +559,6 @@ img_window_struct *img_create_window (void)
 					  G_CALLBACK( img_image_area_button_press ), img_struct );
 	g_signal_connect( G_OBJECT( img_struct->image_area ), "motion-notify-event",
 					  G_CALLBACK( img_image_area_motion ), img_struct );
-
-	viewport = gtk_bin_get_child(GTK_BIN(swindow));
-	gtk_viewport_set_shadow_type(GTK_VIEWPORT(viewport), GTK_SHADOW_NONE);
 
 	vbox_frames = gtk_vbox_new(FALSE, 10);
 	scrollable_window = gtk_scrolled_window_new(NULL, NULL);
@@ -704,7 +735,7 @@ img_window_struct *img_create_window (void)
 	gtk_scale_set_value_pos (GTK_SCALE(img_struct->ken_zoom), GTK_POS_LEFT);
 	gtk_box_pack_start (GTK_BOX (hbox_zoom), img_struct->ken_zoom, TRUE, TRUE, 0);
 	g_signal_connect( G_OBJECT( img_struct->ken_zoom ), "value-changed",
-					  G_CALLBACK( img_zoom_changed ), img_struct );
+					  G_CALLBACK( img_ken_burns_zoom_changed ), img_struct );
 	
 	hbox_buttons = gtk_hbutton_box_new();
 	gtk_button_box_set_layout (GTK_BUTTON_BOX (hbox_buttons), GTK_BUTTONBOX_SPREAD);
@@ -999,8 +1030,67 @@ img_window_struct *img_create_window (void)
 														 GDK_TYPE_PIXBUF,
 														 G_TYPE_BOOLEAN );
 
+	/* Create overview mode widgets */
+	/* FIXME: A lot of duplicate code here!! */
+	{
+		GtkWidget       *icon,
+						*swindow;
+		GtkCellRenderer *cell;
+		gchar           *path;
+		GdkPixbuf       *text;
+
+		swindow = gtk_scrolled_window_new( NULL, NULL );
+		gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( swindow ),
+										GTK_POLICY_AUTOMATIC,
+										GTK_POLICY_AUTOMATIC );
+		gtk_box_pack_start( GTK_BOX( modes_vbox ), swindow, TRUE, TRUE, 0 );
+		img_struct->over_root = swindow;
+
+		icon = gtk_icon_view_new_with_model(
+					GTK_TREE_MODEL( img_struct->thumbnail_model ) );
+		gtk_icon_view_set_selection_mode( GTK_ICON_VIEW( icon ),
+										  GTK_SELECTION_MULTIPLE );
+		gtk_icon_view_set_orientation( GTK_ICON_VIEW( icon ),
+									   GTK_ORIENTATION_HORIZONTAL );
+		gtk_icon_view_set_column_spacing( GTK_ICON_VIEW( icon ), 0 );
+		gtk_icon_view_set_row_spacing( GTK_ICON_VIEW( icon ), 0 );
+		img_struct->over_icon = icon;
+		img_struct->active_icon = icon;
+		g_signal_connect( G_OBJECT( icon ), "selection-changed",
+						  G_CALLBACK( img_iconview_selection_changed ),
+						  img_struct );
+		g_signal_connect( G_OBJECT( icon ), "select-all",
+						  G_CALLBACK( img_iconview_selection_changed ),
+						  img_struct );
+		g_signal_connect( G_OBJECT( icon ), "button-press-event",
+						  G_CALLBACK( img_iconview_selection_button_press ),
+						  img_struct );
+		gtk_container_add( GTK_CONTAINER( swindow ), icon );
+
+		cell = img_cell_renderer_pixbuf_new();
+		gtk_cell_layout_pack_start( GTK_CELL_LAYOUT( icon ), cell, FALSE );
+		img_struct->over_cell = G_OBJECT( cell );
+
+		path = g_strconcat( DATADIR,
+							"/imagination/pixmaps/imagination-text.png",
+							NULL );
+		text = gdk_pixbuf_new_from_file( path, NULL );
+		g_free( path );
+		g_object_set( G_OBJECT( cell ), "ypad", 2,
+										"text-ico", text,
+										NULL );
+		g_object_unref( G_OBJECT( text ) );
+		gtk_cell_layout_set_attributes( GTK_CELL_LAYOUT( icon ), cell,
+										"pixbuf", 0,
+										"transition", 2,
+										"has-text", 3,
+										NULL );
+		gtk_icon_view_set_reorderable( GTK_ICON_VIEW( icon ), TRUE );
+	}
+
 	/* Add wrapper for DnD */
 	eventbox = gtk_event_box_new();
+	img_struct->thum_root = eventbox;
 	gtk_event_box_set_above_child( GTK_EVENT_BOX( eventbox ), FALSE );
 	gtk_event_box_set_visible_window( GTK_EVENT_BOX( eventbox ), FALSE );
 	gtk_drag_dest_set( GTK_WIDGET( eventbox ), GTK_DEST_DEFAULT_ALL,
@@ -1085,6 +1175,10 @@ img_window_struct *img_create_window (void)
 
 	/* Disable all subtitle controls */
 	img_subtitle_update_sensitivity( img_struct, 0 );
+
+	/* Update mode */
+	img_struct->mode = 0;
+	img_switch_mode( img_struct, 0 );
 
 	return img_struct;
 }
@@ -1207,8 +1301,10 @@ void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *im
 	{
 		img_set_statusbar_message(img,nr_selected);
 		if( img->current_image )
+		{
 			cairo_surface_destroy( img->current_image );
-		img->current_image = NULL;
+			img->current_image = NULL;
+		}
 		img->current_slide = NULL;
 		gtk_widget_queue_draw( img->image_area );
 
@@ -1303,14 +1399,23 @@ void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *im
 	}
 
 	if( img->current_image )
+	{
 		cairo_surface_destroy( img->current_image );
-
-	/* Respect quality settings */
-	if( img->low_quality )
-		img->current_image = img_scale_image( img, info_slide->filename, 0,
-											  img->video_size[1] );
-	else
-		img->current_image = img_scale_image( img, info_slide->filename, 0, 0 );
+		img->current_image = NULL;
+	}
+		
+	/* This is not needed when in overview mode, since we're not displaying any
+	 * large image preview. */
+	if( img->mode == 0 )
+	{
+		/* Respect quality settings */
+		if( img->low_quality )
+			img->current_image = img_scale_image( img, info_slide->filename,
+												  0, img->video_size[1] );
+		else
+			img->current_image = img_scale_image( img, info_slide->filename,
+												  0, 0 );
+	}
 
 	/* Update display */
 	img_update_stop_display( img, TRUE );
@@ -1655,7 +1760,7 @@ img_iconview_selection_button_press( GtkWidget         *widget,
 {
 	if( ( button->button == 1 ) &&
 		! ( button->state & ( GDK_SHIFT_MASK | GDK_CONTROL_MASK ) ) )
-		gtk_icon_view_unselect_all( GTK_ICON_VIEW( img->thumbnail_iconview ) );
+		gtk_icon_view_unselect_all( GTK_ICON_VIEW( widget ) );
 
 	return( FALSE );
 }
@@ -1682,10 +1787,7 @@ img_scroll_thumb( GtkWidget         *widget,
 	upper = gtk_adjustment_get_upper( adj );
 	value = gtk_adjustment_get_value( adj );
 
-	g_print( "%f, %f, %f, %f\n", page, step, upper, value );
-
 	gtk_adjustment_set_value( adj, CLAMP( value + step * dir, 0, upper - page ) );
-
 	return( TRUE );
 }
 
@@ -1778,7 +1880,7 @@ img_subtitle_update( img_window_struct *img )
 					  &img->current_slide->subtitle, NULL );
 
 	list = gtk_icon_view_get_selected_items(
-				GTK_ICON_VIEW( img->thumbnail_iconview ) );
+				GTK_ICON_VIEW( img->active_icon ) );
 	gtk_tree_model_get_iter( GTK_TREE_MODEL( img->thumbnail_model ),
 							 &iter, list->data );
 	g_list_foreach( list, (GFunc)gtk_tree_path_free, NULL );
@@ -2046,3 +2148,43 @@ img_update_sub_properties( img_window_struct *img,
 	g_list_free( selected );
 }
 
+static void
+img_toggle_mode( GtkCheckMenuItem  *item,
+				 img_window_struct *img )
+{
+	gint mode;
+	mode = ( gtk_check_menu_item_get_active( item ) ? 0 : 1 );
+
+	if( mode == img->mode )
+		return;
+
+	img->mode = mode;
+	img_switch_mode( img, mode );
+}
+
+static void
+img_switch_mode( img_window_struct *img,
+				 gint               mode )
+{
+	gtk_widget_hide( img->active_icon );
+	switch( mode )
+	{
+		case 0: /* Preview mode */
+			gtk_widget_hide( img->over_root );
+			gtk_widget_show( img->prev_root );
+			gtk_widget_show( img->thum_root );
+			img->active_icon = img->thumbnail_iconview;
+			break;
+
+		case 1: /* Overview mode */
+			gtk_widget_hide( img->prev_root );
+			gtk_widget_hide( img->thum_root );
+			gtk_widget_show( img->over_root );
+			img->active_icon = img->over_icon;
+			break;
+	}
+	gtk_widget_show( img->active_icon );
+
+	/* Update selections */
+	img_iconview_selection_changed( GTK_ICON_VIEW( img->active_icon ), img );
+}

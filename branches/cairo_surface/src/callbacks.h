@@ -57,22 +57,22 @@ cairo_surface_t *img_scale_image( img_window_struct *, gchar *, gint, gint );
 void img_move_audio_up( GtkButton *, img_window_struct * );
 void img_move_audio_down( GtkButton *, img_window_struct * );
 gboolean img_on_expose_event(GtkWidget *,GdkEventExpose *,img_window_struct *);
-void img_zoom_changed( GtkRange *, img_window_struct * );
+void img_ken_burns_zoom_changed( GtkRange *, img_window_struct * );
 gboolean img_image_area_button_press( GtkWidget *, GdkEventButton *, img_window_struct * );
 gboolean img_image_area_motion( GtkWidget *, GdkEventMotion *, img_window_struct * );
+
 void
-img_image_area_zoom_in( GtkMenuItem       *item,
-						img_window_struct *img );
+img_zoom_in( GtkWidget         *item,
+			 img_window_struct *img );
+
 void
-img_image_area_zoom_out( GtkMenuItem       *item,
-						 img_window_struct *img );
+img_zoom_out( GtkWidget         *item,
+			  img_window_struct *img );
+
 void
-img_image_area_zoom_reset( GtkMenuItem       *item,
-						   img_window_struct *img );
-void
-img_image_area_change_zoom( gdouble            step,
-							gboolean           reset,
-							img_window_struct *img );
+img_zoom_reset( GtkWidget         *item,
+				img_window_struct *img );
+
 void
 img_quality_toggled( GtkCheckMenuItem  *item,
 					 img_window_struct *img );

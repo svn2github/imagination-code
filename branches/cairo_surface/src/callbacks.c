@@ -31,6 +31,16 @@ static void img_about_dialog_activate_link(GtkAboutDialog * , const gchar *, gpo
 static GdkPixbuf *img_rotate_pixbuf_c( GdkPixbuf *, GtkProgressBar *);
 static GdkPixbuf *img_rotate_pixbuf_cc( GdkPixbuf *, GtkProgressBar *);
 
+static void
+img_image_area_change_zoom( gdouble            step,
+							gboolean           reset,
+							img_window_struct *img );
+
+static void
+img_overview_change_zoom( gdouble            step,
+						  gboolean           reset,
+						  img_window_struct *img );
+
 void img_set_window_title(img_window_struct *img, gchar *text)
 {
 	gchar *title = NULL;
@@ -1636,7 +1646,7 @@ void img_move_audio_down( GtkButton *button, img_window_struct *img )
 }
 
 /*
- * img_zoom_changed:
+ * img_ken_burns_zoom_changed:
  * @range: GtkRange that will provide proper value for us
  * @img: global img_window_strct structure
  *
@@ -1649,8 +1659,8 @@ void img_move_audio_down( GtkButton *button, img_window_struct *img )
  * img_image_area_change_zoom is the thing to look at.
  */
 void
-img_zoom_changed( GtkRange          *range,
-				  img_window_struct *img )
+img_ken_burns_zoom_changed( GtkRange          *range,
+							img_window_struct *img )
 {
 	/* Store old zoom for calcutaions */
 	gdouble old_zoom = img->current_point.zoom;
@@ -1748,24 +1758,33 @@ img_image_area_motion( GtkWidget         *widget,
 
 /* Zoom callback functions */
 void
-img_image_area_zoom_in( GtkMenuItem       *item,
-						img_window_struct *img )
+img_zoom_in( GtkWidget         *item,
+			 img_window_struct *img )
 {
-	img_image_area_change_zoom( 0.1, FALSE, img );
+	if( img->mode == 0 )
+		img_image_area_change_zoom( 0.1, FALSE, img );
+	else
+		img_overview_change_zoom( 0.1, FALSE, img );
 }
 
 void
-img_image_area_zoom_out( GtkMenuItem       *item,
-						 img_window_struct *img )
+img_zoom_out( GtkWidget         *item,
+			  img_window_struct *img )
 {
-	img_image_area_change_zoom( - 0.1, FALSE, img );
+	if( img->mode == 0 )
+		img_image_area_change_zoom( - 0.1, FALSE, img );
+	else
+		img_overview_change_zoom( - 0.1, FALSE, img );
 }
 
 void
-img_image_area_zoom_reset( GtkMenuItem       *item,
-						   img_window_struct *img )
+img_zoom_reset( GtkWidget         *item,
+				img_window_struct *img )
 {
-	img_image_area_change_zoom( 0, TRUE, img );
+	if( img->mode == 0 )
+		img_image_area_change_zoom( 0, TRUE, img );
+	else
+		img_overview_change_zoom( 0, TRUE, img );
 }
 
 /*
@@ -1784,7 +1803,7 @@ img_image_area_zoom_reset( GtkMenuItem       *item,
  * changed by adjusting bounds array values. If the zoom would be set outside of
  * this interval, it is clamped in between those two values.
  */
-void
+static void
 img_image_area_change_zoom( gdouble            step,
 							gboolean           reset,
 							img_window_struct *img )
@@ -1801,6 +1820,28 @@ img_image_area_change_zoom( gdouble            step,
 	gtk_widget_set_size_request( img->image_area,
 								 img->video_size[0] * img->image_area_zoom,
 								 img->video_size[1] * img->image_area_zoom );
+}
+
+static void
+img_overview_change_zoom( gdouble            step,
+						  gboolean           reset,
+						  img_window_struct *img )
+{
+	static gdouble  bounds[] = { 0.1, 3.0 };
+	GtkTreeModel   *model;
+
+	if( reset )
+		img->overview_zoom = 1;
+	else
+		img->overview_zoom = CLAMP( img->overview_zoom + step,
+									bounds[0], bounds[1] );
+
+	/* Apply change */
+	g_object_get( G_OBJECT( img->over_icon ), "model", &model, NULL );
+	g_object_set( G_OBJECT( img->over_icon ), "model", NULL, NULL );
+	g_object_set( img->over_cell, "zoom", img->overview_zoom, NULL );
+	g_object_set( G_OBJECT( img->over_icon ), "model", model, NULL );
+	g_object_unref( G_OBJECT( model ) );
 }
 
 void

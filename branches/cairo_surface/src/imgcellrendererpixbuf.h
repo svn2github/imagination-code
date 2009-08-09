@@ -49,12 +49,12 @@ typedef struct _ImgCellRendererPixbufClass ImgCellRendererPixbufClass;
 
 struct _ImgCellRendererPixbuf
 {
-	GtkCellRendererPixbuf parent;
+	GtkCellRenderer parent;
 };
 
 struct _ImgCellRendererPixbufClass
 {
-	GtkCellRendererPixbufClass parent_class;
+	GtkCellRendererClass parent_class;
 };
 
 GType
