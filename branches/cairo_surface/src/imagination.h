@@ -193,8 +193,9 @@ struct _img_window_struct
 	GSList		*rotated_files;
 
 	/* Mode switching */
-	gint       mode;      /* In what mode are we in: 0 - preview
-													 1 - overview */
+	gint       mode;        /* In what mode are we in: 0 - preview
+													   1 - overview */
+	gboolean   auto_switch; /* Has been last mode switch made automatically? */
 	GtkWidget *prev_root;   /* Preview mode root widget */
 	GtkWidget *over_root;   /* Overview mode root widget */
 	GtkWidget *thum_root;   /* Thumbnail root widget */

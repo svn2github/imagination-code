@@ -75,4 +75,9 @@ img_combo_box_anim_speed_changed( GtkComboBox       *combo,
 void
 img_text_anim_set( GtkComboBox       *combo,
 				   img_window_struct *img );
+
+void
+img_switch_mode( img_window_struct *img,
+				 gint               mode );
+
 #endif

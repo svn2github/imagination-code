@@ -162,17 +162,19 @@ img_create_export_dialog( img_window_struct  *img,
 	if( img->export_is_running )
 		return( NULL );
 
+	/* Switch mode */
+	if( img->mode == 1 )
+	{
+		img->auto_switch = TRUE;
+		img_switch_mode( img, 0 );
+	}
+
 	/* Abort if no slide is present */
 	model = gtk_icon_view_get_model( GTK_ICON_VIEW( img->thumbnail_iconview ) );
 	if( ! gtk_tree_model_get_iter_first( model, &iter ) )
 	{
 		return( NULL );
 	}
-
-	/* Indicate that export has been started */
-	/* This has been removed since expose handler needs something in
-	 * img->work_image in order for preview to work properly!! */
-	//img->export_is_running = 1;
 
 	/* Create dialog */
 	dialog = gtk_dialog_new_with_buttons( title, parent,
@@ -514,8 +516,17 @@ img_stop_export( img_window_struct *img )
 	/* Indicate that export is not running any more */
 	img->export_is_running = 0;
 
-	/* Redraw preview area */
-	gtk_widget_queue_draw( img->image_area );
+	/* Switch mode if needed */
+	if( img->auto_switch )
+	{
+		img->auto_switch = FALSE;
+		img_switch_mode( img, 1 );
+	}
+	else
+	{
+		/* Redraw preview area */
+		gtk_widget_queue_draw( img->image_area );
+	}
 
 	return( FALSE );
 }
@@ -1110,67 +1121,6 @@ img_export_frame_to_ppm( cairo_surface_t *surface,
  * placeholder named <#AUDIO#>, which will be in next stage replaced by real
  * path to newly produced audio file (at this stage, we don't have any).
  * ************************************************************************* */
-
-/* Template for exporter function. */
-#if 0
-static void
-img_exporter_<format>( img_window_struct *img )
-{
-	gchar          *cmd_line;
-	gchar          *format;
-	const gchar    *filename;
-	gchar          *aspect_ratio;
-	GtkWidget      *dialog;
-	GtkEntry       *entry;
-	GtkWidget      *vbox;
-
-	/* Additional options - <format> only */
-
-	/* This function call should be the first thing exporter does, since this
-	 * function will take some preventive measures. */
-	dialog = img_create_export_dialog( img, _("VOB export"),
-									   GTK_WINDOW( img->imagination_window ),
-									   &entry, &vbox );
-
-	/* If dialog is NULL, abort. */
-	if( dialog == NULL )
-		return;
-
-	/* Add any export format specific GUI elements here */
-
-	
-
-	gtk_widget_show_all( dialog );
-
-	/* Run dialog and abort if needed */
-	if( gtk_dialog_run( GTK_DIALOG( dialog ) ) != GTK_RESPONSE_ACCEPT )
-	{
-		gtk_widget_destroy( dialog );
-		img->export_is_running = 0;
-		return;
-	}
-
-	/* User is serious, so we better prepare ffmpeg command line;) */
-	img->export_fps = <frame rate>;
-	filename = gtk_entry_get_text( entry );
-
-	/* Any additional calculation can be placed here. */
-
-	cmd_line = g_strdup_printf( "ffmpeg -f image2pipe -vcodec ppm -i pipe: "
-								"-r %.02f -aspect %s -s %dx%d <#AUDIO#> -y "
-								"-bf 2 -target %s-dvd \"%s.vob\"",
-								img->export_fps, aspect_ratio,
-								img->video_size[0], img->video_size[1],
-								format, filename );
-	img->export_cmd_line = cmd_line;
-
-	/* Initiate stage 2 of export - audio processing */
-	g_idle_add( (GSourceFunc)img_prepare_audio, img );
-
-	gtk_widget_destroy( dialog );
-}
-#endif
-
 static void
 img_exporter_vob( img_window_struct *img )
 {
@@ -1189,7 +1139,8 @@ img_exporter_vob( img_window_struct *img )
 	GtkWidget *radio1, *radio2;
 
 	/* This function call should be the first thing exporter does, since this
-	 * function will take some preventive measures. */
+	 * function will take some preventive measures and also switches mode into
+	 * preview if needed. */
 	dialog = img_create_export_dialog( img, _("VOB export"),
 									   GTK_WINDOW( img->imagination_window ),
 									   &entry, &vbox );

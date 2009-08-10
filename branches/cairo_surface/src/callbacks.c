@@ -771,6 +771,12 @@ void img_start_stop_preview(GtkWidget *button, img_window_struct *img)
 	else
 	{
 		/* Start the preview */
+		if( img->mode == 1 )
+		{
+			img->auto_switch = TRUE;
+			img_switch_mode( img, 0 );
+		}
+
 		model = GTK_TREE_MODEL( img->thumbnail_model );
 		list = gtk_icon_view_get_selected_items(
 					GTK_ICON_VIEW( img->thumbnail_iconview ) );
@@ -1464,6 +1470,13 @@ static void img_swap_toolbar_images( img_window_struct *img,gboolean flag )
 
 static void img_clean_after_preview(img_window_struct *img)
 {
+	/* Switch to right mode */
+	if( img->auto_switch )
+	{
+		img_switch_mode( img, 1 );
+		img->auto_switch = FALSE;
+	}
+
 	/* Swap toolbar and menu icons */
 	img_swap_toolbar_images( img, TRUE );
 

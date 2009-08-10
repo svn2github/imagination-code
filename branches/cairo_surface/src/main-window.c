@@ -79,10 +79,6 @@ static void
 img_toggle_mode( GtkCheckMenuItem  *item,
 				 img_window_struct *img );
 
-static void
-img_switch_mode( img_window_struct *img,
-				 gint               mode );
-
 
 /* ****************************************************************************
  * Function definitions
@@ -1177,7 +1173,7 @@ img_window_struct *img_create_window (void)
 	img_subtitle_update_sensitivity( img_struct, 0 );
 
 	/* Update mode */
-	img_struct->mode = 0;
+	img_struct->mode = - 1;
 	img_switch_mode( img_struct, 0 );
 
 	return img_struct;
@@ -2155,17 +2151,23 @@ img_toggle_mode( GtkCheckMenuItem  *item,
 	gint mode;
 	mode = ( gtk_check_menu_item_get_active( item ) ? 0 : 1 );
 
-	if( mode == img->mode )
-		return;
-
-	img->mode = mode;
 	img_switch_mode( img, mode );
 }
 
-static void
+void
 img_switch_mode( img_window_struct *img,
 				 gint               mode )
 {
+	GtkIconView *from,      /* Iconviews for selection synchronization */
+				*to;
+	GList       *selection, /* Selection to be copied from 'from' to 'to' */
+				*tmp;       /* Iterator */
+
+	if( img->mode == mode )
+		return;
+
+	img->mode = mode;
+
 	gtk_widget_hide( img->active_icon );
 	switch( mode )
 	{
@@ -2174,6 +2176,7 @@ img_switch_mode( img_window_struct *img,
 			gtk_widget_show( img->prev_root );
 			gtk_widget_show( img->thum_root );
 			img->active_icon = img->thumbnail_iconview;
+			from = GTK_ICON_VIEW( img->over_icon );
 			break;
 
 		case 1: /* Overview mode */
@@ -2181,10 +2184,41 @@ img_switch_mode( img_window_struct *img,
 			gtk_widget_hide( img->thum_root );
 			gtk_widget_show( img->over_root );
 			img->active_icon = img->over_icon;
+			from = GTK_ICON_VIEW( img->thumbnail_iconview );
 			break;
 	}
 	gtk_widget_show( img->active_icon );
+	to = GTK_ICON_VIEW( img->active_icon );
 
-	/* Update selections */
-	img_iconview_selection_changed( GTK_ICON_VIEW( img->active_icon ), img );
+	/* Synchronize selections */
+	selection = gtk_icon_view_get_selected_items( from );
+	if( ! selection )
+	{
+		gtk_icon_view_unselect_all( to );
+		return;
+	}
+
+	g_signal_handlers_block_by_func( from,
+									 img_iconview_selection_changed, img );
+	g_signal_handlers_block_by_func( to,
+									 img_iconview_selection_changed, img );
+
+	gtk_icon_view_unselect_all( to );
+	for( tmp = g_list_next( selection ); tmp; tmp = g_list_next( tmp ) )
+	{
+		GtkTreePath *path = (GtkTreePath *)tmp->data;
+		gtk_icon_view_select_path( to, path );
+		gtk_tree_path_free( path );
+	}
+
+	g_signal_handlers_unblock_by_func( from,
+									   img_iconview_selection_changed, img );
+	g_signal_handlers_unblock_by_func( to,
+									   img_iconview_selection_changed, img );
+
+	gtk_icon_view_select_path( to, (GtkTreePath *)selection->data );
+	gtk_icon_view_set_cursor( to, (GtkTreePath *)selection->data, NULL, FALSE );
+	gtk_tree_path_free( (GtkTreePath *)selection->data );
+
+	g_list_free( selection );
 }
