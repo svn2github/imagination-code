@@ -13,14 +13,14 @@ SUBTITLE RELATED:
 3.  Add word wrapping to subtitle function.
 		Status: In reconsideration.
 4.  Add subtitle related data to save/load procedures.
-		Status: Waiting on 2.
+		Status: FINISHED!
 5.  Add some simple text animation functions.
 		Status: Partially done (only fade animation is available).
 6.  Add proper enabling/disabling of sidebar subtitle controls. This depends on
     finished 2.
-		Status: Waiting on 2.
+		Status: FINISHED!
 7.  Add proper updating of sidebar controls when selecting/deselecting slides.
-		Status: Waiting on 2.
+		Status: FINISHED!
 
 KEN BURNS RELATED:
 8.  Add proper enabling/disabling of sidebar controls.
@@ -33,6 +33,12 @@ BACKEND CHANGE RELATED:
 		Status: Not started yet.
 11. Test preview/export functionality.
 		Status: Not started yet.
+
+ADDED LATER
+12. Add overview mode and properly test it.
+		Status: Coding FINISHED, testing not started yet.
+13. Add copy/paste and test it.
+		Status: In development right now.
 
 
 
@@ -170,7 +176,21 @@ Ad 11.:
 	before we ripped the GdkPixbuf from Imagination and replaced it with
 	cairo_surface_t.
 
+Ad 12.:
+	Another mode of operation should be added that would make it easier to see
+	the general layout of the whole project and make it much more convenient to
+	apply the same settings to multiple slides at a time.
+
+	Functionality of this mode is supplemented by copy/paste ability.
+
+Ad 13.:
+	Copy/Cut/Paste ability is there to aid moving multiple slides at a time.
+	This should make managing large projects much easier.
+
 
 Tadej Borovšak,
 Sun Jul 26 18:25:10 CEST 2009
+
+Last updated:
+Tue Aug 11 18:40:47 CEST 2009
 
