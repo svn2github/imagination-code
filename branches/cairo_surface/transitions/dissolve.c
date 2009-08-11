@@ -22,6 +22,11 @@
 
 #define RAND_VALS 10 /* Number of random values to use */
 
+/* Persistent data */
+static cairo_surface_t *mask = NULL;
+static gint             filled;
+static gint             stride;
+
 /* Plug-in API */
 void
 img_get_plugin_info( gchar  **group,
@@ -51,11 +56,6 @@ img_dissolve( cairo_t         *cr,
 			count;  /* Number of pixels that are already drawn */
 	guchar *data;   /* Mask surface data */
 	gint    values[RAND_VALS]; /* Random values */
-
-	/* Persistent data */
-	static cairo_surface_t *mask = NULL;
-	static gint             filled;
-	static gint             stride;
 
 	width  = cairo_image_surface_get_width( image_from );
 	height = cairo_image_surface_get_height( image_from );
