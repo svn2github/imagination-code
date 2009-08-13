@@ -2159,3 +2159,40 @@ img_calc_current_ken_point( ImgStopPoint *res,
 	res->zoom = from->zoom * ( 1 - fracz ) + to->zoom * fracz;
 }
 
+void img_clipboard_cut_copy_operation(img_window_struct *img, ImgClipboardMode mode)
+{
+	GtkClipboard *img_clipboard;
+	GList *selected = NULL;
+	GtkTargetEntry targets[] = 
+	{
+		{ "application/imagination-info-list", 0, 1 }
+	};
+
+	selected = gtk_icon_view_get_selected_items(GTK_ICON_VIEW(img->thumbnail_iconview));
+	if (selected == NULL)
+		return;
+
+	img_clipboard = gtk_clipboard_get (IMG_CLIPBOARD);
+
+	img->selected_paths = selected;
+	img->clipboard_mode = mode;
+
+	gtk_clipboard_set_with_data (	img_clipboard,
+									targets, G_N_ELEMENTS (targets),
+									(GtkClipboardGetFunc) 	img_clipboard_get,
+									NULL, img);	
+}
+
+void img_clipboard_get (GtkClipboard *clipboard, GtkSelectionData *selection_data, guint info, img_window_struct *img)
+{
+	if (selection_data->target != IMG_INFO_LIST)
+		return;
+
+	gtk_selection_data_set (selection_data, selection_data->target, 8, (guchar *) img->selected_paths, sizeof(GList) * g_list_length(img->selected_paths) );
+}
+
+void img_clipboard_clear (GtkClipboard *clipboard, img_window_struct *img)
+{
+	g_print ("I'm here\n");
+	//gtk_clipboard_clear(clipboard);
+}

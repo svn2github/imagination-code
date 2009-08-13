@@ -41,6 +41,9 @@ static void img_random_button_clicked(GtkButton *, img_window_struct *);
 static GdkPixbuf *img_set_random_transition(img_window_struct *, slide_struct *);
 static void img_combo_box_speed_changed (GtkComboBox *,  img_window_struct *);
 static void img_spinbutton_value_changed (GtkSpinButton *, img_window_struct *);
+static void img_slide_cut(GtkMenuItem * , img_window_struct *);
+static void img_slide_copy(GtkMenuItem * , img_window_struct *);
+static void img_slide_paste(GtkMenuItem* , img_window_struct *);
 static void img_clear_audio_files(GtkButton *, img_window_struct *);
 static void img_expand_button_clicked(GtkButton *, img_window_struct *);
 static void img_on_drag_audio_data_received (GtkWidget *,GdkDragContext *, int, int, GtkSelectionData *, unsigned int, unsigned int, img_window_struct *);
@@ -284,15 +287,15 @@ img_window_struct *img_create_window (void)
 
 	img_struct->cut = gtk_image_menu_item_new_from_stock (GTK_STOCK_CUT, img_struct->accel_group);
 	gtk_container_add (GTK_CONTAINER (slide_menu), img_struct->cut);
-	//g_signal_connect (G_OBJECT (img_struct->cut), "activate", G_CALLBACK (img_slide_cut), img_struct);
+	g_signal_connect (G_OBJECT (img_struct->cut), "activate", G_CALLBACK (img_slide_cut), img_struct);
 
 	img_struct->copy = gtk_image_menu_item_new_from_stock (GTK_STOCK_COPY, img_struct->accel_group);
 	gtk_container_add (GTK_CONTAINER (slide_menu), img_struct->copy);
-	//g_signal_connect (G_OBJECT (img_struct->cut), "activate", G_CALLBACK (img_slide_copy), img_struct);
+	g_signal_connect (G_OBJECT (img_struct->copy), "activate", G_CALLBACK (img_slide_copy), img_struct);
 
 	img_struct->paste = gtk_image_menu_item_new_from_stock (GTK_STOCK_PASTE, img_struct->accel_group);
 	gtk_container_add (GTK_CONTAINER (slide_menu), img_struct->paste);
-	//g_signal_connect (G_OBJECT (img_struct->paste), "activate", G_CALLBACK (img_slide_paste), img_struct);
+	g_signal_connect (G_OBJECT (img_struct->paste), "activate", G_CALLBACK (img_slide_paste), img_struct);
 
 	separator_slide_menu = gtk_separator_menu_item_new ();
 	gtk_container_add (GTK_CONTAINER (slide_menu),separator_slide_menu);
@@ -335,6 +338,9 @@ img_window_struct *img_create_window (void)
 	g_signal_connect( G_OBJECT( menuitem2 ), "activate",
 					  G_CALLBACK( img_zoom_reset ), img_struct );
 	gtk_menu_shell_append( GTK_MENU_SHELL( menu3 ), menuitem2 );
+
+	separator_slide_menu = gtk_separator_menu_item_new ();
+	gtk_container_add (GTK_CONTAINER (slide_menu),separator_slide_menu);
 
 	/* Rotate menu */
 	pixbuf = gtk_icon_theme_load_icon(icon_theme,"object-rotate-left",GTK_ICON_SIZE_MENU,0,NULL);
@@ -1192,6 +1198,42 @@ img_window_struct *img_create_window (void)
 	img_switch_mode( img_struct, 0 );
 
 	return img_struct;
+}
+
+static void img_slide_cut(GtkMenuItem* item, img_window_struct *img)
+{
+	img_clipboard_cut_copy_operation(img, IMG_CLIPBOARD_CUT);
+}
+
+static void img_slide_copy(GtkMenuItem* item, img_window_struct *img)
+{
+	img_clipboard_cut_copy_operation(img, IMG_CLIPBOARD_COPY);
+}
+
+static void img_slide_paste(GtkMenuItem* item, img_window_struct *img)
+{
+	GtkClipboard *clipboard;
+	GtkSelectionData *selection;
+
+	clipboard = gtk_clipboard_get(IMG_CLIPBOARD);
+	selection = gtk_clipboard_wait_for_contents(clipboard, IMG_INFO_LIST);
+
+	if (selection == NULL)
+	{
+		g_print ("Paste: selection is NULL\n");
+		return;
+	}
+	
+	g_print ("** %d\n", g_list_length( (GList *) selection->data) );
+
+	if (img->selected_paths)
+	{
+		g_print ("Delete g_list\n");
+		g_list_foreach (img->selected_paths, (GFunc)gtk_tree_path_free, NULL);
+		g_list_free (img->selected_paths);
+		img->selected_paths = NULL;
+	}	
+	gtk_selection_data_free (selection);
 }
 
 static void img_clear_audio_files(GtkButton *button, img_window_struct *img)

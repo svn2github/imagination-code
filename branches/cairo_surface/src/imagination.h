@@ -119,6 +119,18 @@ struct _ImgStopPoint
 };
 
 /* ****************************************************************************
+ * define for gtk clipboard
+ * ************************************************************************* */
+#define IMG_CLIPBOARD (gdk_atom_intern_static_string ("IMAGINATIO_OWN_CLIPBOARD")) 
+#define IMG_INFO_LIST (gdk_atom_intern_static_string ("application/imagination-info-list"))
+
+typedef enum
+{
+	IMG_CLIPBOARD_CUT,
+	IMG_CLIPBOARD_COPY
+} ImgClipboardMode;
+
+/* ****************************************************************************
  * Common definitions that are used all over the place
  * ************************************************************************* */
 typedef struct _slide_struct slide_struct;
@@ -348,6 +360,10 @@ struct _img_window_struct
 	gboolean low_quality;     /* Preview quality:
 								  TRUE  - preview in low-res
 								  FALSE - preview in hi-res */
+
+	/* Clipboard related stuff */
+	GList				*selected_paths;
+	ImgClipboardMode	clipboard_mode;
 };
 
 #endif
