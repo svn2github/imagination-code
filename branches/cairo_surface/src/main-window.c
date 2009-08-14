@@ -1231,7 +1231,7 @@ static void img_slide_paste(GtkMenuItem* item, img_window_struct *img)
 		return;
 	}
 	model			=	GTK_TREE_MODEL(img->thumbnail_model);
-	where_to_paste	=	gtk_icon_view_get_selected_items(GTK_ICON_VIEW(img->thumbnail_iconview));
+	where_to_paste	=	gtk_icon_view_get_selected_items(GTK_ICON_VIEW(img->active_icon));
 	dummy			=	img->selected_paths;
 
 	if (img->clipboard_mode == IMG_CLIPBOARD_CUT)
@@ -1605,8 +1605,8 @@ static void img_combo_box_transition_type_changed (GtkComboBox *combo, img_windo
 	path = gtk_tree_path_to_string( p );
 	gtk_tree_path_free( p );
 
-	model = gtk_icon_view_get_model(GTK_ICON_VIEW (img->thumbnail_iconview));
-	selected = gtk_icon_view_get_selected_items(GTK_ICON_VIEW (img->thumbnail_iconview));
+	model = GTK_TREE_MODEL( img->thumbnail_model );
+	selected = gtk_icon_view_get_selected_items(GTK_ICON_VIEW (img->active_icon));
 	if (selected == NULL)
 	{
 		g_free( path );
@@ -1650,8 +1650,8 @@ static void img_random_button_clicked(GtkButton *button, img_window_struct *img)
 	slide_struct *info_slide;
 	GdkPixbuf    *pixbuf;
 
-	model = gtk_icon_view_get_model(GTK_ICON_VIEW (img->thumbnail_iconview));
-	selected = gtk_icon_view_get_selected_items(GTK_ICON_VIEW (img->thumbnail_iconview));
+	model = GTK_TREE_MODEL( img->thumbnail_model );
+	selected = gtk_icon_view_get_selected_items(GTK_ICON_VIEW (img->active_icon));
 	if (selected == NULL)
 		return;
 
@@ -1737,8 +1737,8 @@ static void img_combo_box_speed_changed (GtkComboBox *combo, img_window_struct *
 	GtkTreeModel *model;
 	slide_struct *info_slide;
 
-	model = gtk_icon_view_get_model(GTK_ICON_VIEW (img->thumbnail_iconview));
-	selected = gtk_icon_view_get_selected_items(GTK_ICON_VIEW (img->thumbnail_iconview));
+	model = GTK_TREE_MODEL( img->thumbnail_model );
+	selected = gtk_icon_view_get_selected_items(GTK_ICON_VIEW (img->active_icon));
 	if (selected == NULL)
 		return;
 
@@ -1780,8 +1780,8 @@ static void img_spinbutton_value_changed (GtkSpinButton *spinbutton, img_window_
 	GtkTreeModel *model;
 	slide_struct *info_slide;
 
-	model = gtk_icon_view_get_model(GTK_ICON_VIEW(img->thumbnail_iconview));
-	selected = gtk_icon_view_get_selected_items(GTK_ICON_VIEW(img->thumbnail_iconview));
+	model = GTK_TREE_MODEL( img->thumbnail_model );
+	selected = gtk_icon_view_get_selected_items(GTK_ICON_VIEW(img->active_icon));
 	if (selected == NULL)
 		return;
 
@@ -1802,12 +1802,12 @@ static void img_spinbutton_value_changed (GtkSpinButton *spinbutton, img_window_
 
 static void img_select_all_thumbnails(GtkMenuItem *item, img_window_struct *img)
 {
-	gtk_icon_view_select_all(GTK_ICON_VIEW (img->thumbnail_iconview));
+	gtk_icon_view_select_all(GTK_ICON_VIEW (img->active_icon));
 }
 
 static void img_unselect_all_thumbnails(GtkMenuItem *item, img_window_struct *img)
 {
-	gtk_icon_view_unselect_all(GTK_ICON_VIEW (img->thumbnail_iconview));
+	gtk_icon_view_unselect_all(GTK_ICON_VIEW (img->active_icon));
 }
 
 static void img_goto_line_entry_activate(GtkWidget *entry, img_window_struct *img)
@@ -1818,11 +1818,11 @@ static void img_goto_line_entry_activate(GtkWidget *entry, img_window_struct *im
 	slide = strtol(gtk_entry_get_text(GTK_ENTRY(img->slide_number_entry)), NULL, 10);
 	if (slide > 0 && slide <= img->slides_nr)
 	{
-		gtk_icon_view_unselect_all(GTK_ICON_VIEW (img->thumbnail_iconview));
+		gtk_icon_view_unselect_all(GTK_ICON_VIEW (img->active_icon));
 		path = gtk_tree_path_new_from_indices(slide-1,-1);
-		gtk_icon_view_set_cursor (GTK_ICON_VIEW (img->thumbnail_iconview), path, NULL, FALSE);
-		gtk_icon_view_select_path (GTK_ICON_VIEW (img->thumbnail_iconview), path);
-		gtk_icon_view_scroll_to_path (GTK_ICON_VIEW (img->thumbnail_iconview), path, FALSE, 0, 0);
+		gtk_icon_view_set_cursor (GTK_ICON_VIEW (img->active_icon), path, NULL, FALSE);
+		gtk_icon_view_select_path (GTK_ICON_VIEW (img->active_icon), path);
+		gtk_icon_view_scroll_to_path (GTK_ICON_VIEW (img->active_icon), path, FALSE, 0, 0);
 		gtk_tree_path_free (path);
 	}
 }
@@ -2264,7 +2264,7 @@ img_update_sub_properties( img_window_struct *img,
 
 	/* Get all selected slides */
 	selected = gtk_icon_view_get_selected_items(
-					GTK_ICON_VIEW( img->thumbnail_iconview ) );
+					GTK_ICON_VIEW( img->active_icon ) );
 	if( ! selected )
 		return;
 
@@ -2364,3 +2364,4 @@ img_switch_mode( img_window_struct *img,
 
 	g_list_free( selection );
 }
+

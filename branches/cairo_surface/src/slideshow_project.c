@@ -31,7 +31,7 @@ void img_save_slideshow(img_window_struct *img)
 	slide_struct *entry;
 	GtkTreeModel *model;
 
-	model = gtk_icon_view_get_model(GTK_ICON_VIEW(img->thumbnail_iconview));
+	model = GTK_TREE_MODEL( img->thumbnail_model );
 	if (!gtk_tree_model_get_iter_first (model, &iter))
 		return;
 
@@ -202,6 +202,7 @@ void img_load_slideshow(img_window_struct *img)
 	/* Make loading more efficient by removing model from icon view */
 	g_object_ref( G_OBJECT( img->thumbnail_model ) );
 	gtk_icon_view_set_model( GTK_ICON_VIEW( img->thumbnail_iconview ), NULL );
+	gtk_icon_view_set_model( GTK_ICON_VIEW( img->over_icon ), NULL );
 
 	/* Enable loading of old projects too */
 	if( old_file )
@@ -383,6 +384,8 @@ void img_load_slideshow(img_window_struct *img)
 	gtk_widget_hide(img->progress_bar);
 
 	gtk_icon_view_set_model( GTK_ICON_VIEW( img->thumbnail_iconview ),
+							 GTK_TREE_MODEL( img->thumbnail_model ) );
+	gtk_icon_view_set_model( GTK_ICON_VIEW( img->over_icon ),
 							 GTK_TREE_MODEL( img->thumbnail_model ) );
 	g_object_unref( G_OBJECT( img->thumbnail_model ) );
 

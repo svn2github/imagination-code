@@ -170,7 +170,7 @@ img_create_export_dialog( img_window_struct  *img,
 	}
 
 	/* Abort if no slide is present */
-	model = gtk_icon_view_get_model( GTK_ICON_VIEW( img->thumbnail_iconview ) );
+	model = GTK_TREE_MODEL( img->thumbnail_model );
 	if( ! gtk_tree_model_get_iter_first( model, &iter ) )
 	{
 		return( NULL );
@@ -413,7 +413,7 @@ img_start_export( img_window_struct *img )
 	cairo_destroy( cr );
 
 	/* Load first image from model */
-	model = gtk_icon_view_get_model( GTK_ICON_VIEW( img->thumbnail_iconview ) );
+	model = GTK_TREE_MODEL( img->thumbnail_model );
 	gtk_tree_model_get_iter_first( model, &iter );
 	gtk_tree_model_get( model, &iter, 1, &entry, -1 );
 	img->image2 = img_scale_image( img, entry->filename, 0, 0 );
@@ -552,7 +552,7 @@ img_prepare_pixbufs( img_window_struct *img,
 	GtkTreeModel    *model;
 	static gboolean  last_transition = TRUE;
 
-	model = gtk_icon_view_get_model( GTK_ICON_VIEW( img->thumbnail_iconview ) );
+	model = GTK_TREE_MODEL( img->thumbnail_model );
 
 	if( ! img->cur_ss_iter )
 	{
