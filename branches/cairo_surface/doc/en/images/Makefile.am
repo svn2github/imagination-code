@@ -1,10 +1,9 @@
 # $Id$
 
 imagesdir = $(datadir)/doc/imagination/html/en/images
-images_DATA =								
+images_DATA = \
+				imagination_window.png \
+				side_panel_audio.png
 	
-
 EXTRA_DIST = 								\
 	$(images_DATA)
-
-# vi:set ts=8 sw=8 noet ai nocindent syntax=automake:
