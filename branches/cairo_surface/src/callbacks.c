@@ -1583,38 +1583,6 @@ void img_close_slideshow(GtkWidget *widget, img_window_struct *img)
 	img->final_transition.render = NULL;
 }
 
-/*
-// In GdkPixbuf 2.12 or above, this returns the EXIF orientation value.
-const char* exif_orientation = gdk_pixbuf_get_option(thumb->pixbuf, "orientation");
-if (exif_orientation != NULL) {
-switch (exif_orientation[0]) {
-case '3':
-thumb->rotation = 180;
-          break;
-       case '6':
-         thumb->rotation = 270;
-          break;
-       case '8':
-         thumb->rotation = 90;
-          break;
-       // '1' means no rotation.  The other four values are all various
-          transpositions, which are rare in real photos so we don't
-          implement them. 
-      }
-    }
-  }
-
-  // Rotate if necessary 
-  if (thumb->rotation != 0)
-  {
-      GdkPixbuf *new_pixbuf = gdk_pixbuf_rotate_simple (thumb->pixbuf, thumb->rotation);
-      g_object_unref (thumb->pixbuf);
-      thumb->pixbuf = new_pixbuf;
-      // Clean up 
-      thumb->rotation = 0;
- }
- */
-
 void img_move_audio_up( GtkButton *button, img_window_struct *img )
 {
 	GtkTreeSelection *sel;
@@ -2165,7 +2133,7 @@ void img_clipboard_cut_copy_operation(img_window_struct *img, ImgClipboardMode m
 	GList *selected = NULL;
 	GtkTargetEntry targets[] = 
 	{
-		{ "application/imagination-info-list", 0, 1 }
+		{ "application/imagination-info-list", 0, 0 }
 	};
 
 	selected = gtk_icon_view_get_selected_items(GTK_ICON_VIEW(img->thumbnail_iconview));
@@ -2174,6 +2142,12 @@ void img_clipboard_cut_copy_operation(img_window_struct *img, ImgClipboardMode m
 
 	img_clipboard = gtk_clipboard_get (IMG_CLIPBOARD);
 
+	/* Let's delete the GList if the user selechooses Cut/Copy again instead of Paste */
+	if (img->selected_paths)
+	{
+		g_list_foreach (img->selected_paths, (GFunc)gtk_tree_path_free, NULL);
+		g_list_free (img->selected_paths);
+	}
 	img->selected_paths = selected;
 	img->clipboard_mode = mode;
 

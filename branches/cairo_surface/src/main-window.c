@@ -262,22 +262,6 @@ img_window_struct *img_create_window (void)
 	gtk_container_add (GTK_CONTAINER (menu1), imagemenuitem5);
 	g_signal_connect (G_OBJECT (imagemenuitem5),"activate",G_CALLBACK (img_quit_menu),img_struct);
 
-	/* View menu */
-	menuitem1 = gtk_menu_item_new_with_mnemonic (_("_View"));
-	gtk_container_add (GTK_CONTAINER (menubar), menuitem1);
-
-	menu1 = gtk_menu_new ();
-	gtk_menu_item_set_submenu (GTK_MENU_ITEM (menuitem1), menu1);
-
-	imagemenuitem1 = gtk_radio_menu_item_new_with_label( NULL, _("Preview mode") );
-	g_signal_connect( G_OBJECT( imagemenuitem1 ), "toggled",
-					  G_CALLBACK( img_toggle_mode ), img_struct );
-	gtk_menu_shell_append( GTK_MENU_SHELL( menu1 ), imagemenuitem1 );
-
-	imagemenuitem2 = gtk_radio_menu_item_new_with_label_from_widget( 
-							GTK_RADIO_MENU_ITEM( imagemenuitem1 ), _("Overview mode") );
-	gtk_menu_shell_append( GTK_MENU_SHELL( menu1 ), imagemenuitem2 );
-
 	/* Slide menu */
 	menuitem2 = gtk_menu_item_new_with_mnemonic (_("_Slide"));
 	gtk_container_add (GTK_CONTAINER (menubar), menuitem2);
@@ -383,6 +367,22 @@ img_window_struct *img_create_window (void)
 	gtk_container_add (GTK_CONTAINER (slide_menu),deselect_all_menu);
 	gtk_widget_add_accelerator (deselect_all_menu,"activate",img_struct->accel_group,GDK_e,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
 	g_signal_connect (G_OBJECT (deselect_all_menu),"activate",G_CALLBACK (img_unselect_all_thumbnails),img_struct);
+
+	/* View menu */
+	menuitem1 = gtk_menu_item_new_with_mnemonic (_("_View"));
+	gtk_container_add (GTK_CONTAINER (menubar), menuitem1);
+
+	menu1 = gtk_menu_new ();
+	gtk_menu_item_set_submenu (GTK_MENU_ITEM (menuitem1), menu1);
+
+	imagemenuitem1 = gtk_radio_menu_item_new_with_label( NULL, _("Preview mode") );
+	g_signal_connect( G_OBJECT( imagemenuitem1 ), "toggled",
+					  G_CALLBACK( img_toggle_mode ), img_struct );
+	gtk_menu_shell_append( GTK_MENU_SHELL( menu1 ), imagemenuitem1 );
+
+	imagemenuitem2 = gtk_radio_menu_item_new_with_label_from_widget( 
+							GTK_RADIO_MENU_ITEM( imagemenuitem1 ), _("Overview mode") );
+	gtk_menu_shell_append( GTK_MENU_SHELL( menu1 ), imagemenuitem2 );
 
 	menuitem3 = gtk_menu_item_new_with_mnemonic (_("_Help"));
 	gtk_container_add (GTK_CONTAINER (menubar), menuitem3);
@@ -1214,6 +1214,13 @@ static void img_slide_paste(GtkMenuItem* item, img_window_struct *img)
 {
 	GtkClipboard *clipboard;
 	GtkSelectionData *selection;
+	GList *where_to_paste = NULL, *dummy;
+	GtkTreeModel *model;
+	GtkTreeIter iter, position;
+	GdkPixbuf *thumb;
+	gchar *total_slides = NULL;
+	slide_struct *pasted_slide, *info_slide;
+	gint pos;
 
 	clipboard = gtk_clipboard_get(IMG_CLIPBOARD);
 	selection = gtk_clipboard_wait_for_contents(clipboard, IMG_INFO_LIST);
@@ -1223,16 +1230,94 @@ static void img_slide_paste(GtkMenuItem* item, img_window_struct *img)
 		g_print ("Paste: selection is NULL\n");
 		return;
 	}
-	
-	g_print ("** %d\n", g_list_length( (GList *) selection->data) );
+	model			=	GTK_TREE_MODEL(img->thumbnail_model);
+	where_to_paste	=	gtk_icon_view_get_selected_items(GTK_ICON_VIEW(img->thumbnail_iconview));
+	dummy			=	img->selected_paths;
 
+	if (img->clipboard_mode == IMG_CLIPBOARD_CUT)
+	{
+		while (dummy)
+		{
+			gtk_tree_model_get_iter (model, &iter,		dummy->data);
+			gtk_tree_model_get_iter (model, &position,	where_to_paste->data);
+			gtk_list_store_move_after(GTK_LIST_STORE(model), &iter, &position);
+			dummy = dummy->next;
+		}
+	}
+	else
+	{
+		while (dummy)
+		{
+			pasted_slide = g_slice_new0( slide_struct );
+			if (pasted_slide)
+			{
+				gtk_tree_model_get_iter(model, &iter, dummy->data);
+				gtk_tree_model_get(model, &iter, 0, &thumb, 1, &info_slide, -1);
+
+				/* Let'copy the source slide info values into the dest slide */
+				pasted_slide->filename = g_strdup(info_slide->filename);
+				pasted_slide->original_filename = g_strdup(info_slide->original_filename);
+				pasted_slide->resolution = g_strdup(info_slide->resolution);
+				pasted_slide->type = g_strdup(info_slide->type);
+				
+				pasted_slide->duration = info_slide->duration;
+				pasted_slide->path = g_strdup(info_slide->path);
+				pasted_slide->transition_id = info_slide->transition_id;
+				pasted_slide->render = info_slide->render;
+				pasted_slide->speed = info_slide->speed;
+				/* Stop Points*/
+				if (info_slide->no_points)
+				{
+					GList *dummy_pnt = info_slide->points;
+					ImgStopPoint *point;
+					while (dummy_pnt)
+					{
+						point = g_slice_new0( ImgStopPoint );
+						point->time = ((ImgStopPoint *)dummy_pnt->data)->time;
+						point->offx = ((ImgStopPoint *)dummy_pnt->data)->offx;
+						point->offy = ((ImgStopPoint *)dummy_pnt->data)->offy;
+						point->zoom = ((ImgStopPoint *)dummy_pnt->data)->zoom;
+						pasted_slide->points = g_list_append(pasted_slide->points, point);
+						dummy_pnt = dummy_pnt->next;
+					}
+					pasted_slide->no_points = info_slide->no_points;
+				}
+				/* Text */
+				if (info_slide->subtitle)
+				{
+					pasted_slide->subtitle = g_strdup(info_slide->subtitle);
+					pasted_slide->anim     = info_slide->anim;
+					pasted_slide->anim_id  = info_slide->anim_id;
+					pasted_slide->anim_duration = info_slide->anim_duration;
+					pasted_slide->position   = info_slide->position;
+					pasted_slide->placing    = info_slide->placing;
+					pasted_slide->font_desc  = info_slide->font_desc;
+					pasted_slide->font_color[0] = info_slide->font_color[0];
+					pasted_slide->font_color[1] = info_slide->font_color[1];
+					pasted_slide->font_color[2] = info_slide->font_color[2];
+					pasted_slide->font_color[3] = info_slide->font_color[3];
+				}
+			}
+			pos = gtk_tree_path_get_indices(where_to_paste->data)[0]+1;
+			gtk_list_store_insert_with_values(GTK_LIST_STORE(model), &iter, pos, 0, thumb, 1, pasted_slide, -1),
+
+			/* Let's update the total number of slides and the label in toolbar */
+			img->slides_nr++;
+			total_slides = g_strdup_printf("%d",img->slides_nr);
+			gtk_label_set_text(GTK_LABEL(img->total_slide_number_label),total_slides);
+			g_free(total_slides);
+
+			dummy = dummy->next;
+		}
+	}
+	/* Free the GList containing the paths of the selected slides */
 	if (img->selected_paths)
 	{
-		g_print ("Delete g_list\n");
 		g_list_foreach (img->selected_paths, (GFunc)gtk_tree_path_free, NULL);
 		g_list_free (img->selected_paths);
 		img->selected_paths = NULL;
-	}	
+	}
+	/* Free the GTK selection structure */
 	gtk_selection_data_free (selection);
 }
 

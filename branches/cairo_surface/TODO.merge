@@ -29,7 +29,7 @@ KEN BURNS RELATED:
 		Status: FINISHED!
 
 BACKEND CHANGE RELATED:
-10. Test all transition effects (ellipse wipes are behaving strange).
+10. Test all transition effects.
 		Status: Not started yet.
 11. Test preview/export functionality.
 		Status: Not started yet.
@@ -38,7 +38,7 @@ ADDED LATER
 12. Add overview mode and properly test it.
 		Status: Coding FINISHED, testing not started yet.
 13. Add copy/paste and test it.
-		Status: In development right now.
+		Status: Coding FINISHED, testing is in progress.
 
 
 
