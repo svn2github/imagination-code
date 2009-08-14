@@ -523,8 +523,9 @@ void img_rotate_selected_slide(GtkWidget *button, img_window_struct *img)
 	gint handle;
 
 	/* Obtain the selected slideshow filename */
-	model = gtk_icon_view_get_model(GTK_ICON_VIEW(img->thumbnail_iconview));
-	selected = gtk_icon_view_get_selected_items(GTK_ICON_VIEW(img->thumbnail_iconview));
+	model = GTK_TREE_MODEL( img->thumbnail_model );
+	selected = gtk_icon_view_get_selected_items(
+					GTK_ICON_VIEW( img->active_icon ) );
 
 	if( selected == NULL)
 		return;
