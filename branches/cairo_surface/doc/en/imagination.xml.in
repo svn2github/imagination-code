@@ -2,8 +2,8 @@
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
     "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
   <!ENTITY date "September 2009"> 
-  <!ENTITY version "@PACKAGE_VERSION@">
-  <!ENTITY application "@PACKAGE_NAME@"> 
+  <!ENTITY version "2.0">
+  <!ENTITY application "imagination"> 
 ]>
 <article id="index" lang="en">
 	<articleinfo>
@@ -85,24 +85,30 @@
 			<title>Side Panel</title>
 			<para>Please refer to the Working Area section of this document for a detailed explanation.</para>
 		</sect2>
+		<sect2 id="thumbnails_area">
+			<title>Thumbnails Area</title>
+			<para>Cucu</para>
+		</sect2>	
 		<sect2 id="status_bar">
 			<title>Status Bar</title>
 			<para>Cucu</para>
 		</sect2>		
 	</sect1>			
 	<sect1 id="menu">
-		<title>Imagination's menus</title>
+		<title>Imagination's Menus</title>
 		<para>
 			This section describes in detail the menus of Imagination.
 		</para>
 		<sect2 id="slideshow">
-			<title>Slideshow menu</title>
+			<title>Slideshow Menu</title>
 			<itemizedlist>
 				<listitem><para>New</para></listitem>
 				<listitem><para>Open</para></listitem>
 				<listitem><para>Save</para></listitem>
 				<listitem><para>Save As</para></listitem>
 				<listitem><para>Close</para></listitem>
+				<listitem><para>Import pictures</para></listitem>
+				<listitem><para>Import music</para></listitem>
 				<listitem><para>Properties</para></listitem>
 				<listitem><para>Preview</para></listitem>
 				<listitem><para>Export</para></listitem>
@@ -140,6 +146,28 @@
 					This menu closes the slideshow. If the slideshow is not saved yet or you changed something Imagination will ask you to save it first.
 				</para>
 			</sect3>
+			<sect3 id="import_pictures">
+			<title>Import pictures</title>
+				<para>
+					This menu opens up a file dialog allowing you to choose the
+					pictures to import in Imagination To select more than one
+					pictures press and hold SHIFT key while clicking on the
+					files. A progress bar is displayed in the status bar
+					notifying you the percentage progress of the pictures'
+					import. Thumbnails won't be shown util the loading
+					completes.
+				</para>
+			</sect3>
+			<sect3 id="import_music">
+				<title>Import music</title>
+				<para>
+					This is the same as the previous only but works for audio
+					files. Please make sure your libsox is able to handle your
+					selected audio formats (on Debian derived distros, you'll
+					most probably want to install
+					<citetitle>libsox-fmt-all</citetitle> package).
+				</para>
+			</sect3>
 			<sect3 id="properties">
 				<title>Properties</title>
 				<para>
@@ -170,44 +198,35 @@
 			</sect3>
 		</sect2>
 		<sect2 id="slide">
-			<title>Slide menu</title>
+			<title>Slide Menu</title>
 			<itemizedlist>
-				<listitem><para>Import pictures</para></listitem>
-				<listitem><para>Import music</para></listitem>
-				<listitem><para>Delete</para></listitem>
+				<listitem><para>Cut</para></listitem>
+				<listitem><para>Copy</para></listitem>
+				<listitem><para>Paste</para></listitem>
 				<listitem><para>Preview quality</para></listitem>
+				<listitem><para>Zoom</para></listitem>
 				<listitem><para>Rotate clockwise</para></listitem>
 				<listitem><para>Rotate counter-clockwise</para></listitem>
-				<listitem><para>Zoom</para></listitem>
+				<listitem><para>Delete</para></listitem>
 				<listitem><para>Select all</para></listitem>
 				<listitem><para>Unselect all</para></listitem>
 			</itemizedlist>
-			<sect3 id="import_pictures">
-				<title>Import pictures</title>
+			<sect3 id="cut">
+				<title>Cut</title>
 				<para>
-					This menu opens up a file dialog allowing you to choose the
-					pictures to import in Imagination To select more than one
-					pictures press and hold SHIFT key while clicking on the
-					files. A progress bar is displayed in the status bar
-					notifying you the percentage progress of the pictures'
-					import. Thumbnails won't be shown util the loading
-					completes.
+					This menu entry allows you to cut a number of selected slides. 
 				</para>
 			</sect3>
-			<sect3 id="import_music">
-				<title>Import music</title>
+			<sect3 id="copy">
+				<title>Copy</title>
 				<para>
-					This is the same as the previous only but works for audio
-					files. Please make sure your libsox is able to handle your
-					selected audio formats (on Debian derived distros, you'll
-					most probably want to install
-					<citetitle>libsox-fmt-all</citetitle> package).
+					This menu entry allows you to copy a number of selected slides. 
 				</para>
 			</sect3>
-			<sect3 id="delete">
-				<title>Delete</title>
+			<sect3 id="paste">
+				<title>Paste</title>
 				<para>
-					This deletes the selected slides. Hold down the SHIFT key to select more than one slide at once.
+					Before choosing Paste you have to left click on a slide after which you want the previously selected slides to be moved (if you chose Cut) or copied if you chose Copy).
 				</para>
 			</sect3>
 			<sect3 id="preview">
@@ -223,13 +242,80 @@
 					slower machines when high quality is selected.
 				</para>
 			</sect3>
+			<sect3 id="zoom">
+				<title>Zoom</title>
+				<para>
+					This submenu allows you to zoom in or out the image area. It was added so that Imagination is used on notebooks that have limited screen resolution. It does affect also the size of thumbnails when Imagination is in Overview mode (please see the View menu for an explanation of the Overview area).
+				</para>
+			</sect3>
+			<sect3 id="rotate_clockwise">
+				<title>Rotate Clockwise</title>
+				<para>
+					This entry allows you to rotate the selected slide in the clockwise sense. The picture on the disk is NOT affected by the rotation so if you save the slideshow the slide will be saved in its original state.
+				</para>
+			</sect3>
+			<sect3 id="rotate_counterclockwise">
+				<title>Rotate Counter-Clockwise</title>
+				<para>
+					This entry allows you to rotate the selected slide in the counter-clockwise sense. The picture on the disk is NOT affected by the rotation so if you save the slideshow the slide will be saved in its original state.
+				</para>
+			</sect3>
+			<sect3 id="delete">
+				<title>Delete</title>
+				<para>
+					This deletes the selected slides. Hold down the SHIFT key to select more than one slide at once or CTRL to select selectively.
+				</para>
+			</sect3>
+			<sect3 id="select">
+				<title>Select All</title>
+				<para>
+					Should this entry be explained?
+				</para>
+			</sect3>
+			<sect3 id="unselect">
+				<title>Unselect All</title>
+				<para>
+					And this?
+				</para>
+			</sect3>
+		</sect2>
+		<sect2 id="view">
+			<title>View Menu</title>
+			<itemizedlist>
+				<listitem><para>Preview</para></listitem>
+				<listitem><para>Overview</para></listitem>
+			</itemizedlist>
+			<sect3 id="preview_mode">
+				<title>Preview</title>
+				<para>
+					This entry allows you to switch to Preview mode; the image area along with the slide thubnails are displayed. The size of the image area can be enlarged or shrinked so to allow Imagination to be used on notebooks.
+				</para>
+			</sect3>
+			<sect3 id="overview_mode">
+				<title>Overview</title>
+				<para>
+					This entry allows you to switch to Overview mode; the image area along with the slide thumbnails in the bottom are hidden. The Overview mode allows to display more slides than in Preview mode. The size of the thumbnail can be enlarged or shrinked with the Zoom controls.
+				</para>
+			</sect3>
 		</sect2>
 		<sect2 id="help">
-			<title>Help menu</title>
+			<title>Help Menu</title>
 			<itemizedlist>
 				<listitem><para>Contents</para></listitem>
 				<listitem><para>About</para></listitem>
 			</itemizedlist>
+			<sect3 id="content">
+				<title>Content</title>
+				<para>
+					This entry allows you to display this HTML documentation in the system installed browser.
+				</para>
+			</sect3>
+			<sect3 id="about">
+				<title>About</title>
+				<para>
+					This entry displays the About dialog with the credits.
+				</para>
+			</sect3>
 		</sect2>
 	</sect1>
 	<sect1 id="working_area">
