@@ -49,6 +49,67 @@ img_text_ani_fade( cairo_t     *cr,
 				   gdouble      progress,
 				   gdouble     *font_color );
 
+static void
+img_text_from_left( cairo_t     *cr,
+					PangoLayout *layout,
+ 					gint         sw,
+ 					gint         sh,
+ 					gint         lw,
+ 					gint         lh,
+ 					gint         posx,
+ 					gint         posy,
+ 					gdouble      progress,
+ 					gdouble     *font_color );
+
+static void
+img_text_from_right( cairo_t     *cr,
+					 PangoLayout *layout,
+ 					 gint         sw,
+ 					 gint         sh,
+ 					 gint         lw,
+ 					 gint         lh,
+ 					 gint         posx,
+ 					 gint         posy,
+ 					 gdouble      progress,
+ 					 gdouble     *font_color );
+
+static void
+img_text_from_top( cairo_t     *cr,
+				   PangoLayout *layout,
+				   gint         sw,
+				   gint         sh,
+				   gint         lw,
+				   gint         lh,
+				   gint         posx,
+				   gint         posy,
+				   gdouble      progress,
+				   gdouble     *font_color );
+
+static void
+img_text_from_bottom( cairo_t     *cr,
+					  PangoLayout *layout,
+					  gint         sw,
+					  gint         sh,
+  					  gint         lw,
+  					  gint         lh,
+  					  gint         posx,
+  					  gint         posy,
+  					  gdouble      progress,
+					  gdouble     *font_color );
+
+static void
+img_text_grow( cairo_t     *cr,
+			   PangoLayout *layout,
+			   gint         sw,
+			   gint         sh,
+			   gint         lw,
+			   gint         lh,
+			   gint         posx,
+			   gint         posy,
+			   gdouble      progress,
+			   gdouble     *font_color );
+
+
 /* ****************************************************************************
  * Function definitions
  * ************************************************************************* */
@@ -72,7 +133,7 @@ gint
 img_get_text_animation_list( TextAnimation **animations )
 {
 	TextAnimation *list;              /* List of all animations */
-	gint           no_animations = 2; /* Number of animations */
+	gint           no_animations = 7; /* Number of animations */
 	gint           i = 0;
 
 	if( animations )
@@ -90,6 +151,26 @@ img_get_text_animation_list( TextAnimation **animations )
 		list[i].name   = g_strdup( _("Fade") );
 		list[i].id     = i;
 		list[i++].func = img_text_ani_fade;
+
+		list[i].name   = g_strdup( _("Slide from left") );
+		list[i].id     = i;
+		list[i++].func = img_text_from_left;
+
+		list[i].name   = g_strdup( _("Slide from right") );
+		list[i].id     = i;
+		list[i++].func = img_text_from_right;
+
+		list[i].name   = g_strdup( _("Slide from top") );
+		list[i].id     = i;
+		list[i++].func = img_text_from_top;
+
+		list[i].name   = g_strdup( _("Slide from bottom") );
+		list[i].id     = i;
+		list[i++].func = img_text_from_bottom;
+
+		list[i].name   = g_strdup( _("Grow") );
+		list[i].id     = i;
+		list[i++].func = img_text_grow;
 
 		/* FIXME: Add more animations here.
 		 *
@@ -138,9 +219,7 @@ img_render_subtitle( cairo_t              *cr,
 					 TextAnimationFunc     func,
 					 gdouble               progress )
 {
-	gint         sw,     /* Context width */
-				 sh,     /* Context height */
-				 lw,     /* Layout width */
+	gint		 lw,     /* Layout width */
 				 lh,     /* Layout height */
 				 posx,   /* Final subtitle position */
 				 posy;
@@ -199,7 +278,7 @@ img_render_subtitle( cairo_t              *cr,
 
 	/* Do animation */
 	if( func )
-		(*func)( cr, layout, sw, sh, lw, lh, posx, posy, progress, font_color );
+		(*func)( cr, layout, width, height, lw, lh, posx, posy, progress, font_color );
 	else
 	{
 		/* No animation renderer */
@@ -305,3 +384,122 @@ img_text_ani_fade( cairo_t     *cr,
 	cairo_move_to( cr, posx, posy );
 	pango_cairo_show_layout( cr, layout );
 }
+
+static void
+img_text_from_left( cairo_t     *cr,
+					PangoLayout *layout,
+ 					gint         sw,
+ 					gint         sh,
+ 					gint         lw,
+ 					gint         lh,
+ 					gint         posx,
+ 					gint         posy,
+ 					gdouble      progress,
+ 					gdouble     *font_color )
+{
+	/* Set source color */
+	cairo_set_source_rgba( cr, font_color[0],
+							   font_color[1],
+							   font_color[2],
+							   font_color[3] );
+
+	/* Move to proper place and paint text */
+	cairo_move_to( cr, posx * progress - lw * ( 1 - progress ), posy );
+	pango_cairo_show_layout( cr, layout );
+}
+
+static void
+img_text_from_right( cairo_t     *cr,
+					 PangoLayout *layout,
+ 					 gint         sw,
+ 					 gint         sh,
+ 					 gint         lw,
+ 					 gint         lh,
+ 					 gint         posx,
+ 					 gint         posy,
+ 					 gdouble      progress,
+ 					 gdouble     *font_color )
+{
+	/* Set source color */
+	cairo_set_source_rgba( cr, font_color[0],
+							   font_color[1],
+							   font_color[2],
+							   font_color[3] );
+
+	/* Move to proper place and paint text */
+	cairo_move_to( cr, posx * progress + sw * ( 1 - progress ), posy );
+	pango_cairo_show_layout( cr, layout );
+}
+
+static void
+img_text_from_top( cairo_t     *cr,
+				   PangoLayout *layout,
+				   gint         sw,
+				   gint         sh,
+				   gint         lw,
+				   gint         lh,
+				   gint         posx,
+				   gint         posy,
+				   gdouble      progress,
+				   gdouble     *font_color )
+{
+	/* Set source color */
+	cairo_set_source_rgba( cr, font_color[0],
+							   font_color[1],
+							   font_color[2],
+							   font_color[3] );
+
+	/* Move to proper place and paint text */
+	cairo_move_to( cr, posx, posy * progress - lh * ( 1 - progress ) );
+	pango_cairo_show_layout( cr, layout );
+}
+
+static void
+img_text_from_bottom( cairo_t     *cr,
+					  PangoLayout *layout,
+					  gint         sw,
+					  gint         sh,
+  					  gint         lw,
+  					  gint         lh,
+  					  gint         posx,
+  					  gint         posy,
+  					  gdouble      progress,
+					  gdouble     *font_color )
+{
+	/* Set source color */
+	cairo_set_source_rgba( cr, font_color[0],
+							   font_color[1],
+							   font_color[2],
+							   font_color[3] );
+
+	/* Move to proper place and paint text */
+	cairo_move_to( cr, posx, posy * progress + sh * ( 1 - progress ) );
+	pango_cairo_show_layout( cr, layout );
+}
+
+static void
+img_text_grow( cairo_t     *cr,
+			   PangoLayout *layout,
+			   gint         sw,
+			   gint         sh,
+			   gint         lw,
+			   gint         lh,
+			   gint         posx,
+			   gint         posy,
+			   gdouble      progress,
+			   gdouble     *font_color )
+{
+	/* Set source color */
+	cairo_set_source_rgba( cr, font_color[0],
+							   font_color[1],
+							   font_color[2],
+							   font_color[3] );
+
+	cairo_translate( cr, posx + lw * 0.5, posy + lh * 0.5 );
+	cairo_scale( cr, progress, progress );
+
+	/* Move to proper place and paint text */
+	cairo_move_to( cr, - lw * 0.5, - lh * 0.5 );
+	pango_cairo_show_layout( cr, layout );
+}
+
