@@ -1686,6 +1686,9 @@ static void img_random_button_clicked(GtkButton *button, img_window_struct *img)
 	img->project_is_modified = TRUE;
 	g_list_foreach (bak, (GFunc)gtk_tree_path_free, NULL);
 	g_list_free(bak);
+
+	/* This fixes enable/disable issue */
+	img_iconview_selection_changed( img->active_icon, img );
 }
 
 static GdkPixbuf *
