@@ -105,7 +105,7 @@
 				</para>
 				<para>
 					NOTE: When slide has motion applied to it, slide duration
-					field is disabled aand cannot be modified, since duration of
+					field is disabled and cannot be modified, since duration of
 					still part is now calculated as a sum of all stop points'
 					durations and will be automatically updated.
 				</para>
