@@ -79,18 +79,7 @@
 				<listitem><para>Goto Last Slide</para></listitem>
 				<listitem><para>Quit</para></listitem>
 			</itemizedlist>
-			<sect3 id="toolbar_new">
-				<title>New</title>
-				<para>
-					This menu allows you to create a new slideshow. The slideshow dialog is displayed. You can choose the video format (PAL/NTSC), if to scale the picture so that it covers the whole screen avoiding the black stripes and the background color to be displayed when the picture is too small and the rescaling doesn't succed to cover the whole screen. You can also change these options later.
-				</para>
-			</sect3>
-			<sect3 id="toolbar_open">
-				<title>Open</title>
-				<para>
-					This menu allows you to open a previously saved slideshow.
-				</para>
-			</sect3>
+			<para>For a detailed explanation please look at <xref linkend="slideshow"/> and <xref linkend="slide"/> since these options are the same.</para>
 		</sect2>
 		<sect2>
 			<title>Working Area</title>
@@ -100,12 +89,10 @@
 				<listitem><para>Slide Motion</para></listitem>
 				<listitem><para>Slide Text</para></listitem>
 			</itemizedlist>
-			<para>By clicking on the "Audio" tab the background music list is displayed. Here you can see the length of each of the imported audio files along with the total time length. The arrow buttons allows you to reorder the audio files while the button with the broom deletes the selected audio files. </para>
-			<figure id="background_music">
-				<title>Background Music</title>
-				<graphic fileref="images/side_panel_audio.png"></graphic>
+			<figure id="video_tab">
+				<title>Video Tab</title>
+				<graphic fileref="images/side_panel_video.png"></graphic>
 			</figure>
-			
 			<sect3 id="slide_settings">
 				<title>Slide Settings</title>
 				<para>
@@ -179,6 +166,11 @@
 					exported video will be stay of the same size.
 				</para>
 			</sect3>
+			<para>By clicking on the "Audio" tab the background music list is displayed. Here you can see the length of each of the imported audio files along with the total time length. The arrow buttons allows you to reorder the audio files while the button with the broom deletes the selected audio files. </para>
+			<figure id="audio_tab">
+				<title>Audio Tab</title>
+				<graphic fileref="images/side_panel_audio.png"></graphic>
+			</figure>
 		</sect2>
 		<sect2 id="image_area">
 			<title>Image Area</title>
@@ -186,7 +178,7 @@
 		</sect2>
 		<sect2 id="thumbnails_area">
 			<title>Thumbnails Area</title>
-			<para>Located in the bottom part of Imagination's window the thumbnail area displays the imported slides. Left clicking on one of it displays the slide in the image area along with the slide settings in the working area. Drag and drop is supported so you can import your favorite pictures by dragging them here. Rubber banding is supported too so you can select a group of slides by left-clicking on some white space and then by moving the mouse.</para>
+			<para>Located in the bottom part of Imagination's window the thumbnail area displays the imported slides. Left clicking on one of it displays the slide in the image area along with the slide settings in the working area. Drag and drop is supported so you can import your favorite pictures by dragging them here. Rubber banding is supported too so you can select a group of slides by left clicking on some white space and then by moving the mouse. You can also reorder the slides by holding down left mouse button and by moving them around.</para>
 		</sect2>	
 		<sect2 id="status_bar">
 			<title>Status Bar</title>
@@ -276,7 +268,7 @@
 			<sect3 id="preview_slideshow">
 				<title>Preview</title>
 				<para>
-					This menu starts the preview of the slideshow in the image area. If you want to start the preview by a specific slide just select it by left-clicking on it. The preview quality if affected by the setting in the menu <menuchoice><guimenu>Slide</guimenu><guimenuitem>Preview quality</guimenuitem></menuchoice>.
+					This menu starts the preview of the slideshow in the image area. If you want to start the preview by a specific slide just select it by left clicking on it. The preview quality if affected by the setting in the menu <menuchoice><guimenu>Slide</guimenu><guimenuitem>Preview quality</guimenuitem></menuchoice>.
 				</para>
 			</sect3>
 			<sect3 id="export">
@@ -344,25 +336,25 @@
 			<sect3 id="zoom">
 				<title>Zoom</title>
 				<para>
-					This submenu allows you to zoom in or out the image area. It was added so that Imagination is used on notebooks that have limited screen resolution. It does affect also the size of thumbnails when Imagination is in Overview mode (please see the View menu for an explanation of the Overview area).
+					This submenu allows you to zoom in or out the image area. It was added so that Imagination can be used on notebooks that have limited screen resolution. It does affect also the size of thumbnails when Imagination is in Overview mode (please see the View menu for an explanation of the Overview area).
 				</para>
 			</sect3>
 			<sect3 id="rotate_clockwise">
 				<title>Rotate Clockwise</title>
 				<para>
-					This entry allows you to rotate the selected slide in the clockwise sense. The picture on the disk is NOT affected by the rotation so if you save the slideshow the slide will be saved in its original state.
+					This entry allows you to rotate the selected slide in the clockwise sense. The picture on the disk is NOT affected by the rotation so if you save the slideshow and you load it back the slide is displayed to its original state before the rotation.
 				</para>
 			</sect3>
 			<sect3 id="rotate_counterclockwise">
 				<title>Rotate Counter-Clockwise</title>
 				<para>
-					This entry allows you to rotate the selected slide in the counter-clockwise sense. The picture on the disk is NOT affected by the rotation so if you save the slideshow the slide will be saved in its original state.
+					This entry allows you to rotate the selected slide in the counter-clockwise sense. The picture on the disk is NOT affected by the rotation so if you save the slideshow and you load it back the slide is displayed to its original state before the rotation.
 				</para>
 			</sect3>
 			<sect3 id="delete">
 				<title>Delete</title>
 				<para>
-					This deletes the selected slides. Hold down the SHIFT key to select more than one slide at once or CTRL to select selectively.
+					This menu entry deletes the selected slides. Hold down the SHIFT key to select more than one slide at once or CTRL to select selectively. Please be aware this action cannot be undone!
 				</para>
 			</sect3>
 			<sect3 id="select">
@@ -381,19 +373,19 @@
 		<sect2 id="view">
 			<title>View Menu</title>
 			<itemizedlist>
-				<listitem><para>Preview</para></listitem>
-				<listitem><para>Overview</para></listitem>
+				<listitem><para>Preview Mode</para></listitem>
+				<listitem><para>Overview Mode</para></listitem>
 			</itemizedlist>
 			<sect3 id="preview_mode">
-				<title>Preview</title>
+				<title>Preview mode</title>
 				<para>
-					This entry allows you to switch to Preview mode; the image area along with the slide thubnails are displayed. The size of the image area can be enlarged or shrinked so to allow Imagination to be used on notebooks.
+					This entry allows you to switch to Preview mode; the image area along with the thumbnails area are displayed. The size of the image area can be enlarged or shrinked with the Zoom controls so to allow Imagination to be used on notebooks.
 				</para>
 			</sect3>
 			<sect3 id="overview_mode">
-				<title>Overview</title>
+				<title>Overview mode</title>
 				<para>
-					This entry allows you to switch to Overview mode; the image area along with the slide thumbnails in the bottom are hidden. The Overview mode allows to display more slides than in Preview mode. The size of the thumbnail can be enlarged or shrinked with the Zoom controls.
+					This entry allows you to switch to Overview mode; the image area along with the thumbnails area are hidden. This mode allows you to organize the slides in a matrix. The size of the thumbnails can be increased or decreased with the Zoom controls. Cut/Copy/Paste menu entries are supported. The slides can also be arranged by holding left mouse button and by moving them around.
 				</para>
 			</sect3>
 		</sect2>
