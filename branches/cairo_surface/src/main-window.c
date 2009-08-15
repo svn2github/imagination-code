@@ -1217,8 +1217,9 @@ static void img_slide_paste(GtkMenuItem* item, img_window_struct *img)
 	GList *where_to_paste = NULL, *dummy;
 	GtkTreeModel *model;
 	GtkTreeIter iter, position;
-	GdkPixbuf *thumb;
 	gchar *total_slides = NULL;
+	GdkPixbuf *thumb, *trans;
+	gboolean   has_sub;
 	slide_struct *pasted_slide, *info_slide;
 	gint pos;
 
@@ -1248,68 +1249,71 @@ static void img_slide_paste(GtkMenuItem* item, img_window_struct *img)
 	{
 		while (dummy)
 		{
-			pasted_slide = g_slice_new0( slide_struct );
+			/* Get slide and some additional data */
+			gtk_tree_model_get_iter(model, &iter, dummy->data);
+			gtk_tree_model_get(model, &iter, 0, &thumb,
+											 1, &info_slide,
+											 2, &trans,
+											 3, &has_sub,
+											 -1);
+			if( thumb )
+				g_object_unref( G_OBJECT( thumb ) );
+			if( trans )
+				g_object_unref( G_OBJECT( trans ) );
+
+			/* Create new slide that is exact copy of rpevious one */
+			pasted_slide = g_slice_copy( sizeof( slide_struct ), info_slide );
+
 			if (pasted_slide)
 			{
-				gtk_tree_model_get_iter(model, &iter, dummy->data);
-				gtk_tree_model_get(model, &iter, 0, &thumb, 1, &info_slide, -1);
-
-				/* Let'copy the source slide info values into the dest slide */
+				/* Fill fields with fresh strings, since g_slice_copy cannot do
+				 * that for us. */
 				pasted_slide->filename = g_strdup(info_slide->filename);
 				pasted_slide->original_filename = g_strdup(info_slide->original_filename);
 				pasted_slide->resolution = g_strdup(info_slide->resolution);
 				pasted_slide->type = g_strdup(info_slide->type);
-				
-				pasted_slide->duration = info_slide->duration;
 				pasted_slide->path = g_strdup(info_slide->path);
-				pasted_slide->transition_id = info_slide->transition_id;
-				pasted_slide->render = info_slide->render;
-				pasted_slide->speed = info_slide->speed;
-				/* Stop Points*/
+
+				/* Stop Points also need to copied by hand. */
 				if (info_slide->no_points)
 				{
 					GList *dummy_pnt = info_slide->points;
 					ImgStopPoint *point;
+
+					pasted_slide->points = NULL;
 					while (dummy_pnt)
 					{
-						point = g_slice_new0( ImgStopPoint );
-						point->time = ((ImgStopPoint *)dummy_pnt->data)->time;
-						point->offx = ((ImgStopPoint *)dummy_pnt->data)->offx;
-						point->offy = ((ImgStopPoint *)dummy_pnt->data)->offy;
-						point->zoom = ((ImgStopPoint *)dummy_pnt->data)->zoom;
+						point = g_slice_copy( sizeof( ImgStopPoint ),
+											  dummy_pnt->data );
 						pasted_slide->points = g_list_append(pasted_slide->points, point);
 						dummy_pnt = dummy_pnt->next;
 					}
-					pasted_slide->no_points = info_slide->no_points;
 				}
-				/* Text */
-				if (info_slide->subtitle)
-				{
-					pasted_slide->subtitle = g_strdup(info_slide->subtitle);
-					pasted_slide->anim     = info_slide->anim;
-					pasted_slide->anim_id  = info_slide->anim_id;
-					pasted_slide->anim_duration = info_slide->anim_duration;
-					pasted_slide->position   = info_slide->position;
-					pasted_slide->placing    = info_slide->placing;
-					pasted_slide->font_desc  = info_slide->font_desc;
-					pasted_slide->font_color[0] = info_slide->font_color[0];
-					pasted_slide->font_color[1] = info_slide->font_color[1];
-					pasted_slide->font_color[2] = info_slide->font_color[2];
-					pasted_slide->font_color[3] = info_slide->font_color[3];
-				}
-			}
-			pos = gtk_tree_path_get_indices(where_to_paste->data)[0]+1;
-			gtk_list_store_insert_with_values(GTK_LIST_STORE(model), &iter, pos, 0, thumb, 1, pasted_slide, -1),
 
-			/* Let's update the total number of slides and the label in toolbar */
-			img->slides_nr++;
-			total_slides = g_strdup_printf("%d",img->slides_nr);
-			gtk_label_set_text(GTK_LABEL(img->total_slide_number_label),total_slides);
-			g_free(total_slides);
+				/* Text should be duplicated if present. Font descripštion
+				 * should also be copied!! */
+				if (info_slide->subtitle)
+					pasted_slide->subtitle = g_strdup(info_slide->subtitle);
+				pasted_slide->font_desc =
+						pango_font_description_copy( info_slide->font_desc );
+
+				pos = gtk_tree_path_get_indices(where_to_paste->data)[0]+1;
+				gtk_list_store_insert_with_values(
+						GTK_LIST_STORE( model ), &iter, pos,
+												 0, thumb,
+						 						 1, pasted_slide,
+						 						 2, trans,
+						 						 3, has_sub,
+						 						 -1 );
+				
+				/* Let's update the total number of slides and the label in toolbar */
+				img->slides_nr++;
+			}
 
 			dummy = dummy->next;
 		}
 	}
+
 	/* Free the GList containing the paths of the selected slides */
 	if (img->selected_paths)
 	{
@@ -1317,6 +1321,12 @@ static void img_slide_paste(GtkMenuItem* item, img_window_struct *img)
 		g_list_free (img->selected_paths);
 		img->selected_paths = NULL;
 	}
+
+	/* Update display */
+	total_slides = g_strdup_printf("%d",img->slides_nr);
+	gtk_label_set_text(GTK_LABEL(img->total_slide_number_label),total_slides);
+	g_free(total_slides);
+
 	/* Free the GTK selection structure */
 	gtk_selection_data_free (selection);
 }
