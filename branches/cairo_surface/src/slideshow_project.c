@@ -217,7 +217,6 @@ void img_load_slideshow(img_window_struct *img)
 
 		/* Loads the thumbnails and set the slides info */
 		number = g_key_file_get_integer(img_key_file,"images","number", NULL);
-		img->slides_nr = number;
 		gtk_widget_show(img->progress_bar);
 		for (i = 1; i <= number; i++)
 		{
@@ -252,6 +251,9 @@ void img_load_slideshow(img_window_struct *img)
 												   render, speed, img );
 					g_object_unref( G_OBJECT( pix ) );
 
+					/* Increment slide counter */
+					img->slides_nr++;
+
 					/* If we're loading the first slide, apply some of it's
 				 	* data to final pseudo-slide */
 					if( img->slides_nr == 1 )
@@ -261,8 +263,6 @@ void img_load_slideshow(img_window_struct *img)
 					}
 				}
 			}
-			else
-				not_found++;
 
 			img_increase_progressbar(img, i);
 			g_free(slide_filename);
@@ -288,7 +288,6 @@ void img_load_slideshow(img_window_struct *img)
 		/* Loads the thumbnails and set the slides info */
 		number = g_key_file_get_integer( img_key_file, "slideshow settings",
 										 "number of slides", NULL);
-		img->slides_nr = number;
 		gtk_widget_show( img->progress_bar );
 		for( i = 1; i <= number; i++ )
 		{
@@ -355,6 +354,9 @@ void img_load_slideshow(img_window_struct *img)
 											 anim_duration, text_pos, placing,
 											 font_desc, font_color, img );
 
+					/* Increment slides counter */
+					img->slides_nr++;
+
 					/* If we're loading the first slide, apply some of it's
 				 	* data to final pseudo-slide */
 					if( img->slides_nr == 1 )
@@ -366,8 +368,6 @@ void img_load_slideshow(img_window_struct *img)
 				g_object_unref( G_OBJECT( pix ) );
 				g_free( font_desc );
 			}
-			else
-				not_found++;
 
 			img_increase_progressbar(img, i);
 			g_free(slide_filename);
@@ -380,7 +380,6 @@ void img_load_slideshow(img_window_struct *img)
 	img->distort_images = g_key_file_get_boolean( img_key_file,
 												  "slideshow settings",
 												  "distort images", NULL );
-	img->slides_nr -= not_found;
 	gtk_widget_hide(img->progress_bar);
 
 	gtk_icon_view_set_model( GTK_ICON_VIEW( img->thumbnail_iconview ),
