@@ -57,7 +57,6 @@ GtkWidget *_gtk_combo_box_new_text(gboolean);
 void img_set_statusbar_message(img_window_struct *, gint);
 void img_load_available_transitions(img_window_struct *);
 void img_show_file_chooser(SexyIconEntry *, SexyIconEntryPosition, int, img_window_struct *);
-GdkPixbuf *img_load_pixbuf_from_file(gchar *);
 
 slide_struct *
 img_create_new_slide( const gchar *filename );
@@ -99,11 +98,22 @@ img_set_slide_text_info( slide_struct      *slide,
 
 void img_free_slide_struct( slide_struct * );
 
+
 gboolean
 img_set_total_slideshow_duration( img_window_struct *img );
 
 gint
 img_calc_slide_duration_points( GList *list,
 								gint   length );
+
+gboolean
+img_scale_image( const gchar      *filename,
+				 gdouble           ratio,
+				 gint              width,
+				 gint              height,
+				 gboolean          distort,
+				 gdouble          *color,
+				 GdkPixbuf       **pixbuf,
+				 cairo_surface_t **surface );
 
 #endif

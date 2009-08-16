@@ -95,8 +95,9 @@ void img_add_slides_thumbnails(GtkMenuItem *item, img_window_struct *img)
 	bak = slides;
 	while (slides)
 	{
-		thumb = img_load_pixbuf_from_file(slides->data);
-		if (thumb)
+		if( img_scale_image( slides->data, img->video_ratio, 88, 0,
+							 img->distort_images, img->background_color,
+							 &thumb, NULL ) )
 		{
 			slide_info = img_create_new_slide( slides->data );
 			if (slide_info)
@@ -583,15 +584,19 @@ void img_rotate_selected_slide(GtkWidget *button, img_window_struct *img)
 
 	/* Respect quality settings */
 	if( img->low_quality )
-		img->current_image = img_scale_image( img, info_slide->filename, 0,
-											  img->video_size[1] );
+		img_scale_image( info_slide->filename, img->video_ratio,
+						 0, img->video_size[1], img->distort_images,
+						 img->background_color, NULL, &img->current_image );
 	else
-		img->current_image = img_scale_image( img, info_slide->filename, 0, 0 );
+		img_scale_image( info_slide->filename, img->video_ratio,
+						 0, 0, img->distort_images,
+						 img->background_color, NULL, &img->current_image );
 
 	gtk_widget_queue_draw( img->image_area );
 
 	/* Display the rotated image in thumbnails iconview */
-	thumb = gdk_pixbuf_new_from_file_at_scale(filename, 93, 70, TRUE, NULL);
+	img_scale_image( filename, img->video_ratio, 88, 0, img->distort_images,
+					 img->background_color, &thumb, NULL );
 	gtk_list_store_set (img->thumbnail_model, &iter, 0, thumb, -1);
 	g_object_unref (thumb);
 }
@@ -818,10 +823,13 @@ void img_start_stop_preview(GtkWidget *button, img_window_struct *img)
 
 		/* Respect quality settings */
 		if( img->low_quality )
-			img->image2 = img_scale_image( img, entry->filename, 0,
-										   img->video_size[1] );
+			img_scale_image( entry->filename, img->video_ratio,
+							 0, img->video_size[1], img->distort_images,
+							 img->background_color, NULL, &img->image2 );
 		else
-			img->image2 = img_scale_image( img, entry->filename, 0, 0 );
+			img_scale_image( entry->filename, img->video_ratio,
+							 0, 0, img->distort_images,
+							 img->background_color, NULL, &img->image2 );
 
 		/* Load first stop point */
 		img->point2 = (ImgStopPoint *)( entry->no_points ?
@@ -843,10 +851,15 @@ void img_start_stop_preview(GtkWidget *button, img_window_struct *img)
 
 			/* Respect quality settings */
 			if( img->low_quality )
-				img->image1 = img_scale_image( img, entry->filename, 0,
-											   img->video_size[1] );
+				img_scale_image( entry->filename,
+								 (gdouble)img->video_size[0] / img->video_size[1],
+								 0, img->video_size[1], img->distort_images,
+								 img->background_color, NULL, &img->image1 );
 			else
-				img->image1 = img_scale_image( img, entry->filename, 0, 0 );
+				img_scale_image( entry->filename,
+								 (gdouble)img->video_size[0] / img->video_size[1],
+								 0, 0, img->distort_images,
+								 img->background_color, NULL, &img->image1 );
 			
 			/* Load last stop point */
 			img->point1 = (ImgStopPoint *)( entry->no_points ?
@@ -1033,8 +1046,9 @@ void img_on_drag_data_received (GtkWidget *widget,GdkDragContext *context,int x,
 	while(pictures[len])
 	{
 		filename = g_filename_from_uri (pictures[len],NULL,NULL);
-		thumb = img_load_pixbuf_from_file(filename);
-		if (thumb)
+		if( img_scale_image( filename, img->video_ratio, 88, 0,
+							 img->distort_images, img->background_color,
+							 &thumb, NULL ) )
 		{
 			slide_info = img_create_new_slide( filename );
 			if (slide_info)
@@ -1173,220 +1187,6 @@ img_draw_image_on_surface( cairo_t           *cr,
 	cairo_set_source_surface( cr, surface, offxr, offyr );
 	cairo_paint( cr );
 	cairo_restore( cr );
-}
-
-/*
- * img_scale_image:
- * @img: global img_window_struct structure
- * @filename: name of the file to load
- * @width: requested width of the returned surface
- * @height: requested height of the returned surface
- *
- * This function should be called for all image loading needs. It'll properly
- * scale and trim loaded images, add borders is needed and return surface of
- * requested size.
- *
- * If one of the size requests is 0, the other one will be calculated from
- * first one with aspect ratio calculation. If both dimensions are 0, image
- * will be loaded from disk at original size (this is mainly used for export,
- * when we want to have images at their best quality).
- *
- * Return value: newly constructed cairo_surface_t type. This surface should be
- * unreferenced with cairo_surface_destroy() when not needed anymore.
- */
-cairo_surface_t *
-img_scale_image( img_window_struct *img,
-				 gchar             *filename,
-				 int                width,
-				 int                height )
-{
-	GdkPixbuf *pixbuf;                  /* Pixbuf used for loading */
-	gint       i_width, i_height;		/* Image dimensions */
-	gint       a_width, a_height;		/* Display dimensions */
-	gint       offset_x, offset_y;      /* Offset values for borders */
-	gdouble    a_ratio, i_ratio;        /* Export and image aspect ratios */
-	cairo_surface_t *surface;           /* Surface to draw on */
-	cairo_t   *cr;                      /* Cairo, used to transform image */
-	gint       c_width, c_height;       /* Dimensions of cairo surface that
-										   will be created and will hold
-										   original image with any borders
-										   if needed */
-	gdouble    skew;                    /* Transformation between a_ratio
-										   and i_ratio */
-	gdouble    max_skew = 1.35;         /* Maxumum allowed distortion values */
-	gdouble    min_skew = 0.75;
-	gboolean   transform = FALSE;       /* Flag that controls scalling */
-
-	/* Obtain information about display area */
-	a_width  = img->video_size[0];
-	a_height = img->video_size[1];
-	a_ratio  = (gdouble)a_width / a_height;
-
-	/* Obtain information about image being loaded */
-	gdk_pixbuf_get_file_info( filename, &i_width, &i_height );
-	i_ratio = (gdouble)i_width / i_height;
-
-	/* How distorted images would be if we scaled them */
-	skew = a_ratio / i_ratio;
-
-	/* This is where things are going to change. Main difference will be
-	 * replacement of GdkPixbuf with cairo_surface_t as a image storage format.
-	 * But image loading will still be performed by gdk-pixbuf library, since
-	 * cairo can load only from PNG.
-	 *
-	 * Image loading process is separated into four stages:
-	 *  - calculating surface dimensions
-	 *  - creation of image surface that will be returned
-	 *  - loading from disk into pixbuf according to requested sizes
-	 *  - painting of this image surface according to stretching
-	 */
-
-	/* Calculationg surface dimensions.
-	 *
-	 * In order to be as flexible as possible, this function can load images at
-	 * various sizes, but at aspect ration that matches the aspect ratio of main
-	 * preview area. How size is determined? If width argument is not -1, this
-	 * is taken as a reference dimension from which height is calculated (if
-	 * height argument also present, it's ignored). If width argument is -1,
-	 * height is taken as a reference dimension. If both width and height are
-	 * -1, surface dimensions are calculated to to fit original image.
-	 */
-	if( width > 0 )
-	{
-		/* Calculate height according to width */
-		width = MAX( width, a_width );
-		c_width = width;
-		c_height = width / a_ratio;
-	}
-	else if( height > 0 )
-	{
-		/* Calculate width from height */
-		height = MAX( height, a_height );
-		c_height = height;
-		c_width = height * a_ratio;
-	}
-	else
-	{
-		/* Load image at maximum quality
-		 *
-		 * If the user doesn't want to have distorted images, we create slightly
-		 * bigger surface that will hold borders too.
-		 *
-		 * If images should be distorted, we first check if we're able to fit
-		 * image without distorting it too much. If images would be largely
-		 * distorted, we simply load them undistorted.
-		 *
-		 * If we came all the way to  here, then we're able to distort image.
-		 */
-		if( ( ! img->distort_images ) || /* Don't distort */
-			( skew > max_skew )       || /* Image is too wide */
-			( skew < min_skew )        ) /* Image is too tall */
-		{
-			/* User doesn't want images to be distorted or distortion would be
-			 * too intrusive. */
-			if( a_ratio < i_ratio )
-			{
-				/* Borders will be added on left and right */
-				c_width = i_width;
-				c_height = c_width / a_ratio;
-			}
-			else
-			{
-				/* Borders will be added on top and bottom */
-				c_height = i_height;
-				c_width = c_height * a_ratio;
-			}
-		}
-		else
-		{
-			/* User wants images to be distorted and we're able to do it
-			 * without ruining images. */
-			if( a_ratio > i_ratio )
-			{
-				/* Image will be distorted horizontally */
-				c_height = i_height;
-				c_width = c_height * a_ratio;
-			}
-			else
-			{
-				/* Image will be distorted vertically */
-				c_width = i_width;
-				c_height = c_width / a_ratio;
-			}
-		}
-	}
-	/* Loaded surface cannot be smaller than video size or images will look bad
-	 * even at Ken Burns zoom level 1. */
-
-	/* Will image be disotrted?
-	 *
-	 * Conditions:
-	 *  - user allows us to do it
-	 *  - skew is in sensible range
-	 *  - image is not smaller than exported wideo size
-	 */
-	transform = img->distort_images &&
-				skew < max_skew && skew > min_skew &&
-				( i_width > a_width || i_height > a_height );
-
-	/* Create image surface with proper dimensions */
-	surface = cairo_image_surface_create( CAIRO_FORMAT_RGB24, c_width, c_height );
-
-	/* Load image into pixbuf at proper size */
-	if( transform )
-	{
-		gint lw, lh;
-
-		/* Images will be loaded at slightly modified dimensions */
-		if( a_ratio > i_ratio )
-		{
-			/* Horizontal scaling */
-			lw = (gdouble)c_width * ( skew + 1 ) / 2;
-			lh = c_height;
-		}
-		else
-		{
-			/* Vertical scaling */
-			lw = c_width;
-			lh = (gdouble)c_height / ( skew + 1 ) * 2;
-		}
-		pixbuf = gdk_pixbuf_new_from_file_at_scale( filename, lw, lh,
-													FALSE, NULL );
-	}
-	else
-	{
-		/* Simply load image into pixbuf at size */
-		pixbuf = gdk_pixbuf_new_from_file_at_size( filename, c_width,
-												   c_height, NULL );
-	}
-	i_width  = gdk_pixbuf_get_width( pixbuf );
-	i_height = gdk_pixbuf_get_height( pixbuf );
-
-	/* Paint surface with loaded image
-	 *
-	 * If image cannot be scalled, transform is FALSE. In this case, just
-	 * borders are added. If transform is not 0, than scale image before
-	 * painting it. */
-	cr = cairo_create( surface );
-
-	offset_x = ( c_width - i_width ) / 2;   /* CAN BE NEGATIVE!!! */
-	offset_y = ( c_height - i_height ) / 2; /* CAN BE NEGATIVE!!! */
-	if( ! transform )
-	{
-		/* Fill with background color */
-		cairo_set_source_rgb( cr, img->background_color[0],
-								  img->background_color[1],
-								  img->background_color[2] );
-		cairo_paint( cr );
-	}
-
-	/* Paint image */
-	gdk_cairo_set_source_pixbuf( cr, pixbuf, offset_x, offset_y );
-	cairo_paint( cr );
-
-	cairo_destroy( cr );
-
-	return( surface );
 }
 
 static gboolean img_transition_timeout(img_window_struct *img)

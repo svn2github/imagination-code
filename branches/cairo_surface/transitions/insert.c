@@ -123,19 +123,14 @@ transition_render( cairo_t         *cr,
 	cairo_set_source_surface( cr, image_from, 0, 0 );
 	cairo_paint( cr );
 
-	cairo_set_source_surface( cr, image_to, 0, 0 );
+	cairo_translate( cr, 0.5 * width, 0.5 * height );
+	if( direction == 1 ) 
+		cairo_rotate( cr, 2 * G_PI * progress );
+	else if ( direction == -1 ) 
+		cairo_rotate( cr, 2 * G_PI * ( 1 - progress ) );	
+	cairo_scale( cr, progress, progress );
 	
-
-	cairo_translate (cr, 0.5*width, 0.5*height);
-	if (direction==1) 
-		cairo_rotate (cr, 2*G_PI*progress);
-	else if (direction==-1) 
-		cairo_rotate (cr, 2 * G_PI * ( 1 - progress ));	
-
-	cairo_scale  (cr, progress, progress);
-	cairo_translate (cr, -0.5*width, -0.5*height);
-	
-	cairo_set_source_surface( cr, image_to, 0, 0 );
+	cairo_set_source_surface( cr, image_to, - 0.5 * width, - 0.5 * height );
 	cairo_paint( cr );
 }
 
@@ -155,34 +150,31 @@ transition2_render( cairo_t         *cr,
 	cairo_set_source_surface( cr, image_from, 0, 0 );
 	cairo_paint( cr );
 
-	cairo_set_source_surface( cr, image_to, 0, 0 );
-	
-	/*up - left*/
-	if (direction == 0) {
-		cairo_translate (cr, progress/2*width, progress/2*height);
-		cairo_scale  (cr, progress, progress);
-		cairo_translate (cr,-progress/2*width, -progress/2*height);
-	}
-	else
-	/*up - right*/
-	if (direction == 1) {
-		cairo_translate (cr, width-progress/2*width, progress/2*height);
-		cairo_scale  (cr, progress, progress);
-		cairo_translate (cr, progress/2*width-width, -progress/2*height);
-	}
-	else
-		/*down - left*/
-	if (direction == 2) {
-		cairo_translate (cr, progress/2*width, height-progress/2*height);
-		cairo_scale  (cr, progress, progress);
-		cairo_translate (cr, -progress/2*width, progress/2*height-height);
-	}
-	else
-	/*down - right*/
-	if (direction == 3) {
-		cairo_translate (cr, width-progress/2*width, height-progress/2*height);
-		cairo_scale  (cr, progress, progress);
-		cairo_translate (cr,progress/2*width-width, progress/2*height-height);
+	switch( direction )
+	{
+		case 0:	/* up - left */
+			cairo_translate (cr, progress/2*width, progress/2*height);
+			cairo_scale  (cr, progress, progress);
+			cairo_translate (cr,-progress/2*width, -progress/2*height);
+			break;
+
+		case 1: /* up - right */
+			cairo_translate (cr, width-progress/2*width, progress/2*height);
+			cairo_scale  (cr, progress, progress);
+			cairo_translate (cr, progress/2*width-width, -progress/2*height);
+			break;
+
+		case 2: /* down - left */
+			cairo_translate (cr, progress/2*width, height-progress/2*height);
+			cairo_scale  (cr, progress, progress);
+			cairo_translate (cr, -progress/2*width, progress/2*height-height);
+			break;
+
+		case 3: /* down - right */
+			cairo_translate (cr, width-progress/2*width, height-progress/2*height);
+			cairo_scale  (cr, progress, progress);
+			cairo_translate (cr,progress/2*width-width, progress/2*height-height);
+			break;
 	}
 	
 	cairo_set_source_surface( cr, image_to, 0, 0 );

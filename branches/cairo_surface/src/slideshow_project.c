@@ -144,7 +144,7 @@ void img_load_slideshow(img_window_struct *img)
 	GKeyFile *img_key_file;
 	gchar *dummy, *slide_filename, *time;
 	GtkWidget *dialog;
-	gint not_found = 0,number,i,transition_id, duration, no_points;
+	gint number,i,transition_id, duration, no_points;
 	guint speed;
 	GtkTreeModel *model;
 	void (*render);
@@ -223,8 +223,9 @@ void img_load_slideshow(img_window_struct *img)
 			dummy = g_strdup_printf("image_%d",i);
 			slide_filename = g_key_file_get_string(img_key_file,"images",dummy, NULL);
 
-			thumb = img_load_pixbuf_from_file(slide_filename);
-			if (thumb)
+			if( img_scale_image( slide_filename, img->video_ratio, 88, 0,
+								 img->distort_images, img->background_color,
+								 &thumb, NULL ) )
 			{
 				GdkPixbuf *pix;
 
@@ -295,8 +296,9 @@ void img_load_slideshow(img_window_struct *img)
 			slide_filename = g_key_file_get_string(img_key_file,conf,"filename", NULL);
 
 			/* Try to load image. If this fails, skip this slide */
-			thumb = img_load_pixbuf_from_file(slide_filename);
-			if (thumb)
+			if( img_scale_image( slide_filename, img->video_ratio, 88, 0,
+								 img->distort_images, img->background_color,
+								 &thumb, NULL ) )
 			{
 				duration	  = g_key_file_get_integer(img_key_file, conf, "duration", NULL);
 				transition_id = g_key_file_get_integer(img_key_file, conf, "transition_id", NULL);

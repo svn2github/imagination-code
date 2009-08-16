@@ -69,6 +69,7 @@ int main (int argc, char *argv[])
 	img_window->low_quality = TRUE;
 	img_window->video_size[0] = 720;
 	img_window->video_size[1] = 576;
+	img_window->video_ratio = (gdouble)720 / 576;
 
 	/* Last pseudo-slide has a duration of 0 */
 	img_window->final_transition.duration = 0;

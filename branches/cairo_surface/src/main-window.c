@@ -1558,11 +1558,15 @@ void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *im
 	{
 		/* Respect quality settings */
 		if( img->low_quality )
-			img->current_image = img_scale_image( img, info_slide->filename,
-												  0, img->video_size[1] );
+			img_scale_image( info_slide->filename,
+							 (gdouble)img->video_size[0] / img->video_size[1],
+							 0, img->video_size[1], img->distort_images,
+							 img->background_color, NULL, &img->current_image );
 		else
-			img->current_image = img_scale_image( img, info_slide->filename,
-												  0, 0 );
+			img_scale_image( info_slide->filename,
+							 (gdouble)img->video_size[0] / img->video_size[1],
+							 0, 0, img->distort_images,
+							 img->background_color, NULL, &img->current_image );
 	}
 
 	/* Update display */

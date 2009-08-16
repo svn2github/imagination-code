@@ -265,6 +265,7 @@ struct _img_window_struct
 	gboolean	distort_images;
 	gboolean	project_is_modified;
 	gint        video_size[2];
+	gdouble     video_ratio;
 	gdouble     background_color[3];
   	gint		total_secs;
 	gint		total_music_secs;

@@ -416,7 +416,10 @@ img_start_export( img_window_struct *img )
 	model = GTK_TREE_MODEL( img->thumbnail_model );
 	gtk_tree_model_get_iter_first( model, &iter );
 	gtk_tree_model_get( model, &iter, 1, &entry, -1 );
-	img->image2 = img_scale_image( img, entry->filename, 0, 0 );
+	img_scale_image( entry->filename,
+					 (gdouble)img->video_size[0] / img->video_size[1],
+					 0, 0, img->distort_images,
+					 img->background_color, NULL, &img->image2 );
 
 	/* Add export idle function and set initial values */
 	img->export_is_running = 4;
@@ -573,10 +576,15 @@ img_prepare_pixbufs( img_window_struct *img,
 		gtk_tree_model_get( model, img->cur_ss_iter, 1, &img->work_slide, -1 );
 
 		if( preview && img->low_quality )
-			img->image2 = img_scale_image( img, img->work_slide->filename, 0,
-										   img->video_size[1] );
+			img_scale_image( img->work_slide->filename,
+							 (gdouble)img->video_size[0] / img->video_size[1],
+							 0, img->video_size[1], img->distort_images,
+							 img->background_color, NULL, &img->image2 );
 		else
-			img->image2 = img_scale_image( img, img->work_slide->filename, 0, 0 );
+			img_scale_image( img->work_slide->filename,
+							 (gdouble)img->video_size[0] / img->video_size[1],
+							 0, 0, img->distort_images,
+							 img->background_color, NULL, &img->image2 );
 
 		/* Get first stop point */
 		img->point2 = (ImgStopPoint *)( img->work_slide->no_points ?
