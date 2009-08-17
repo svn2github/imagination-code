@@ -1324,7 +1324,6 @@ img_exporter_flv( img_window_struct *img )
 {
 	gchar          *cmd_line;
 	const gchar    *filename;
-	gchar          *aspect_ratio;
 	GtkWidget      *dialog;
 	GtkEntry       *entry;
 	GtkWidget      *vbox;
@@ -1335,7 +1334,8 @@ img_exporter_flv( img_window_struct *img )
 	GtkWidget *hbox;
 	GtkWidget *radio1, *radio2;
 	GtkWidget *radios[3];
-	gint       i;
+	gint       i, width, height;
+
 	/* These values have been contributed by Jean-Pierre Redonnet.
 	 * Thanks. */
 	gint       qualities[] = { 192, 384, 768 };
@@ -1407,9 +1407,15 @@ img_exporter_flv( img_window_struct *img )
 
 	/* Any additional calculation can be placed here. */
 	if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( radio1 ) ) )
-		aspect_ratio = "4:3";
+	{
+		width  = 320;
+		height = 240;
+	}
 	else
-		aspect_ratio = "16:9";
+	{
+		width  = 400;
+		height = 226;
+	}
 
 	for( i = 0; i < 3; i++ )
 	{
@@ -1418,12 +1424,12 @@ img_exporter_flv( img_window_struct *img )
 	}
 
 	cmd_line = g_strdup_printf( "ffmpeg -f image2pipe -vcodec ppm -i pipe: "
-								"-r %.02f -b %dk -aspect %s -s 320x240 "
+								"-r %.02f -b %dk -s %dx%d "
 								"<#AUDIO#> -f flv -vcodec flv "
 								"-acodec libmp3lame -ab 56000 -ar 22050 "
 								"-ac 1 -y \"%s.flv\"",
 								img->export_fps, qualities[i],
-								aspect_ratio, filename );
+								width, height, filename );
 	img->export_cmd_line = cmd_line;
 
 	/* Initiate stage 2 of export - audio processing */
