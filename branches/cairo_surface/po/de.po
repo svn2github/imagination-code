@@ -15,7 +15,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-08-17 12:53+0200\n"
+"POT-Creation-Date: 2009-08-17 13:35+0200\n"
 "PO-Revision-Date: 2009-06-23 22:31+0200\n"
 "Last-Translator: Fabian Nowak <ttimystery@arcor.de>\n"
 "Language-Team: German\n"
@@ -264,6 +264,15 @@ msgstr "Länge der Diaschau:"
 #, fuzzy
 msgid "<b>Slide Motion</b>"
 msgstr "<b>Dia-Einstellungen</b>"
+
+#: ../src/main-window.c:701
+msgid "Stop Point:"
+msgstr ""
+
+#: ../src/main-window.c:738
+#, fuzzy
+msgid "Duration:"
+msgstr "Dauer:"
 
 #: ../src/main-window.c:747
 msgid "Zoom: "

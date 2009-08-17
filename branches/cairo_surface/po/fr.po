@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination 1.5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-08-17 12:53+0200\n"
+"POT-Creation-Date: 2009-08-17 13:35+0200\n"
 "PO-Revision-Date: 2009-06-13 16:46+0200\n"
 "Last-Translator: Jean-Pierre Redonnet <redonnetbrouk@aol.com>\n"
 "Language-Team: French\n"
@@ -251,6 +251,15 @@ msgstr "Durée de la présentation:"
 #, fuzzy
 msgid "<b>Slide Motion</b>"
 msgstr "Paramètres du transparent"
+
+#: ../src/main-window.c:701
+msgid "Stop Point:"
+msgstr ""
+
+#: ../src/main-window.c:738
+#, fuzzy
+msgid "Duration:"
+msgstr "Durée de la musique"
 
 #: ../src/main-window.c:747
 msgid "Zoom: "

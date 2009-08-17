@@ -334,7 +334,7 @@ img_window_struct *img_create_window (void)
 	img_struct->rotate_left_menu = gtk_image_menu_item_new_with_mnemonic (_("_Rotate clockwise"));
 	gtk_container_add (GTK_CONTAINER (slide_menu),img_struct->rotate_left_menu);
 	gtk_widget_add_accelerator (img_struct->rotate_left_menu,"activate",img_struct->accel_group, GDK_r,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
-	g_signal_connect (G_OBJECT (img_struct->rotate_left_menu),"activate",G_CALLBACK (img_rotate_selected_slide),img_struct);
+	g_signal_connect (G_OBJECT (img_struct->rotate_left_menu),"activate",G_CALLBACK (img_rotate_selected_slides),img_struct);
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (img_struct->rotate_left_menu),tmp_image);
 
 	pixbuf = gtk_icon_theme_load_icon(icon_theme,"object-rotate-right",GTK_ICON_SIZE_MENU,0,NULL);
@@ -344,7 +344,7 @@ img_window_struct *img_create_window (void)
 	img_struct->rotate_right_menu = gtk_image_menu_item_new_with_mnemonic (_("Rotate co_unter-clockwise"));
 	gtk_container_add (GTK_CONTAINER (slide_menu),img_struct->rotate_right_menu);
 	gtk_widget_add_accelerator (img_struct->rotate_right_menu,"activate",img_struct->accel_group, GDK_u,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
-	g_signal_connect (G_OBJECT (img_struct->rotate_right_menu),"activate",G_CALLBACK (img_rotate_selected_slide),img_struct);
+	g_signal_connect (G_OBJECT (img_struct->rotate_right_menu),"activate",G_CALLBACK (img_rotate_selected_slides),img_struct);
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (img_struct->rotate_right_menu),tmp_image);
 
 	img_struct->remove_menu = gtk_image_menu_item_new_with_mnemonic (_("Dele_te"));
@@ -457,7 +457,7 @@ img_window_struct *img_create_window (void)
 	img_struct->rotate_left_button = GTK_WIDGET (gtk_tool_button_new(tmp_image,""));
 	gtk_container_add (GTK_CONTAINER (toolbar), img_struct->rotate_left_button);
 	gtk_widget_set_tooltip_text(img_struct->rotate_left_button, _("Rotate the slide clockwise"));
-	g_signal_connect (G_OBJECT (img_struct->rotate_left_button),"clicked",G_CALLBACK (img_rotate_selected_slide),img_struct);
+	g_signal_connect (G_OBJECT (img_struct->rotate_left_button),"clicked",G_CALLBACK (img_rotate_selected_slides),img_struct);
 	
 	pixbuf = gtk_icon_theme_load_icon(icon_theme,"object-rotate-right",GTK_ICON_SIZE_LARGE_TOOLBAR,0,NULL);
 	tmp_image = gtk_image_new_from_pixbuf(pixbuf);
@@ -466,7 +466,7 @@ img_window_struct *img_create_window (void)
 	img_struct->rotate_right_button = GTK_WIDGET (gtk_tool_button_new(tmp_image,""));
 	gtk_container_add (GTK_CONTAINER (toolbar),img_struct->rotate_right_button);
 	gtk_widget_set_tooltip_text(img_struct->rotate_right_button, _("Rotate the slide counter-clockwise"));
-	g_signal_connect (G_OBJECT (img_struct->rotate_right_button),"clicked",G_CALLBACK (img_rotate_selected_slide),img_struct);
+	g_signal_connect (G_OBJECT (img_struct->rotate_right_button),"clicked",G_CALLBACK (img_rotate_selected_slides),img_struct);
 
 	zoom_in_button = GTK_WIDGET (gtk_tool_button_new_from_stock ("gtk-zoom-in"));
 	gtk_container_add (GTK_CONTAINER (toolbar),zoom_in_button);

@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-08-17 12:53+0200\n"
+"POT-Creation-Date: 2009-08-17 13:35+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Michal Várady <miko.vaji@gmail.com>\n"
 "Language-Team: \n"
@@ -250,6 +250,15 @@ msgstr "Délka prezentace:"
 #, fuzzy
 msgid "<b>Slide Motion</b>"
 msgstr "<b>Nastavení snímků</b>"
+
+#: ../src/main-window.c:701
+msgid "Stop Point:"
+msgstr ""
+
+#: ../src/main-window.c:738
+#, fuzzy
+msgid "Duration:"
+msgstr "Délka přehrávání hudby:"
 
 #: ../src/main-window.c:747
 msgid "Zoom: "

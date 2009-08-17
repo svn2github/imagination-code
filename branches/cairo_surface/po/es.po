@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-08-17 12:53+0200\n"
+"POT-Creation-Date: 2009-08-17 13:35+0200\n"
 "PO-Revision-Date: 2009-06-23 19:53-0300\n"
 "Last-Translator: elega <elega@elega.com.ar>\n"
 "Language-Team: Spanish (Spain)\n"
@@ -253,6 +253,15 @@ msgstr "Duración de la presentación de diapositivas:"
 #, fuzzy
 msgid "<b>Slide Motion</b>"
 msgstr "<b>Ajustes de diapositivas</b>"
+
+#: ../src/main-window.c:701
+msgid "Stop Point:"
+msgstr ""
+
+#: ../src/main-window.c:738
+#, fuzzy
+msgid "Duration:"
+msgstr "Duración de la música:"
 
 #: ../src/main-window.c:747
 msgid "Zoom: "

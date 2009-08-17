@@ -522,11 +522,11 @@ void img_delete_selected_slides(GtkMenuItem *item,img_window_struct *img_struct)
 	img_iconview_selection_changed(GTK_ICON_VIEW(img_struct->active_icon),img_struct);
 }
 
-void img_rotate_selected_slide(GtkWidget *button, img_window_struct *img)
+void img_rotate_selected_slides(GtkWidget *button, img_window_struct *img)
 {
 	GtkTreeModel *model;
 	GtkTreeIter iter;
-	GList *selected = NULL;
+	GList *selected, *bak;
 	GdkPixbuf *thumb, *rotated_thumb;
 	GError *error = NULL;
 	GtkWidget *dialog;
@@ -543,62 +543,68 @@ void img_rotate_selected_slide(GtkWidget *button, img_window_struct *img)
 		return;
 
 	gtk_widget_show(img->progress_bar);
-	gtk_tree_model_get_iter(model,&iter,selected->data);
-	gtk_tree_path_free(selected->data);
-	g_list_free (selected);
-	gtk_tree_model_get(model,&iter,1,&info_slide,-1);
-
-	/* Load the image, save a copy in the temp dir, rotate it and display it in the image area */
-	thumb = gdk_pixbuf_new_from_file(info_slide->filename, NULL);
-	if (button == img->rotate_left_button)
-		rotated_thumb = img_rotate_pixbuf_c( thumb, GTK_PROGRESS_BAR( img->progress_bar ) );
-	else
-		rotated_thumb = img_rotate_pixbuf_cc( thumb, GTK_PROGRESS_BAR( img->progress_bar ) );
-	g_object_unref(thumb);
-
-	gtk_widget_hide(img->progress_bar);
-
-	handle = g_file_open_tmp("img-XXXXXX.jpg", &filename, NULL);
-	close(handle);
-	if ( ! gdk_pixbuf_save(rotated_thumb, filename, "jpeg",  &error, NULL))
+	
+	bak = selected;
+	while (selected)
 	{
-		dialog = gtk_message_dialog_new(GTK_WINDOW(img->imagination_window),GTK_DIALOG_MODAL,GTK_MESSAGE_ERROR,GTK_BUTTONS_OK,_("An error occurred while trying to rotate the slide:"));
-		gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog),"%s.", error->message);
-		gtk_window_set_title(GTK_WINDOW(dialog),"Imagination");
-		gtk_dialog_run (GTK_DIALOG (dialog));
-		gtk_widget_destroy (GTK_WIDGET (dialog));
-		g_error_free(error);
-		g_free(filename);
-		return;
-	}
-	g_object_unref(rotated_thumb);
+		gtk_tree_model_get_iter(model,&iter,selected->data);
+		gtk_tree_model_get(model,&iter,1,&info_slide,-1);
 
-	if (info_slide->original_filename == NULL)
-		info_slide->original_filename = info_slide->filename;
+		/* Load the image, save a copy in the temp dir, rotate it and display it in the image area */
+		thumb = gdk_pixbuf_new_from_file(info_slide->filename, NULL);
+		if (button == img->rotate_left_button)
+			rotated_thumb = img_rotate_pixbuf_c( thumb, GTK_PROGRESS_BAR( img->progress_bar ) );
+		else
+			rotated_thumb = img_rotate_pixbuf_cc( thumb, GTK_PROGRESS_BAR( img->progress_bar ) );
+		g_object_unref(thumb);
 
-	info_slide->filename = filename;
-	img->rotated_files = g_slist_append(img->rotated_files, g_strdup(filename));
+		gtk_widget_hide(img->progress_bar);
 
-	if( img->current_image )
-		cairo_surface_destroy( img->current_image );
+		handle = g_file_open_tmp("img-XXXXXX.jpg", &filename, NULL);
+		close(handle);
+		if ( ! gdk_pixbuf_save(rotated_thumb, filename, "jpeg",  &error, NULL))
+		{	
+			dialog = gtk_message_dialog_new(GTK_WINDOW(img->imagination_window),GTK_DIALOG_MODAL,GTK_MESSAGE_ERROR,GTK_BUTTONS_OK,_("An error occurred while trying to rotate the slide:"));
+			gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog),"%s.", error->message);
+			gtk_window_set_title(GTK_WINDOW(dialog),"Imagination");
+			gtk_dialog_run (GTK_DIALOG (dialog));
+			gtk_widget_destroy (GTK_WIDGET (dialog));
+			g_error_free(error);
+			g_free(filename);
+			return;
+		}
+		g_object_unref(rotated_thumb);
 
-	/* Respect quality settings */
-	if( img->low_quality )
-		img_scale_image( info_slide->filename, img->video_ratio,
+		if (info_slide->original_filename == NULL)
+			info_slide->original_filename = info_slide->filename;
+
+		info_slide->filename = filename;
+		img->rotated_files = g_slist_append(img->rotated_files, g_strdup(filename));
+
+		if( img->current_image )
+			cairo_surface_destroy( img->current_image );
+
+		/* Respect quality settings */
+		if( img->low_quality )
+			img_scale_image( info_slide->filename, img->video_ratio,
 						 0, img->video_size[1], img->distort_images,
 						 img->background_color, NULL, &img->current_image );
-	else
-		img_scale_image( info_slide->filename, img->video_ratio,
+		else
+			img_scale_image( info_slide->filename, img->video_ratio,
 						 0, 0, img->distort_images,
 						 img->background_color, NULL, &img->current_image );
 
-	gtk_widget_queue_draw( img->image_area );
+		gtk_widget_queue_draw( img->image_area );
 
-	/* Display the rotated image in thumbnails iconview */
-	img_scale_image( filename, img->video_ratio, 88, 0, img->distort_images,
+		/* Display the rotated image in thumbnails iconview */
+		img_scale_image( filename, img->video_ratio, 88, 0, img->distort_images,
 					 img->background_color, &thumb, NULL );
-	gtk_list_store_set (img->thumbnail_model, &iter, 0, thumb, -1);
-	g_object_unref (thumb);
+		gtk_list_store_set (img->thumbnail_model, &iter, 0, thumb, -1);
+		g_object_unref (thumb);
+		selected = selected->next;
+	}
+	g_list_foreach (bak, (GFunc)gtk_tree_path_free, NULL);
+	g_list_free(bak);
 }
 
 /* Rotate clockwise */

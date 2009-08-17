@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-08-17 12:53+0200\n"
+"POT-Creation-Date: 2009-08-17 13:35+0200\n"
 "PO-Revision-Date: 2009-06-22 20:15+0100\n"
 "Last-Translator: Daniel Nylander <po@danielnylander.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
@@ -253,6 +253,15 @@ msgstr "Bildvisningslängd:"
 #, fuzzy
 msgid "<b>Slide Motion</b>"
 msgstr "<b>Bildinställningar</b>"
+
+#: ../src/main-window.c:701
+msgid "Stop Point:"
+msgstr ""
+
+#: ../src/main-window.c:738
+#, fuzzy
+msgid "Duration:"
+msgstr "Musiklängd:"
 
 #: ../src/main-window.c:747
 msgid "Zoom: "

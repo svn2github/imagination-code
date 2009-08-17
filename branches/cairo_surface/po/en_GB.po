@@ -7,9 +7,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-08-17 12:53+0200\n"
-"PO-Revision-Date: 2009-02-24 11:39+0100\n"
-"Last-Translator: colossus73 <colossus73@gmail.com>\n"
+"POT-Creation-Date: 2009-08-17 13:35+0200\n"
+"PO-Revision-Date: 2009-08-17 13:35+0100\n"
+"Last-Translator: \n"
 "Language-Team: English (British)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -240,6 +240,14 @@ msgstr "Slideshow Length:"
 #: ../src/main-window.c:691
 msgid "<b>Slide Motion</b>"
 msgstr "<b>Slide Motion</b>"
+
+#: ../src/main-window.c:701
+msgid "Stop Point:"
+msgstr "Stop Point:"
+
+#: ../src/main-window.c:738
+msgid "Duration:"
+msgstr "Duration:"
 
 #: ../src/main-window.c:747
 msgid "Zoom: "
