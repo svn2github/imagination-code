@@ -657,7 +657,7 @@ img_scale_image( const gchar      *filename,
 	 *  - image is not smaller than exported wideo size
 	 */
 	transform = distort && skew < max_skew && skew > min_skew &&
-				( i_width > width || i_height > height );
+				( i_width >= width || i_height >= height );
 
 	/* Load image into pixbuf at proper size */
 	if( transform )

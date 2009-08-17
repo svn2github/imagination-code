@@ -416,8 +416,7 @@ img_start_export( img_window_struct *img )
 	model = GTK_TREE_MODEL( img->thumbnail_model );
 	gtk_tree_model_get_iter_first( model, &iter );
 	gtk_tree_model_get( model, &iter, 1, &entry, -1 );
-	img_scale_image( entry->filename,
-					 (gdouble)img->video_size[0] / img->video_size[1],
+	img_scale_image( entry->filename, img->video_ratio,
 					 0, 0, img->distort_images,
 					 img->background_color, NULL, &img->image2 );
 
@@ -576,13 +575,11 @@ img_prepare_pixbufs( img_window_struct *img,
 		gtk_tree_model_get( model, img->cur_ss_iter, 1, &img->work_slide, -1 );
 
 		if( preview && img->low_quality )
-			img_scale_image( img->work_slide->filename,
-							 (gdouble)img->video_size[0] / img->video_size[1],
+			img_scale_image( img->work_slide->filename, img->video_ratio,
 							 0, img->video_size[1], img->distort_images,
 							 img->background_color, NULL, &img->image2 );
 		else
-			img_scale_image( img->work_slide->filename,
-							 (gdouble)img->video_size[0] / img->video_size[1],
+			img_scale_image( img->work_slide->filename, img->video_ratio,
 							 0, 0, img->distort_images,
 							 img->background_color, NULL, &img->image2 );
 
@@ -591,7 +588,7 @@ img_prepare_pixbufs( img_window_struct *img,
 										img->work_slide->points->data :
 										NULL );
 
-		return(TRUE);
+		return( TRUE );
 	}
 	else if( last_transition )
 	{
@@ -1327,14 +1324,16 @@ img_exporter_flv( img_window_struct *img )
 {
 	gchar          *cmd_line;
 	const gchar    *filename;
+	gchar          *aspect_ratio;
 	GtkWidget      *dialog;
 	GtkEntry       *entry;
 	GtkWidget      *vbox;
 
-	/* Additional options - OGG  only */
+	/* Additional options - FLV  only */
 	GtkWidget *frame;
 	GtkWidget *label;
 	GtkWidget *hbox;
+	GtkWidget *radio1, *radio2;
 	GtkWidget *radios[3];
 	gint       i;
 	/* These values have been contributed by Jean-Pierre Redonnet.
@@ -1352,6 +1351,24 @@ img_exporter_flv( img_window_struct *img )
 		return;
 
 	/* Add any export format specific GUI elements here */
+	frame = gtk_frame_new( NULL );
+	gtk_box_pack_start( GTK_BOX( vbox ), frame, FALSE, FALSE, 0 );
+
+	label = gtk_label_new( _("<b>Television Format</b>") );
+	gtk_label_set_use_markup( GTK_LABEL( label ), TRUE );
+	gtk_frame_set_label_widget( GTK_FRAME( frame ), label );
+
+	hbox = gtk_hbox_new( TRUE, 5 );
+	gtk_container_add( GTK_CONTAINER( frame ), hbox );
+
+	radio1 = gtk_radio_button_new_with_mnemonic( NULL, _("Normal 4:3") );
+	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( radio1 ), TRUE );
+	gtk_box_pack_start( GTK_BOX( hbox ), radio1, FALSE, FALSE, 0 );
+
+	radio2 = gtk_radio_button_new_with_mnemonic_from_widget(
+				GTK_RADIO_BUTTON( radio1 ), _("Widescreen 16:9") );
+	gtk_box_pack_start( GTK_BOX( hbox ), radio2, FALSE, FALSE, 0 );
+	
 	frame = gtk_frame_new( NULL );
 	gtk_box_pack_start( GTK_BOX( vbox ), frame, FALSE, FALSE, 0 );
 
@@ -1389,6 +1406,11 @@ img_exporter_flv( img_window_struct *img )
 	filename = gtk_entry_get_text( entry );
 
 	/* Any additional calculation can be placed here. */
+	if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( radio1 ) ) )
+		aspect_ratio = "4:3";
+	else
+		aspect_ratio = "16:9";
+
 	for( i = 0; i < 3; i++ )
 	{
 		if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( radios[i] ) ) )
@@ -1396,10 +1418,12 @@ img_exporter_flv( img_window_struct *img )
 	}
 
 	cmd_line = g_strdup_printf( "ffmpeg -f image2pipe -vcodec ppm -i pipe: "
-								"-r %.02f -b %dk -s 320x240 <#AUDIO#> "
-								"-f flv -vcodec flv -acodec libmp3lame "
-								"-ab 56000 -ar 22050 -ac 1 -y \"%s.flv\"",
-								img->export_fps, qualities[i], filename );
+								"-r %.02f -b %dk -aspect %s -s 320x240 "
+								"<#AUDIO#> -f flv -vcodec flv "
+								"-acodec libmp3lame -ab 56000 -ar 22050 "
+								"-ac 1 -y \"%s.flv\"",
+								img->export_fps, qualities[i],
+								aspect_ratio, filename );
 	img->export_cmd_line = cmd_line;
 
 	/* Initiate stage 2 of export - audio processing */
