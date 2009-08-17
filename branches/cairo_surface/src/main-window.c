@@ -698,7 +698,7 @@ img_window_struct *img_create_window (void)
 
 	hbox_stop_points = gtk_hbox_new(FALSE,5);
 	gtk_box_pack_start (GTK_BOX (vbox_slide_motion), hbox_stop_points, TRUE, FALSE, 0);
-	stop_points_label = gtk_label_new(("Stop Point:"));
+	stop_points_label = gtk_label_new(_("Stop Point:"));
 	gtk_box_pack_start (GTK_BOX (hbox_stop_points), stop_points_label, TRUE, TRUE, 0);
 	gtk_misc_set_alignment(GTK_MISC(stop_points_label),0.0, 0.5);
 
@@ -735,7 +735,7 @@ img_window_struct *img_create_window (void)
 
 	hbox_time_offset = gtk_hbox_new(FALSE,0);
 	gtk_box_pack_start (GTK_BOX (vbox_slide_motion), hbox_time_offset, FALSE, FALSE, 0);
-	time_offset_label = gtk_label_new(("Duration:"));
+	time_offset_label = gtk_label_new(_("Duration:"));
 	gtk_box_pack_start (GTK_BOX (hbox_time_offset), time_offset_label, TRUE, TRUE, 0);
 	gtk_misc_set_alignment(GTK_MISC(time_offset_label),0.0, 0.5);
 	img_struct->ken_duration = gtk_spin_button_new_with_range (1, 60, 1);

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-08-17 12:53+0200\n"
+"POT-Creation-Date: 2009-08-17 12:15+0200\n"
 "PO-Revision-Date: 2009-02-24 11:55+0100\n"
 "Last-Translator: tadeboro <tadeboro@gmail.com>\n"
 "Language-Team: Slovenian\n"
@@ -32,7 +32,7 @@ msgstr "Domišljija"
 #: ../src/audio.c:106
 #, c-format
 msgid "Playing %s..."
-msgstr "Predvajam %s"
+msgstr "Predvajam %s ..."
 
 #: ../src/audio.c:126 ../src/main-window.c:1012
 msgid "Play the selected file"
@@ -69,14 +69,12 @@ msgstr "Di_apozitiv"
 
 #. Preview quality menu
 #: ../src/main-window.c:288
-#, fuzzy
 msgid "Preview quality"
-msgstr "_Predogled"
+msgstr "Kakovost predogleda"
 
 #: ../src/main-window.c:294
-#, fuzzy
 msgid "_Low"
-msgstr "Nizka"
+msgstr "_Nizka"
 
 #: ../src/main-window.c:298 ../src/export.c:1278 ../src/export.c:1391
 msgid "High"
@@ -85,16 +83,15 @@ msgstr "Visoka"
 #. Zoom controls
 #: ../src/main-window.c:302
 msgid "_Zoom"
-msgstr ""
+msgstr "Povečava"
 
 #: ../src/main-window.c:334
-#, fuzzy
 msgid "_Rotate clockwise"
-msgstr "Shrani diaprojekcijo"
+msgstr "Zav_rti v smeri urinega kazalca"
 
 #: ../src/main-window.c:344
 msgid "Rotate co_unter-clockwise"
-msgstr ""
+msgstr "Zavrti proti smeri _urinega kazalca"
 
 #: ../src/main-window.c:350
 msgid "Dele_te"
@@ -106,18 +103,16 @@ msgstr "Počis_ti izbor"
 
 #. View menu
 #: ../src/main-window.c:372
-#, fuzzy
 msgid "_View"
-msgstr "_Predogled"
+msgstr "_Pogled"
 
 #: ../src/main-window.c:378
-#, fuzzy
 msgid "Preview mode"
-msgstr "_Predogled"
+msgstr "Predogled"
 
 #: ../src/main-window.c:384
 msgid "Overview mode"
-msgstr ""
+msgstr "Pregled"
 
 #: ../src/main-window.c:387
 msgid "_Help"
@@ -152,26 +147,24 @@ msgid "Delete the selected slides"
 msgstr "Zbriši izbrane diapozitive"
 
 #: ../src/main-window.c:459
-#, fuzzy
 msgid "Rotate the slide clockwise"
-msgstr "Shrani diaprojekcijo"
+msgstr "Zavrti diapozitiv v smeri urinega kazalca"
 
 #: ../src/main-window.c:468
 msgid "Rotate the slide counter-clockwise"
-msgstr ""
+msgstr "Zavrti proti smeri urinega kazalca"
 
 #: ../src/main-window.c:473
 msgid "Zoom In"
-msgstr ""
+msgstr "Povečaj"
 
 #: ../src/main-window.c:478
 msgid "Zoom Out"
-msgstr ""
+msgstr "Pomanjšaj"
 
 #: ../src/main-window.c:483
-#, fuzzy
 msgid "Normal Size"
-msgstr "Normalno"
+msgstr "Normalna velikost"
 
 #: ../src/main-window.c:491 ../src/callbacks.c:1269
 msgid "Starts the preview"
@@ -179,32 +172,29 @@ msgstr "Požene predogled"
 
 #: ../src/main-window.c:499
 msgid "Goto first slide"
-msgstr ""
+msgstr "Pojdi na prvi diapozitiv"
 
 #: ../src/main-window.c:504
-#, fuzzy
 msgid "Goto previous selected slide"
-msgstr "Zbriši izbrane diapozitive"
+msgstr "Pojdi na prejšnji diapozitiv"
 
 #: ../src/main-window.c:520 ../src/main-window.c:724
 msgid " of "
-msgstr ""
+msgstr " od "
 
 #: ../src/main-window.c:531
-#, fuzzy
 msgid "Goto next selected slide"
-msgstr "Zbriši izbrane diapozitive"
+msgstr "Pojdi na naslednji diapozitiv"
 
 #: ../src/main-window.c:536
 msgid "Goto last slide"
-msgstr ""
+msgstr "Pojdi na zadnji diapozitiv"
 
 #: ../src/main-window.c:585
 msgid "Video"
-msgstr ""
+msgstr "Video"
 
 #: ../src/main-window.c:604
-#, fuzzy
 msgid "<b>Slide Settings</b>"
 msgstr "<b>Nastavitve diapozitiva</b>"
 
@@ -249,69 +239,65 @@ msgid "Slideshow Length:"
 msgstr "Trajanje diaprojekcije:"
 
 #: ../src/main-window.c:691
-#, fuzzy
 msgid "<b>Slide Motion</b>"
-msgstr "<b>Nastavitve diapozitiva</b>"
+msgstr "<b>Gibanje diapozitiva</b>"
 
 #: ../src/main-window.c:747
 msgid "Zoom: "
-msgstr ""
+msgstr "Povečava:"
 
 #: ../src/main-window.c:761
 msgid "Add"
-msgstr ""
+msgstr "Dodaj"
 
 #: ../src/main-window.c:765
 msgid "Update"
-msgstr ""
+msgstr "Posodobi"
 
 #: ../src/main-window.c:770
 msgid "Remove"
-msgstr ""
+msgstr "Odstrani"
 
 #: ../src/main-window.c:784
-#, fuzzy
 msgid "<b>Slide Text</b>"
-msgstr "<b>Nastavitve diapozitiva</b>"
+msgstr "<b>Besedilo diapozitiva</b>"
 
 #: ../src/main-window.c:813 ../src/main-window.c:1355
 msgid "Click to expand the area"
-msgstr ""
+msgstr "Razširi besedilno polje"
 
 #: ../src/main-window.c:830
 msgid "Click to choose the font"
-msgstr ""
+msgstr "Izberi pisavo"
 
 #: ../src/main-window.c:840
 msgid "Animation:"
-msgstr ""
+msgstr "Animacija:"
 
 #: ../src/main-window.c:852
-#, fuzzy
 msgid "Animation Speed:"
-msgstr "Histrost prehoda:"
+msgstr "Histrost animacije:"
 
 #: ../src/main-window.c:880
 msgid "Placing is relative to:"
-msgstr ""
+msgstr "Položaj relativno na:"
 
 #: ../src/main-window.c:894
-#, fuzzy
 msgid "Exported video"
-msgstr "Izvažam diaprojekcijo"
+msgstr "Izvoženi video"
 
 #: ../src/main-window.c:896
 msgid "Original image"
-msgstr ""
+msgstr "Izvorna slika"
 
 #: ../src/main-window.c:905
 msgid "Subtitle position:"
-msgstr ""
+msgstr "Položaj besedila:"
 
 #. Background music frame
 #: ../src/main-window.c:940
 msgid "Audio"
-msgstr ""
+msgstr "Glasba"
 
 #: ../src/main-window.c:953
 msgid "<b>Background Music</b>"
@@ -339,21 +325,19 @@ msgstr "Počisti datoteke"
 
 #: ../src/main-window.c:1350
 msgid "Click to shrink the area"
-msgstr ""
+msgstr "Skrčni besedilno polje"
 
 #: ../src/main-window.c:1382 ../src/callbacks.c:1038
 msgid "Sorry,I could not perform the operation!"
-msgstr ""
+msgstr "Na žalost operacije ne morem izvesti!"
 
 #: ../src/main-window.c:1541
-#, fuzzy
 msgid "Resolution"
-msgstr "Ločljivost:"
+msgstr "Ločljivost"
 
 #: ../src/main-window.c:1541
-#, fuzzy
 msgid "Type"
-msgstr "Tip:"
+msgstr "Tip"
 
 #: ../src/main-window.c:1855 ../src/main-window.c:1857 ../src/support.c:138
 msgid "None"
@@ -399,7 +383,7 @@ msgstr[3] "%d x %d pik"
 
 #: ../src/callbacks.c:565
 msgid "An error occurred while trying to rotate the slide:"
-msgstr ""
+msgstr "Napaka med vrtenjem diapozitiva:"
 
 #: ../src/callbacks.c:731
 msgid "translator-credits"
@@ -550,20 +534,3 @@ msgstr "Srednja"
 msgid "FLV export"
 msgstr "FLV izvoz"
 
-#~ msgid "Slide Number:"
-#~ msgstr "Številka diapozitiva:"
-
-#~ msgid "Jump to the entered slide number"
-#~ msgstr "Skoči na vnešeni diapozitiv"
-
-#~ msgid "Export the DVD slideshow"
-#~ msgstr "Izvozi DVD diaprojekcijo"
-
-#~ msgid ""
-#~ "The length of the audio track is longer than the video one. Do you want "
-#~ "to continue?"
-#~ msgstr ""
-#~ "Glasbena podlaga je daljša od video vsebinw. Želite vseeno nadaljevati?"
-
-#~ msgid "Export the slideshow as:"
-#~ msgstr "Izvozi diaprojekcijo kot:"
