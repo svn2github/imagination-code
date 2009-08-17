@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-08-17 13:35+0200\n"
+"POT-Creation-Date: 2009-08-17 17:57+0200\n"
 "PO-Revision-Date: 2009-08-17 13:34+0100\n"
 "Last-Translator: \n"
 "Language-Team: Italian\n"
@@ -165,7 +165,7 @@ msgstr "Zoom Out"
 msgid "Normal Size"
 msgstr "Dimensioni normali"
 
-#: ../src/main-window.c:491 ../src/callbacks.c:1269
+#: ../src/main-window.c:491 ../src/callbacks.c:1275
 msgid "Starts the preview"
 msgstr "Avvia l'anteprima"
 
@@ -334,7 +334,7 @@ msgstr "Cancella tutti i file"
 msgid "Click to shrink the area"
 msgstr "Clicca per restringere l'area"
 
-#: ../src/main-window.c:1382 ../src/callbacks.c:1038
+#: ../src/main-window.c:1382 ../src/callbacks.c:1044
 msgid "Sorry,I could not perform the operation!"
 msgstr "Spiacente, non è stato possibile completare l'operazione"
 
@@ -375,7 +375,7 @@ msgstr "Importazione diapositive, usa MAIUSC per la selezione multipla"
 msgid "All image files"
 msgstr "Tutti i file immagine"
 
-#: ../src/callbacks.c:413 ../src/callbacks.c:1373
+#: ../src/callbacks.c:413 ../src/callbacks.c:1379
 msgid "You didn't save your slideshow yet. Are you sure you want to close it?"
 msgstr ""
 "La presentazione non è stata ancora salvata, sei sicuro di volerla chiudere?"
@@ -387,23 +387,23 @@ msgid_plural "%d x %d pixels"
 msgstr[0] "%d x %d pixel"
 msgstr[1] "%d x %d pixel"
 
-#: ../src/callbacks.c:565
+#: ../src/callbacks.c:567
 msgid "An error occurred while trying to rotate the slide:"
 msgstr "Si è verificato un errore mentre provavo a ruotare la diapositiva:"
 
-#: ../src/callbacks.c:731
+#: ../src/callbacks.c:737
 msgid "translator-credits"
 msgstr "Giuseppe Torelli <colossus73@gmail.com>"
 
-#: ../src/callbacks.c:1279
+#: ../src/callbacks.c:1285
 msgid "Stops the preview"
 msgstr "Ferma l'anteprima"
 
-#: ../src/callbacks.c:1332
+#: ../src/callbacks.c:1338
 msgid "Load an Imagination slideshow project"
 msgstr "Carica una presentazione di Imagination"
 
-#: ../src/callbacks.c:1333
+#: ../src/callbacks.c:1339
 msgid "Save an Imagination slideshow project"
 msgstr "Salva una presentazione di Imagination"
 

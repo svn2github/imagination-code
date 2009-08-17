@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-08-17 13:35+0200\n"
-"PO-Revision-Date: 2009-06-23 08:39-0400\n"
+"POT-Creation-Date: 2009-08-17 17:57+0200\n"
+"PO-Revision-Date: 2009-08-17 09:39-0400\n"
 "Last-Translator: Og Maciel <ogmaciel@gnome.org>\n"
 "Language-Team: Brazilian Portuguese <ldp-br@bazar2.conectiva.com.br>\n"
 "MIME-Version: 1.0\n"
@@ -69,14 +69,12 @@ msgstr "_Slide"
 
 #. Preview quality menu
 #: ../src/main-window.c:288
-#, fuzzy
 msgid "Preview quality"
-msgstr "_Visualização"
+msgstr "Visualizar qualidade"
 
 #: ../src/main-window.c:294
-#, fuzzy
 msgid "_Low"
-msgstr "Baixa"
+msgstr "_Baixa"
 
 #: ../src/main-window.c:298 ../src/export.c:1278 ../src/export.c:1391
 msgid "High"
@@ -85,16 +83,15 @@ msgstr "Alta"
 #. Zoom controls
 #: ../src/main-window.c:302
 msgid "_Zoom"
-msgstr ""
+msgstr "_Ampliar"
 
 #: ../src/main-window.c:334
-#, fuzzy
 msgid "_Rotate clockwise"
-msgstr "Salvar a apresentação de slides"
+msgstr "_Rotacionar no sentido horário"
 
 #: ../src/main-window.c:344
 msgid "Rotate co_unter-clockwise"
-msgstr ""
+msgstr "Rotacionar no sentido a_nti-horário"
 
 #: ../src/main-window.c:350
 msgid "Dele_te"
@@ -106,18 +103,16 @@ msgstr "De_selencionar tudo"
 
 #. View menu
 #: ../src/main-window.c:372
-#, fuzzy
 msgid "_View"
-msgstr "_Visualização"
+msgstr "_Ver"
 
 #: ../src/main-window.c:378
-#, fuzzy
 msgid "Preview mode"
-msgstr "_Visualização"
+msgstr "Modo de visualização"
 
 #: ../src/main-window.c:384
 msgid "Overview mode"
-msgstr ""
+msgstr "Mode resumo"
 
 #: ../src/main-window.c:387
 msgid "_Help"
@@ -125,7 +120,7 @@ msgstr "_Ajuda"
 
 #: ../src/main-window.c:392
 msgid "Contents"
-msgstr ""
+msgstr "Conteúdo"
 
 #: ../src/main-window.c:413 ../src/new_slideshow.c:63
 msgid "Create a new slideshow"
@@ -152,59 +147,54 @@ msgid "Delete the selected slides"
 msgstr "Excluirr os slides selecionados"
 
 #: ../src/main-window.c:459
-#, fuzzy
 msgid "Rotate the slide clockwise"
-msgstr "Salvar a apresentação de slides"
+msgstr "Rotacionar o slide no sentido horário"
 
 #: ../src/main-window.c:468
 msgid "Rotate the slide counter-clockwise"
-msgstr ""
+msgstr "Rotacionar o slide no sentido anti-horário"
 
 #: ../src/main-window.c:473
 msgid "Zoom In"
-msgstr ""
+msgstr "Ampliar"
 
 #: ../src/main-window.c:478
 msgid "Zoom Out"
-msgstr ""
+msgstr "Reduzir"
 
 #: ../src/main-window.c:483
-#, fuzzy
 msgid "Normal Size"
-msgstr "Normal"
+msgstr "Tamanho normal"
 
-#: ../src/main-window.c:491 ../src/callbacks.c:1269
+#: ../src/main-window.c:491 ../src/callbacks.c:1275
 msgid "Starts the preview"
 msgstr "Iniciar a visualização"
 
 #: ../src/main-window.c:499
 msgid "Goto first slide"
-msgstr ""
+msgstr "Ir para o primeiro slide"
 
 #: ../src/main-window.c:504
-#, fuzzy
 msgid "Goto previous selected slide"
-msgstr "Excluirr os slides selecionados"
+msgstr "Ir para o slide selecionado anterior"
 
 #: ../src/main-window.c:520 ../src/main-window.c:724
 msgid " of "
-msgstr ""
+msgstr " de "
 
 #: ../src/main-window.c:531
-#, fuzzy
 msgid "Goto next selected slide"
-msgstr "Excluirr os slides selecionados"
+msgstr "Ir para o próximo slide selecionado"
 
 #: ../src/main-window.c:536
 msgid "Goto last slide"
-msgstr ""
+msgstr "Ir para o último slide"
 
 #: ../src/main-window.c:585
 msgid "Video"
-msgstr ""
+msgstr "Vídeo"
 
 #: ../src/main-window.c:604
-#, fuzzy
 msgid "<b>Slide Settings</b>"
 msgstr "<b>Configurações do slide</b>"
 
@@ -249,78 +239,73 @@ msgid "Slideshow Length:"
 msgstr "Duração da apresentação de slides:"
 
 #: ../src/main-window.c:691
-#, fuzzy
 msgid "<b>Slide Motion</b>"
-msgstr "<b>Configurações do slide</b>"
+msgstr "<b>Movimento do slide</b>"
 
 #: ../src/main-window.c:701
 msgid "Stop Point:"
-msgstr ""
+msgstr "Ponto de parada:"
 
 #: ../src/main-window.c:738
-#, fuzzy
 msgid "Duration:"
-msgstr "Duração da música"
+msgstr "Duração:"
 
 #: ../src/main-window.c:747
 msgid "Zoom: "
-msgstr ""
+msgstr "Ampliar: "
 
 #: ../src/main-window.c:761
 msgid "Add"
-msgstr ""
+msgstr "Adicionar"
 
 #: ../src/main-window.c:765
 msgid "Update"
-msgstr ""
+msgstr "Atualizar"
 
 #: ../src/main-window.c:770
 msgid "Remove"
-msgstr ""
+msgstr "Remover"
 
 #: ../src/main-window.c:784
-#, fuzzy
 msgid "<b>Slide Text</b>"
-msgstr "<b>Configurações do slide</b>"
+msgstr "<b>Texto do slide</b>"
 
 #: ../src/main-window.c:813 ../src/main-window.c:1355
 msgid "Click to expand the area"
-msgstr ""
+msgstr "Clique para expandir a área"
 
 #: ../src/main-window.c:830
 msgid "Click to choose the font"
-msgstr ""
+msgstr "Clique para escolher a fonte"
 
 #: ../src/main-window.c:840
 msgid "Animation:"
-msgstr ""
+msgstr "Transição:"
 
 #: ../src/main-window.c:852
-#, fuzzy
 msgid "Animation Speed:"
 msgstr "Velocidade da transição:"
 
 #: ../src/main-window.c:880
 msgid "Placing is relative to:"
-msgstr ""
+msgstr "Posicionamento relativo a:"
 
 #: ../src/main-window.c:894
-#, fuzzy
 msgid "Exported video"
-msgstr "Exportando a apresentação de slides"
+msgstr "Vídeo exportado"
 
 #: ../src/main-window.c:896
 msgid "Original image"
-msgstr ""
+msgstr "Imagem original"
 
 #: ../src/main-window.c:905
 msgid "Subtitle position:"
-msgstr ""
+msgstr "Posicionamento de subtítulo"
 
 #. Background music frame
 #: ../src/main-window.c:940
 msgid "Audio"
-msgstr ""
+msgstr "Áudio"
 
 #: ../src/main-window.c:953
 msgid "<b>Background Music</b>"
@@ -348,21 +333,19 @@ msgstr "Remover todos arquivos"
 
 #: ../src/main-window.c:1350
 msgid "Click to shrink the area"
-msgstr ""
+msgstr "Clique para reduzir a área"
 
-#: ../src/main-window.c:1382 ../src/callbacks.c:1038
+#: ../src/main-window.c:1382 ../src/callbacks.c:1044
 msgid "Sorry,I could not perform the operation!"
-msgstr ""
+msgstr "Desculpe, mas não foi possível efetuar a operação!"
 
 #: ../src/main-window.c:1541
-#, fuzzy
 msgid "Resolution"
-msgstr "Resolução:"
+msgstr "Resolução"
 
 #: ../src/main-window.c:1541
-#, fuzzy
 msgid "Type"
-msgstr "Tipo:"
+msgstr "Tipo"
 
 #: ../src/main-window.c:1855 ../src/main-window.c:1857 ../src/support.c:138
 msgid "None"
@@ -393,7 +376,7 @@ msgstr "Importar slides, use a tecla SHIFT para seleção múltipla"
 msgid "All image files"
 msgstr "Todos arquivos de imagens"
 
-#: ../src/callbacks.c:413 ../src/callbacks.c:1373
+#: ../src/callbacks.c:413 ../src/callbacks.c:1379
 msgid "You didn't save your slideshow yet. Are you sure you want to close it?"
 msgstr ""
 "Você ainda não salvou sua apresentação de slides. Você tem certeza que "
@@ -406,25 +389,25 @@ msgid_plural "%d x %d pixels"
 msgstr[0] "%d x %d pixels"
 msgstr[1] "%d x %d pixels"
 
-#: ../src/callbacks.c:565
+#: ../src/callbacks.c:567
 msgid "An error occurred while trying to rotate the slide:"
-msgstr ""
+msgstr "Um erro aconteceu enquanto tentando rotacionar o slide:"
 
-#: ../src/callbacks.c:731
+#: ../src/callbacks.c:737
 msgid "translator-credits"
 msgstr ""
 "banto palmarino <bantopalmarino@nkosi.org>\n"
 "Og Maciel <ogmaciel@gnome.org>"
 
-#: ../src/callbacks.c:1279
+#: ../src/callbacks.c:1285
 msgid "Stops the preview"
 msgstr "Parar a visualização"
 
-#: ../src/callbacks.c:1332
+#: ../src/callbacks.c:1338
 msgid "Load an Imagination slideshow project"
 msgstr "Carregar um projeto Imagination de apresentação de slides"
 
-#: ../src/callbacks.c:1333
+#: ../src/callbacks.c:1339
 msgid "Save an Imagination slideshow project"
 msgstr "Salvar um projeto Imagination de apresentação de slides"
 
