@@ -213,6 +213,10 @@
 			</itemizedlist>
 			<sect3 id="new">
 				<title>New</title>
+				<figure id="new_dialog">
+					<title>New Dialog</title>
+					<graphic fileref="images/new_dialog.png"></graphic>
+				</figure>
 				<para>
 					This menu allows you to create a new slideshow. The slideshow dialog is displayed. You can choose the video format (PAL/NTSC), if to scale the picture so that it covers the whole screen avoiding the black stripes and the background color to be displayed when the picture is too small and the rescaling doesn't succed to cover the whole screen. You can also change these options later.
 				</para>
@@ -268,7 +272,7 @@
 			<sect3 id="properties">
 				<title>Properties</title>
 				<para>
-					This menu displays a dialog with the slideshow properties. Please see above for an explanation of the available settings.
+					This menu displays a dialog with the slideshow properties. Please see the <xref linkend="new" /> for an explanation of the available settings.
 				</para>
 			</sect3>
 			<sect3 id="preview_slideshow">
