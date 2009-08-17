@@ -244,12 +244,11 @@ msgstr "<b>Gibanje diapozitiva</b>"
 
 #: ../src/main-window.c:701
 msgid "Stop Point:"
-msgstr ""
+msgstr "Postajališče:"
 
 #: ../src/main-window.c:738
-#, fuzzy
 msgid "Duration:"
-msgstr "Trajanje glasbene podlage:"
+msgstr "Trajanje:"
 
 #: ../src/main-window.c:747
 msgid "Zoom: "

@@ -237,7 +237,9 @@ img_render_subtitle( cairo_t              *cr,
 	/* Create pango layout and measure it */
 	layout = pango_cairo_create_layout( cr );
 	pango_layout_set_font_description( layout, font_desc );
+	/* Disable wrapping
 	pango_layout_set_wrap( layout, PANGO_WRAP_WORD );
+	*/
 	switch( position )
 	{
 		case IMG_SUB_POS_TOP_LEFT:
@@ -262,12 +264,14 @@ img_render_subtitle( cairo_t              *cr,
 	pango_layout_get_size( layout, &lw, &lh );
 	lw /= PANGO_SCALE;
 
+	/* Disable wrapping
 	if( lw > ( width * WRAP_WIDTH ) )
 	{
 		pango_layout_set_width( layout, width * WRAP_WIDTH * PANGO_SCALE );
 		pango_layout_get_size( layout, &lw, &lh );
 		lw /= PANGO_SCALE;
 	}
+	*/
 	lh /= PANGO_SCALE;
 
 	/* Calculate relative dimensions and final position of this subtitle */
