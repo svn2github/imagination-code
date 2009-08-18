@@ -395,12 +395,6 @@ img_start_export( img_window_struct *img )
 
 	gtk_widget_show_all( dialog );
 
-	/* Display some visual feedback */
-	/*while( gtk_events_pending() )
-		gtk_main_iteration();*/
-	/* FIXME: This is not worth the effort of maintaining it here, since audio
-	 * preparation dialog will ran it over. */
-
 	/* Create first slide */
 	img->image1 = cairo_image_surface_create( CAIRO_FORMAT_RGB24,
 											  img->video_size[0],
@@ -439,6 +433,16 @@ img_start_export( img_window_struct *img )
 													  img->video_size[0],
 													  img->video_size[1] );
 
+	/* Set stop points */
+	img->cur_point = NULL;
+	img->point1 = NULL;
+	img->point2 = (ImgStopPoint *)( img->work_slide->no_points ?
+									img->work_slide->points->data :
+									NULL );
+
+	/* Set first slide */
+	gtk_tree_model_get_iter_first( GTK_TREE_MODEL( img->thumbnail_model ),
+								   &img->cur_ss_iter );
 
 	img->export_slide = 1;
 	img->export_idle_func = (GSourceFunc)img_export_transition;
@@ -485,10 +489,6 @@ img_stop_export( img_window_struct *img )
 			kill( img->ffmpeg_export, SIGINT );
 			g_source_remove( img->source_id );
 
-			/* Clean other resources */
-			g_slice_free( GtkTreeIter, img->cur_ss_iter );
-			img->cur_ss_iter = NULL;
-			
 			close(img->file_desc);
 			g_spawn_close_pid( img->ffmpeg_export );
 
@@ -556,23 +556,17 @@ img_prepare_pixbufs( img_window_struct *img,
 
 	model = GTK_TREE_MODEL( img->thumbnail_model );
 
-	if( ! img->cur_ss_iter )
-	{
-		img->cur_ss_iter = g_slice_new( GtkTreeIter );
-		gtk_tree_model_get_iter_first( model, img->cur_ss_iter );
-	}
-
 	/* Get last stop point of current slide */
 	img->point1 = (ImgStopPoint *)( img->work_slide->no_points ?
 									g_list_last( img->work_slide->points )->data :
 									NULL );
 
-	if( gtk_tree_model_iter_next( model, img->cur_ss_iter ) )
+	if( gtk_tree_model_iter_next( model, &img->cur_ss_iter ) )
 	{
 		/* We have next iter, so prepare for next round */
 		cairo_surface_destroy( img->image1 );
 		img->image1 = img->image2;
-		gtk_tree_model_get( model, img->cur_ss_iter, 1, &img->work_slide, -1 );
+		gtk_tree_model_get( model, &img->cur_ss_iter, 1, &img->work_slide, -1 );
 
 		if( preview && img->low_quality )
 			img_scale_image( img->work_slide->filename, img->video_ratio,
@@ -620,7 +614,7 @@ img_prepare_pixbufs( img_window_struct *img,
 	/* We're done now */
 	last_transition = TRUE;
 
-	return(FALSE);
+	return( FALSE );
 }
 
 /*
@@ -688,18 +682,16 @@ guint
 img_calc_next_slide_time_offset( img_window_struct *img,
 								 gdouble            rate )
 {
-	img->slide_trans_frames = 0;
-
 	if( img->work_slide->render )
 	{
 		img->next_slide_off += img->work_slide->duration +
 							   img->work_slide->speed;
-
 		img->slide_trans_frames = img->work_slide->speed * rate;
 	}
 	else
 	{
 		img->next_slide_off += img->work_slide->duration;
+		img->slide_trans_frames = 0;
 	}
 
 	img->slide_nr_frames = img->next_slide_off * rate - img->displayed_frame;
@@ -809,14 +801,13 @@ img_export_still( img_window_struct *img )
 
 			img->export_idle_func = (GSourceFunc)img_export_transition;
 			img->source_id = g_idle_add( (GSourceFunc)img_export_transition, img );
+
+			img->cur_point = NULL;
 		}
 		else
 			img_stop_export( img );
 
-		/* Indicate that we must start fresh with new slide */
-		img->cur_point = NULL;
-
-		return FALSE;
+		return( FALSE );
 	}
 
 	/* Draw frames until we have enough of them to fill slide duration gap. */
@@ -882,7 +873,36 @@ img_render_transition_frame( img_window_struct *img )
 	cr = cairo_create( img->image_from );
 	img_draw_image_on_surface( cr, img->video_size[0], img->image1,
 							   ( img->point1 ? img->point1 : &point ), img );
-	/* FIXME: Add subtitles here */
+
+#if 0
+	/* Render subtitle if present */
+	if( img->work_slide->subtitle )
+	{
+		gdouble       progress;     /* Text animation progress */
+		ImgStopPoint *p_draw_point; 
+
+		progress = (gdouble)img->cur_text_frame / ( img->no_text_frames - 1 );
+		progress = CLAMP( progress, 0, 1 );
+		img->cur_text_frame++;
+
+		p_draw_point = ( img->point1 ? img->point1 : &point );
+
+		img_render_subtitle( cr,
+							 img->video_size[0],
+							 img->video_size[1],
+							 1.0,
+							 img->work_slide->position,
+							 img->work_slide->placing,
+							 p_draw_point->zoom,
+							 p_draw_point->offx,
+							 p_draw_point->offy,
+							 img->work_slide->subtitle,
+							 img->work_slide->font_desc,
+							 img->work_slide->font_color,
+							 img->work_slide->anim,
+							 progress );
+	}
+#endif
 	cairo_destroy( cr );
 
 	/* Create second image */
@@ -988,8 +1008,6 @@ img_render_still_frame( img_window_struct *img,
 		progress = CLAMP( progress, 0, 1 );
 		img->cur_text_frame++;
 
-		/* We ignore image area zoom in preview/export, since video is exported
-		 * at 720x[576|480] no matter what zoom is set */
 		img_render_subtitle( cr,
 							 img->video_size[0],
 							 img->video_size[1],

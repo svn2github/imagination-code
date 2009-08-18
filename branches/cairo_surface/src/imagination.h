@@ -276,25 +276,25 @@ struct _img_window_struct
 
 	/* Variables common to export and preview functions */
 	slide_struct    *work_slide;
-	cairo_surface_t *current_image;      /* Image in preview area */
-	cairo_surface_t *exported_image;     /* Image being exported */
-	cairo_surface_t *image1;             /* Images used in transition rendering */
+	cairo_surface_t *current_image;  /* Image in preview area */
+	cairo_surface_t *exported_image; /* Image being exported */
+	cairo_surface_t *image1;         /* Original images */
 	cairo_surface_t *image2;
-	cairo_surface_t *image_from;
+	cairo_surface_t *image_from;     /* Images used in transition rendering */
 	cairo_surface_t *image_to;
-	ImgStopPoint    *point1;             /* Last stop point of image1 */
-	ImgStopPoint    *point2;             /* First stop point of image2 */
-  	GtkTreeIter     *cur_ss_iter;
+	ImgStopPoint    *point1;        /* Last stop point of image1 */
+	ImgStopPoint    *point2;        /* First stop point of image2 */
+  	GtkTreeIter      cur_ss_iter;
   	guint		     source_id;
-	gdouble          progress;           /* This will be DEPRECATED */
 
-	guint            total_nr_frames;    /* Total number of frames */
-	guint            displayed_frame;    /* Current frame */
-	guint            slide_nr_frames;    /* Number of frames fo current slide */
-	guint            slide_cur_frame;    /* Current slide frame */
-	guint            slide_trans_frames; /* Number of frames in transition */
-	guint            slide_still_frames; /* Number of frames in still part */
-	guint            next_slide_off;     /* Time offset of next slide */
+	/* Counters that control animation flow */
+	guint  total_nr_frames;    /* Total number of frames */
+	guint  displayed_frame;    /* Current frame */
+	guint  slide_nr_frames;    /* Number of frames fo current slide */
+	guint  slide_cur_frame;    /* Current slide frame */
+	guint  slide_trans_frames; /* Number of frames in transition */
+	guint  slide_still_frames; /* Number of frames in still part */
+	guint  next_slide_off;     /* Time offset of next slide */
 
 	gint   still_counter; /* Currently displayed still frame */
 	gint   still_max;     /* Number of frames per stop point */
@@ -302,10 +302,8 @@ struct _img_window_struct
 	guint  still_cmlt;    /* Cumulative number of still frames */
 	GList *cur_point;     /* Current stop point */
 
-	/* FIXME: If we'll display text during transition too, we need to add
-	 * another set of counters here to monitor both slides. */
-	gint cur_text_frame; /* Current text frame being displayed */
-	gint no_text_frames; /* All text frames */
+	gint   cur_text_frame; /* Current text frame being displayed */
+	gint   no_text_frames; /* All text frames */
 
 	/* Preview related variables */
   	gboolean	preview_is_running;

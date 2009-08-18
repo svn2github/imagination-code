@@ -120,7 +120,7 @@ msgstr "_Pomoč"
 
 #: ../src/main-window.c:392
 msgid "Contents"
-msgstr ""
+msgstr "Vsebina"
 
 #: ../src/main-window.c:413 ../src/new_slideshow.c:63
 msgid "Create a new slideshow"

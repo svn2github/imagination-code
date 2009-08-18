@@ -820,6 +820,7 @@ void img_start_stop_preview(GtkWidget *button, img_window_struct *img)
 			if( ! gtk_tree_model_get_iter_first( model, &iter ) )
 				return;
 		}
+		img->cur_ss_iter = iter;
 
 		/* Replace button and menu images */
 		img_swap_toolbar_images( img, FALSE );
@@ -843,27 +844,23 @@ void img_start_stop_preview(GtkWidget *button, img_window_struct *img)
 										NULL );
 
 		img->work_slide = entry;
+		img->cur_point = NULL;
 
 		/* If we started our preview from beginning, create empty pixbuf and
 		 * fill it with background color. Else load image that is before
 		 * currently selected slide. */
 		if( path != NULL && gtk_tree_path_prev( path ) )
 		{
-			if( ! img->cur_ss_iter )
-				img->cur_ss_iter = g_slice_new( GtkTreeIter );
-
 			gtk_tree_model_get_iter( model, &prev, path );
 			gtk_tree_model_get( model, &prev, 1, &entry, -1 );
 
 			/* Respect quality settings */
 			if( img->low_quality )
-				img_scale_image( entry->filename,
-								 (gdouble)img->video_size[0] / img->video_size[1],
+				img_scale_image( entry->filename, img->video_ratio,
 								 0, img->video_size[1], img->distort_images,
 								 img->background_color, NULL, &img->image1 );
 			else
-				img_scale_image( entry->filename,
-								 (gdouble)img->video_size[0] / img->video_size[1],
+				img_scale_image( entry->filename, img->video_ratio,
 								 0, 0, img->distort_images,
 								 img->background_color, NULL, &img->image1 );
 			
@@ -871,8 +868,6 @@ void img_start_stop_preview(GtkWidget *button, img_window_struct *img)
 			img->point1 = (ImgStopPoint *)( entry->no_points ?
 											g_list_last( entry->points )->data :
 											NULL );
-
-			*img->cur_ss_iter = iter;
 		}
 		else
 		{
@@ -1300,10 +1295,6 @@ static void img_clean_after_preview(img_window_struct *img)
 
 	/* Indicate that preview is not running */
 	img->preview_is_running = FALSE;
-
-	/* Clean the resources used by timeout handlers */
-	g_slice_free( GtkTreeIter, img->cur_ss_iter );
-	img->cur_ss_iter = NULL;
 
 	/* Destroy images that were used */
 	cairo_surface_destroy( img->image1 );

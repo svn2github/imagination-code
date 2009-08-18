@@ -116,4 +116,7 @@ img_scale_image( const gchar      *filename,
 				 GdkPixbuf       **pixbuf,
 				 cairo_surface_t **surface );
 
+void
+img_set_project_mod_state( img_window_struct *img,
+						   gboolean           modified );
 #endif
