@@ -1,11 +1,12 @@
 Imagination changelog
 
 xx/09/09 - 2.0:
+			- Added Widescreen option to FLV exported video.
 			- Added Cut/Copy/Paste ability on the slides.
 			- Added Dissolve transition effect.
 			- Added an overview mode to the GUI so to group the slides in the window.
 			- Added icons on the slides for indicating the transition type and if text is set on the slide.
-			- Added ability to add text on the slides.
+			- Added ability to add text on the slides with some text animations.
 			- Added HTML documentation.
 			- Added Ken Burn effects.
 			- Made GUI work better on smaller screens.
