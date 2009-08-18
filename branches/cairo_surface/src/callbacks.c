@@ -1313,7 +1313,7 @@ void img_choose_slideshow_filename(GtkWidget *widget, img_window_struct *img)
 	GtkWidget *fc;
 	GtkFileChooserAction action = 0;
 	gint response;
-	gchar *filename;
+	gchar *filename = NULL;
 
 	/* Determine the mode of the chooser. */
 	if (widget == img->open_menu || widget == img->open_button)
@@ -1352,8 +1352,11 @@ void img_choose_slideshow_filename(GtkWidget *widget, img_window_struct *img)
 			gtk_widget_destroy(fc);
 			return;
 		}
+		gtk_widget_destroy(fc);
 	}
-	gtk_widget_destroy(fc);
+
+	if( ! filename )
+		filename = g_strdup( img->project_filename );
 
 	if (action == GTK_FILE_CHOOSER_ACTION_OPEN)
 		img_load_slideshow( img, filename );
