@@ -230,7 +230,10 @@ img_render_subtitle( cairo_t              *cr,
 
 	/* Transform cairo context to get proper text measurements */
 	if( placing == IMG_REL_PLACING_ORIGINAL_IMAGE )
+	{
 		cairo_scale( cr, factor * zoom, factor * zoom );
+		cairo_translate( cr, offx / factor, offy / factor );
+	}
 	else
 		cairo_scale( cr, zoom, zoom );
 
@@ -276,9 +279,6 @@ img_render_subtitle( cairo_t              *cr,
 
 	/* Calculate relative dimensions and final position of this subtitle */
 	img_calc_text_pos( width, height, lw, lh, position, &posx, &posy );
-	if( placing == IMG_REL_PLACING_ORIGINAL_IMAGE )
-		/* Adjust positions according to offsets */
-		cairo_translate( cr, offx / factor, offy / factor );
 
 	/* Do animation */
 	if( func )

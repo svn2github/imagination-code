@@ -82,9 +82,7 @@ int main (int argc, char *argv[])
 	/*read the project filename passed in argv*/
  	if (argc > 1 )
 	{
-		argv++;
-		img_window->project_filename = g_strdup(*argv);
-		img_load_slideshow(img_window);
+		img_load_slideshow( img_window, argv[1] );
 	}
 
 	gtk_main ();

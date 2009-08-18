@@ -1313,6 +1313,7 @@ void img_choose_slideshow_filename(GtkWidget *widget, img_window_struct *img)
 	GtkWidget *fc;
 	GtkFileChooserAction action = 0;
 	gint response;
+	gchar *filename;
 
 	/* Determine the mode of the chooser. */
 	if (widget == img->open_menu || widget == img->open_button)
@@ -1339,16 +1340,11 @@ void img_choose_slideshow_filename(GtkWidget *widget, img_window_struct *img)
 		response = gtk_dialog_run (GTK_DIALOG (fc));
 		if (response == GTK_RESPONSE_ACCEPT)
 		{
-			gchar *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fc));
-			if(filename)
+			filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fc));
+			if( ! filename )
 			{
-				/* Free any previous filename */
-				if(img->project_filename)
-					g_free(img->project_filename);
-				
-				/* Store new filename */
-				img->project_filename = filename;
 				gtk_widget_destroy(fc);
+				return;
 			}
 		}
 		else if (response == GTK_RESPONSE_CANCEL || GTK_RESPONSE_DELETE_EVENT)
@@ -1357,10 +1353,14 @@ void img_choose_slideshow_filename(GtkWidget *widget, img_window_struct *img)
 			return;
 		}
 	}
+	gtk_widget_destroy(fc);
+
 	if (action == GTK_FILE_CHOOSER_ACTION_OPEN)
-		img_load_slideshow(img);
+		img_load_slideshow( img, filename );
 	else
-		img_save_slideshow(img);
+		img_save_slideshow( img, filename );
+
+	g_free( filename );
 }
 
 void img_close_slideshow(GtkWidget *widget, img_window_struct *img)

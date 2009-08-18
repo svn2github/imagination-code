@@ -21,7 +21,9 @@
 
 static gboolean img_populate_hash_table( GtkTreeModel *, GtkTreePath *, GtkTreeIter *, GHashTable ** );
 
-void img_save_slideshow(img_window_struct *img)
+void
+img_save_slideshow( img_window_struct *img,
+					const gchar       *output )
 {
 	GKeyFile *img_key_file;
 	gchar *conf, *string, *path, *filename, *file, *font_desc;
@@ -125,18 +127,24 @@ void img_save_slideshow(img_window_struct *img)
 
 	/* Write the project file */
 	conf = g_key_file_to_data(img_key_file, &len, NULL);
-	g_file_set_contents(img->project_filename, conf, len, NULL);
+	g_file_set_contents( output, conf, len, NULL );
 	g_free (conf);
 
-	string = g_path_get_basename(img->project_filename);
+	string = g_path_get_basename( output );
 	img_set_window_title(img,string);
 	g_free(string);
 	g_key_file_free(img_key_file);
 
+	if( img->project_filename )
+		g_free( img->project_filename );
+	img->project_filename = g_strdup( output );
+
 	img->project_is_modified = FALSE;
 }
 
-void img_load_slideshow(img_window_struct *img)
+void
+img_load_slideshow( img_window_struct *img,
+					const gchar       *input )
 {
 	GdkPixbuf *thumb;
 	slide_struct *slide_info;
@@ -153,14 +161,16 @@ void img_load_slideshow(img_window_struct *img)
 	gdouble    *color, *font_color;
 	gboolean    old_file = FALSE;
 
+	/* Cretate new key file */
 	img_key_file = g_key_file_new();
-	if( ! g_key_file_load_from_file( img_key_file,img->project_filename,
+	if( ! g_key_file_load_from_file( img_key_file, input,
 									 G_KEY_FILE_KEEP_COMMENTS, NULL ) )
 	{
 		g_key_file_free( img_key_file );
 		return;
 	}
 
+	/* Are we able to load this project? */
 	dummy = g_key_file_get_comment( img_key_file, NULL, NULL, NULL);
 
 	if( strncmp( dummy, comment_string, strlen( comment_string ) ) != 0 )
@@ -410,11 +420,17 @@ void img_load_slideshow(img_window_struct *img)
 
 	img_set_statusbar_message(img, 0);
 
-	dummy = g_path_get_basename(img->project_filename);
+	dummy = g_path_get_basename( input );
 	img_set_window_title(img, dummy);
 	g_free(dummy);
 
 	g_hash_table_destroy( table );
+
+	/* If we made it to here, we succesfully loaded project, so it's safe to set
+	 * filename field in global data structure. */
+	if( img->project_filename )
+		g_free( img->project_filename );
+	img->project_filename = g_strdup( input );
 	
 	/* Select the first slide */
 	img_goto_first_slide(NULL, img);
