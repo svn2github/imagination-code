@@ -21,7 +21,6 @@
 #include "callbacks.h"
 #include "export.h"
 
-/* FIXME: When new slide creator is completed, this should be removed. */
 /* Internal structure, used for creating empty slide */
 typedef struct _ImgEmptySlide ImgEmptySlide;
 struct _ImgEmptySlide
@@ -29,6 +28,8 @@ struct _ImgEmptySlide
 	/* Values */
 	gdouble c_start[3]; /* Start color */
 	gdouble c_stop[3];  /* Stop color */
+	gdouble p_start[2]; /* Start point */
+	gdouble p_stop[2];  /* Stop point */
 	gint    gradient;   /* Gradient type: 0 - solid color
 										  1 - linear
 										  2 - radial */
@@ -36,11 +37,7 @@ struct _ImgEmptySlide
 	/* Widgets */
 	GtkWidget *color2;
 	GtkWidget *preview;
-	GtkWidget *dialog;
 	GtkWidget *radio[3];
-
-	/* Pointer to global structure */
-	img_window_struct *img;
 };
 
 static void img_file_chooser_add_preview(img_window_struct *);
@@ -75,14 +72,6 @@ static gboolean
 img_gradient_expose( GtkWidget      *widget,
 					 GdkEventExpose *expose,
 					 ImgEmptySlide  *slide );
-
-static void
-img_gradient_cancel( GtkButton     *button,
-					 ImgEmptySlide *slide );
-
-static void
-img_gradient_create( GtkButton     *button,
-					 ImgEmptySlide *slide );
 
 
 void img_set_window_title(img_window_struct *img, gchar *text)
@@ -2030,14 +2019,18 @@ void
 img_add_empty_slide( GtkMenuItem       *item,
 					 img_window_struct *img )
 {
-	static ImgEmptySlide slide = { { 0, 0, 0 },
-								   { 0, 0, 0 },
-								   0,
-								   NULL,
-								   NULL,
-								   NULL,
-								   { NULL, NULL, NULL },
-								   NULL };
+	/* This structure retains values across invocations */
+	static ImgEmptySlide slide = { { 0, 0, 0 },         /* Start color */
+								   { 0, 0, 0 },         /* Stop color */
+								   { 0, 0 },            /* Start point */
+								   { 0, 0 },            /* Stop point */
+								   0,                   /* Gradient type */
+								   NULL,                /* Color button */
+								   NULL,                /* Preview area */
+								   { NULL, NULL, NULL } /* Radio buttons */
+								 }; 
+
+	/* Widgets */
 	GtkWidget *dialog,
 			  *vbox,
 			  *frame,
@@ -2048,19 +2041,20 @@ img_add_empty_slide( GtkMenuItem       *item,
 			  *color1,
 			  *color2,
 			  *preview,
-			  *hbox,
-			  *button;
+			  *hbox;
 	GdkColor   color;
 	gint       i;
 
-	dialog = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+	dialog = gtk_dialog_new_with_buttons(
+					_("Create new slide"),
+					GTK_WINDOW( img->imagination_window ),
+					GTK_DIALOG_MODAL,
+					GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+					GTK_STOCK_OK, GTK_RESPONSE_ACCEPT,
+					NULL );
 	gtk_window_set_default_size( GTK_WINDOW( dialog ), 400, 200 );
-	gtk_window_set_modal( GTK_WINDOW( dialog ), TRUE );
-	gtk_window_set_transient_for( GTK_WINDOW( dialog ),
-								  GTK_WINDOW( img->imagination_window ) );
 
-	vbox = gtk_vbox_new( FALSE, 6 );
-	gtk_container_add( GTK_CONTAINER( dialog ), vbox );
+	vbox = gtk_dialog_get_content_area( GTK_DIALOG( dialog ) );
 
 	frame = gtk_frame_new( _("Empty slide options:") );
 	gtk_box_pack_start( GTK_BOX( vbox ), frame, TRUE, TRUE, 0 );
@@ -2113,7 +2107,7 @@ img_add_empty_slide( GtkMenuItem       *item,
 	g_signal_connect( G_OBJECT( color2 ), "color-set",
 					  G_CALLBACK( img_gradient_color_set ), &slide );
 
-	frame = gtk_frame_new( _("Preview") );
+	frame = gtk_aspect_frame_new( _("Preview"), 0, 0, img->video_ratio, FALSE );
 	gtk_box_pack_start( GTK_BOX( hbox ), frame, TRUE, TRUE, 0 );
 
 	preview = gtk_drawing_area_new();
@@ -2121,26 +2115,18 @@ img_add_empty_slide( GtkMenuItem       *item,
 	g_signal_connect( G_OBJECT( preview ), "expose-event",
 					  G_CALLBACK( img_gradient_expose ), &slide );
 
-	hbox = gtk_hbox_new( TRUE, 6 );
-	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
-
-	button = gtk_button_new_from_stock( GTK_STOCK_CANCEL );
-	gtk_box_pack_start( GTK_BOX( hbox ), button, TRUE, FALSE, 0 );
-	g_signal_connect( G_OBJECT( button ), "clicked",
-					  G_CALLBACK( img_gradient_cancel ), &slide );
-
-	button = gtk_button_new_from_stock( GTK_STOCK_OK );
-	gtk_box_pack_start( GTK_BOX( hbox ), button, TRUE, FALSE, 0 );
-	g_signal_connect( G_OBJECT( button ), "clicked",
-					  G_CALLBACK( img_gradient_create ), &slide );
+	/* Show all */
+	gtk_widget_show_all( vbox );
 
 	/* Fill internal structure */
 	slide.color2 = color2;
 	slide.preview = preview;
-	slide.dialog = dialog;
-	slide.img = img;
 
-	gtk_widget_show_all( dialog );
+	if( gtk_dialog_run( GTK_DIALOG( dialog ) ) == GTK_RESPONSE_ACCEPT )
+	{
+		/* FIXME: create new slide here */
+	}
+	gtk_widget_destroy( dialog );
 }
 
 static void
@@ -2238,20 +2224,5 @@ img_gradient_expose( GtkWidget      *widget,
 	cairo_destroy( cr );
 
 	return( TRUE );
-}
-
-static void
-img_gradient_cancel( GtkButton     *button,
-					 ImgEmptySlide *slide )
-{
-	gtk_widget_destroy( slide->dialog );
-}
-
-static void
-img_gradient_create( GtkButton     *button,
-					 ImgEmptySlide *slide )
-{
-	/* FIXME: Create new empty slide here and insert it into data store. */
-	gtk_widget_destroy( slide->dialog );
 }
 
