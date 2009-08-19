@@ -1169,7 +1169,7 @@ img_draw_image_on_surface( cairo_t           *cr,
 						   ImgStopPoint      *point,
 						   img_window_struct *img )
 {
-	gint     offxr, offyr;  /* Relative offsets */
+	gdouble  offxr, offyr;  /* Relative offsets */
 	gdouble  factor_c;      /* Scaling factor for cairo context */
 	gdouble  factor_o;      /* Scalng factor for offset mods */
 	gint     cw;            /* Width of the surface */
@@ -1510,8 +1510,8 @@ img_image_area_button_press( GtkWidget         *widget,
 	if( event->button != 1 )
 		return( FALSE );
 
-	img->x = (gint)event->x;
-	img->y = (gint)event->y;
+	img->x = event->x;
+	img->y = event->y;
 	img->bak_offx = img->current_point.offx;
 	img->bak_offy = img->current_point.offy;
 
@@ -1535,11 +1535,11 @@ img_image_area_motion( GtkWidget         *widget,
 					   GdkEventMotion    *event,
 					   img_window_struct *img )
 {
-	gint deltax;
-	gint deltay;
+	gdouble deltax,
+			deltay;
 
-	deltax = (gint)( ( event->x - img->x ) / img->image_area_zoom );
-	deltay = (gint)( ( event->y - img->y ) / img->image_area_zoom );
+	deltax = ( event->x - img->x ) / img->image_area_zoom;
+	deltay = ( event->y - img->y ) / img->image_area_zoom;
 
 	img->current_point.offx = CLAMP( deltax + img->bak_offx, img->maxoffx, 0 );
 	img->current_point.offy = CLAMP( deltay + img->bak_offy, img->maxoffy, 0 );

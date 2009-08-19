@@ -113,8 +113,8 @@ typedef struct _ImgStopPoint ImgStopPoint;
 struct _ImgStopPoint
 {
 	gint    time; /* Duration of this stop point */
-	gint    offx; /* X and Y offsets of zoomed image */
-	gint    offy;
+	gdouble offx; /* X and Y offsets of zoomed image */
+	gdouble offy;
 	gdouble zoom; /* Zoom level */
 };
 
@@ -243,12 +243,12 @@ struct _img_window_struct
   	GtkWidget	*preview_image;
 
 	/* Current image position parameters */
-	gint          x;             /* Last button press coordinates */
-	gint          y;
-	gint          bak_offx;      /* Stored offset at button press */
-	gint          bak_offy;
-	gint          maxoffx;       /* Maximal offsets for current zoom */
-	gint          maxoffy;
+	gdouble       x;             /* Last button press coordinates */
+	gdouble       y;
+	gdouble       bak_offx;      /* Stored offset at button press */
+	gdouble       bak_offy;
+	gdouble       maxoffx;       /* Maximal offsets for current zoom */
+	gdouble       maxoffy;
 	ImgStopPoint  current_point; /* Data for rendering current image */
   	slide_struct *current_slide;
 	

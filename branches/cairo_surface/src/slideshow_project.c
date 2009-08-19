@@ -77,8 +77,8 @@ img_save_slideshow( img_window_struct *img,
 			{
 				ImgStopPoint *my_point = g_list_nth_data(entry->points,point_counter);
 				my_points[ (point_counter * 4) + 0] = (gdouble)my_point->time;
-				my_points[ (point_counter * 4) + 1] = (gdouble)my_point->offx;
-				my_points[ (point_counter * 4) + 2] = (gdouble)my_point->offy;
+				my_points[ (point_counter * 4) + 1] = my_point->offx;
+				my_points[ (point_counter * 4) + 2] = my_point->offy;
 				my_points[ (point_counter * 4) + 3] = my_point->zoom;
 				point_counter++;
 			}

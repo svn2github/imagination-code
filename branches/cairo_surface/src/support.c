@@ -370,12 +370,11 @@ img_set_slide_ken_burns_info( slide_struct *slide,
 	for( i = 0; i < length; i += 4 )
 	{
 		/* Create new point */
-		/* FIXME: This might be problematic because of the rounding. */
-		point = g_slice_new0( ImgStopPoint );
-		point->time = (gint)points[0 + i];
-		point->offx = (gint)points[1 + i];
-		point->offy = (gint)points[2 + i];
-		point->zoom = 		points[3 + i];
+		point = g_slice_new( ImgStopPoint );
+		point->time = (gint)( points[0 + i] + 0.5 );
+		point->offx = points[1 + i];
+		point->offy = points[2 + i];
+		point->zoom = points[3 + i];
 		
 		/* Append it to the list */
 		slide->points = g_list_append( slide->points, point );
