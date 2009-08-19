@@ -152,7 +152,7 @@ img_load_slideshow( img_window_struct *img,
 	GKeyFile *img_key_file;
 	gchar *dummy, *slide_filename, *time;
 	GtkWidget *dialog;
-	gint number,i,transition_id, duration, no_points;
+	gint number,i,transition_id, duration, no_points, previous_nr_of_slides;
 	guint speed;
 	GtkTreeModel *model;
 	void (*render);
@@ -227,6 +227,10 @@ img_load_slideshow( img_window_struct *img,
 
 		/* Loads the thumbnails and set the slides info */
 		number = g_key_file_get_integer(img_key_file,"images","number", NULL);
+
+		/* Store the previous number of slides and set img->slides_nr so to have the correct number of slides displayed on the status bar */
+		previous_nr_of_slides = img->slides_nr;
+		img->slides_nr = number;
 		gtk_widget_show(img->progress_bar);
 		for (i = 1; i <= number; i++)
 		{
@@ -299,6 +303,10 @@ img_load_slideshow( img_window_struct *img,
 		/* Loads the thumbnails and set the slides info */
 		number = g_key_file_get_integer( img_key_file, "slideshow settings",
 										 "number of slides", NULL);
+		/* Store the previous number of slides and set img->slides_nr so to have the correct number of slides displayed on the status bar */
+		previous_nr_of_slides = img->slides_nr;
+		img->slides_nr = number;
+
 		gtk_widget_show( img->progress_bar );
 		for( i = 1; i <= number; i++ )
 		{
@@ -366,9 +374,6 @@ img_load_slideshow( img_window_struct *img,
 											 anim_duration, text_pos, placing,
 											 font_desc, font_color, img );
 
-					/* Increment slides counter */
-					img->slides_nr++;
-
 					/* If we're loading the first slide, apply some of it's
 				 	* data to final pseudo-slide */
 					if( img->slides_nr == 1 )
@@ -380,6 +385,8 @@ img_load_slideshow( img_window_struct *img,
 				g_object_unref( G_OBJECT( pix ) );
 				g_free( font_desc );
 			}
+			else
+				img->slides_nr--;
 
 			img_increase_progressbar(img, i);
 			g_free(slide_filename);
@@ -388,7 +395,7 @@ img_load_slideshow( img_window_struct *img,
 			g_free(conf);
 		}
 	}
-
+	img->slides_nr += previous_nr_of_slides;
 	img->distort_images = g_key_file_get_boolean( img_key_file,
 												  "slideshow settings",
 												  "distort images", NULL );
