@@ -15,9 +15,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-08-19 22:09+0200\n"
-"PO-Revision-Date: 2009-08-18 22:04+0100\n"
-"Last-Translator: \n"
+"POT-Creation-Date: 2009-08-19 23:15+0200\n"
+"PO-Revision-Date: 2009-08-19 23:12+0100\n"
+"Last-Translator: Fabian Nowak <timystery@arcor.de>\n"
 "Language-Team: German\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
@@ -97,7 +97,7 @@ msgstr "_Zoom"
 
 #: ../src/main-window.c:330
 msgid "Add empty slide"
-msgstr ""
+msgstr "Leeres Dia hinzufügen"
 
 #: ../src/main-window.c:341
 msgid "Dele_te"
@@ -426,30 +426,28 @@ msgid "Save an Imagination slideshow project"
 msgstr "Eine Imagination Diaschau speichern"
 
 #: ../src/callbacks.c:2075
-#, fuzzy
 msgid "Create new slide"
-msgstr "Neue Diaschau anlegen"
+msgstr "Neues Dia anlegen"
 
 #: ../src/callbacks.c:2085
 msgid "Empty slide options:"
-msgstr ""
+msgstr "Einstellungen für leeres Dia:"
 
 #: ../src/callbacks.c:2094
 msgid "Use _solid color"
-msgstr ""
+msgstr "_Feste Hintergrundfarbe"
 
 #: ../src/callbacks.c:2100
 msgid "Use _linear gradient"
-msgstr ""
+msgstr "_Linearer Farbverlauf"
 
 #: ../src/callbacks.c:2106
 msgid "Use _radial gradient"
-msgstr ""
+msgstr "Radialer Farbverlauf"
 
 #: ../src/callbacks.c:2136
-#, fuzzy
 msgid "Preview"
-msgstr "_Vorschau"
+msgstr "Vorschau"
 
 #. Display propert title depending on the callback that is calling this function.
 #: ../src/new_slideshow.c:63
