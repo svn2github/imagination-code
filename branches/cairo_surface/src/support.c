@@ -289,7 +289,7 @@ img_create_new_slide( const gchar *filename )
 		slide->subtitle = NULL;
 		slide->anim = NULL;
 		slide->anim_id = 0;
-		slide->anim_duration = 2; /* FIXME: Consult about this value */
+		slide->anim_duration = 1;
 		slide->position = IMG_SUB_POS_MIDDLE_CENTER;
 		slide->placing = IMG_REL_PLACING_EXPORTED_VIDEO;
 		slide->font_desc = pango_font_description_from_string( "Sans 12" );

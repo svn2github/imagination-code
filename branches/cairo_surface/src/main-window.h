@@ -69,7 +69,7 @@ img_update_sub_properties( img_window_struct *img,
 						   gdouble           *color );
 
 void
-img_combo_box_anim_speed_changed( GtkComboBox       *combo,
+img_combo_box_anim_speed_changed( GtkSpinButton       *spinbutton,
 								  img_window_struct *img );
 
 void

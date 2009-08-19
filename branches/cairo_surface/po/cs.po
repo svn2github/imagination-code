@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-08-18 22:05+0200\n"
+"POT-Creation-Date: 2009-08-19 09:06+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Michal Várady <miko.vaji@gmail.com>\n"
 "Language-Team: \n"
@@ -391,7 +391,7 @@ msgstr "Import snímků, více souborů vyberete použitím klávesy SHIFT"
 msgid "All image files"
 msgstr "Všechny obrázky"
 
-#: ../src/callbacks.c:413 ../src/callbacks.c:1370
+#: ../src/callbacks.c:413 ../src/callbacks.c:1373
 msgid "You didn't save your slideshow yet. Are you sure you want to close it?"
 msgstr "Dosud jste prezentaci neuložili. Opravdu ji chcete zavřít?"
 
@@ -415,11 +415,11 @@ msgstr "Michal Várady <miko.vaji@gmail.com>"
 msgid "Stops the preview"
 msgstr "Zastaví náhled"
 
-#: ../src/callbacks.c:1329
+#: ../src/callbacks.c:1330
 msgid "Load an Imagination slideshow project"
 msgstr "Načtení projektu prezentace aplikace Imagination"
 
-#: ../src/callbacks.c:1330
+#: ../src/callbacks.c:1331
 msgid "Save an Imagination slideshow project"
 msgstr "Uložení projektu prezentace aplikace Imagination"
 
@@ -449,7 +449,7 @@ msgstr ""
 msgid "Select background color:"
 msgstr "Vybrat barvu pozadí:"
 
-#: ../src/slideshow_project.c:175
+#: ../src/slideshow_project.c:185
 msgid "This is not an Imagination project file!"
 msgstr "Toto není soubor projektu aplikace Imagination."
 

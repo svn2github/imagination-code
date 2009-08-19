@@ -853,25 +853,13 @@ img_window_struct *img_create_window (void)
 	gtk_misc_set_alignment( GTK_MISC( a_label ), 0, 0.5 );
 	gtk_box_pack_start( GTK_BOX( a_hbox ), a_label, TRUE, TRUE, 0 );
 
-	img_struct->sub_anim_duration = _gtk_combo_box_new_text( FALSE );
+	img_struct->sub_anim_duration = gtk_spin_button_new_with_range (1, 60, 1);
+	gtk_spin_button_set_numeric(GTK_SPIN_BUTTON (img_struct->sub_anim_duration),TRUE);
 	gtk_box_pack_start( GTK_BOX( a_hbox ), img_struct->sub_anim_duration,
 						FALSE, FALSE, 0 );
-	{
-		GtkTreeIter   iter;
-		GtkListStore *store =
-				GTK_LIST_STORE( gtk_combo_box_get_model(
-						GTK_COMBO_BOX( img_struct->sub_anim_duration ) ) );
 
-		gtk_list_store_append( store, &iter );
-		gtk_list_store_set( store, &iter, 0, _("Fast"), -1 );
-		gtk_list_store_append( store, &iter );
-		gtk_list_store_set( store, &iter, 0, _("Normal"), -1 );
-		gtk_list_store_append( store, &iter );
-		gtk_list_store_set( store, &iter, 0, _("Slow"), -1 );
-	}
-	gtk_combo_box_set_active( GTK_COMBO_BOX( img_struct->sub_anim_duration ), 1 );
 	gtk_widget_set_sensitive( img_struct->sub_anim_duration, FALSE );
-	g_signal_connect( G_OBJECT( img_struct->sub_anim_duration ), "changed",
+	g_signal_connect( G_OBJECT( img_struct->sub_anim_duration ), "value-changed",
 					  G_CALLBACK( img_combo_box_anim_speed_changed ), img_struct );
 
 	a_hbox = gtk_hbox_new(FALSE, 6);
@@ -2109,26 +2097,12 @@ img_font_color_changed( GtkColorButton    *button,
 }
 
 void
-img_combo_box_anim_speed_changed( GtkComboBox       *combo,
+img_combo_box_anim_speed_changed( GtkSpinButton       *spinbutton,
 								  img_window_struct *img )
 {
 	gint speed;
 
-	/* FIXME: What should proper duration be? */
-	switch( gtk_combo_box_get_active( combo ) )
-	{
-		case 0: /* Fast */
-			speed = 1;
-			break;
-
-		case 1: /* Normal */
-			speed = 2;
-			break;
-
-		case 2: /* Slow */
-			speed = 3;
-			break;
-	}
+	speed = gtk_spin_button_get_value_as_int(spinbutton);
 	img_update_sub_properties( img, NULL, -1, speed, -1, -1, NULL, NULL );
 }
 

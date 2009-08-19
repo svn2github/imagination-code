@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-08-18 22:05+0200\n"
+"POT-Creation-Date: 2009-08-19 09:06+0200\n"
 "PO-Revision-Date: 2009-06-23 19:53-0300\n"
 "Last-Translator: elega <elega@elega.com.ar>\n"
 "Language-Team: Spanish (Spain)\n"
@@ -394,7 +394,7 @@ msgstr "Importar diapositivas, use la tecla MAYÚS para una selección múltiple
 msgid "All image files"
 msgstr "Todas las imágenes"
 
-#: ../src/callbacks.c:413 ../src/callbacks.c:1370
+#: ../src/callbacks.c:413 ../src/callbacks.c:1373
 msgid "You didn't save your slideshow yet. Are you sure you want to close it?"
 msgstr ""
 "Usted todavía no ha guardado su presentación de diapositivas. ¿Está seguro "
@@ -421,11 +421,11 @@ msgstr ""
 msgid "Stops the preview"
 msgstr "Detener la previsualización"
 
-#: ../src/callbacks.c:1329
+#: ../src/callbacks.c:1330
 msgid "Load an Imagination slideshow project"
 msgstr "Cargar un proyecto de presentación de diapositivas Imagination"
 
-#: ../src/callbacks.c:1330
+#: ../src/callbacks.c:1331
 msgid "Save an Imagination slideshow project"
 msgstr "Guardar un proyecto de presentación de diapositivas Imagination"
 
@@ -454,7 +454,7 @@ msgstr "Reescalar imágenes para adaptarlas a la relación de aspecto"
 msgid "Select background color:"
 msgstr "Seleccione el color de fondo:"
 
-#: ../src/slideshow_project.c:175
+#: ../src/slideshow_project.c:185
 msgid "This is not an Imagination project file!"
 msgstr "Éste no es un archivo de un proyecto Imagination!"
 

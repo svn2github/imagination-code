@@ -15,7 +15,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-08-18 22:05+0200\n"
+"POT-Creation-Date: 2009-08-19 09:06+0200\n"
 "PO-Revision-Date: 2009-08-18 22:04+0100\n"
 "Last-Translator: \n"
 "Language-Team: German\n"
@@ -386,7 +386,7 @@ msgstr "Dias Importieren (Shift-Taste für Mehrfachauswahl benutzen)"
 msgid "All image files"
 msgstr "Alle Bilddateien"
 
-#: ../src/callbacks.c:413 ../src/callbacks.c:1370
+#: ../src/callbacks.c:413 ../src/callbacks.c:1373
 msgid "You didn't save your slideshow yet. Are you sure you want to close it?"
 msgstr ""
 "Sie haben die Diaschau noch nicht gespeichert. Sind Sie sicher, dass Sie "
@@ -413,11 +413,11 @@ msgstr ""
 msgid "Stops the preview"
 msgstr "Hält die Vorschau an"
 
-#: ../src/callbacks.c:1329
+#: ../src/callbacks.c:1330
 msgid "Load an Imagination slideshow project"
 msgstr "Eine Imagination Diaschau laden"
 
-#: ../src/callbacks.c:1330
+#: ../src/callbacks.c:1331
 msgid "Save an Imagination slideshow project"
 msgstr "Eine Imagination Diaschau speichern"
 
@@ -446,7 +446,7 @@ msgstr "Bilder in das Format einpassen"
 msgid "Select background color:"
 msgstr "Hintergrundfarbe:"
 
-#: ../src/slideshow_project.c:175
+#: ../src/slideshow_project.c:185
 msgid "This is not an Imagination project file!"
 msgstr "Dies ist keine Imagination Projektdatei."
 

@@ -1830,10 +1830,8 @@ img_update_subtitles_widgets( img_window_struct *img )
 							  img->current_slide->anim_id );
 
 	/* Update duration */
-	/* FIXME: This is dangerous, since we rely on the fact that durations are 1,
-	 * 2 and 3 seconds respectively! */
-	gtk_combo_box_set_active( GTK_COMBO_BOX( img->sub_anim_duration ),
-							  img->current_slide->anim_duration - 1 );
+	gtk_spin_button_set_value( GTK_SPIN_BUTTON( img->sub_anim_duration ),
+							  img->current_slide->anim_duration );
 
 	/* Update placing */
 	gtk_combo_box_set_active( GTK_COMBO_BOX( img->sub_placing ),
