@@ -21,6 +21,28 @@
 #include "callbacks.h"
 #include "export.h"
 
+/* FIXME: When new slide creator is completed, this should be removed. */
+/* Internal structure, used for creating empty slide */
+typedef struct _ImgEmptySlide ImgEmptySlide;
+struct _ImgEmptySlide
+{
+	/* Values */
+	gdouble c_start[3]; /* Start color */
+	gdouble c_stop[3];  /* Stop color */
+	gint    gradient;   /* Gradient type: 0 - solid color
+										  1 - linear
+										  2 - radial */
+
+	/* Widgets */
+	GtkWidget *color2;
+	GtkWidget *preview;
+	GtkWidget *dialog;
+	GtkWidget *radio[3];
+
+	/* Pointer to global structure */
+	img_window_struct *img;
+};
+
 static void img_file_chooser_add_preview(img_window_struct *);
 static void img_update_preview_file_chooser(GtkFileChooser *,img_window_struct *);
 static gboolean img_transition_timeout(img_window_struct *);
@@ -40,6 +62,28 @@ static void
 img_overview_change_zoom( gdouble            step,
 						  gboolean           reset,
 						  img_window_struct *img );
+
+static void
+img_gradient_toggled( GtkToggleButton *button,
+					  ImgEmptySlide   *slide );
+
+static void
+img_gradient_color_set( GtkColorButton *button,
+						ImgEmptySlide  *slide );
+
+static gboolean
+img_gradient_expose( GtkWidget      *widget,
+					 GdkEventExpose *expose,
+					 ImgEmptySlide  *slide );
+
+static void
+img_gradient_cancel( GtkButton     *button,
+					 ImgEmptySlide *slide );
+
+static void
+img_gradient_create( GtkButton     *button,
+					 ImgEmptySlide *slide );
+
 
 void img_set_window_title(img_window_struct *img, gchar *text)
 {
@@ -1981,3 +2025,233 @@ void img_clipboard_clear (GtkClipboard *clipboard, img_window_struct *img)
 	g_print ("I'm here\n");
 	//gtk_clipboard_clear(clipboard);
 }
+
+void
+img_add_empty_slide( GtkMenuItem       *item,
+					 img_window_struct *img )
+{
+	static ImgEmptySlide slide = { { 0, 0, 0 },
+								   { 0, 0, 0 },
+								   0,
+								   NULL,
+								   NULL,
+								   NULL,
+								   { NULL, NULL, NULL },
+								   NULL };
+	GtkWidget *dialog,
+			  *vbox,
+			  *frame,
+			  *table,
+			  *radio1,
+			  *radio2,
+			  *radio3,
+			  *color1,
+			  *color2,
+			  *preview,
+			  *hbox,
+			  *button;
+	GdkColor   color;
+	gint       i;
+
+	dialog = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+	gtk_window_set_default_size( GTK_WINDOW( dialog ), 400, 200 );
+	gtk_window_set_modal( GTK_WINDOW( dialog ), TRUE );
+	gtk_window_set_transient_for( GTK_WINDOW( dialog ),
+								  GTK_WINDOW( img->imagination_window ) );
+
+	vbox = gtk_vbox_new( FALSE, 6 );
+	gtk_container_add( GTK_CONTAINER( dialog ), vbox );
+
+	frame = gtk_frame_new( _("Empty slide options:") );
+	gtk_box_pack_start( GTK_BOX( vbox ), frame, TRUE, TRUE, 0 );
+
+	hbox = gtk_hbox_new( FALSE, 6 );
+	gtk_container_add( GTK_CONTAINER( frame ), hbox );
+
+	table = gtk_table_new( 4, 2, FALSE );
+	gtk_box_pack_start( GTK_BOX( hbox ), table, FALSE, FALSE, 0 );
+
+	radio1 = gtk_radio_button_new_with_mnemonic( NULL, _("Use _solid color") );
+	gtk_table_attach( GTK_TABLE( table ), radio1, 0, 2, 0, 1,
+					  GTK_FILL, GTK_FILL, 0, 0 );
+	slide.radio[0] = radio1;
+
+	radio2 = gtk_radio_button_new_with_mnemonic_from_widget(
+				GTK_RADIO_BUTTON( radio1 ), _("Use _linear gradient") );
+	gtk_table_attach( GTK_TABLE( table ), radio2, 0, 2, 1, 2,
+					  GTK_FILL, GTK_FILL, 0, 0 );
+	slide.radio[1] = radio2;
+
+	radio3 = gtk_radio_button_new_with_mnemonic_from_widget(
+				GTK_RADIO_BUTTON( radio1 ), _("Use _radial gradient") );
+	gtk_table_attach( GTK_TABLE( table ), radio3, 0, 2, 2, 3,
+					  GTK_FILL, GTK_FILL, 0, 0 );
+	slide.radio[2] = radio3;
+
+	gtk_toggle_button_set_active(
+			GTK_TOGGLE_BUTTON( slide.radio[slide.gradient] ), TRUE );
+	for( i = 0; i < 3; i++ )
+		g_signal_connect( G_OBJECT( slide.radio[i] ), "toggled",
+						  G_CALLBACK( img_gradient_toggled ), &slide );
+
+	color.red   = (gint)( slide.c_start[0] * 0xffff );
+	color.green = (gint)( slide.c_start[1] * 0xffff );
+	color.blue  = (gint)( slide.c_start[2] * 0xffff );
+	color1 = gtk_color_button_new_with_color( &color );
+	gtk_table_attach( GTK_TABLE( table ), color1, 0, 1, 3, 4,
+					  GTK_FILL, GTK_FILL, 0, 0 );
+	g_signal_connect( G_OBJECT( color1 ), "color-set",
+					  G_CALLBACK( img_gradient_color_set ), &slide );
+
+	color.red   = (gint)( slide.c_stop[0] * 0xffff );
+	color.green = (gint)( slide.c_stop[1] * 0xffff );
+	color.blue  = (gint)( slide.c_stop[2] * 0xffff );
+	color2 = gtk_color_button_new_with_color( &color );
+	gtk_table_attach( GTK_TABLE( table ), color2, 1, 2, 3, 4,
+					  GTK_FILL, GTK_FILL, 0, 0 );
+	gtk_widget_set_sensitive( color2, (gboolean)slide.gradient );
+	g_signal_connect( G_OBJECT( color2 ), "color-set",
+					  G_CALLBACK( img_gradient_color_set ), &slide );
+
+	frame = gtk_frame_new( _("Preview") );
+	gtk_box_pack_start( GTK_BOX( hbox ), frame, TRUE, TRUE, 0 );
+
+	preview = gtk_drawing_area_new();
+	gtk_container_add( GTK_CONTAINER( frame ), preview );
+	g_signal_connect( G_OBJECT( preview ), "expose-event",
+					  G_CALLBACK( img_gradient_expose ), &slide );
+
+	hbox = gtk_hbox_new( TRUE, 6 );
+	gtk_box_pack_start( GTK_BOX( vbox ), hbox, FALSE, FALSE, 0 );
+
+	button = gtk_button_new_from_stock( GTK_STOCK_CANCEL );
+	gtk_box_pack_start( GTK_BOX( hbox ), button, TRUE, FALSE, 0 );
+	g_signal_connect( G_OBJECT( button ), "clicked",
+					  G_CALLBACK( img_gradient_cancel ), &slide );
+
+	button = gtk_button_new_from_stock( GTK_STOCK_OK );
+	gtk_box_pack_start( GTK_BOX( hbox ), button, TRUE, FALSE, 0 );
+	g_signal_connect( G_OBJECT( button ), "clicked",
+					  G_CALLBACK( img_gradient_create ), &slide );
+
+	/* Fill internal structure */
+	slide.color2 = color2;
+	slide.preview = preview;
+	slide.dialog = dialog;
+	slide.img = img;
+
+	gtk_widget_show_all( dialog );
+}
+
+static void
+img_gradient_toggled( GtkToggleButton *button,
+					  ImgEmptySlide   *slide )
+{
+	GtkWidget *widget = GTK_WIDGET( button );
+	gint       i;
+
+	if( ! gtk_toggle_button_get_active( button ) )
+		return;
+
+	for( i = 0; widget != slide->radio[i]; i++ )
+		;
+
+	slide->gradient = i;
+
+	gtk_widget_set_sensitive( slide->color2, (gboolean)i );
+
+	gtk_widget_queue_draw( slide->preview );
+}
+
+static void
+img_gradient_color_set( GtkColorButton *button,
+						ImgEmptySlide  *slide )
+{
+	GdkColor  color;
+	gdouble  *my_color;
+
+	gtk_color_button_get_color( button, &color );
+
+	if( (GtkWidget *)button == slide->color2 )
+		my_color = slide->c_stop;
+	else
+		my_color = slide->c_start;
+
+	my_color[0] = (gdouble)color.red   / 0xffff;
+	my_color[1] = (gdouble)color.green / 0xffff;
+	my_color[2] = (gdouble)color.blue  / 0xffff;
+
+	gtk_widget_queue_draw( slide->preview );
+}
+
+static gboolean
+img_gradient_expose( GtkWidget      *widget,
+					 GdkEventExpose *expose,
+					 ImgEmptySlide  *slide )
+{
+	cairo_t         *cr;
+	cairo_pattern_t *pattern;
+	gint             w, h;
+
+	gdk_drawable_get_size( expose->window, &w, &h );
+	cr = gdk_cairo_create( expose->window );
+	switch( slide->gradient )
+	{
+		case 0:
+			cairo_set_source_rgb( cr, slide->c_start[0],
+									  slide->c_start[1],
+									  slide->c_start[2] );
+			cairo_paint( cr );
+			break;
+
+		case 1:
+			pattern = cairo_pattern_create_linear( 0, 0, w, 0 );
+			cairo_pattern_add_color_stop_rgb( pattern, 0,
+											  slide->c_start[0],
+											  slide->c_start[1],
+											  slide->c_start[2] );
+			cairo_pattern_add_color_stop_rgb( pattern, 1,
+											  slide->c_stop[0],
+											  slide->c_stop[1],
+											  slide->c_stop[2] );
+			cairo_set_source( cr, pattern );
+			cairo_paint( cr );
+			cairo_pattern_destroy( pattern );
+			break;
+
+		case 2:
+			pattern = cairo_pattern_create_radial( w * 0.5, h * 0.5, 0,
+												   w * 0.5, h * 0.5, w * 0.5 );
+			cairo_pattern_add_color_stop_rgb( pattern, 0,
+											  slide->c_start[0],
+											  slide->c_start[1],
+											  slide->c_start[2] );
+			cairo_pattern_add_color_stop_rgb( pattern, 1,
+											  slide->c_stop[0],
+											  slide->c_stop[1],
+											  slide->c_stop[2] );
+			cairo_set_source( cr, pattern );
+			cairo_paint( cr );
+			cairo_pattern_destroy( pattern );
+			break;
+	}
+	cairo_destroy( cr );
+
+	return( TRUE );
+}
+
+static void
+img_gradient_cancel( GtkButton     *button,
+					 ImgEmptySlide *slide )
+{
+	gtk_widget_destroy( slide->dialog );
+}
+
+static void
+img_gradient_create( GtkButton     *button,
+					 ImgEmptySlide *slide )
+{
+	/* FIXME: Create new empty slide here and insert it into data store. */
+	gtk_widget_destroy( slide->dialog );
+}
+

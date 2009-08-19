@@ -116,4 +116,8 @@ img_calc_current_ken_point( ImgStopPoint *res,
 							gdouble       progress,
 							gint          mode );
 
+void
+img_add_empty_slide( GtkMenuItem       *item,
+					 img_window_struct *img );
+
 #endif
