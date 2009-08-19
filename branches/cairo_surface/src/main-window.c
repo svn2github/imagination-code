@@ -110,6 +110,7 @@ img_window_struct *img_create_window (void)
 	GtkWidget *contents;
 	GtkWidget *toolbar;
 	GtkWidget *new_button;
+	GtkWidget *add_slide;
 	GtkWidget *separatortoolitem;
 	GtkWidget *toolbutton_slide_goto;
 	GtkWidget *first_slide, *last_slide, *prev_slide, *next_slide, *label_of;
@@ -326,7 +327,22 @@ img_window_struct *img_create_window (void)
 	separator_slide_menu = gtk_separator_menu_item_new ();
 	gtk_container_add (GTK_CONTAINER (slide_menu),separator_slide_menu);
 
-	/* Rotate menu */
+	add_slide = gtk_image_menu_item_new_with_mnemonic (_("Add empty slide"));
+	gtk_container_add (GTK_CONTAINER (slide_menu), add_slide);
+	//gtk_widget_add_accelerator (add_slide,"activate",img_struct->accel_group, GDK_Delete,0,GTK_ACCEL_VISIBLE);
+	//g_signal_connect (G_OBJECT (add_slide),"activate",G_CALLBACK (img_delete_selected_slides),img_struct);
+
+	tmp_image = gtk_image_new_from_stock (GTK_STOCK_ADD,GTK_ICON_SIZE_MENU);
+	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (add_slide),tmp_image);
+
+	img_struct->remove_menu = gtk_image_menu_item_new_with_mnemonic (_("Dele_te"));
+	gtk_container_add (GTK_CONTAINER (slide_menu), img_struct->remove_menu);
+	gtk_widget_add_accelerator (img_struct->remove_menu,"activate",img_struct->accel_group, GDK_Delete,0,GTK_ACCEL_VISIBLE);
+	g_signal_connect (G_OBJECT (img_struct->remove_menu),"activate",G_CALLBACK (img_delete_selected_slides),img_struct);
+
+	tmp_image = gtk_image_new_from_stock (GTK_STOCK_DELETE,GTK_ICON_SIZE_MENU);
+	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (img_struct->remove_menu),tmp_image);
+
 	pixbuf = gtk_icon_theme_load_icon(icon_theme,"object-rotate-left",GTK_ICON_SIZE_MENU,0,NULL);
 	tmp_image = gtk_image_new_from_pixbuf(pixbuf);
 	g_object_unref(pixbuf);
@@ -346,14 +362,6 @@ img_window_struct *img_create_window (void)
 	gtk_widget_add_accelerator (img_struct->rotate_right_menu,"activate",img_struct->accel_group, GDK_u,GDK_CONTROL_MASK,GTK_ACCEL_VISIBLE);
 	g_signal_connect (G_OBJECT (img_struct->rotate_right_menu),"activate",G_CALLBACK (img_rotate_selected_slides),img_struct);
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (img_struct->rotate_right_menu),tmp_image);
-
-	img_struct->remove_menu = gtk_image_menu_item_new_with_mnemonic (_("Dele_te"));
-	gtk_container_add (GTK_CONTAINER (slide_menu), img_struct->remove_menu);
-	gtk_widget_add_accelerator (img_struct->remove_menu,"activate",img_struct->accel_group, GDK_Delete,0,GTK_ACCEL_VISIBLE);
-	g_signal_connect (G_OBJECT (img_struct->remove_menu),"activate",G_CALLBACK (img_delete_selected_slides),img_struct);
-	
-	tmp_image = gtk_image_new_from_stock (GTK_STOCK_DELETE,GTK_ICON_SIZE_MENU);
-	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (img_struct->remove_menu),tmp_image);
 
 	separator_slide_menu = gtk_separator_menu_item_new ();
 	gtk_container_add (GTK_CONTAINER (slide_menu),separator_slide_menu);
