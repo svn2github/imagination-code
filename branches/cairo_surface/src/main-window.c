@@ -1524,6 +1524,12 @@ void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *im
 	gtk_spin_button_set_value(GTK_SPIN_BUTTON(img->duration), info_slide->duration);
 	g_signal_handlers_unblock_by_func((gpointer)img->duration, (gpointer)img_spinbutton_value_changed, img);
 
+	/* Update Ken Burns display */
+	img_update_stop_display( img, TRUE );
+
+	/* Update subtitle widgets */
+	img_update_subtitles_widgets( img );
+
 	img->project_is_modified = TRUE;
 
 	if (nr_selected > 1)
@@ -1564,12 +1570,6 @@ void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *im
 							 0, 0, img->distort_images,
 							 img->background_color, NULL, &img->current_image );
 	}
-
-	/* Update display */
-	img_update_stop_display( img, TRUE );
-
-	/* Update subtitle widgets */
-	img_update_subtitles_widgets( img );
 }
 
 static void img_combo_box_transition_type_changed (GtkComboBox *combo, img_window_struct *img)

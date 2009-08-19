@@ -1818,9 +1818,9 @@ img_update_subtitles_widgets( img_window_struct *img )
 
 	/* Update color button */
 	f_colors = img->current_slide->font_color;
-	color.red   = (gint)f_colors[0] * 0xffff;
-	color.green = (gint)f_colors[1] * 0xffff;
-	color.blue  = (gint)f_colors[2] * 0xffff;
+	color.red   = (gint)( f_colors[0] * 0xffff );
+	color.green = (gint)( f_colors[1] * 0xffff );
+	color.blue  = (gint)( f_colors[2] * 0xffff );
 	gtk_color_button_set_color( GTK_COLOR_BUTTON( img->sub_color ), &color ); 
 	gtk_color_button_set_alpha( GTK_COLOR_BUTTON( img->sub_color ),
 								(gint)(f_colors[3] * 0xffff ) );
