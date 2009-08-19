@@ -306,9 +306,10 @@
 				<listitem><para>Paste</para></listitem>
 				<listitem><para>Preview quality</para></listitem>
 				<listitem><para>Zoom</para></listitem>
+				<listitem><para>Add empty slide</para></listitem>
+				<listitem><para>Delete</para></listitem>
 				<listitem><para>Rotate clockwise</para></listitem>
 				<listitem><para>Rotate counter-clockwise</para></listitem>
-				<listitem><para>Delete</para></listitem>
 				<listitem><para>Select all</para></listitem>
 				<listitem><para>Unselect all</para></listitem>
 			</itemizedlist>
@@ -349,6 +350,18 @@
 					This submenu allows you to zoom in or out the image area. It was added so that Imagination can be used on notebooks that have limited screen resolution. It does affect also the size of thumbnails when Imagination is in Overview mode (please see the View menu for an explanation of the Overview area).
 				</para>
 			</sect3>
+			<sect3 id="Add_empty_slide">
+				<title>Add empty slide</title>
+				<para>
+					This menu entry adds an empty slide. You can choose the background color. This option is useful when you want to start a slideshow with some text.
+				</para>
+			</sect3>
+			<sect3 id="delete">
+				<title>Delete</title>
+				<para>
+					This menu entry deletes the selected slides. Hold down the SHIFT key to select more than one slide at once or CTRL to select selectively. Please be aware this action cannot be undone!
+				</para>
+			</sect3>
 			<sect3 id="rotate_clockwise">
 				<title>Rotate Clockwise</title>
 				<para>
@@ -359,12 +372,6 @@
 				<title>Rotate Counter-Clockwise</title>
 				<para>
 					This entry allows you to rotate the selected slide in the counter-clockwise sense. The picture on the disk is NOT affected by the rotation so if you save the slideshow and you load it back the slide is displayed to its original state before the rotation.
-				</para>
-			</sect3>
-			<sect3 id="delete">
-				<title>Delete</title>
-				<para>
-					This menu entry deletes the selected slides. Hold down the SHIFT key to select more than one slide at once or CTRL to select selectively. Please be aware this action cannot be undone!
 				</para>
 			</sect3>
 			<sect3 id="select">
