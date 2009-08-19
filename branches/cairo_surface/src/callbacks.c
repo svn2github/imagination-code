@@ -20,19 +20,27 @@
 
 #include "callbacks.h"
 #include "export.h"
+#include <math.h>
 
 /* Internal structure, used for creating empty slide */
 typedef struct _ImgEmptySlide ImgEmptySlide;
 struct _ImgEmptySlide
 {
 	/* Values */
-	gdouble c_start[3]; /* Start color */
-	gdouble c_stop[3];  /* Stop color */
-	gdouble p_start[2]; /* Start point */
-	gdouble p_stop[2];  /* Stop point */
-	gint    gradient;   /* Gradient type: 0 - solid color
-										  1 - linear
-										  2 - radial */
+	gdouble c_start[3];  /* Start color */
+	gdouble c_stop[3];   /* Stop color */
+	gdouble pl_start[2]; /* Linear start point */
+	gdouble pl_stop[2];  /* Linear stop point */
+	gdouble pr_start[2]; /* Radial start point */
+	gdouble pr_stop[2];  /* Radial stop point */
+	gint    drag;        /* Are we draging point:
+							  0 - no
+							  1 - start point
+							  2 - stop point */
+	gint    gradient;    /* Gradient type:
+						      0 - solid color
+							  1 - linear
+							  2 - radial */
 
 	/* Widgets */
 	GtkWidget *color2;
@@ -72,6 +80,21 @@ static gboolean
 img_gradient_expose( GtkWidget      *widget,
 					 GdkEventExpose *expose,
 					 ImgEmptySlide  *slide );
+
+static gboolean
+img_gradient_press( GtkWidget      *widget,
+					GdkEventButton *button,
+					ImgEmptySlide  *slide );
+
+static gboolean
+img_gradient_release( GtkWidget      *widget,
+					  GdkEventButton *button,
+					  ImgEmptySlide  *slide );
+
+static gboolean
+img_gradient_move( GtkWidget      *widget,
+				   GdkEventMotion *motion,
+				   ImgEmptySlide  *slide );
 
 
 void img_set_window_title(img_window_struct *img, gchar *text)
@@ -2021,9 +2044,12 @@ img_add_empty_slide( GtkMenuItem       *item,
 {
 	/* This structure retains values across invocations */
 	static ImgEmptySlide slide = { { 0, 0, 0 },         /* Start color */
-								   { 0, 0, 0 },         /* Stop color */
-								   { 0, 0 },            /* Start point */
-								   { 0, 0 },            /* Stop point */
+								   { 1, 1, 1 },         /* Stop color */
+								   { 0, 0 },            /* Start point (l) */
+								   { -1, 0 },           /* Stop point (l) */
+								   { 0, 0 },            /* Start point (r) */
+								   { 0, 0 },            /* Stop point (r) */
+								   0,                   /* Drag */
 								   0,                   /* Gradient type */
 								   NULL,                /* Color button */
 								   NULL,                /* Preview area */
@@ -2107,20 +2133,42 @@ img_add_empty_slide( GtkMenuItem       *item,
 	g_signal_connect( G_OBJECT( color2 ), "color-set",
 					  G_CALLBACK( img_gradient_color_set ), &slide );
 
-	frame = gtk_aspect_frame_new( _("Preview"), 0, 0, img->video_ratio, FALSE );
+	frame = gtk_frame_new( _("Preview") );
 	gtk_box_pack_start( GTK_BOX( hbox ), frame, TRUE, TRUE, 0 );
 
 	preview = gtk_drawing_area_new();
+	gtk_widget_set_size_request( preview, 300,
+								 (gint)( 300 / img->video_ratio ) );
+	gtk_widget_add_events( preview, GDK_BUTTON1_MOTION_MASK |
+									GDK_BUTTON_PRESS_MASK |
+									GDK_BUTTON_RELEASE_MASK );
 	gtk_container_add( GTK_CONTAINER( frame ), preview );
 	g_signal_connect( G_OBJECT( preview ), "expose-event",
 					  G_CALLBACK( img_gradient_expose ), &slide );
+	g_signal_connect( G_OBJECT( preview ), "button-press-event",
+					  G_CALLBACK( img_gradient_press ), &slide );
+	g_signal_connect( G_OBJECT( preview ), "button-release-event",
+					  G_CALLBACK( img_gradient_release ), &slide );
+	g_signal_connect( G_OBJECT( preview ), "motion-notify-event",
+					  G_CALLBACK( img_gradient_move ), &slide );
 
 	/* Show all */
-	gtk_widget_show_all( vbox );
+	gtk_widget_show_all( dialog );
 
 	/* Fill internal structure */
 	slide.color2 = color2;
 	slide.preview = preview;
+	if( slide.pl_stop[0] < 0 )
+	{
+		GdkWindow *wnd = gtk_widget_get_window( preview );
+		gint       w, h;
+
+		gdk_drawable_get_size( wnd, &w, &h );
+		slide.pl_stop[0] = (gdouble)w;
+		slide.pl_stop[1] = (gdouble)h;
+		slide.pr_start[0] = w * 0.5;
+		slide.pr_start[1] = h * 0.5;
+	}
 
 	if( gtk_dialog_run( GTK_DIALOG( dialog ) ) == GTK_RESPONSE_ACCEPT )
 	{
@@ -2178,6 +2226,7 @@ img_gradient_expose( GtkWidget      *widget,
 	cairo_t         *cr;
 	cairo_pattern_t *pattern;
 	gint             w, h;
+	gdouble          radius, diffx, diffy;
 
 	gdk_drawable_get_size( expose->window, &w, &h );
 	cr = gdk_cairo_create( expose->window );
@@ -2191,7 +2240,10 @@ img_gradient_expose( GtkWidget      *widget,
 			break;
 
 		case 1:
-			pattern = cairo_pattern_create_linear( 0, 0, w, 0 );
+			pattern = cairo_pattern_create_linear( slide->pl_start[0],
+												   slide->pl_start[1],
+												   slide->pl_stop[0],
+												   slide->pl_stop[1] );
 			cairo_pattern_add_color_stop_rgb( pattern, 0,
 											  slide->c_start[0],
 											  slide->c_start[1],
@@ -2203,11 +2255,30 @@ img_gradient_expose( GtkWidget      *widget,
 			cairo_set_source( cr, pattern );
 			cairo_paint( cr );
 			cairo_pattern_destroy( pattern );
+
+			/* Paint indicators */
+			cairo_rectangle( cr, slide->pl_start[0] - 7,
+								 slide->pl_start[1] - 7,
+								 15, 15 );
+			cairo_rectangle( cr, slide->pl_stop[0] - 7,
+								 slide->pl_stop[1] - 7,
+								 15, 15 );
+			cairo_set_source_rgb( cr, 0, 0, 0 );
+			cairo_stroke_preserve( cr );
+			cairo_set_source_rgb( cr, 1, 1, 1 );
+			cairo_fill( cr );
 			break;
 
 		case 2:
-			pattern = cairo_pattern_create_radial( w * 0.5, h * 0.5, 0,
-												   w * 0.5, h * 0.5, w * 0.5 );
+			diffx = ABS( slide->pr_start[0] - slide->pr_stop[0] );
+			diffy = ABS( slide->pr_start[1] - slide->pr_stop[1] );
+			radius = sqrt( pow( diffx, 2 ) + pow( diffy, 2 ) );
+			pattern = cairo_pattern_create_radial( slide->pr_start[0],
+												   slide->pr_start[1],
+												   0,
+												   slide->pr_start[0],
+												   slide->pr_start[1],
+												   radius );
 			cairo_pattern_add_color_stop_rgb( pattern, 0,
 											  slide->c_start[0],
 											  slide->c_start[1],
@@ -2219,9 +2290,123 @@ img_gradient_expose( GtkWidget      *widget,
 			cairo_set_source( cr, pattern );
 			cairo_paint( cr );
 			cairo_pattern_destroy( pattern );
+
+			/* Paint indicators */
+			cairo_rectangle( cr, slide->pr_start[0] - 7,
+								 slide->pr_start[1] - 7,
+								 15, 15 );
+			cairo_rectangle( cr, slide->pr_stop[0] - 7,
+								 slide->pr_stop[1] - 7,
+								 15, 15 );
+			cairo_set_source_rgb( cr, 0, 0, 0 );
+			cairo_stroke_preserve( cr );
+			cairo_set_source_rgb( cr, 1, 1, 1 );
+			cairo_fill( cr );
 			break;
 	}
 	cairo_destroy( cr );
+
+	return( TRUE );
+}
+
+static gboolean
+img_gradient_press( GtkWidget      *widget,
+					GdkEventButton *button,
+					ImgEmptySlide  *slide )
+{
+	if( button->button != 1 )
+		return( FALSE );
+
+	switch( slide->gradient )
+	{
+		case 1:
+			if( button->x < ( slide->pl_start[0] + 8 ) &&
+				button->x > ( slide->pl_start[0] - 8 ) &&
+				button->y < ( slide->pl_start[1] + 8 ) &&
+				button->y > ( slide->pl_start[1] - 8 ) )
+			{
+				slide->drag = 1;
+			}
+			else if( button->x < ( slide->pl_stop[0] + 8 ) &&
+					 button->x > ( slide->pl_stop[0] - 8 ) &&
+					 button->y < ( slide->pl_stop[1] + 8 ) &&
+					 button->y > ( slide->pl_stop[1] - 8 ) )
+			{
+				slide->drag = 2;
+			}
+			break;
+
+		case 2:
+			if( button->x < ( slide->pr_start[0] + 8 ) &&
+				button->x > ( slide->pr_start[0] - 8 ) &&
+				button->y < ( slide->pr_start[1] + 8 ) &&
+				button->y > ( slide->pr_start[1] - 8 ) )
+			{
+				slide->drag = 1;
+			}
+			else if( button->x < ( slide->pr_stop[0] + 8 ) &&
+					 button->x > ( slide->pr_stop[0] - 8 ) &&
+					 button->y < ( slide->pr_stop[1] + 8 ) &&
+					 button->y > ( slide->pr_stop[1] - 8 ) )
+			{
+				slide->drag = 2;
+			}
+			break;
+	}
+
+	return( TRUE );
+}
+
+static gboolean
+img_gradient_release( GtkWidget      *widget,
+					  GdkEventButton *button,
+					  ImgEmptySlide  *slide )
+{
+	slide->drag = 0;
+
+	return( TRUE );
+}
+
+static gboolean
+img_gradient_move( GtkWidget      *widget,
+				   GdkEventMotion *motion,
+				   ImgEmptySlide  *slide )
+{
+	gint w, h;
+
+	if( ! slide->drag )
+		return( FALSE );
+
+	gdk_drawable_get_size( motion->window, &w, &h );
+	switch( slide->gradient )
+	{
+		case 1:
+			if( slide->drag == 1 )
+			{
+				slide->pl_start[0] = CLAMP( motion->x, 0, w );
+				slide->pl_start[1] = CLAMP( motion->y, 0, h );
+			}
+			else
+			{
+				slide->pl_stop[0] = CLAMP( motion->x, 0, w );
+				slide->pl_stop[1] = CLAMP( motion->y, 0, h );
+			}
+			break;
+
+		case 2:
+			if( slide->drag == 1 )
+			{
+				slide->pr_start[0] = CLAMP( motion->x, 0, w );
+				slide->pr_start[1] = CLAMP( motion->y, 0, h );
+			}
+			else
+			{
+				slide->pr_stop[0] = CLAMP( motion->x, 0, w );
+				slide->pr_stop[1] = CLAMP( motion->y, 0, h );
+			}
+			break;
+	}
+	gtk_widget_queue_draw( slide->preview );
 
 	return( TRUE );
 }
