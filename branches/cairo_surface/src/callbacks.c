@@ -1727,6 +1727,9 @@ img_add_stop_point( GtkButton         *button,
 	img_update_stop_display( img, FALSE );
 	img_ken_burns_update_sensitivity( img, TRUE,
 									  img->current_slide->no_points );
+
+	/* Sync timings */
+	img_sync_timings( img->current_slide, img );
 }
 
 void
@@ -1749,6 +1752,9 @@ img_update_stop_point( GtkButton         *button,
 
 	/* Update display */
 	img_update_stop_display( img, FALSE );
+
+	/* Sync timings */
+	img_sync_timings( img->current_slide, img );
 }
 
 void
@@ -1776,6 +1782,9 @@ img_delete_stop_point( GtkButton         *button,
 	img_update_stop_display( img, TRUE );
 	img_ken_burns_update_sensitivity( img, TRUE,
 									  img->current_slide->no_points );
+
+	/* Sync timings */
+	img_sync_timings( img->current_slide, img );
 }
 
 void

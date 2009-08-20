@@ -120,4 +120,8 @@ img_scale_image( const gchar      *filename,
 void
 img_set_project_mod_state( img_window_struct *img,
 						   gboolean           modified );
+
+void
+img_sync_timings( slide_struct      *slide,
+				  img_window_struct *img );
 #endif

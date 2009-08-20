@@ -428,10 +428,18 @@ img_set_slide_text_info( slide_struct      *slide,
 
 		slide->anim_id = anim_id;
 		gtk_tree_model_get( model, &iter, 1, &slide->anim, -1 );
+
+		/* Sync timings */
+		img_sync_timings( slide, img );
 	}
 
 	if( ( anim_duration > 0 ) && ( anim_duration != slide->anim_duration ) )
+	{
 		slide->anim_duration = anim_duration;
+
+		/* Synchronize timings */
+		img_sync_timings( slide, img );
+	}
 
 	if( ( position > -1 ) && ( position != slide->position ) )
 		slide->position = position;
@@ -767,6 +775,37 @@ img_set_project_mod_state( img_window_struct *img,
 	img->project_is_modified = modified;
 
 	/* FIXME: Do any updates here (add "*" to window title, ...). */
+}
+
+void
+img_sync_timings( slide_struct      *slide,
+				  img_window_struct *img )
+{
+	/* If times are already synchronized, return */
+	if( slide->duration >= slide->anim_duration )
+		return;
+
+	/* Do the right thing;) */
+	if( slide->no_points )
+	{
+		gint          diff;
+		ImgStopPoint *point;
+
+		/* Calculate difference that we need to accomodate */
+		diff = slide->anim_duration - slide->duration;
+
+		/* Elongate last point */
+		point = (ImgStopPoint *)g_list_last( slide->points )->data;
+		point->time += diff;
+		
+		/* Update Ken Burns display */
+		gtk_spin_button_set_value( GTK_SPIN_BUTTON( img->ken_duration ),
+								   point->time );
+	}
+
+	/* Update display */
+	gtk_spin_button_set_value( GTK_SPIN_BUTTON( img->duration ),
+							   slide->anim_duration );
 }
 
 void img_select_nth_slide(img_window_struct *img, gint slide_to_select)

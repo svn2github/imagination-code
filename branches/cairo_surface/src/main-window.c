@@ -1812,6 +1812,9 @@ static void img_spinbutton_value_changed (GtkSpinButton *spinbutton, img_window_
 
 	g_list_foreach (bak, (GFunc)gtk_tree_path_free, NULL);
 	g_list_free(bak);
+
+	/* Sync timings */
+	img_sync_timings( img->current_slide, img );
 }
 
 static void img_select_all_thumbnails(GtkMenuItem *item, img_window_struct *img)
