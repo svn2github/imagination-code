@@ -314,7 +314,7 @@ img_load_slideshow( img_window_struct *img,
 		gdouble *my_points = NULL, *p_start, *p_stop, *c_start, *c_stop;
 		gsize length;
 		gint anim_id,anim_duration, text_pos, placing, gradient;
-		GdkPixbuf *pix;
+		GdkPixbuf *pix = NULL;
 	
 		/* Load project backgroud color */
 		color = g_key_file_get_double_list( img_key_file, "slideshow settings",
@@ -340,7 +340,6 @@ img_load_slideshow( img_window_struct *img,
 			if (strlen(slide_filename) == 0)
 			{
 				/* We are loading an empty slide */
-				
 				gradient = g_key_file_get_integer(img_key_file, conf, "gradient", NULL);
 				c_start = g_key_file_get_double_list(img_key_file, conf, "start_color", NULL, NULL);
 				c_stop  = g_key_file_get_double_list(img_key_file, conf, "stop_color", NULL, NULL);
@@ -425,7 +424,8 @@ there:
 						img->final_transition.render = slide_info->render;
 					}
 				}
-				g_object_unref( G_OBJECT( pix ) );
+				if (pix)
+					g_object_unref( G_OBJECT( pix ) );
 				g_free( font_desc );
 			}
 			else
