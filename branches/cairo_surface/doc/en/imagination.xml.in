@@ -46,6 +46,14 @@
 				It requires the ffmpeg encoder to produce the movie file and libsox to import the audio files. Yes you don't need any other third-party software!
 			</para>
 	</sect1>
+	<sect1 id="new_format">
+		<title>New Slideshow Project Format</title>
+			<para>
+				Starting from this release, &version;, Imagination's slideshow project format has changed. The old format will be recognized and slideshows saved with this format
+				will be correctly loaded, but from the next release support for old slideshow project files (saved with Imagination's release prior to &version;
+				will be <emphasis>DROPPED</emphasis>. Please ensure to load ALL your old slideshow projects with Imagination &version; and save them again.
+			</para>
+	</sect1>
 	<sect1 id="window">
 		<title>Imagination's window</title>
 		<para>
@@ -353,7 +361,7 @@
 			<sect3 id="Add_empty_slide">
 				<title>Add empty slide</title>
 				<para>
-					This menu entry adds an empty slide. You can choose the background color. This option is useful when you want to start a slideshow with some text.
+					This menu entry displays the above dialog where you can choose the background color of the empty slide in a three different ways: 1) with a solid color, 2) with a linear gradient, 3) with a radial gradient.
 				</para>
 			</sect3>
 			<sect3 id="delete">

@@ -327,16 +327,14 @@ img_window_struct *img_create_window (void)
 	separator_slide_menu = gtk_separator_menu_item_new ();
 	gtk_container_add (GTK_CONTAINER (slide_menu),separator_slide_menu);
 
-	add_slide = gtk_image_menu_item_new_with_mnemonic (_("Add empty slide"));
+	add_slide = gtk_image_menu_item_new_with_mnemonic (_("Add empt_y slide"));
 	gtk_container_add (GTK_CONTAINER (slide_menu), add_slide);
-	gtk_widget_add_accelerator( add_slide, "activate", img_struct->accel_group,
-								GDK_n, GDK_CONTROL_MASK | GDK_SHIFT_MASK,
-								GTK_ACCEL_VISIBLE );
+	gtk_widget_add_accelerator( add_slide, "activate", img_struct->accel_group,	GDK_y, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE );
 	g_signal_connect( G_OBJECT( add_slide ), "activate",
 					  G_CALLBACK( img_add_empty_slide ), img_struct );
 
-	tmp_image = gtk_image_new_from_stock (GTK_STOCK_ADD,GTK_ICON_SIZE_MENU);
-	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (add_slide),tmp_image);
+	image_menu = img_load_icon ("imagination-add-new-slide.png",GTK_ICON_SIZE_MENU);
+	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (add_slide), image_menu);
 
 	img_struct->remove_menu = gtk_image_menu_item_new_with_mnemonic (_("Dele_te"));
 	gtk_container_add (GTK_CONTAINER (slide_menu), img_struct->remove_menu);

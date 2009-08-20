@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination 1.5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-08-19 23:15+0200\n"
+"POT-Creation-Date: 2009-08-20 08:28+0200\n"
 "PO-Revision-Date: 2009-06-13 16:46+0200\n"
 "Last-Translator: Jean-Pierre Redonnet <redonnetbrouk@aol.com>\n"
 "Language-Team: French\n"
@@ -88,7 +88,7 @@ msgstr "Zoom"
 
 #: ../src/main-window.c:330
 msgid "Add empty slide"
-msgstr ""
+msgstr "Ajoute un transparent vierge"
 
 #: ../src/main-window.c:341
 msgid "Dele_te"
@@ -120,7 +120,7 @@ msgstr "Prévisualise"
 
 #: ../src/main-window.c:395
 msgid "Overview mode"
-msgstr ""
+msgstr "Vue d'ensemble"
 
 #: ../src/main-window.c:398
 msgid "_Help"
@@ -174,7 +174,7 @@ msgstr "Réduction"
 #: ../src/main-window.c:494
 #, fuzzy
 msgid "Normal Size"
-msgstr "Normale"
+msgstr "Taille normale"
 
 #: ../src/main-window.c:502 ../src/callbacks.c:1326
 msgid "Starts the preview"
@@ -191,7 +191,7 @@ msgstr "Retourne au transparent précédent "
 
 #: ../src/main-window.c:531 ../src/main-window.c:735
 msgid " of "
-msgstr " de"
+msgstr " de "
 
 #: ../src/main-window.c:542
 #, fuzzy
@@ -258,7 +258,7 @@ msgstr "Déplacement de l'image"
 
 #: ../src/main-window.c:712
 msgid "Stop Point:"
-msgstr ""
+msgstr "Point d'arrêt"
 
 #: ../src/main-window.c:749
 #, fuzzy
@@ -435,19 +435,19 @@ msgstr "Crée une nouvelle présentation"
 
 #: ../src/callbacks.c:2085
 msgid "Empty slide options:"
-msgstr ""
+msgstr "Supprime les options du transparent"
 
 #: ../src/callbacks.c:2094
 msgid "Use _solid color"
-msgstr ""
+msgstr "Utilise une couleur uniforme"
 
 #: ../src/callbacks.c:2100
 msgid "Use _linear gradient"
-msgstr ""
+msgstr "Utilise un gradient linéaire"
 
 #: ../src/callbacks.c:2106
 msgid "Use _radial gradient"
-msgstr ""
+msgstr "Utilise un gradient radial"
 
 #: ../src/callbacks.c:2136
 #, fuzzy
