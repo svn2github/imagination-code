@@ -313,9 +313,6 @@ img_set_slide_gradient_info( slide_struct *slide,
 {
 	gint i;
 
-	slide->resolution = g_strdup( "N/A" );
-	slide->type = g_strdup( "N/A" );
-
 	slide->gradient = gradient;
 	for( i = 0; i < 3; i++ )
 	{
