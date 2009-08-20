@@ -137,10 +137,19 @@ typedef struct _slide_struct slide_struct;
 struct _slide_struct
 {
 	/* Common data - always filled */
-	gchar *filename;          /* Filename of the image that slide represents */
-	gchar *original_filename; /* This is filled if the image has been rotated */
 	gchar *resolution;        /* Image dimensions */
 	gchar *type;              /* Image type */
+
+	/* Fields that are filled when we load slide from disk */
+	gchar *filename;          /* Filename of the image that slide represents */
+	gchar *original_filename; /* This is filled if the image has been rotated */
+
+	/* Fields that are filled if we create slide in memory */
+	gint    gradient;         /* Gradient type */
+	gdouble g_start_color[3]; /* RGB start color */
+	gdouble g_stop_color[3];  /* RGB stop color */
+	gdouble g_start_point[2]; /* x, y coordinates of start point */
+	gdouble g_stop_point[2];  /* x, y coordinates of stop point */
 
 	/* Still part of the slide params */
 	guint duration; /* Duration of still part */ /* NOTE: sub1 */

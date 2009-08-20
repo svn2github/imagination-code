@@ -1559,8 +1559,19 @@ void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *im
 	 * large image preview. */
 	if( img->mode == 0 )
 	{
+		if( ! info_slide->filename )
+		{
+			img_scale_gradient( info_slide->gradient,
+								info_slide->g_start_point,
+								info_slide->g_stop_point,
+								info_slide->g_start_color,
+								info_slide->g_stop_color,
+								img->video_size[0],
+								img->video_size[1], NULL,
+								&img->current_image );
+		}
 		/* Respect quality settings */
-		if( img->low_quality )
+		else if( img->low_quality )
 			img_scale_image( info_slide->filename,
 							 (gdouble)img->video_size[0] / img->video_size[1],
 							 0, img->video_size[1], img->distort_images,

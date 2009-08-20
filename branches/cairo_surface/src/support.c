@@ -254,41 +254,25 @@ void img_show_file_chooser(SexyIconEntry *entry, SexyIconEntryPosition icon_pos,
 }
 
 slide_struct *
-img_create_new_slide( const gchar *filename )
+img_create_new_slide( void )
 {
 	slide_struct    *slide = NULL;
-	GdkPixbufFormat *format;
-	gint             width,
-					 height;
 
-	slide = g_slice_new( slide_struct );
-	format = gdk_pixbuf_get_file_info( filename, &width, &height );
-	if( slide && format )
+	slide = g_slice_new0( slide_struct );
+	if( slide )
 	{
-		/* Common data */
-		slide->filename = g_strdup( filename );
-		slide->original_filename = NULL;
-		slide->resolution = g_strdup_printf( "%d x %d", width, height );
-		slide->type = gdk_pixbuf_format_get_name( format );
-
 		/* Still part */
 		slide->duration = 1;
 
 		/* Transition */
 		slide->path = g_strdup( "0" );
 		slide->transition_id = -1;
-		slide->render = NULL;
 		slide->speed = NORMAL;
 
 		/* Ken Burns */
-		slide->points = NULL;
-		slide->no_points = 0;
 		slide->cur_point = -1;
 
 		/* Subtitles */
-		slide->subtitle = NULL;
-		slide->anim = NULL;
-		slide->anim_id = 0;
 		slide->anim_duration = 1;
 		slide->position = IMG_SUB_POS_MIDDLE_CENTER;
 		slide->placing = IMG_REL_PLACING_EXPORTED_VIDEO;
@@ -300,6 +284,49 @@ img_create_new_slide( const gchar *filename )
 	}
 
 	return( slide );
+}
+
+void
+img_set_slide_file_info( slide_struct *slide,
+						 const gchar  *filename )
+{
+	GdkPixbufFormat *format;
+	gint             width,
+					 height;
+
+	format = gdk_pixbuf_get_file_info( filename, &width, &height );
+
+	slide->filename = g_strdup( filename );
+	slide->original_filename = NULL;
+	
+	slide->resolution = g_strdup_printf( "%d x %d", width, height );
+	slide->type = gdk_pixbuf_format_get_name( format );
+}
+
+void
+img_set_slide_gradient_info( slide_struct *slide,
+							 gint          gradient,
+							 gdouble      *start_color,
+							 gdouble      *stop_color,
+							 gdouble      *start_point,
+							 gdouble      *stop_point )
+{
+	gint i;
+
+	slide->resolution = g_strdup( "N/A" );
+	slide->type = g_strdup( "N/A" );
+
+	slide->gradient = gradient;
+	for( i = 0; i < 3; i++ )
+	{
+		slide->g_start_color[i] = start_color[i];
+		slide->g_stop_color[i]  = stop_color[i];
+	}
+	for( i = 0; i < 2; i++ )
+	{
+		slide->g_start_point[i] = start_point[i];
+		slide->g_stop_point[i]  = stop_point[i];
+	}
 }
 
 void
@@ -819,3 +846,114 @@ void img_select_nth_slide(img_window_struct *img, gint slide_to_select)
 	gtk_icon_view_scroll_to_path (GTK_ICON_VIEW (img->active_icon), path, FALSE, 0, 0);
 	gtk_tree_path_free (path);
 }
+
+GdkPixbuf *
+img_convert_surface_to_pixbuf( cairo_surface_t *surface )
+{
+	GdkPixbuf *pixbuf;
+	gint       w, h, ss, sp, row, col;
+	guchar    *data_s, *data_p;
+
+	/* Information about surface */
+	w = cairo_image_surface_get_width( surface );
+	h = cairo_image_surface_get_height( surface );
+	ss = cairo_image_surface_get_stride( surface );
+	data_s = cairo_image_surface_get_data( surface );
+
+	/* Create new pixbuf according to upper specs */
+	pixbuf = gdk_pixbuf_new( GDK_COLORSPACE_RGB, FALSE, 8, w, h );
+
+	/* Get info about new pixbuf */
+	sp = gdk_pixbuf_get_rowstride( pixbuf );
+	data_p = gdk_pixbuf_get_pixels( pixbuf );
+
+	/* Copy pixels */
+	for( row = 0; row < h; row++ )
+	{
+		for( col = 0; col < w; col++ )
+		{
+			gint index_s, index_p;
+
+			index_s = row * ss + col * 4;
+			index_p = row * sp + col * 3;
+
+			data_p[index_p + 0] = data_s[index_s + 2];
+			data_p[index_p + 1] = data_s[index_s + 1];
+			data_p[index_p + 2] = data_s[index_s + 0];
+		}
+	}
+
+	return( pixbuf );
+}
+
+gboolean
+img_scale_gradient( gint              gradient,
+					gdouble          *p_start,
+					gdouble          *p_stop,
+					gdouble          *c_start,
+					gdouble          *c_stop,
+					gint              width,
+					gint              height,
+					GdkPixbuf       **pixbuf,
+					cairo_surface_t **surface )
+{
+	cairo_surface_t *sf;
+	cairo_t         *cr;
+	cairo_pattern_t *pat;
+	gdouble          diffx, diffy, radius, scale;
+
+	sf = cairo_image_surface_create( CAIRO_FORMAT_RGB24, width, height );
+	cr = cairo_create( sf );
+
+	switch( gradient )
+	{
+		case 0: /* Solid color */
+			cairo_set_source_rgb( cr, c_start[0], c_start[1], c_start[2] );
+			cairo_paint( cr );
+			break;
+
+		case 1: /* Linear gradient */
+			pat = cairo_pattern_create_linear( p_start[0] * width,
+											   p_start[1] * height,
+											   p_stop[0] * width,
+											   p_stop[1] * height );
+			cairo_pattern_add_color_stop_rgb( pat, 0, c_start[0],
+											  c_start[1], c_start[2] );
+			cairo_pattern_add_color_stop_rgb( pat, 1, c_stop[0],
+											  c_stop[1], c_stop[2] );
+			cairo_set_source( cr, pat );
+			cairo_paint( cr );
+			cairo_pattern_destroy( pat );
+			break;
+
+		case 2: /* Radial gradient */
+			diffx = ABS( p_start[0] - p_stop[0] ) * width;
+			diffy = ABS( p_start[1] - p_stop[1] ) * height;
+			radius = sqrt( pow( diffx, 2 ) + pow( diffy, 2 ) );
+
+			pat = cairo_pattern_create_radial( p_start[0] * width,
+											   p_start[1] * height, 0,
+											   p_start[0] * width,
+											   p_start[1] * height, radius );
+			cairo_pattern_add_color_stop_rgb( pat, 0, c_start[0],
+											  c_start[1], c_start[2] );
+			cairo_pattern_add_color_stop_rgb( pat, 1, c_stop[0],
+											  c_stop[1], c_stop[2] );
+			cairo_set_source( cr, pat );
+			cairo_paint( cr );
+			cairo_pattern_destroy( pat );
+			break;
+	}
+	cairo_destroy( cr );
+
+	if( surface )
+		*surface = sf;
+	else
+	{
+		*pixbuf = img_convert_surface_to_pixbuf( sf );
+		cairo_surface_destroy( sf );
+	}
+
+	return( TRUE );
+}
+

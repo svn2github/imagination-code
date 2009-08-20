@@ -155,9 +155,10 @@ void img_add_slides_thumbnails(GtkMenuItem *item, img_window_struct *img)
 							 img->distort_images, img->background_color,
 							 &thumb, NULL ) )
 		{
-			slide_info = img_create_new_slide( slides->data );
+			slide_info = img_create_new_slide();
 			if (slide_info)
 			{
+				img_set_slide_file_info( slide_info, slides->data );
 				gtk_list_store_append (img->thumbnail_model,&iter);
 				gtk_list_store_set (img->thumbnail_model, &iter, 0, thumb,
 																 1, slide_info,
@@ -597,6 +598,13 @@ void img_rotate_selected_slides(GtkWidget *button, img_window_struct *img)
 		gtk_tree_model_get_iter(model,&iter,selected->data);
 		gtk_tree_model_get(model,&iter,1,&info_slide,-1);
 
+		/* If this slide is gradient, do not rotate it */
+		if( ! info_slide->filename )
+		{
+			selected = selected->next;
+			continue;
+		}
+
 		/* Load the image, save a copy in the temp dir, rotate it and display it in the image area */
 		thumb = gdk_pixbuf_new_from_file(info_slide->filename, NULL);
 		if (button == img->rotate_left_button)
@@ -645,7 +653,7 @@ void img_rotate_selected_slides(GtkWidget *button, img_window_struct *img)
 
 		/* Display the rotated image in thumbnails iconview */
 		img_scale_image( filename, img->video_ratio, 88, 0, img->distort_images,
-					 img->background_color, &thumb, NULL );
+						 img->background_color, &thumb, NULL );
 		gtk_list_store_set (img->thumbnail_model, &iter, 0, thumb, -1);
 		g_object_unref (thumb);
 		selected = selected->next;
@@ -875,8 +883,15 @@ void img_start_stop_preview(GtkWidget *button, img_window_struct *img)
 		/* Load the first image in the pixbuf */
 		gtk_tree_model_get( model, &iter, 1, &entry, -1);
 
+		if( ! entry->filename )
+		{
+			img_scale_gradient( entry->gradient, entry->g_start_point,
+								entry->g_stop_point, entry->g_start_color,
+								entry->g_stop_color, img->video_size[0],
+								img->video_size[1], NULL, &img->image2 );
+		}
 		/* Respect quality settings */
-		if( img->low_quality )
+		else if( img->low_quality )
 			img_scale_image( entry->filename, img->video_ratio,
 							 0, img->video_size[1], img->distort_images,
 							 img->background_color, NULL, &img->image2 );
@@ -901,8 +916,15 @@ void img_start_stop_preview(GtkWidget *button, img_window_struct *img)
 			gtk_tree_model_get_iter( model, &prev, path );
 			gtk_tree_model_get( model, &prev, 1, &entry, -1 );
 
+			if( ! entry->filename )
+			{
+				img_scale_gradient( entry->gradient, entry->g_start_point,
+									entry->g_stop_point, entry->g_start_color,
+									entry->g_stop_color, img->video_size[0],
+									img->video_size[1], NULL, &img->image1 );
+			}
 			/* Respect quality settings */
-			if( img->low_quality )
+			else if( img->low_quality )
 				img_scale_image( entry->filename, img->video_ratio,
 								 0, img->video_size[1], img->distort_images,
 								 img->background_color, NULL, &img->image1 );
@@ -1099,9 +1121,10 @@ void img_on_drag_data_received (GtkWidget *widget,GdkDragContext *context,int x,
 							 img->distort_images, img->background_color,
 							 &thumb, NULL ) )
 		{
-			slide_info = img_create_new_slide( filename );
+			slide_info = img_create_new_slide();
 			if (slide_info)
 			{
+				img_set_slide_file_info( slide_info, filename );
 				gtk_list_store_append (img->thumbnail_model,&iter);
 				gtk_list_store_set (img->thumbnail_model, &iter, 0, thumb, 1, slide_info, -1);
 				g_object_unref (thumb);
@@ -2078,7 +2101,7 @@ img_add_empty_slide( GtkMenuItem       *item,
 			  *preview,
 			  *hbox;
 	GdkColor   color;
-	gint       i;
+	gint       i, w, h;
 
 	dialog = gtk_dialog_new_with_buttons(
 					_("Create new slide"),
@@ -2087,7 +2110,6 @@ img_add_empty_slide( GtkMenuItem       *item,
 					GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 					GTK_STOCK_OK, GTK_RESPONSE_ACCEPT,
 					NULL );
-	gtk_window_set_default_size( GTK_WINDOW( dialog ), 400, 200 );
 
 	vbox = gtk_dialog_get_content_area( GTK_DIALOG( dialog ) );
 
@@ -2145,9 +2167,10 @@ img_add_empty_slide( GtkMenuItem       *item,
 	frame = gtk_frame_new( _("Preview") );
 	gtk_box_pack_start( GTK_BOX( hbox ), frame, TRUE, TRUE, 0 );
 
+	w = img->video_size[0] / 2;
+	h = img->video_size[1] / 2;
 	preview = gtk_drawing_area_new();
-	gtk_widget_set_size_request( preview, 300,
-								 (gint)( 300 / img->video_ratio ) );
+	gtk_widget_set_size_request( preview, w, h );
 	gtk_widget_add_events( preview, GDK_BUTTON1_MOTION_MASK |
 									GDK_BUTTON_PRESS_MASK |
 									GDK_BUTTON_RELEASE_MASK );
@@ -2169,10 +2192,6 @@ img_add_empty_slide( GtkMenuItem       *item,
 	slide.preview = preview;
 	if( slide.pl_stop[0] < 0 )
 	{
-		GdkWindow *wnd = gtk_widget_get_window( preview );
-		gint       w, h;
-
-		gdk_drawable_get_size( wnd, &w, &h );
 		slide.pl_stop[0] = (gdouble)w;
 		slide.pl_stop[1] = (gdouble)h;
 		slide.pr_start[0] = w * 0.5;
@@ -2181,7 +2200,59 @@ img_add_empty_slide( GtkMenuItem       *item,
 
 	if( gtk_dialog_run( GTK_DIALOG( dialog ) ) == GTK_RESPONSE_ACCEPT )
 	{
-		/* FIXME: create new slide here */
+		GtkTreeIter   iter;
+		slide_struct *slide_info;
+		GdkPixbuf    *thumb;
+
+		slide_info = img_create_new_slide();
+		if( slide_info )
+		{
+			gdouble p_start[2],
+					p_stop[2];
+
+			/* Convert gradient points into relative offsets (this enables us to
+			 * scale gradient on any surface size) */
+			if( slide.gradient < 2 ) /* solid and linear */
+			{
+				p_start[0] = slide.pl_start[0] / w;
+				p_start[1] = slide.pl_start[1] / h;
+				p_stop[0] = slide.pl_stop[0] / w;
+				p_stop[1] = slide.pl_stop[1] / h;
+			}
+			else /* Radial gradient */
+			{
+				p_start[0] = slide.pr_start[0] / w;
+				p_start[1] = slide.pr_start[1] / h;
+				p_stop[0] = slide.pr_stop[0] / w;
+				p_stop[1] = slide.pr_stop[1] / h;
+			}
+
+			/* Update slide info */
+			img_set_slide_gradient_info( slide_info, slide.gradient,
+										 slide.c_start, slide.c_stop,
+										 p_start, p_stop );
+
+			/* Create thumbnail */
+			img_scale_gradient( slide.gradient, p_start, p_stop,
+								slide.c_start, slide.c_stop,
+								88, 72,
+								&thumb, NULL );
+										
+			/* Add slide to store */
+			/* FIXME: We should probably insert new slide at selected
+			 * before/after currently selected slide. */
+			gtk_list_store_append( img->thumbnail_model, &iter );
+			gtk_list_store_set( img->thumbnail_model, &iter, 0, thumb,
+															 1, slide_info,
+															 2, NULL,
+															 3, FALSE,
+															 -1 );
+			g_object_unref( G_OBJECT( thumb ) );
+			img->slides_nr++;
+			img_set_total_slideshow_duration( img );
+
+			img_select_nth_slide( img, img->slides_nr );
+		}
 	}
 	gtk_widget_destroy( dialog );
 }

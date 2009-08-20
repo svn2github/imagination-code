@@ -27,6 +27,7 @@
 #include <gtk/gtk.h>
 #include <string.h>
 #include <unistd.h>
+#include <math.h>
 #include "imagination.h"
 #include "sexy-icon-entry.h"
 
@@ -60,7 +61,19 @@ void img_show_file_chooser(SexyIconEntry *, SexyIconEntryPosition, int, img_wind
 void img_select_nth_slide(img_window_struct *, gint);
 
 slide_struct *
-img_create_new_slide( const gchar *filename );
+img_create_new_slide( void );
+
+void
+img_set_slide_file_info( slide_struct *slide,
+						 const gchar  *filename );
+
+void
+img_set_slide_gradient_info( slide_struct *slide,
+							 gint          gradient,
+							 gdouble      *start_color,
+							 gdouble      *stop_color,
+							 gdouble      *start_point,
+							 gdouble      *stop_point );
 
 void
 img_set_slide_still_info( slide_struct      *slide,
@@ -124,4 +137,19 @@ img_set_project_mod_state( img_window_struct *img,
 void
 img_sync_timings( slide_struct      *slide,
 				  img_window_struct *img );
+
+GdkPixbuf *
+img_convert_surface_to_pixbuf( cairo_surface_t *surface );
+
+gboolean
+img_scale_gradient( gint              gradient,
+					gdouble          *p_start,
+					gdouble          *p_stop,
+					gdouble          *c_start,
+					gdouble          *c_stop,
+					gint              width,
+					gint              height,
+					GdkPixbuf       **pixbuf,
+					cairo_surface_t **surface );
+
 #endif

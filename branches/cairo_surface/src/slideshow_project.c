@@ -251,9 +251,10 @@ img_load_slideshow( img_window_struct *img,
 				spath = (gchar *)g_hash_table_lookup( table, GINT_TO_POINTER( transition_id ) );
 				gtk_tree_model_get_iter_from_string( model, &iter, spath );
 				gtk_tree_model_get( model, &iter, 2, &render, 0, &pix, -1 );
-				slide_info = img_create_new_slide( slide_filename );
+				slide_info = img_create_new_slide();
 				if( slide_info )
 				{
+					img_set_slide_file_info( slide_info, slide_filename );
 					gtk_list_store_append( img->thumbnail_model, &iter );
 					gtk_list_store_set( img->thumbnail_model, &iter, 0, thumb, 1, slide_info, -1 );
 					g_object_unref( G_OBJECT( thumb ) );
@@ -341,9 +342,10 @@ img_load_slideshow( img_window_struct *img,
 				gtk_tree_model_get_iter_from_string( model, &iter, spath );
 				gtk_tree_model_get( model, &iter, 2, &render, 0, &pix, -1 );
 
-				slide_info = img_create_new_slide( slide_filename );
+				slide_info = img_create_new_slide();
 				if( slide_info )
 				{
+					img_set_slide_file_info( slide_info, slide_filename );
 					gtk_list_store_append( img->thumbnail_model, &iter );
 					gtk_list_store_set( img->thumbnail_model, &iter,
 										0, thumb,
