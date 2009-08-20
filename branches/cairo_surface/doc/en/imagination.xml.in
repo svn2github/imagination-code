@@ -177,7 +177,19 @@
 					effect, both options produce the same result. But if you
 					apply zoom, text that is positioned relative to the original
 					image will be zoomed to, while text positioned relative to
-					exported video will be stay of the same size.
+					exported video will stay of the same size.
+				</para>
+				<para>
+					Text entrance can also be animated. Simply select animation
+					from combo box, set the duration of the effect and enjoy.
+				</para>
+				<para>
+					NOTE: If duration of the text animation function exceedes
+					duration of the slide, slide duration is synchronized with
+					it. This is done on two ways: if slide has no motion
+					applied, still part of the slide is simply expanded; if
+					slide has motion applied, last stop point is expanded to
+					fit.
 				</para>
 			</sect3>
 			<sect3 id="audio_tab">
@@ -267,8 +279,8 @@
 			<title>Import pictures</title>
 				<para>
 					This menu opens up a file dialog allowing you to choose the
-					pictures to import in Imagination To select more than one
-					pictures press and hold SHIFT key while clicking on the
+					pictures to import into Imagination. To select more than one
+					picture, press and hold SHIFT key while clicking on the
 					files. A progress bar is displayed in the status bar
 					notifying you the percentage progress of the pictures'
 					import. Thumbnails won't be shown util the loading
@@ -369,7 +381,23 @@
 			<sect3 id="Add_empty_slide">
 				<title>Add empty slide</title>
 				<para>
-					This menu entry displays the above dialog where you can choose the background color of the empty slide in a three different ways: 1) with a solid color, 2) with a linear gradient, 3) with a radial gradient.
+					This menu entry displays the above dialog where you can
+					choose the background color of the empty slide in a three
+					different ways: 1) with a solid color, 2) with a linear
+					gradient, 3) with a radial gradient. This functionality is
+					most useful when you want to separate your images in
+					distinct groups by adding simple text slide in between them.
+				</para>
+				<para>
+					Slides created this way are in no way different from any
+					other slide. You can still add text to them and enhance them
+					by applying slide motion.
+				</para>
+				<para>
+					Gradients can be controlled on two levels. One level is
+					selection of start and end color. Second level is position
+					of the endpoints, which are represented by two white
+					rectangles that can be dragged around the preview area.
 				</para>
 			</sect3>
 			<sect3 id="delete">

@@ -87,7 +87,7 @@ msgstr "Povečava"
 
 #: ../src/main-window.c:330
 msgid "Add empty slide"
-msgstr ""
+msgstr "Dodaj prazen diapozitiv"
 
 #: ../src/main-window.c:341
 msgid "Dele_te"
@@ -414,30 +414,28 @@ msgid "Save an Imagination slideshow project"
 msgstr "Shrani Domišljijin projekt"
 
 #: ../src/callbacks.c:2075
-#, fuzzy
 msgid "Create new slide"
-msgstr "Ustvari novo diaprojekcijo"
+msgstr "Ustvari nov diapozitiv"
 
 #: ../src/callbacks.c:2085
 msgid "Empty slide options:"
-msgstr ""
+msgstr "Možnosti praznega diapozitiva:"
 
 #: ../src/callbacks.c:2094
 msgid "Use _solid color"
-msgstr ""
+msgstr "Uporabi či_sto barvo"
 
 #: ../src/callbacks.c:2100
 msgid "Use _linear gradient"
-msgstr ""
+msgstr "Uporabi _linearni gradient"
 
 #: ../src/callbacks.c:2106
 msgid "Use _radial gradient"
-msgstr ""
+msgstr "Uporabi _radialni gradient"
 
 #: ../src/callbacks.c:2136
-#, fuzzy
 msgid "Preview"
-msgstr "_Predogled"
+msgstr "Predogled"
 
 #. Display propert title depending on the callback that is calling this function.
 #: ../src/new_slideshow.c:63
