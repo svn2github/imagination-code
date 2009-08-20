@@ -1318,6 +1318,9 @@ static void img_slide_paste(GtkMenuItem* item, img_window_struct *img)
 		g_list_free (img->selected_paths);
 		img->selected_paths = NULL;
 	}
+	/* Free the GList containing the paths where to paste */
+	g_list_foreach (where_to_paste, (GFunc)gtk_tree_path_free, NULL);
+	g_list_free (where_to_paste);
 
 	/* Update display */
 	total_slides = g_strdup_printf("%d",img->slides_nr);
@@ -1541,10 +1544,12 @@ void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *im
 	}
 	else
 	{
-		slide_info_msg = g_strdup_printf("%s    %s: %s    %s: %s",info_slide->filename, _("Resolution"), info_slide->resolution, _("Type"), info_slide->type);
-		gtk_statusbar_push(GTK_STATUSBAR (img->statusbar), img->context_id, slide_info_msg);
-		g_free(slide_info_msg);
-
+		if (info_slide->filename != NULL)
+		{
+			slide_info_msg = g_strdup_printf("%s    %s: %s    %s: %s",info_slide->filename, _("Resolution"), info_slide->resolution, _("Type"), info_slide->type);
+			gtk_statusbar_push(GTK_STATUSBAR (img->statusbar), img->context_id, slide_info_msg);
+			g_free(slide_info_msg);
+		}
 		img_ken_burns_update_sensitivity( img, TRUE, info_slide->no_points );
 		img_subtitle_update_sensitivity( img, 1 );
 	}

@@ -2088,6 +2088,8 @@ img_add_empty_slide( GtkMenuItem       *item,
 								   { NULL, NULL, NULL } /* Radio buttons */
 								 }; 
 
+	GList *where_to_insert = NULL;
+
 	/* Widgets */
 	GtkWidget *dialog,
 			  *vbox,
@@ -2101,7 +2103,7 @@ img_add_empty_slide( GtkMenuItem       *item,
 			  *preview,
 			  *hbox;
 	GdkColor   color;
-	gint       i, w, h;
+	gint       i, w, h, pos;
 
 	dialog = gtk_dialog_new_with_buttons(
 					_("Create new slide"),
@@ -2111,16 +2113,19 @@ img_add_empty_slide( GtkMenuItem       *item,
 					GTK_STOCK_OK, GTK_RESPONSE_ACCEPT,
 					NULL );
 
+	gtk_button_box_set_layout (GTK_BUTTON_BOX (GTK_DIALOG (dialog)->action_area), GTK_BUTTONBOX_SPREAD);
+	gtk_dialog_set_has_separator (GTK_DIALOG (dialog), FALSE);
 	vbox = gtk_dialog_get_content_area( GTK_DIALOG( dialog ) );
-
+	
 	frame = gtk_frame_new( _("Empty slide options:") );
-	gtk_box_pack_start( GTK_BOX( vbox ), frame, TRUE, TRUE, 0 );
+	gtk_box_pack_start( GTK_BOX( vbox ), frame, TRUE, TRUE, 5 );
+	gtk_container_set_border_width( GTK_CONTAINER( frame ), 5 );
 
 	hbox = gtk_hbox_new( FALSE, 6 );
 	gtk_container_add( GTK_CONTAINER( frame ), hbox );
 
-	table = gtk_table_new( 4, 2, FALSE );
-	gtk_box_pack_start( GTK_BOX( hbox ), table, FALSE, FALSE, 0 );
+	table = gtk_table_new( 4, 2, TRUE );
+	gtk_box_pack_start( GTK_BOX( hbox ), table, FALSE, FALSE, 10 );
 
 	radio1 = gtk_radio_button_new_with_mnemonic( NULL, _("Use _solid color") );
 	gtk_table_attach( GTK_TABLE( table ), radio1, 0, 2, 0, 1,
@@ -2165,7 +2170,7 @@ img_add_empty_slide( GtkMenuItem       *item,
 					  G_CALLBACK( img_gradient_color_set ), &slide );
 
 	frame = gtk_frame_new( _("Preview") );
-	gtk_box_pack_start( GTK_BOX( hbox ), frame, TRUE, TRUE, 0 );
+	gtk_box_pack_start( GTK_BOX( hbox ), frame, TRUE, TRUE, 5 );
 
 	w = img->video_size[0] / 2;
 	h = img->video_size[1] / 2;
@@ -2239,14 +2244,25 @@ img_add_empty_slide( GtkMenuItem       *item,
 								&thumb, NULL );
 										
 			/* Add slide to store */
-			/* FIXME: We should probably insert new slide at selected
-			 * before/after currently selected slide. */
-			gtk_list_store_append( img->thumbnail_model, &iter );
-			gtk_list_store_set( img->thumbnail_model, &iter, 0, thumb,
-															 1, slide_info,
-															 2, NULL,
-															 3, FALSE,
-															 -1 );
+			where_to_insert	=	gtk_icon_view_get_selected_items(GTK_ICON_VIEW(img->active_icon));
+			if (where_to_insert)
+			{
+				pos = gtk_tree_path_get_indices(where_to_insert->data)[0]+1;
+				gtk_list_store_insert_with_values(img->thumbnail_model, &iter,
+												 pos,
+												 0, thumb,
+						 						 1, slide_info,
+						 						 2, NULL,
+						 						 3, FALSE,
+						 						-1 );
+				g_list_foreach (where_to_insert, (GFunc)gtk_tree_path_free, NULL);
+				g_list_free (where_to_insert);
+			}
+			else
+			{
+				gtk_list_store_append( img->thumbnail_model, &iter );
+				gtk_list_store_set(img->thumbnail_model, &iter, 0, thumb, 1, slide_info, 2, NULL, 3, FALSE, -1 );
+			}
 			g_object_unref( G_OBJECT( thumb ) );
 			img->slides_nr++;
 			img_set_total_slideshow_duration( img );

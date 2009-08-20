@@ -387,6 +387,8 @@
 					gradient, 3) with a radial gradient. This functionality is
 					most useful when you want to separate your images in
 					distinct groups by adding simple text slide in between them.
+					If a slide is selected the empty slide will be added next to
+					the selected slide otherwise it will be added after the last slide.
 				</para>
 				<para>
 					Slides created this way are in no way different from any
