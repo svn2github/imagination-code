@@ -768,3 +768,15 @@ img_set_project_mod_state( img_window_struct *img,
 
 	/* FIXME: Do any updates here (add "*" to window title, ...). */
 }
+
+void img_select_nth_slide(img_window_struct *img, gint slide_to_select)
+{
+	GtkTreePath *path;
+
+	gtk_icon_view_unselect_all(GTK_ICON_VIEW (img->active_icon));
+	path = gtk_tree_path_new_from_indices(slide_to_select, -1);
+	gtk_icon_view_set_cursor (GTK_ICON_VIEW (img->active_icon), path, NULL, FALSE);
+	gtk_icon_view_select_path (GTK_ICON_VIEW (img->active_icon), path);
+	gtk_icon_view_scroll_to_path (GTK_ICON_VIEW (img->active_icon), path, FALSE, 0, 0);
+	gtk_tree_path_free (path);
+}

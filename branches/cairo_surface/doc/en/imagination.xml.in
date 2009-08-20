@@ -3,7 +3,7 @@
     "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
   <!ENTITY date "September 2009"> 
   <!ENTITY version "2.0">
-  <!ENTITY application "imagination"> 
+  <!ENTITY application "Imagination"> 
 ]>
 <article id="index" lang="en">
 	<articleinfo>
@@ -50,7 +50,7 @@
 		<title>New Slideshow Project Format</title>
 			<para>
 				Starting from this release, &version;, Imagination's slideshow project format has changed. The old format will be recognized and slideshows saved with this format
-				will be correctly loaded, but from the next release support for old slideshow project files (saved with Imagination's release prior to &version;
+				will be correctly loaded, but from the next release support for old slideshow project files (saved with Imagination's release prior to &version;)
 				will be <emphasis>DROPPED</emphasis>. Please ensure to load ALL your old slideshow projects with Imagination &version; and save them again.
 			</para>
 	</sect1>
@@ -180,11 +180,19 @@
 					exported video will be stay of the same size.
 				</para>
 			</sect3>
-			<para>By clicking on the "Audio" tab the background music list is displayed. Here you can see the length of each of the imported audio files along with the total time length. The arrow buttons allows you to reorder the audio files while the button with the broom deletes the selected audio files. </para>
-			<figure id="audio_tab">
+			<sect3 id="audio_tab">
 				<title>Audio Tab</title>
-				<graphic fileref="images/side_panel_audio.png"></graphic>
-			</figure>
+					<para>
+						By clicking on the "Audio" tab the background music list is displayed. Here you can see the length
+						of each of the imported audio files along with the total time length of all the imported audio files.
+						The play button allows you to reproduce the selected audio file. The arrow buttons allows you to
+						reorder the audio files and the button with the broom deletes the selected audio files.
+					</para>
+				<figure id="audio_tab_pic">
+					<title>Audio Tab</title>
+					<graphic fileref="images/side_panel_audio.png"></graphic>
+				</figure>
+			</sect3>
 		</sect2>
 		<sect2 id="image_area">
 			<title>Image Area</title>

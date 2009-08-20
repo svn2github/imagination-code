@@ -187,19 +187,10 @@ void img_add_slides_thumbnails(GtkMenuItem *item, img_window_struct *img)
 	/* Select the first slide */
 	if (actual_slides == 0)
 		img_goto_first_slide(NULL, img);
+
 	/* Select the first loaded slide if a previous set of slides was loaded */
 	else
-	{
-		GtkTreePath *path;
-
-		gtk_icon_view_unselect_all(GTK_ICON_VIEW (img->active_icon));
-		path = gtk_tree_path_new_from_indices(actual_slides, -1);
-		gtk_icon_view_set_cursor (GTK_ICON_VIEW (img->active_icon), path, NULL, FALSE);
-		gtk_icon_view_select_path (GTK_ICON_VIEW (img->active_icon), path);
-		gtk_icon_view_scroll_to_path (GTK_ICON_VIEW (img->active_icon), path, FALSE, 0, 0);
-		gtk_tree_path_free (path);
-	}
-	
+		img_select_nth_slide(img, actual_slides);
 }
 
 void img_increase_progressbar(img_window_struct *img, gint nr)
@@ -1086,7 +1077,7 @@ void img_on_drag_data_received (GtkWidget *widget,GdkDragContext *context,int x,
 	GtkWidget *dialog;
 	GdkPixbuf *thumb;
 	GtkTreeIter iter;
-	gint len = 0, slides_cnt = 0;
+	gint len = 0, slides_cnt = 0, actual_slides;
 	slide_struct *slide_info;
 
 	pictures = gtk_selection_data_get_uris(data);
@@ -1099,6 +1090,7 @@ void img_on_drag_data_received (GtkWidget *widget,GdkDragContext *context,int x,
 		gtk_drag_finish(context,FALSE,FALSE,time);
 		return;
 	}
+	actual_slides = img->slides_nr;
 	gtk_drag_finish (context,TRUE,FALSE,time);
 	while(pictures[len])
 	{
@@ -1127,6 +1119,14 @@ void img_on_drag_data_received (GtkWidget *widget,GdkDragContext *context,int x,
 		img_set_statusbar_message(img, 0);
 	}
 	g_strfreev (pictures);
+
+	/* Select the first slide */
+	if (actual_slides == 0)
+		img_goto_first_slide(NULL, img);
+
+	/* Select the first loaded slide if a previous set of slides was loaded */
+	else
+		img_select_nth_slide(img, actual_slides);	
 }
 
 /*
