@@ -2211,8 +2211,6 @@ void
 img_subtitle_update_sensitivity( img_window_struct *img,
 								 gint               mode )
 {
-	GtkTextIter start, end;
-
 	/* Modes:
 	 *  0 - disable all
 	 *  1 - enable all
@@ -2224,13 +2222,16 @@ img_subtitle_update_sensitivity( img_window_struct *img,
 							  ( mode == 2 ? FALSE : (gboolean)mode ) );
 
 	/* Let's delete the textbuffer when no slide is selected */
-	g_signal_handlers_block_by_func((gpointer)img->slide_text_buffer, (gpointer)img_queue_subtitle_update, img);
-
-	gtk_text_buffer_get_start_iter(GTK_TEXT_BUFFER(img->slide_text_buffer), &start);
-	gtk_text_buffer_get_end_iter(GTK_TEXT_BUFFER(img->slide_text_buffer), &end);
-	gtk_text_buffer_delete(GTK_TEXT_BUFFER(img->slide_text_buffer), &start, &end);
-
-	g_signal_handlers_unblock_by_func((gpointer)img->slide_text_buffer, (gpointer)img_queue_subtitle_update, img);
+	if( mode == 0 || mode == 2 )
+	{
+		g_signal_handlers_block_by_func( (gpointer)img->slide_text_buffer,
+										 (gpointer)img_queue_subtitle_update,
+										 img );
+		g_object_set( G_OBJECT( img->slide_text_buffer ), "text", "", NULL );
+		g_signal_handlers_unblock_by_func( (gpointer)img->slide_text_buffer,
+										   (gpointer)img_queue_subtitle_update,
+										   img );
+	}
 
 	/* Animation duration is also special, since it shoudl be disabled when None
 	 * animation is selected. */
