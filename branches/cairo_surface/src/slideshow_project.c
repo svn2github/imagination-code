@@ -64,7 +64,7 @@ img_save_slideshow( img_window_struct *img,
 		else
 		{
 			/* We are dealing with an empty slide */
-			gdouble start_color[3], stop_color[3], start_point[3], stop_point[3];
+			gdouble start_color[3], stop_color[3], start_point[2], stop_point[2];
 			g_key_file_set_string (img_key_file, conf, "filename",	"");
 			g_key_file_set_integer(img_key_file, conf, "gradient",	entry->gradient);
 			for( i = 0; i < 3; i++ )
@@ -345,7 +345,7 @@ img_load_slideshow( img_window_struct *img,
 				c_start = g_key_file_get_double_list(img_key_file, conf, "start_color", NULL, NULL);
 				c_stop  = g_key_file_get_double_list(img_key_file, conf, "stop_color", NULL, NULL);
 				p_start = g_key_file_get_double_list(img_key_file, conf, "start_point", NULL, NULL);
-				p_stop = g_key_file_get_double_list(img_key_file, conf, "stop_color", NULL, NULL);
+				p_stop = g_key_file_get_double_list(img_key_file, conf, "stop_point", NULL, NULL);
 
 				/* Create thumbnail */
 				img_scale_gradient( gradient, p_start, p_stop, c_start, c_stop, 88, 72, &thumb, NULL );
