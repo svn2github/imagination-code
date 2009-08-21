@@ -191,6 +191,15 @@
 					slide has motion applied, last stop point is expanded to
 					fit.
 				</para>
+				<para>
+					How to have text stnd still for a period of time? Just make
+					sure that slide duration is longer than text animation
+					duration. For example, if you want to have 6 seconds of text
+					movement and 4 seconds of still text, you should set text
+					animation duration to 6 seconds and slide duration to 10
+					seconds (6 seconds of text animation + 4 seconds of still
+					time).
+				</para>
 			</sect3>
 			<sect3 id="audio_tab">
 				<title>Audio Tab</title>
