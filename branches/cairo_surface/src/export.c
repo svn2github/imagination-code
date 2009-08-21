@@ -17,6 +17,8 @@
 ** Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
+#define TB_DEBUG_FFMPEG 1
+
 #include "export.h"
 #include "support.h"
 #include "callbacks.h"
@@ -61,6 +63,8 @@ static void
 img_exporter_ogg( img_window_struct *img );
 static void
 img_exporter_flv( img_window_struct *img );
+static void
+img_exporter_debug( img_window_struct *img );
 
 
 /*
@@ -84,6 +88,10 @@ img_get_exporters_list( Exporter **exporters )
 	gint      no_exporters = 3; /* Total number of exporters */
 	gint      i = 0;
 	
+#ifdef TB_DEBUG_FFMPEG
+	no_exporters++;
+#endif
+
 	list = g_slice_alloc( sizeof( Exporter ) * no_exporters );
 
 	/* Populate list with data */
@@ -93,6 +101,13 @@ img_get_exporters_list( Exporter **exporters )
 	list[i++].func = G_CALLBACK( img_exporter_ogg );
 	list[i].description = g_strdup( "FLV (Flash video)" );
 	list[i++].func = G_CALLBACK( img_exporter_flv );
+
+#ifdef TB_DEBUG_FFMPEG
+	/* This is not a real video exporter, since it produces images that
+	 * represent video frames instead of video file */
+	list[i].description = g_strdup( "Debug (PPM images)" );
+	list[i++].func = G_CALLBACK( img_exporter_debug );
+#endif
 
 	*exporters = list;
 
@@ -1469,6 +1484,46 @@ img_exporter_flv( img_window_struct *img )
 								"-ac 1 -y \"%s.flv\"",
 								img->export_fps, qualities[i],
 								width, height, filename );
+	img->export_cmd_line = cmd_line;
+
+	/* Initiate stage 2 of export - audio processing */
+	g_idle_add( (GSourceFunc)img_prepare_audio, img );
+
+	gtk_widget_destroy( dialog );
+}
+
+static void
+img_exporter_debug( img_window_struct *img )
+{
+	gchar          *cmd_line;
+	const gchar    *filename;
+	GtkWidget      *dialog;
+	GtkEntry       *entry;
+	GtkWidget      *vbox;
+
+	/* This function call should be the first thing exporter does, since this
+	 * function will take some preventive measures. */
+	dialog = img_create_export_dialog( img, _("FLV export"),
+									   GTK_WINDOW( img->imagination_window ),
+									   &entry, &vbox );
+
+	/* If dialog is NULL, abort. */
+	if( dialog == NULL )
+		return;
+
+	/* Run dialog and abort if needed */
+	if( gtk_dialog_run( GTK_DIALOG( dialog ) ) != GTK_RESPONSE_ACCEPT )
+	{
+		gtk_widget_destroy( dialog );
+		return;
+	}
+
+	/* User is serious, so we better prepare ffmpeg command line;) */
+	img->export_is_running = 1;
+	img->export_fps = 30;
+	filename = gtk_entry_get_text( entry );
+
+	cmd_line = g_strdup_printf( "cat > %s", filename );
 	img->export_cmd_line = cmd_line;
 
 	/* Initiate stage 2 of export - audio processing */
