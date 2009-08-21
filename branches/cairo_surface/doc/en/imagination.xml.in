@@ -380,6 +380,10 @@
 			</sect3>
 			<sect3 id="Add_empty_slide">
 				<title>Add empty slide</title>
+				<figure id="empty_slide">
+					<title>Create new slide dialog</title>
+					<graphic fileref="images/empty_slide_dialog.png"></graphic>
+				</figure>
 				<para>
 					This menu entry displays the above dialog where you can
 					choose the background color of the empty slide in a three
@@ -399,7 +403,7 @@
 					Gradients can be controlled on two levels. One level is
 					selection of start and end color. Second level is position
 					of the endpoints, which are represented by two white
-					rectangles that can be dragged around the preview area.
+					squares that can be dragged around the preview area.
 				</para>
 			</sect3>
 			<sect3 id="delete">
