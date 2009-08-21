@@ -192,7 +192,7 @@
 					fit.
 				</para>
 				<para>
-					How to have text stnd still for a period of time? Just make
+					How to have text stand still for a period of time? Just make
 					sure that slide duration is longer than text animation
 					duration. For example, if you want to have 6 seconds of text
 					movement and 4 seconds of still text, you should set text
