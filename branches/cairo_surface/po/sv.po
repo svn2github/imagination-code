@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-08-21 09:31+0200\n"
+"POT-Creation-Date: 2009-08-21 19:07+0200\n"
 "PO-Revision-Date: 2009-08-21 09:29+0100\n"
 "Last-Translator: Daniel Nylander <po@danielnylander.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
@@ -75,7 +75,7 @@ msgstr "Kvalitet för förhandsgranskning"
 msgid "_Low"
 msgstr "_Låg"
 
-#: ../src/main-window.c:299 ../src/export.c:1317 ../src/export.c:1430
+#: ../src/main-window.c:299 ../src/export.c:1332 ../src/export.c:1445
 msgid "High"
 msgstr "Hög"
 
@@ -464,7 +464,7 @@ msgstr "Skala om bilderna för att passa önskat bildformat"
 msgid "Select background color:"
 msgstr "Välj bakgrundsfärg:"
 
-#: ../src/slideshow_project.c:208
+#: ../src/slideshow_project.c:203
 msgid "This is not an Imagination project file!"
 msgstr "Detta är inte en projektfil för Imagination!"
 
@@ -495,36 +495,36 @@ msgstr ""
 msgid "Please choose the slideshow project filename"
 msgstr "Välj filnamn för bildspelsprojektet"
 
-#: ../src/export.c:204
+#: ../src/export.c:219
 msgid "<b>Export Settings</b>"
 msgstr "<b>Exportinställningar</b>"
 
-#: ../src/export.c:218
+#: ../src/export.c:233
 msgid "Filename of the slideshow:"
 msgstr "Filnamn för bildspelet:"
 
-#: ../src/export.c:350
+#: ../src/export.c:365
 msgid "Exporting the slideshow"
 msgstr "Exporterar bildspelet"
 
-#: ../src/export.c:361
+#: ../src/export.c:376
 msgid "Preparing for export ..."
 msgstr "Förbereder för export ..."
 
-#: ../src/export.c:372
+#: ../src/export.c:387
 msgid "Overall progress:"
 msgstr "Totalt förlopp:"
 
-#: ../src/export.c:462 ../src/export.c:818
+#: ../src/export.c:477 ../src/export.c:833
 #, c-format
 msgid "Slide %d export progress:"
 msgstr "Förlopp för export av bild %d:"
 
-#: ../src/export.c:673
+#: ../src/export.c:688
 msgid "Failed to launch the encoder!"
 msgstr "Misslyckades med att starta kodaren!"
 
-#: ../src/export.c:816
+#: ../src/export.c:831
 #, c-format
 msgid "Final transition export progress:"
 msgstr "Förlopp för export av slutgiltig övergång:"
@@ -532,43 +532,43 @@ msgstr "Förlopp för export av slutgiltig övergång:"
 #. This function call should be the first thing exporter does, since this
 #. * function will take some preventive measures and also switches mode into
 #. * preview if needed.
-#: ../src/export.c:1188
+#: ../src/export.c:1203
 msgid "VOB export"
 msgstr "VOB-export"
 
-#: ../src/export.c:1200 ../src/export.c:1283 ../src/export.c:1396
+#: ../src/export.c:1215 ../src/export.c:1298 ../src/export.c:1411
 msgid "<b>Television Format</b>"
 msgstr "<b>Tv-format</b>"
 
-#: ../src/export.c:1207 ../src/export.c:1290 ../src/export.c:1403
+#: ../src/export.c:1222 ../src/export.c:1305 ../src/export.c:1418
 msgid "Normal 4:3"
 msgstr "Normal 4:3"
 
-#: ../src/export.c:1212 ../src/export.c:1295 ../src/export.c:1408
+#: ../src/export.c:1227 ../src/export.c:1310 ../src/export.c:1423
 msgid "Widescreen 16:9"
 msgstr "Bredbild 16:9"
 
 #. This function call should be the first thing exporter does, since this
 #. * function will take some preventive measures.
-#: ../src/export.c:1271
+#: ../src/export.c:1286
 msgid "OGG export"
 msgstr "OGG-export"
 
-#: ../src/export.c:1301 ../src/export.c:1414
+#: ../src/export.c:1316 ../src/export.c:1429
 msgid "<b>Video Quality:</b>"
 msgstr "<b>Videokvalitet:</b>"
 
-#: ../src/export.c:1308 ../src/export.c:1421
+#: ../src/export.c:1323 ../src/export.c:1436
 msgid "Low"
 msgstr "Låg"
 
-#: ../src/export.c:1312 ../src/export.c:1425
+#: ../src/export.c:1327 ../src/export.c:1440
 msgid "Medium"
 msgstr "Medel"
 
 #. This function call should be the first thing exporter does, since this
 #. * function will take some preventive measures.
-#: ../src/export.c:1384
+#: ../src/export.c:1399 ../src/export.c:1506
 msgid "FLV export"
 msgstr "FLV-export"
 

@@ -1246,8 +1246,8 @@ img_exporter_vob( img_window_struct *img )
 	else
 		aspect_ratio = "16:9";
 
-	cmd_line = g_strdup_printf( "ffmpeg -f image2pipe -vcodec ppm -i pipe: "
-								"-r %.02f -aspect %s -s %dx%d <#AUDIO#> -y "
+	cmd_line = g_strdup_printf( "ffmpeg -f image2pipe -vcodec ppm -r %.02f -i pipe: "
+								"-aspect %s -s %dx%d <#AUDIO#> -y "
 								"-bf 2 -target %s-dvd \"%s.vob\"",
 								img->export_fps, aspect_ratio,
 								img->video_size[0], img->video_size[1],
@@ -1358,8 +1358,8 @@ img_exporter_ogg( img_window_struct *img )
 			break;
 	}
 
-	cmd_line = g_strdup_printf( "ffmpeg -f image2pipe -vcodec ppm -i pipe: "
-								"-r %.02f -aspect %s -s %dx%d <#AUDIO#> "
+	cmd_line = g_strdup_printf( "ffmpeg -f image2pipe -vcodec ppm -r %.02f -i pipe: "
+								"-aspect %s -s %dx%d <#AUDIO#> "
 								"-vcodec libtheora -b %dk -acodec libvorbis "
 								"-f ogg -y \"%s.ogv\"",
 								img->export_fps, aspect_ratio,
@@ -1477,8 +1477,8 @@ img_exporter_flv( img_window_struct *img )
 			break;
 	}
 
-	cmd_line = g_strdup_printf( "ffmpeg -f image2pipe -vcodec ppm -i pipe: "
-								"-r %.02f -b %dk -s %dx%d "
+	cmd_line = g_strdup_printf( "ffmpeg -f image2pipe -vcodec ppm -r %.02f -i pipe: "
+								"-b %dk -s %dx%d "
 								"<#AUDIO#> -f flv -vcodec flv "
 								"-acodec libmp3lame -ab 56000 -ar 22050 "
 								"-ac 1 -y \"%s.flv\"",

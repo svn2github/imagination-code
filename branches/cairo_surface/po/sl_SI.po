@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-08-21 09:31+0200\n"
+"POT-Creation-Date: 2009-08-21 19:07+0200\n"
 "PO-Revision-Date: 2009-02-24 11:55+0100\n"
 "Last-Translator: tadeboro <tadeboro@gmail.com>\n"
 "Language-Team: Slovenian\n"
@@ -76,7 +76,7 @@ msgstr "Kakovost predogleda"
 msgid "_Low"
 msgstr "_Nizka"
 
-#: ../src/main-window.c:299 ../src/export.c:1317 ../src/export.c:1430
+#: ../src/main-window.c:299 ../src/export.c:1332 ../src/export.c:1445
 msgid "High"
 msgstr "Visoka"
 
@@ -463,7 +463,7 @@ msgstr "Preoblikuj slike da ustrezajo obliki izvoza"
 msgid "Select background color:"
 msgstr "Izberite barvo ozadja:"
 
-#: ../src/slideshow_project.c:208
+#: ../src/slideshow_project.c:203
 msgid "This is not an Imagination project file!"
 msgstr "Izbrana datoteka ni Domišljijin projekt!"
 
@@ -494,36 +494,36 @@ msgstr " - Uporabite CTRL za posamično izbiranje ali SHIFT za izbiro večih"
 msgid "Please choose the slideshow project filename"
 msgstr "Prosimo izberite ime projekta"
 
-#: ../src/export.c:204
+#: ../src/export.c:219
 msgid "<b>Export Settings</b>"
 msgstr "<b>Nastavitve izvoza</b>"
 
-#: ../src/export.c:218
+#: ../src/export.c:233
 msgid "Filename of the slideshow:"
 msgstr "Ime datoteke z diaprojekcijo:"
 
-#: ../src/export.c:350
+#: ../src/export.c:365
 msgid "Exporting the slideshow"
 msgstr "Izvažam diaprojekcijo"
 
-#: ../src/export.c:361
+#: ../src/export.c:376
 msgid "Preparing for export ..."
 msgstr "Pripravljam za izvoz ..."
 
-#: ../src/export.c:372
+#: ../src/export.c:387
 msgid "Overall progress:"
 msgstr "Skupni napredek:"
 
-#: ../src/export.c:462 ../src/export.c:818
+#: ../src/export.c:477 ../src/export.c:833
 #, c-format
 msgid "Slide %d export progress:"
 msgstr "Napredek izvoza diapozitiva %d:"
 
-#: ../src/export.c:673
+#: ../src/export.c:688
 msgid "Failed to launch the encoder!"
 msgstr "Ne morem zagnati šifrirnika!"
 
-#: ../src/export.c:816
+#: ../src/export.c:831
 #, c-format
 msgid "Final transition export progress:"
 msgstr "Napredek izvoza zadnjega prehoda:"
@@ -531,42 +531,42 @@ msgstr "Napredek izvoza zadnjega prehoda:"
 #. This function call should be the first thing exporter does, since this
 #. * function will take some preventive measures and also switches mode into
 #. * preview if needed.
-#: ../src/export.c:1188
+#: ../src/export.c:1203
 msgid "VOB export"
 msgstr "VOB izvoz"
 
-#: ../src/export.c:1200 ../src/export.c:1283 ../src/export.c:1396
+#: ../src/export.c:1215 ../src/export.c:1298 ../src/export.c:1411
 msgid "<b>Television Format</b>"
 msgstr "<b>Televizijska oblika</b>"
 
-#: ../src/export.c:1207 ../src/export.c:1290 ../src/export.c:1403
+#: ../src/export.c:1222 ../src/export.c:1305 ../src/export.c:1418
 msgid "Normal 4:3"
 msgstr "Normalno 4:3"
 
-#: ../src/export.c:1212 ../src/export.c:1295 ../src/export.c:1408
+#: ../src/export.c:1227 ../src/export.c:1310 ../src/export.c:1423
 msgid "Widescreen 16:9"
 msgstr "Širokozaslonsko 16:9"
 
 #. This function call should be the first thing exporter does, since this
 #. * function will take some preventive measures.
-#: ../src/export.c:1271
+#: ../src/export.c:1286
 msgid "OGG export"
 msgstr "OGG izvoz"
 
-#: ../src/export.c:1301 ../src/export.c:1414
+#: ../src/export.c:1316 ../src/export.c:1429
 msgid "<b>Video Quality:</b>"
 msgstr "<b>Kvaliteta videa:</b>"
 
-#: ../src/export.c:1308 ../src/export.c:1421
+#: ../src/export.c:1323 ../src/export.c:1436
 msgid "Low"
 msgstr "Nizka"
 
-#: ../src/export.c:1312 ../src/export.c:1425
+#: ../src/export.c:1327 ../src/export.c:1440
 msgid "Medium"
 msgstr "Srednja"
 
 #. This function call should be the first thing exporter does, since this
 #. * function will take some preventive measures.
-#: ../src/export.c:1384
+#: ../src/export.c:1399 ../src/export.c:1506
 msgid "FLV export"
 msgstr "FLV izvoz"

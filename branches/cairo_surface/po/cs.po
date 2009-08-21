@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-08-21 09:31+0200\n"
+"POT-Creation-Date: 2009-08-21 19:07+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Michal Várady <miko.vaji@gmail.com>\n"
 "Language-Team: \n"
@@ -76,7 +76,7 @@ msgstr "_Náhled"
 msgid "_Low"
 msgstr "Nízká"
 
-#: ../src/main-window.c:299 ../src/export.c:1317 ../src/export.c:1430
+#: ../src/main-window.c:299 ../src/export.c:1332 ../src/export.c:1445
 msgid "High"
 msgstr "Vysoká"
 
@@ -479,7 +479,7 @@ msgstr ""
 msgid "Select background color:"
 msgstr "Vybrat barvu pozadí:"
 
-#: ../src/slideshow_project.c:208
+#: ../src/slideshow_project.c:203
 msgid "This is not an Imagination project file!"
 msgstr "Toto není soubor projektu aplikace Imagination."
 
@@ -511,36 +511,36 @@ msgstr ""
 msgid "Please choose the slideshow project filename"
 msgstr "Zvolte název souboru projektu prezentace"
 
-#: ../src/export.c:204
+#: ../src/export.c:219
 msgid "<b>Export Settings</b>"
 msgstr "<b>Nastavení exportu</b>"
 
-#: ../src/export.c:218
+#: ../src/export.c:233
 msgid "Filename of the slideshow:"
 msgstr "Název souboru prezentace:"
 
-#: ../src/export.c:350
+#: ../src/export.c:365
 msgid "Exporting the slideshow"
 msgstr "Exportování prezentace"
 
-#: ../src/export.c:361
+#: ../src/export.c:376
 msgid "Preparing for export ..."
 msgstr "Příprava na export..."
 
-#: ../src/export.c:372
+#: ../src/export.c:387
 msgid "Overall progress:"
 msgstr "Celkový průběh:"
 
-#: ../src/export.c:462 ../src/export.c:818
+#: ../src/export.c:477 ../src/export.c:833
 #, c-format
 msgid "Slide %d export progress:"
 msgstr "Průběh exportu snímku %d:"
 
-#: ../src/export.c:673
+#: ../src/export.c:688
 msgid "Failed to launch the encoder!"
 msgstr "Nepodařilo se spustit enkodér."
 
-#: ../src/export.c:816
+#: ../src/export.c:831
 #, c-format
 msgid "Final transition export progress:"
 msgstr "Průběh exportu hotových přechodů"
@@ -548,43 +548,43 @@ msgstr "Průběh exportu hotových přechodů"
 #. This function call should be the first thing exporter does, since this
 #. * function will take some preventive measures and also switches mode into
 #. * preview if needed.
-#: ../src/export.c:1188
+#: ../src/export.c:1203
 msgid "VOB export"
 msgstr "Export do formátu VOB"
 
-#: ../src/export.c:1200 ../src/export.c:1283 ../src/export.c:1396
+#: ../src/export.c:1215 ../src/export.c:1298 ../src/export.c:1411
 msgid "<b>Television Format</b>"
 msgstr "<b>Televizní formát</b>"
 
-#: ../src/export.c:1207 ../src/export.c:1290 ../src/export.c:1403
+#: ../src/export.c:1222 ../src/export.c:1305 ../src/export.c:1418
 msgid "Normal 4:3"
 msgstr "Běžný 4:3"
 
-#: ../src/export.c:1212 ../src/export.c:1295 ../src/export.c:1408
+#: ../src/export.c:1227 ../src/export.c:1310 ../src/export.c:1423
 msgid "Widescreen 16:9"
 msgstr "Širokoúhlý 16:9"
 
 #. This function call should be the first thing exporter does, since this
 #. * function will take some preventive measures.
-#: ../src/export.c:1271
+#: ../src/export.c:1286
 msgid "OGG export"
 msgstr "Export do formátu OGG"
 
-#: ../src/export.c:1301 ../src/export.c:1414
+#: ../src/export.c:1316 ../src/export.c:1429
 msgid "<b>Video Quality:</b>"
 msgstr "<b>Kvalita videa:</b>"
 
-#: ../src/export.c:1308 ../src/export.c:1421
+#: ../src/export.c:1323 ../src/export.c:1436
 msgid "Low"
 msgstr "Nízká"
 
-#: ../src/export.c:1312 ../src/export.c:1425
+#: ../src/export.c:1327 ../src/export.c:1440
 msgid "Medium"
 msgstr "Střední"
 
 #. This function call should be the first thing exporter does, since this
 #. * function will take some preventive measures.
-#: ../src/export.c:1384
+#: ../src/export.c:1399 ../src/export.c:1506
 msgid "FLV export"
 msgstr "Export do formátu FLV"
 

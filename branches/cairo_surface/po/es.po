@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-08-21 09:31+0200\n"
-"PO-Revision-Date: 2009-08-21 00:35-0300\n"
+"POT-Creation-Date: 2009-08-21 19:07+0200\n"
+"PO-Revision-Date: 2009-08-21 12:05-0300\n"
 "Last-Translator: elega <elega@elega.com.ar>\n"
 "Language-Team: Spanish (Spain)\n"
 "MIME-Version: 1.0\n"
@@ -68,36 +68,34 @@ msgstr "_Diapositiva"
 
 #. Preview quality menu
 #: ../src/main-window.c:289
-#, fuzzy
 msgid "Preview quality"
-msgstr "P_revisualizar"
+msgstr "Calidad de la previsualización"
 
 #: ../src/main-window.c:295
-#, fuzzy
 msgid "_Low"
-msgstr "Baja"
+msgstr "_Baja"
 
-#: ../src/main-window.c:299 ../src/export.c:1317 ../src/export.c:1430
+#: ../src/main-window.c:299 ../src/export.c:1332 ../src/export.c:1445
 msgid "High"
 msgstr "Alta"
 
 #. Zoom controls
 #: ../src/main-window.c:303
 msgid "_Zoom"
-msgstr ""
+msgstr "_Zoom"
 
 #: ../src/main-window.c:330
+#, fuzzy
 msgid "Add empt_y slide"
-msgstr ""
+msgstr "Agregar una diapositiva vacia"
 
 #: ../src/main-window.c:339
 msgid "Dele_te"
 msgstr "_Eliminar"
 
 #: ../src/main-window.c:351
-#, fuzzy
 msgid "_Rotate clockwise"
-msgstr "Rotar en sentido _horario"
+msgstr "_Rotar en sentido horario"
 
 #: ../src/main-window.c:361
 msgid "Rotate co_unter-clockwise"
@@ -109,18 +107,16 @@ msgstr "_Deseleccionar todo"
 
 #. View menu
 #: ../src/main-window.c:381
-#, fuzzy
 msgid "_View"
-msgstr "P_revisualizar"
+msgstr "_Ver"
 
 #: ../src/main-window.c:387
-#, fuzzy
 msgid "Preview mode"
-msgstr "P_revisualizar"
+msgstr "Previsualizar"
 
 #: ../src/main-window.c:393
 msgid "Overview mode"
-msgstr ""
+msgstr "Modo de vista general"
 
 #: ../src/main-window.c:396
 msgid "_Help"
@@ -128,7 +124,7 @@ msgstr "_Ayuda"
 
 #: ../src/main-window.c:401
 msgid "Contents"
-msgstr ""
+msgstr "Contenidos"
 
 #: ../src/main-window.c:422 ../src/new_slideshow.c:63
 msgid "Create a new slideshow"
@@ -164,16 +160,15 @@ msgstr "Rotar la dispositiva en sentido antihorario"
 
 #: ../src/main-window.c:482
 msgid "Zoom In"
-msgstr ""
+msgstr "Acercar"
 
 #: ../src/main-window.c:487
 msgid "Zoom Out"
-msgstr ""
+msgstr "Alejar"
 
 #: ../src/main-window.c:492
-#, fuzzy
 msgid "Normal Size"
-msgstr "Normal"
+msgstr "Tamaño normal"
 
 #: ../src/main-window.c:500 ../src/callbacks.c:1349
 msgid "Starts the preview"
@@ -185,7 +180,7 @@ msgstr "Ir a la primera diapositiva"
 
 #: ../src/main-window.c:513
 msgid "Goto previous selected slide"
-msgstr "Ir a la anterior diapositiva seleccionada"
+msgstr "Ir a la diapositiva anterior"
 
 #: ../src/main-window.c:529 ../src/main-window.c:733
 msgid " of "
@@ -193,7 +188,7 @@ msgstr " de"
 
 #: ../src/main-window.c:540
 msgid "Goto next selected slide"
-msgstr "Ir a la siguiente diapositiva seleccionada"
+msgstr "Ir a la diapositiva siguiente"
 
 #: ../src/main-window.c:545
 msgid "Goto last slide"
@@ -201,7 +196,7 @@ msgstr "Ir a la última diapositiva"
 
 #: ../src/main-window.c:594
 msgid "Video"
-msgstr ""
+msgstr "Video"
 
 #: ../src/main-window.c:613
 msgid "<b>Slide Settings</b>"
@@ -253,17 +248,15 @@ msgstr "<b>Movimiento de las diapositivas</b>"
 
 #: ../src/main-window.c:710
 msgid "Stop Point:"
-msgstr ""
+msgstr "Detener punto:-"
 
 #: ../src/main-window.c:747
-#, fuzzy
 msgid "Duration:"
-msgstr "Duración de la música:"
+msgstr "Duración:"
 
 #: ../src/main-window.c:756
-#, fuzzy
 msgid "Zoom: "
-msgstr "Factor de zoom:"
+msgstr "Zoom:"
 
 #: ../src/main-window.c:770
 msgid "Add"
@@ -271,7 +264,7 @@ msgstr "Añadir"
 
 #: ../src/main-window.c:774
 msgid "Update"
-msgstr ""
+msgstr "Actaualizar"
 
 #: ../src/main-window.c:779
 msgid "Remove"
@@ -294,31 +287,30 @@ msgid "Animation:"
 msgstr "Animación:"
 
 #: ../src/main-window.c:861
-#, fuzzy
 msgid "Animation Speed:"
-msgstr "Velocidad de la transición:"
+msgstr "Velocidad de la animación:"
 
 #: ../src/main-window.c:877
+#, fuzzy
 msgid "Placing is relative to:"
-msgstr ""
+msgstr "Situación relativa a:"
 
 #: ../src/main-window.c:891
-#, fuzzy
 msgid "Exported video"
-msgstr "Exportando la presentación de diapositivas"
+msgstr "Exportar video"
 
 #: ../src/main-window.c:893
 msgid "Original image"
-msgstr ""
+msgstr "Imagen original"
 
 #: ../src/main-window.c:902
 msgid "Subtitle position:"
-msgstr ""
+msgstr "Posición del subtítulo:"
 
 #. Background music frame
 #: ../src/main-window.c:937
 msgid "Audio"
-msgstr ""
+msgstr "Audio"
 
 #: ../src/main-window.c:950
 msgid "<b>Background Music</b>"
@@ -425,30 +417,29 @@ msgid "Save an Imagination slideshow project"
 msgstr "Guardar un proyecto de presentación de diapositivas Imagination"
 
 #: ../src/callbacks.c:2109
-#, fuzzy
 msgid "Create new slide"
-msgstr "Crear una nueva presentación de diapositivas"
+msgstr "Crear una nueva diapositiva"
 
 #: ../src/callbacks.c:2120
+#, fuzzy
 msgid "Empty slide options:"
-msgstr ""
+msgstr "Opciones de la diapositiva vacia:"
 
 #: ../src/callbacks.c:2130
 msgid "Use _solid color"
-msgstr ""
+msgstr "Usar color sólido"
 
 #: ../src/callbacks.c:2136
 msgid "Use _linear gradient"
-msgstr ""
+msgstr "Usar gradiante _lineal"
 
 #: ../src/callbacks.c:2142
 msgid "Use _radial gradient"
-msgstr ""
+msgstr "Usar gradiante _radial"
 
 #: ../src/callbacks.c:2172
-#, fuzzy
 msgid "Preview"
-msgstr "P_revisualizar"
+msgstr "Previsualizar"
 
 #. Display propert title depending on the callback that is calling this function.
 #: ../src/new_slideshow.c:63
@@ -475,7 +466,7 @@ msgstr "Reescalar imágenes para adaptarlas a la relación de aspecto"
 msgid "Select background color:"
 msgstr "Seleccione el color de fondo:"
 
-#: ../src/slideshow_project.c:208
+#: ../src/slideshow_project.c:203
 msgid "This is not an Imagination project file!"
 msgstr "Éste no es un archivo de un proyecto Imagination!"
 
@@ -506,36 +497,36 @@ msgstr ""
 msgid "Please choose the slideshow project filename"
 msgstr "Por favor, elija un nombre para la presentación de diapositivas"
 
-#: ../src/export.c:204
+#: ../src/export.c:219
 msgid "<b>Export Settings</b>"
 msgstr "<b>Configuración de la exportación</b>"
 
-#: ../src/export.c:218
+#: ../src/export.c:233
 msgid "Filename of the slideshow:"
 msgstr "Nombre de la presentación de diapositivas:"
 
-#: ../src/export.c:350
+#: ../src/export.c:365
 msgid "Exporting the slideshow"
 msgstr "Exportando la presentación de diapositivas"
 
-#: ../src/export.c:361
+#: ../src/export.c:376
 msgid "Preparing for export ..."
 msgstr "Preparando para exportar ..."
 
-#: ../src/export.c:372
+#: ../src/export.c:387
 msgid "Overall progress:"
 msgstr "Progreso global:"
 
-#: ../src/export.c:462 ../src/export.c:818
+#: ../src/export.c:477 ../src/export.c:833
 #, c-format
 msgid "Slide %d export progress:"
 msgstr "Progreso de exportación de la diapositiva %d:"
 
-#: ../src/export.c:673
+#: ../src/export.c:688
 msgid "Failed to launch the encoder!"
 msgstr "Error al iniciar el codificador!"
 
-#: ../src/export.c:816
+#: ../src/export.c:831
 #, c-format
 msgid "Final transition export progress:"
 msgstr "Progreso de exportación de la transición final:"
@@ -543,43 +534,43 @@ msgstr "Progreso de exportación de la transición final:"
 #. This function call should be the first thing exporter does, since this
 #. * function will take some preventive measures and also switches mode into
 #. * preview if needed.
-#: ../src/export.c:1188
+#: ../src/export.c:1203
 msgid "VOB export"
 msgstr "Exportar VOB"
 
-#: ../src/export.c:1200 ../src/export.c:1283 ../src/export.c:1396
+#: ../src/export.c:1215 ../src/export.c:1298 ../src/export.c:1411
 msgid "<b>Television Format</b>"
 msgstr "<b>Formato de televisión</b>"
 
-#: ../src/export.c:1207 ../src/export.c:1290 ../src/export.c:1403
+#: ../src/export.c:1222 ../src/export.c:1305 ../src/export.c:1418
 msgid "Normal 4:3"
 msgstr "Normal 4:3"
 
-#: ../src/export.c:1212 ../src/export.c:1295 ../src/export.c:1408
+#: ../src/export.c:1227 ../src/export.c:1310 ../src/export.c:1423
 msgid "Widescreen 16:9"
 msgstr "Panorámico 16:9"
 
 #. This function call should be the first thing exporter does, since this
 #. * function will take some preventive measures.
-#: ../src/export.c:1271
+#: ../src/export.c:1286
 msgid "OGG export"
 msgstr "Exportar OGG"
 
-#: ../src/export.c:1301 ../src/export.c:1414
+#: ../src/export.c:1316 ../src/export.c:1429
 msgid "<b>Video Quality:</b>"
 msgstr "<b>Calidad de video:</b>"
 
-#: ../src/export.c:1308 ../src/export.c:1421
+#: ../src/export.c:1323 ../src/export.c:1436
 msgid "Low"
 msgstr "Baja"
 
-#: ../src/export.c:1312 ../src/export.c:1425
+#: ../src/export.c:1327 ../src/export.c:1440
 msgid "Medium"
 msgstr "Media"
 
 #. This function call should be the first thing exporter does, since this
 #. * function will take some preventive measures.
-#: ../src/export.c:1384
+#: ../src/export.c:1399 ../src/export.c:1506
 msgid "FLV export"
 msgstr "Exportar FLV"
 
