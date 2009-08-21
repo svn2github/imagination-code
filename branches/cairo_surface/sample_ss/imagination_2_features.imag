@@ -1,0 +1,165 @@
+#Imagination 2.0 Slideshow Project - http://imagination.sf.net
+
+[slideshow settings]
+video format=576
+background color=0;0;0;
+distort images=true
+number of slides=11
+
+[slide 1]
+gradient=1
+start_color=0.27489127946898606;0.73652246890974293;1;
+stop_color=1;1;1;
+start_point=0.4777777777777778;0.43402777777777779;
+stop_point=0.4777777777777778;1;
+duration=10
+transition_id=-1
+speed=4
+no_points=0
+text=This is a brief video showing what\nyou can do with Imagination 2.0\nforthcoming on September...
+anim id=5
+anim duration=6
+text pos=4
+placing=0
+font=Swift 26
+font color=0.47608148317692833;0.12837415121690698;0.68331425955596248;1;
+
+[slide 2]
+filename=sample_ss/The_Big_Apple.jpg
+duration=4
+transition_id=19
+speed=4
+no_points=0
+anim id=0
+anim duration=1
+text pos=4
+placing=0
+font=Sans 12
+font color=0;0;0;1;
+
+[slide 3]
+filename=sample_ss/0024 (22).JPG
+duration=21
+transition_id=60
+speed=4
+no_points=5
+points=5;0;0;1;4;-1747.5;-259.5;5;4;-416;-63;2;4;0;-133.25;2;4;0;0;1;
+text=As you can see\nyou can have as\nmany stop points\nas you want not just 2
+anim id=4
+anim duration=4
+text pos=4
+placing=0
+font=Shado Bold 28
+font color=1;1;1;1;
+
+[slide 4]
+filename=sample_ss/[From www.metacafe.com] 173439.1120062.1.jpg
+duration=4
+transition_id=3
+speed=4
+no_points=0
+anim id=0
+anim duration=1
+text pos=4
+placing=0
+font=Sans 12
+font color=0;0;0;1;
+
+[slide 5]
+filename=sample_ss/0024 (15).JPG
+duration=4
+transition_id=43
+speed=4
+no_points=0
+anim id=0
+anim duration=1
+text pos=4
+placing=0
+font=Sans 12
+font color=0;0;0;1;
+
+[slide 6]
+filename=sample_ss/Sfondi 17888 (9).jpg
+duration=4
+transition_id=14
+speed=4
+no_points=0
+anim id=0
+anim duration=1
+text pos=4
+placing=0
+font=Sans 12
+font color=0;0;0;1;
+
+[slide 7]
+filename=sample_ss/0024 (9).JPG
+duration=6
+transition_id=67
+speed=4
+no_points=0
+text=You can have text\nfade too
+anim id=1
+anim duration=4
+text pos=4
+placing=0
+font=Purisa Light 40
+font color=1;1;1;1;
+
+[slide 8]
+filename=sample_ss/0024 (11).JPG
+duration=1
+transition_id=15
+speed=4
+no_points=0
+anim id=0
+anim duration=1
+text pos=4
+placing=0
+font=Sans 12
+font color=0;0;0;1;
+
+[slide 9]
+filename=sample_ss/[From www.metacafe.com] 173439.1120112.1.jpg
+duration=4
+transition_id=17
+speed=4
+no_points=0
+anim id=0
+anim duration=1
+text pos=4
+placing=0
+font=Sans 12
+font color=0;0;0;1;
+
+[slide 10]
+filename=sample_ss/[From www.metacafe.com] 173439.1120056.1.jpg
+duration=6
+transition_id=58
+speed=4
+no_points=0
+text=And have\ntext grow...
+anim id=6
+anim duration=4
+text pos=4
+placing=0
+font=Swift 64
+font color=0.55294117647058827;0.13333333333333333;0.99607843137254903;1;
+
+[slide 11]
+filename=sample_ss/0024 (18).JPG
+duration=18
+transition_id=36
+speed=4
+no_points=4
+points=3;0;0;1;10;-58.75;0;6.0999999999999996;3;-3655;0;6.0999999999999996;2;0;0;1;
+text=See you in September
+anim id=1
+anim duration=3
+text pos=1
+placing=1
+font=Bitstream Vera Sans Bold 36
+font color=1;1;1;1;
+
+[music]
+number=1
+music_1=sample_ss/music.ogg

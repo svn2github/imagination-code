@@ -27,7 +27,7 @@ img_save_slideshow( img_window_struct *img,
 {
 	GKeyFile *img_key_file;
 	gchar *conf, *string, *path, *filename, *file, *font_desc;
-	gint count = 0, point_counter = 0, i;
+	gint count = 0, i;
 	gsize len;
 	GtkTreeIter iter;
 	slide_struct *entry;
@@ -64,22 +64,14 @@ img_save_slideshow( img_window_struct *img,
 		else
 		{
 			/* We are dealing with an empty slide */
-			gdouble start_color[3], stop_color[3], start_point[2], stop_point[2];
-			g_key_file_set_string (img_key_file, conf, "filename",	"");
+			gdouble *start_color = entry->g_start_color,
+					*stop_color  = entry->g_stop_color,
+					*start_point = entry->g_start_point,
+					*stop_point  = entry->g_stop_point;
+
 			g_key_file_set_integer(img_key_file, conf, "gradient",	entry->gradient);
-			for( i = 0; i < 3; i++ )
-			{
-				start_color[i] = entry->g_start_color[i];
-				stop_color[i]  = entry->g_stop_color[i];
-			}
 			g_key_file_set_double_list(img_key_file, conf, "start_color", start_color, 3 );
 			g_key_file_set_double_list(img_key_file, conf, "stop_color" , stop_color , 3 );
-			
-			for( i = 0; i < 2; i++ )
-			{
-				start_point[i] = entry->g_start_point[i];
-				stop_point[i]  = entry->g_stop_point[i];
-			}
 			g_key_file_set_double_list(img_key_file, conf, "start_point", start_point, 2 );
 			g_key_file_set_double_list(img_key_file, conf, "stop_point" , stop_point , 2 );
 		}
@@ -95,15 +87,18 @@ img_save_slideshow( img_window_struct *img,
 		g_key_file_set_integer(img_key_file,conf, "no_points",		entry->no_points);
 		if (entry->no_points > 0)
 		{
+			gint    point_counter;
 			gdouble my_points[entry->no_points * 4];
-			while (point_counter < entry->no_points)
+
+			for( point_counter = 0;
+				 point_counter < entry->no_points;
+				 point_counter++ )
 			{
 				ImgStopPoint *my_point = g_list_nth_data(entry->points,point_counter);
 				my_points[ (point_counter * 4) + 0] = (gdouble)my_point->time;
 				my_points[ (point_counter * 4) + 1] = my_point->offx;
 				my_points[ (point_counter * 4) + 2] = my_point->offy;
 				my_points[ (point_counter * 4) + 3] = my_point->zoom;
-				point_counter++;
 			}
 			g_key_file_set_double_list(img_key_file,conf, "points", my_points, (gsize) entry->no_points * 4);
 		}
@@ -315,6 +310,7 @@ img_load_slideshow( img_window_struct *img,
 		gsize length;
 		gint anim_id,anim_duration, text_pos, placing, gradient;
 		GdkPixbuf *pix = NULL;
+		gboolean   load_ok;
 	
 		/* Load project backgroud color */
 		color = g_key_file_get_double_list( img_key_file, "slideshow settings",
@@ -337,7 +333,13 @@ img_load_slideshow( img_window_struct *img,
 			conf = g_strdup_printf("slide %d", i);
 			slide_filename = g_key_file_get_string(img_key_file,conf,"filename", NULL);
 
-			if (strlen(slide_filename) == 0)
+			if( slide_filename )
+			{
+				load_ok = img_scale_image( slide_filename, img->video_ratio,
+										   88, 0, img->distort_images,
+										   img->background_color, &thumb, NULL );
+			}
+			else
 			{
 				/* We are loading an empty slide */
 				gradient = g_key_file_get_integer(img_key_file, conf, "gradient", NULL);
@@ -347,15 +349,14 @@ img_load_slideshow( img_window_struct *img,
 				p_stop = g_key_file_get_double_list(img_key_file, conf, "stop_point", NULL, NULL);
 
 				/* Create thumbnail */
-				img_scale_gradient( gradient, p_start, p_stop, c_start, c_stop, 88, 72, &thumb, NULL );
-				goto there;
+				load_ok = img_scale_gradient( gradient, p_start, p_stop,
+											  c_start, c_stop, 88, 72,
+											  &thumb, NULL );
 			}
+
 			/* Try to load image. If this fails, skip this slide */
-			if( img_scale_image( slide_filename, img->video_ratio, 88, 0,
-								 img->distort_images, img->background_color,
-								 &thumb, NULL ) )
+			if( load_ok )
 			{
-there:				
 				duration	  = g_key_file_get_integer(img_key_file, conf, "duration", NULL);
 				transition_id = g_key_file_get_integer(img_key_file, conf, "transition_id", NULL);
 				speed 		  =	g_key_file_get_integer(img_key_file, conf, "speed",	NULL);
@@ -382,10 +383,13 @@ there:
 				slide_info = img_create_new_slide();
 				if( slide_info )
 				{
-					if (strlen(slide_filename) == 0)
-						img_set_slide_gradient_info( slide_info, gradient, c_start, c_stop, p_start, p_stop );
-					else
+					if( slide_filename )
 						img_set_slide_file_info( slide_info, slide_filename );
+					else
+						img_set_slide_gradient_info( slide_info, gradient,
+													 c_start, c_stop,
+													 p_start, p_stop );
+
 					gtk_list_store_append( img->thumbnail_model, &iter );
 					gtk_list_store_set( img->thumbnail_model, &iter,
 										0, thumb,
