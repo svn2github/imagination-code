@@ -15,7 +15,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-08-21 19:07+0200\n"
+"POT-Creation-Date: 2009-08-22 23:03+0200\n"
 "PO-Revision-Date: 2009-08-19 23:12+0100\n"
 "Last-Translator: Fabian Nowak <timystery@arcor.de>\n"
 "Language-Team: German\n"
@@ -86,7 +86,7 @@ msgstr "Darstellungsqualität der Vorschau"
 msgid "_Low"
 msgstr "_Niedrig"
 
-#: ../src/main-window.c:299 ../src/export.c:1332 ../src/export.c:1445
+#: ../src/main-window.c:299 ../src/export.c:1317 ../src/export.c:1430
 msgid "High"
 msgstr "Hoch"
 
@@ -506,36 +506,36 @@ msgstr ""
 msgid "Please choose the slideshow project filename"
 msgstr "Projektnamen für die Diaschau wählen"
 
-#: ../src/export.c:219
+#: ../src/export.c:204
 msgid "<b>Export Settings</b>"
 msgstr "<b>Export-Einstellungen</b>"
 
-#: ../src/export.c:233
+#: ../src/export.c:218
 msgid "Filename of the slideshow:"
 msgstr "Dateiname für die Diaschau:"
 
-#: ../src/export.c:365
+#: ../src/export.c:350
 msgid "Exporting the slideshow"
 msgstr "Diaschau wird exportiert"
 
-#: ../src/export.c:376
+#: ../src/export.c:361
 msgid "Preparing for export ..."
 msgstr "Export vorbereiten ..."
 
-#: ../src/export.c:387
+#: ../src/export.c:372
 msgid "Overall progress:"
 msgstr "Gesamtfortschritt: "
 
-#: ../src/export.c:477 ../src/export.c:833
+#: ../src/export.c:462 ../src/export.c:818
 #, c-format
 msgid "Slide %d export progress:"
 msgstr "Exportfortschritt bei Dia %d:"
 
-#: ../src/export.c:688
+#: ../src/export.c:673
 msgid "Failed to launch the encoder!"
 msgstr "Konnte den Encoder nicht starten."
 
-#: ../src/export.c:831
+#: ../src/export.c:816
 #, c-format
 msgid "Final transition export progress:"
 msgstr "Exportfortschritt beim letzten Dia:"
@@ -543,43 +543,43 @@ msgstr "Exportfortschritt beim letzten Dia:"
 #. This function call should be the first thing exporter does, since this
 #. * function will take some preventive measures and also switches mode into
 #. * preview if needed.
-#: ../src/export.c:1203
+#: ../src/export.c:1188
 msgid "VOB export"
 msgstr "VOB exportieren"
 
-#: ../src/export.c:1215 ../src/export.c:1298 ../src/export.c:1411
+#: ../src/export.c:1200 ../src/export.c:1283 ../src/export.c:1396
 msgid "<b>Television Format</b>"
 msgstr "<b>Fernsehformat</b>"
 
-#: ../src/export.c:1222 ../src/export.c:1305 ../src/export.c:1418
+#: ../src/export.c:1207 ../src/export.c:1290 ../src/export.c:1403
 msgid "Normal 4:3"
 msgstr "Normal 4:3"
 
-#: ../src/export.c:1227 ../src/export.c:1310 ../src/export.c:1423
+#: ../src/export.c:1212 ../src/export.c:1295 ../src/export.c:1408
 msgid "Widescreen 16:9"
 msgstr "Breitbild 16:9"
 
 #. This function call should be the first thing exporter does, since this
 #. * function will take some preventive measures.
-#: ../src/export.c:1286
+#: ../src/export.c:1271
 msgid "OGG export"
 msgstr "OGG exportieren"
 
-#: ../src/export.c:1316 ../src/export.c:1429
+#: ../src/export.c:1301 ../src/export.c:1414
 msgid "<b>Video Quality:</b>"
 msgstr "<b>Videoqualität</b>"
 
-#: ../src/export.c:1323 ../src/export.c:1436
+#: ../src/export.c:1308 ../src/export.c:1421
 msgid "Low"
 msgstr "Niedrig"
 
-#: ../src/export.c:1327 ../src/export.c:1440
+#: ../src/export.c:1312 ../src/export.c:1425
 msgid "Medium"
 msgstr "Mittel"
 
 #. This function call should be the first thing exporter does, since this
 #. * function will take some preventive measures.
-#: ../src/export.c:1399 ../src/export.c:1506
+#: ../src/export.c:1384
 msgid "FLV export"
 msgstr "FLV exportieren"
 

@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-08-21 19:07+0200\n"
-"PO-Revision-Date: 2009-08-21 12:05-0300\n"
+"POT-Creation-Date: 2009-08-22 23:03+0200\n"
+"PO-Revision-Date: 2009-08-22 17:19-0300\n"
 "Last-Translator: elega <elega@elega.com.ar>\n"
 "Language-Team: Spanish (Spain)\n"
 "MIME-Version: 1.0\n"
@@ -75,7 +75,7 @@ msgstr "Calidad de la previsualización"
 msgid "_Low"
 msgstr "_Baja"
 
-#: ../src/main-window.c:299 ../src/export.c:1332 ../src/export.c:1445
+#: ../src/main-window.c:299 ../src/export.c:1317 ../src/export.c:1430
 msgid "High"
 msgstr "Alta"
 
@@ -85,9 +85,8 @@ msgid "_Zoom"
 msgstr "_Zoom"
 
 #: ../src/main-window.c:330
-#, fuzzy
 msgid "Add empt_y slide"
-msgstr "Agregar una diapositiva vacia"
+msgstr "Agregar una diapositiva _vacía"
 
 #: ../src/main-window.c:339
 msgid "Dele_te"
@@ -248,7 +247,7 @@ msgstr "<b>Movimiento de las diapositivas</b>"
 
 #: ../src/main-window.c:710
 msgid "Stop Point:"
-msgstr "Detener punto:-"
+msgstr "Detener punto:"
 
 #: ../src/main-window.c:747
 msgid "Duration:"
@@ -291,9 +290,8 @@ msgid "Animation Speed:"
 msgstr "Velocidad de la animación:"
 
 #: ../src/main-window.c:877
-#, fuzzy
 msgid "Placing is relative to:"
-msgstr "Situación relativa a:"
+msgstr "Colocar en relación a:"
 
 #: ../src/main-window.c:891
 msgid "Exported video"
@@ -421,9 +419,8 @@ msgid "Create new slide"
 msgstr "Crear una nueva diapositiva"
 
 #: ../src/callbacks.c:2120
-#, fuzzy
 msgid "Empty slide options:"
-msgstr "Opciones de la diapositiva vacia:"
+msgstr "Opciones de la diapositiva vacía:"
 
 #: ../src/callbacks.c:2130
 msgid "Use _solid color"
@@ -497,36 +494,36 @@ msgstr ""
 msgid "Please choose the slideshow project filename"
 msgstr "Por favor, elija un nombre para la presentación de diapositivas"
 
-#: ../src/export.c:219
+#: ../src/export.c:204
 msgid "<b>Export Settings</b>"
 msgstr "<b>Configuración de la exportación</b>"
 
-#: ../src/export.c:233
+#: ../src/export.c:218
 msgid "Filename of the slideshow:"
 msgstr "Nombre de la presentación de diapositivas:"
 
-#: ../src/export.c:365
+#: ../src/export.c:350
 msgid "Exporting the slideshow"
 msgstr "Exportando la presentación de diapositivas"
 
-#: ../src/export.c:376
+#: ../src/export.c:361
 msgid "Preparing for export ..."
 msgstr "Preparando para exportar ..."
 
-#: ../src/export.c:387
+#: ../src/export.c:372
 msgid "Overall progress:"
 msgstr "Progreso global:"
 
-#: ../src/export.c:477 ../src/export.c:833
+#: ../src/export.c:462 ../src/export.c:818
 #, c-format
 msgid "Slide %d export progress:"
 msgstr "Progreso de exportación de la diapositiva %d:"
 
-#: ../src/export.c:688
+#: ../src/export.c:673
 msgid "Failed to launch the encoder!"
 msgstr "Error al iniciar el codificador!"
 
-#: ../src/export.c:831
+#: ../src/export.c:816
 #, c-format
 msgid "Final transition export progress:"
 msgstr "Progreso de exportación de la transición final:"
@@ -534,43 +531,43 @@ msgstr "Progreso de exportación de la transición final:"
 #. This function call should be the first thing exporter does, since this
 #. * function will take some preventive measures and also switches mode into
 #. * preview if needed.
-#: ../src/export.c:1203
+#: ../src/export.c:1188
 msgid "VOB export"
 msgstr "Exportar VOB"
 
-#: ../src/export.c:1215 ../src/export.c:1298 ../src/export.c:1411
+#: ../src/export.c:1200 ../src/export.c:1283 ../src/export.c:1396
 msgid "<b>Television Format</b>"
 msgstr "<b>Formato de televisión</b>"
 
-#: ../src/export.c:1222 ../src/export.c:1305 ../src/export.c:1418
+#: ../src/export.c:1207 ../src/export.c:1290 ../src/export.c:1403
 msgid "Normal 4:3"
 msgstr "Normal 4:3"
 
-#: ../src/export.c:1227 ../src/export.c:1310 ../src/export.c:1423
+#: ../src/export.c:1212 ../src/export.c:1295 ../src/export.c:1408
 msgid "Widescreen 16:9"
 msgstr "Panorámico 16:9"
 
 #. This function call should be the first thing exporter does, since this
 #. * function will take some preventive measures.
-#: ../src/export.c:1286
+#: ../src/export.c:1271
 msgid "OGG export"
 msgstr "Exportar OGG"
 
-#: ../src/export.c:1316 ../src/export.c:1429
+#: ../src/export.c:1301 ../src/export.c:1414
 msgid "<b>Video Quality:</b>"
 msgstr "<b>Calidad de video:</b>"
 
-#: ../src/export.c:1323 ../src/export.c:1436
+#: ../src/export.c:1308 ../src/export.c:1421
 msgid "Low"
 msgstr "Baja"
 
-#: ../src/export.c:1327 ../src/export.c:1440
+#: ../src/export.c:1312 ../src/export.c:1425
 msgid "Medium"
 msgstr "Media"
 
 #. This function call should be the first thing exporter does, since this
 #. * function will take some preventive measures.
-#: ../src/export.c:1399 ../src/export.c:1506
+#: ../src/export.c:1384
 msgid "FLV export"
 msgstr "Exportar FLV"
 
