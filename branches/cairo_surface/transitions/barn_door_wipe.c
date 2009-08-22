@@ -106,8 +106,6 @@ transition_render( cairo_t         *cr,
 	cairo_set_source_surface( cr, image_from, 0, 0 );
 	cairo_paint( cr );
 
-	cairo_set_source_surface( cr, image_to, 0, 0 );
-
 	diag = sqrt( ( width * width ) + ( height * height ) );
 	cairo_set_source_surface( cr, image_to, 0, 0 );
 	cairo_move_to( cr, width / 2 , height / 2 );

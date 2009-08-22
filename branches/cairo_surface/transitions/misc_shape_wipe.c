@@ -59,19 +59,19 @@ img_get_plugin_info( gchar  **group,
 }
 
 void
-img_heart_in(cairo_t         *cr,
-			cairo_surface_t *image_from,
-			cairo_surface_t *image_to,
-			gdouble          progress)
+img_heart_in( cairo_t         *cr,
+			  cairo_surface_t *image_from,
+			  cairo_surface_t *image_to,
+			  gdouble          progress )
 {
     transition_render( cr, image_from, image_to, progress, 1, TRUE );
 }
 
 void
 img_heart_out( cairo_t         *cr,
-			cairo_surface_t *image_from,
-			cairo_surface_t *image_to,
-			gdouble          progress)
+			   cairo_surface_t *image_from,
+			   cairo_surface_t *image_to,
+			   gdouble          progress )
 {
     transition_render( cr, image_from, image_to, progress, 1, FALSE );
 }
@@ -80,16 +80,16 @@ void
 img_key_in( cairo_t         *cr,
 			cairo_surface_t *image_from,
 			cairo_surface_t *image_to,
-			gdouble          progress)
+			gdouble          progress )
 {
     transition_render( cr, image_from, image_to, progress, 2, TRUE );
 }
 
 void
 img_key_out( cairo_t         *cr,
-			cairo_surface_t *image_from,
-			cairo_surface_t *image_to,
-			gdouble          progress)
+			 cairo_surface_t *image_from,
+			 cairo_surface_t *image_to,
+			 gdouble          progress )
 {
     transition_render( cr, image_from, image_to, progress, 2, FALSE );
 }
@@ -108,11 +108,6 @@ transition_render(	cairo_t         *cr,
 
 	width  = cairo_image_surface_get_width( image_from );
 	height = cairo_image_surface_get_height( image_from );
-
-	cairo_set_source_surface( cr, image_from, 0, 0 );
-	cairo_paint( cr );
-
-	cairo_set_source_surface( cr, image_to, 0, 0 );
 
     /* Drawing code goes here */
 	if( direction )
