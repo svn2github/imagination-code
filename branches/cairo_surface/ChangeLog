@@ -21,7 +21,7 @@ xx/09/09 - 2.0:
 			- Slides can be rotated inside Imagination but the original image won't be affected since the EXIF info would be lost.
 			- Added ability to import audio with drag and drop.
 			- Added first, prev, next and last buttons to move the selection on the slides; thanks to David Prieto for the suggestions.
-			- Addded ability to import pictures with drag and drop.
+			- Added ability to import pictures with drag and drop.
 			- Centered the Heart transition effect of the Misc Shape Wipe family.
 			- Removed ffmpeg's dependancy in the configure script.
 			- Use icons from the current Gtk theme for import image and import sound menu/toolbar entries thanks to David Prieto for the idea.
