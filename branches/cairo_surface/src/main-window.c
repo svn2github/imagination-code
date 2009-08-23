@@ -117,7 +117,6 @@ img_window_struct *img_create_window (void)
 	GtkWidget *notebook;
 	GtkWidget *video_tab;
 	GtkWidget *audio_tab;
-	GtkWidget *hbox;
 	GtkWidget *swindow, *scrollable_window;
 	GtkWidget *viewport;
 	GtkWidget *align;
@@ -148,6 +147,7 @@ img_window_struct *img_create_window (void)
 	GtkWidget *a_label;
 	GtkWidget *a_hbox;
 	GtkWidget *modes_vbox;
+	GtkWidget *paned;
 
 	/* Added after cleaning up the img_window_struct */
 	GtkWidget *properties_menu;
@@ -169,7 +169,8 @@ img_window_struct *img_create_window (void)
 	img_struct->imagination_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_icon (GTK_WINDOW(img_struct->imagination_window),icon);
 	gtk_window_set_position (GTK_WINDOW(img_struct->imagination_window),GTK_WIN_POS_CENTER);
-	gtk_window_set_default_size (GTK_WINDOW (img_struct->imagination_window), 1072, 700);
+	gtk_window_set_default_size( GTK_WINDOW( img_struct->imagination_window ), 800, 600 );
+//	gtk_window_maximize( GTK_WINDOW( img_struct->imagination_window ) );
 	img_set_window_title(img_struct,NULL);
 	g_signal_connect (G_OBJECT (img_struct->imagination_window),"delete-event",G_CALLBACK (img_quit_application),img_struct);
 	g_signal_connect (G_OBJECT (img_struct->imagination_window), "destroy", G_CALLBACK (gtk_main_quit), NULL );
@@ -548,11 +549,11 @@ img_window_struct *img_create_window (void)
 	gtk_widget_show_all (toolbar);
 
 	/* Create the image area and the other widgets */
-	hbox = gtk_hpaned_new();
-	gtk_box_pack_start (GTK_BOX (vbox1), hbox, TRUE, TRUE, 0);
+	paned = gtk_hpaned_new();
+	gtk_box_pack_start (GTK_BOX (vbox1), paned, TRUE, TRUE, 0);
 
 	modes_vbox = gtk_vbox_new( FALSE, 0 );
-	gtk_paned_add1( GTK_PANED( hbox ), modes_vbox );
+	gtk_paned_add1( GTK_PANED( paned ), modes_vbox );
 
 	swindow = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(swindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
@@ -593,9 +594,8 @@ img_window_struct *img_create_window (void)
 	
 	video_tab = gtk_label_new (_("Video"));
 	notebook = gtk_notebook_new();
-	gtk_paned_add2(GTK_PANED (hbox),notebook);
+	gtk_paned_add2( GTK_PANED( paned ), notebook );
 	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), scrollable_window, video_tab);
-	gtk_paned_set_position( GTK_PANED( hbox ), 650 );
 
 	viewport = gtk_bin_get_child(GTK_BIN(scrollable_window));
 	gtk_viewport_set_shadow_type(GTK_VIEWPORT(viewport), GTK_SHADOW_NONE);
@@ -940,7 +940,7 @@ img_window_struct *img_create_window (void)
 	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), vbox_audio_frames, audio_tab);
 
 	frame3 = gtk_frame_new (NULL);
-	gtk_box_pack_start (GTK_BOX (vbox_audio_frames), frame3, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (vbox_audio_frames), frame3, TRUE, TRUE, 0);
 	gtk_frame_set_shadow_type (GTK_FRAME (frame3), GTK_SHADOW_OUT);
 
 	frame3_alignment = gtk_alignment_new (0.5, 0.5, 1, 1);
@@ -958,10 +958,9 @@ img_window_struct *img_create_window (void)
 	gtk_container_set_border_width (GTK_CONTAINER (vbox2), 0);
 	
 	scrolledwindow1 = gtk_scrolled_window_new (NULL, NULL);
-	gtk_box_pack_start (GTK_BOX (vbox2), scrolledwindow1, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (vbox2), scrolledwindow1, TRUE, TRUE, 0);
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow1), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (scrolledwindow1), GTK_SHADOW_IN);
-	gtk_widget_set_size_request(scrolledwindow1, -1, 373);
 
 	img_struct->music_file_liststore = gtk_list_store_new (4, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_INT);
 	g_signal_connect (G_OBJECT (img_struct->music_file_liststore), "row-inserted",	G_CALLBACK (img_activate_remove_button_music_liststore) , img_struct);
@@ -988,7 +987,7 @@ img_window_struct *img_create_window (void)
 
 	/* Add the total music labels and the buttons */
 	hbox_music_label = gtk_hbox_new(FALSE, 2);
-	gtk_container_add (GTK_CONTAINER ( vbox2), hbox_music_label);
+	gtk_box_pack_start( GTK_BOX( vbox2 ), hbox_music_label, FALSE, FALSE, 0 );
 
 	music_time = gtk_label_new(_("Music Duration:"));
 	gtk_box_pack_start(GTK_BOX(hbox_music_label), music_time, TRUE, TRUE, 0);
@@ -999,7 +998,7 @@ img_window_struct *img_create_window (void)
 	gtk_misc_set_alignment (GTK_MISC (img_struct->music_time_data), 1, 0.5);
 
 	hbox_buttons = gtk_hbox_new(TRUE, 2);
-	gtk_container_add (GTK_CONTAINER ( vbox2), hbox_buttons);
+	gtk_box_pack_start( GTK_BOX( vbox2 ), hbox_buttons, FALSE, FALSE, 0 );
 
 	img_struct->play_audio_button = gtk_button_new();
 	gtk_widget_set_sensitive(img_struct->play_audio_button, FALSE);
@@ -1181,7 +1180,7 @@ img_window_struct *img_create_window (void)
 		gtk_box_pack_start (GTK_BOX (vbox), img_struct->progress_bar, TRUE, FALSE, 0);
 		gtk_widget_show (vbox);
 	}
-	gtk_widget_show_all(hbox);
+	gtk_widget_show_all( paned );
 	gtk_window_add_accel_group (GTK_WINDOW (img_struct->imagination_window), img_struct->accel_group);
 
 	/* Disable all Ken Burns controls */
@@ -1193,6 +1192,15 @@ img_window_struct *img_create_window (void)
 	/* Update mode */
 	img_struct->mode = - 1;
 	img_switch_mode( img_struct, 0 );
+
+	/* Do some pseudo smart sizing */
+	gtk_widget_show (img_struct->imagination_window);
+	{
+		gint pos;
+		
+		pos = paned->allocation.width - frame4->requisition.width - 20;
+		gtk_paned_set_position( GTK_PANED( paned ), pos );
+	}
 
 	return img_struct;
 }

@@ -76,7 +76,6 @@ int main (int argc, char *argv[])
 	img_window->final_transition.render = NULL;
 	img_window->final_transition.speed = NORMAL;
 
-	gtk_widget_show (img_window->imagination_window);
 	img_set_statusbar_message(img_window,0);
 
 	/*read the project filename passed in argv*/
