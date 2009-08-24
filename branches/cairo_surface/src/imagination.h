@@ -187,10 +187,6 @@ struct _img_window_struct
 	GtkWidget	*save_as_menu;
 	GtkWidget	*open_button;
 	GtkWidget	*save_button;
-	GtkWidget   *rotate_left_menu;
-	GtkWidget   *rotate_right_menu;
-	GtkWidget   *rotate_left_button;
-	GtkWidget   *rotate_right_button;
 	GtkWidget	*cut;
 	GtkWidget	*copy;
 	GtkWidget	*paste;

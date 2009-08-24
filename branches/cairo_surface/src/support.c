@@ -897,7 +897,7 @@ img_scale_gradient( gint              gradient,
 	cairo_surface_t *sf;
 	cairo_t         *cr;
 	cairo_pattern_t *pat;
-	gdouble          diffx, diffy, radius, scale;
+	gdouble          diffx, diffy, radius;
 
 	sf = cairo_image_surface_create( CAIRO_FORMAT_RGB24, width, height );
 	cr = cairo_create( sf );

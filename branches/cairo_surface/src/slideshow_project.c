@@ -27,7 +27,7 @@ img_save_slideshow( img_window_struct *img,
 {
 	GKeyFile *img_key_file;
 	gchar *conf, *string, *path, *filename, *file, *font_desc;
-	gint count = 0, i;
+	gint count = 0;
 	gsize len;
 	GtkTreeIter iter;
 	slide_struct *entry;

@@ -57,6 +57,7 @@ static void img_clean_after_preview(img_window_struct *);
 static void img_about_dialog_activate_link(GtkAboutDialog * , const gchar *, gpointer );
 static GdkPixbuf *img_rotate_pixbuf_c( GdkPixbuf *, GtkProgressBar *);
 static GdkPixbuf *img_rotate_pixbuf_cc( GdkPixbuf *, GtkProgressBar *);
+static void img_rotate_selected_slides( img_window_struct *, gboolean );
 
 static void
 img_image_area_change_zoom( gdouble            step,
@@ -570,7 +571,23 @@ void img_delete_selected_slides(GtkMenuItem *item,img_window_struct *img_struct)
 	img_iconview_selection_changed(GTK_ICON_VIEW(img_struct->active_icon),img_struct);
 }
 
-void img_rotate_selected_slides(GtkWidget *button, img_window_struct *img)
+void
+img_rotate_slides_left( GtkWidget         *widget,
+						img_window_struct *img )
+{
+	img_rotate_selected_slides( img, TRUE );
+}
+
+void
+img_rotate_slides_right( GtkWidget         *widget,
+						 img_window_struct *img )
+{
+	img_rotate_selected_slides( img, FALSE );
+}
+
+static void
+img_rotate_selected_slides( img_window_struct *img,
+							gboolean           clockwise )
 {
 	GtkTreeModel *model;
 	GtkTreeIter iter;
@@ -605,9 +622,10 @@ void img_rotate_selected_slides(GtkWidget *button, img_window_struct *img)
 			continue;
 		}
 
-		/* Load the image, save a copy in the temp dir, rotate it and display it in the image area */
+		/* Load the image, save a copy in the temp dir, rotate it and display
+		 * it in the image area */
 		thumb = gdk_pixbuf_new_from_file(info_slide->filename, NULL);
-		if (button == img->rotate_left_button)
+		if( clockwise )
 			rotated_thumb = img_rotate_pixbuf_c( thumb, GTK_PROGRESS_BAR( img->progress_bar ) );
 		else
 			rotated_thumb = img_rotate_pixbuf_cc( thumb, GTK_PROGRESS_BAR( img->progress_bar ) );

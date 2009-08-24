@@ -35,7 +35,13 @@ void img_add_slides_thumbnails(GtkMenuItem *,img_window_struct *);
 void img_remove_audio_files (GtkWidget *, img_window_struct *);
 void img_remove_foreach_func (GtkTreeModel *, GtkTreePath *, GtkTreeIter *, GList **);
 void img_delete_selected_slides(GtkMenuItem *,img_window_struct *);
-void img_rotate_selected_slides(GtkWidget *, img_window_struct *);
+void
+img_rotate_slides_left( GtkWidget         *widget,
+						img_window_struct *img );
+
+void
+img_rotate_slides_right( GtkWidget         *widget,
+						 img_window_struct *img );
 void img_show_about_dialog (GtkMenuItem *,img_window_struct *);
 void img_start_stop_preview(GtkWidget *, img_window_struct *);
 void img_goto_first_slide(GtkWidget *, img_window_struct *);
