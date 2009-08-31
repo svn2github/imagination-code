@@ -2534,12 +2534,21 @@ img_save_window_settings( img_window_struct *img )
 	GKeyFile *kf;
 	gchar    *group = "Interface settings";
 	gchar    *rc_file, *rc_path, *contents;
-	int       w, h, g; /* Width, height, gutter */
-
-	/* TODO: Add conformation dialog here */
+	int       w, h, g, f; /* Width, height, gutter, flags */
+	gboolean  max;
 
 	gtk_window_get_size( GTK_WINDOW( img->imagination_window ), &w, &h );
 	g = gtk_paned_get_position( GTK_PANED( img->paned ) );
+	f = gdk_window_get_state( gtk_widget_get_window( img->imagination_window ) );
+	max = f & GDK_WINDOW_STATE_MAXIMIZED;
+
+	/* If window is maximized, store sizes that are a bit smaller than full
+	 * screen, else making window non-fullscreen will have no effect. */
+	if( max )
+	{
+		w -= 100;
+		h -= 100;
+	}
 
 	kf = g_key_file_new();
 	g_key_file_set_integer( kf, group, "width",   w );
@@ -2549,15 +2558,12 @@ img_save_window_settings( img_window_struct *img )
 	g_key_file_set_double(  kf, group, "zoom_p",  img->image_area_zoom );
 	g_key_file_set_double(  kf, group, "zoom_o",  img->overview_zoom );
 	g_key_file_set_boolean( kf, group, "quality", img->low_quality );
+	g_key_file_set_boolean( kf, group, "max",     max );
 
 	rc_path = g_build_filename( g_get_home_dir(), ".config",
 								"imagination", NULL );
 	rc_file = g_build_filename( rc_path, "imaginationrc", NULL );
 	contents = g_key_file_to_data( kf, NULL, NULL );
-
-	/* FIXME: Delete next two lines!! */
-	g_print( "%s\n", contents );
-	g_print( "%s\n", rc_file );
 
 	g_mkdir_with_parents( rc_path, S_IRWXU );
 	g_file_set_contents( rc_file, contents, -1, NULL );
@@ -2576,6 +2582,7 @@ img_load_window_settings( img_window_struct *img )
 	gchar    *group = "Interface settings";
 	gchar    *rc_file;
 	int       w, h, g, m; /* Width, height, gutter, mode */
+	gboolean  max;
 
 	rc_file = g_build_filename( g_get_home_dir(), ".config",
 								"imagination", "imaginationrc", NULL );
@@ -2592,6 +2599,7 @@ img_load_window_settings( img_window_struct *img )
 	img->image_area_zoom = g_key_file_get_double(  kf, group, "zoom_p",  NULL );
 	img->overview_zoom   = g_key_file_get_double(  kf, group, "zoom_o",  NULL );
 	img->low_quality     = g_key_file_get_boolean( kf, group, "quality", NULL );
+	max                  = g_key_file_get_boolean( kf, group, "max",     NULL );
 
 	/* Update mode */
 	img->mode = - 1;
@@ -2600,6 +2608,8 @@ img_load_window_settings( img_window_struct *img )
 	/* Update window size and gutter position */
 	gtk_window_set_default_size( GTK_WINDOW( img->imagination_window ), w, h );
 	gtk_paned_set_position( GTK_PANED( img->paned ), g );
+	if( max )
+		gtk_window_maximize( GTK_WINDOW( img->imagination_window ) );
 
 	/* Update zoom display */
 	gtk_widget_set_size_request( img->image_area,
