@@ -22,6 +22,9 @@
 #include "callbacks.h"
 #include <glib/gstdio.h>
 
+static void
+img_export_flv_changed( GtkComboBox   *, GtkWidget * );
+
 static GtkWidget *
 img_create_export_dialog( img_window_struct  *img,
 						  const gchar        *title,
@@ -1370,8 +1373,9 @@ img_exporter_flv( img_window_struct *img )
 	/* Additional options - FLV  only */
 	GtkWidget *frame;
 	GtkWidget *label;
-	GtkWidget *hbox;
+	GtkWidget *hbox, *vbox_normal, *vbox_wide;
 	GtkWidget *radio1, *radio2;
+	GtkWidget *normal_combo, *wide_combo;
 	GtkWidget *radios[3];
 	gint       i, width, height;
 
@@ -1393,21 +1397,63 @@ img_exporter_flv( img_window_struct *img )
 	frame = gtk_frame_new( NULL );
 	gtk_box_pack_start( GTK_BOX( vbox ), frame, FALSE, FALSE, 0 );
 
-	label = gtk_label_new( _("<b>Television Format</b>") );
+	label = gtk_label_new( _("<b>Video Size</b>") );
 	gtk_label_set_use_markup( GTK_LABEL( label ), TRUE );
 	gtk_frame_set_label_widget( GTK_FRAME( frame ), label );
 
 	hbox = gtk_hbox_new( TRUE, 5 );
 	gtk_container_add( GTK_CONTAINER( frame ), hbox );
 
+	vbox_normal = gtk_vbox_new( FALSE, 0 );
+	gtk_box_pack_start (GTK_BOX(hbox), vbox_normal, FALSE, FALSE, 0 );
+	
 	radio1 = gtk_radio_button_new_with_mnemonic( NULL, _("Normal 4:3") );
 	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( radio1 ), TRUE );
-	gtk_box_pack_start( GTK_BOX( hbox ), radio1, FALSE, FALSE, 0 );
+	gtk_box_pack_start( GTK_BOX( vbox_normal ), radio1, FALSE, FALSE, 0 );
 
-	radio2 = gtk_radio_button_new_with_mnemonic_from_widget(
-				GTK_RADIO_BUTTON( radio1 ), _("Widescreen 16:9") );
-	gtk_box_pack_start( GTK_BOX( hbox ), radio2, FALSE, FALSE, 0 );
+	normal_combo = _gtk_combo_box_new_text(FALSE);
+	gtk_box_pack_start( GTK_BOX( vbox_normal ), normal_combo, FALSE, FALSE, 0 );
+	{
+		GtkTreeIter   iter;
+		GtkListStore *store = GTK_LIST_STORE( gtk_combo_box_get_model(GTK_COMBO_BOX( normal_combo ) ) );
+
+		gtk_list_store_append( store, &iter );
+		gtk_list_store_set( store, &iter, 0, "320 x 240", -1 );
+		gtk_list_store_append( store, &iter );
+		gtk_list_store_set( store, &iter, 0, "400 x 300", -1 );
+		gtk_list_store_append( store, &iter );
+		gtk_list_store_set( store, &iter, 0, "512 x 384", -1 );
+		gtk_list_store_append( store, &iter );
+		gtk_list_store_set( store, &iter, 0, "640 x 480", -1 );
+	}
+	gtk_combo_box_set_active( GTK_COMBO_BOX( normal_combo ), 0 );
+
+	vbox_wide = gtk_vbox_new( FALSE, 0 );
+	gtk_box_pack_start (GTK_BOX(hbox), vbox_wide, FALSE, FALSE, 0 );
+
+	radio2 = gtk_radio_button_new_with_mnemonic_from_widget(GTK_RADIO_BUTTON( radio1 ), _("Widescreen 16:9") );
+	gtk_box_pack_start( GTK_BOX( vbox_wide ), radio2, FALSE, FALSE, 0 );
+
+	wide_combo = _gtk_combo_box_new_text(FALSE);
+	gtk_box_pack_start( GTK_BOX( vbox_wide ), wide_combo, FALSE, FALSE, 0 );
 	
+	{
+		GtkTreeIter   iter;
+		GtkListStore *store = GTK_LIST_STORE( gtk_combo_box_get_model(GTK_COMBO_BOX( wide_combo ) ) );
+
+		gtk_list_store_append( store, &iter );
+		gtk_list_store_set( store, &iter, 0, "320 x 180", -1 );
+		gtk_list_store_append( store, &iter );
+		gtk_list_store_set( store, &iter, 0, "400 x 225", -1 );
+		gtk_list_store_append( store, &iter );
+		gtk_list_store_set( store, &iter, 0, "512 x 288", -1 );
+		gtk_list_store_append( store, &iter );
+		gtk_list_store_set( store, &iter, 0, "640 x 360", -1 );
+	}
+	gtk_combo_box_set_active( GTK_COMBO_BOX( wide_combo ), 0 );
+	g_signal_connect( G_OBJECT( normal_combo ), "changed", G_CALLBACK( img_export_flv_changed ), radio1 );
+	g_signal_connect( G_OBJECT( wide_combo ), "changed", G_CALLBACK( img_export_flv_changed ), radio2 );
+
 	frame = gtk_frame_new( NULL );
 	gtk_box_pack_start( GTK_BOX( vbox ), frame, FALSE, FALSE, 0 );
 
@@ -1447,13 +1493,53 @@ img_exporter_flv( img_window_struct *img )
 	/* Any additional calculation can be placed here. */
 	if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( radio1 ) ) )
 	{
-		width  = 320;
-		height = 240;
+		switch(gtk_combo_box_get_active(GTK_COMBO_BOX(normal_combo)) )
+		{
+			case 0:
+			width  = 320;
+			height = 240;
+			break;
+
+			case 1:
+			width  = 400;
+			height = 300;
+			break;
+
+			case 2:
+			width  = 512;
+			height = 384;
+			break;
+
+			case 3:
+			width  = 640;
+			height = 480;
+			break;
+		}
 	}
 	else
 	{
-		width  = 400;
-		height = 226;
+		switch(gtk_combo_box_get_active(GTK_COMBO_BOX(wide_combo)) )
+		{
+			case 0:
+			width  = 320;
+			height = 180;
+			break;
+
+			case 1:
+			width  = 400;
+			height = 225;
+			break;
+
+			case 2:
+			width  = 512;
+			height = 288;
+			break;
+
+			case 3:
+			width  = 640;
+			height = 360;
+			break;
+		}
 	}
 
 	for( i = 0; i < 3; i++ )
@@ -1479,3 +1565,8 @@ img_exporter_flv( img_window_struct *img )
 /* ****************************************************************************
  * End exporters
  * ************************************************************************* */
+
+static void img_export_flv_changed( GtkComboBox   *combo, GtkWidget *radio )
+{
+	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( radio ), TRUE );
+}

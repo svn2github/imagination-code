@@ -1,6 +1,9 @@
 Imagination changelog
 
 xx/09/09 - 2.0:
+			- FLV export supports several video sizes.
+
+22/08/09 - 2.0b1:
 			- Fixed bug that caused exported slideshows being 20% longer than reported by Imagination.
 			- Added ability to insert an empty slide with the option to choose a background color gradient in three different ways: solid, linear and radial.
 			- Added Widescreen option to FLV exported video.
