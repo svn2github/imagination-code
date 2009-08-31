@@ -147,7 +147,6 @@ img_window_struct *img_create_window (void)
 	GtkWidget *a_label;
 	GtkWidget *a_hbox;
 	GtkWidget *modes_vbox;
-	GtkWidget *paned;
 
 	/* Added after cleaning up the img_window_struct */
 	GtkWidget *properties_menu;
@@ -166,15 +165,37 @@ img_window_struct *img_create_window (void)
 	GtkWidget *rotate_left_button;
 	GtkWidget *rotate_right_button;
 
+	img_struct = g_new0(img_window_struct, 1);
+
+	/* Set some default values */
+	img_struct->background_color[0] = 0;
+	img_struct->background_color[1] = 0;
+	img_struct->background_color[2] = 0;
+	img_struct->slides_nr = 0;
+	img_struct->distort_images = TRUE;
+
+	img_struct->maxoffx = 0;
+	img_struct->maxoffy = 0;
+	img_struct->current_point.offx = 0;
+	img_struct->current_point.offy = 0;
+	img_struct->current_point.zoom = 1;
+
+	img_struct->video_size[0] = 720;
+	img_struct->video_size[1] = 576;
+	img_struct->video_ratio = (gdouble)720 / 576;
+
+	img_struct->final_transition.duration = 0;
+	img_struct->final_transition.render = NULL;
+	img_struct->final_transition.speed = NORMAL;
+
+
+	/* GUI STUFF */
 	icon_theme = gtk_icon_theme_get_default();
 	icon = gtk_icon_theme_load_icon(icon_theme, "imagination", 24, 0, NULL);
 
-	img_struct = g_new0(img_window_struct, 1);
 	img_struct->imagination_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_icon (GTK_WINDOW(img_struct->imagination_window),icon);
 	gtk_window_set_position (GTK_WINDOW(img_struct->imagination_window),GTK_WIN_POS_CENTER);
-	gtk_window_set_default_size( GTK_WINDOW( img_struct->imagination_window ), 800, 600 );
-//	gtk_window_maximize( GTK_WINDOW( img_struct->imagination_window ) );
 	img_set_window_title(img_struct,NULL);
 	g_signal_connect (G_OBJECT (img_struct->imagination_window),"delete-event",G_CALLBACK (img_quit_application),img_struct);
 	g_signal_connect (G_OBJECT (img_struct->imagination_window), "destroy", G_CALLBACK (gtk_main_quit), NULL );
@@ -557,11 +578,11 @@ img_window_struct *img_create_window (void)
 	gtk_widget_show_all (toolbar);
 
 	/* Create the image area and the other widgets */
-	paned = gtk_hpaned_new();
-	gtk_box_pack_start (GTK_BOX (vbox1), paned, TRUE, TRUE, 0);
+	img_struct->paned = gtk_hpaned_new();
+	gtk_box_pack_start (GTK_BOX (vbox1), img_struct->paned, TRUE, TRUE, 0);
 
 	modes_vbox = gtk_vbox_new( FALSE, 0 );
-	gtk_paned_add1( GTK_PANED( paned ), modes_vbox );
+	gtk_paned_add1( GTK_PANED( img_struct->paned ), modes_vbox );
 
 	swindow = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(swindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
@@ -583,7 +604,9 @@ img_window_struct *img_create_window (void)
 	gtk_container_add(GTK_CONTAINER(image_area_frame), align);
 
 	img_struct->image_area = gtk_drawing_area_new();
-	gtk_widget_set_size_request(img_struct->image_area, 720, 576);
+	gtk_widget_set_size_request( img_struct->image_area,
+								 img_struct->video_size[0],
+								 img_struct->video_size[1] );
 	gtk_container_add(GTK_CONTAINER(align), img_struct->image_area);
 	gtk_widget_add_events( img_struct->image_area, GDK_BUTTON1_MOTION_MASK
 												 | GDK_POINTER_MOTION_HINT_MASK
@@ -602,7 +625,7 @@ img_window_struct *img_create_window (void)
 	
 	video_tab = gtk_label_new (_("Video"));
 	notebook = gtk_notebook_new();
-	gtk_paned_add2( GTK_PANED( paned ), notebook );
+	gtk_paned_add2( GTK_PANED( img_struct->paned ), notebook );
 	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), scrollable_window, video_tab);
 
 	viewport = gtk_bin_get_child(GTK_BIN(scrollable_window));
@@ -1188,7 +1211,7 @@ img_window_struct *img_create_window (void)
 		gtk_box_pack_start (GTK_BOX (vbox), img_struct->progress_bar, TRUE, FALSE, 0);
 		gtk_widget_show (vbox);
 	}
-	gtk_widget_show_all( paned );
+	gtk_widget_show_all( img_struct->paned );
 	gtk_window_add_accel_group (GTK_WINDOW (img_struct->imagination_window), img_struct->accel_group);
 
 	/* Disable all Ken Burns controls */
@@ -1197,18 +1220,9 @@ img_window_struct *img_create_window (void)
 	/* Disable all subtitle controls */
 	img_subtitle_update_sensitivity( img_struct, 0 );
 
-	/* Update mode */
-	img_struct->mode = - 1;
-	img_switch_mode( img_struct, 0 );
-
-	/* Do some pseudo smart sizing */
-	gtk_widget_show (img_struct->imagination_window);
-	{
-		gint pos;
-		
-		pos = paned->allocation.width - frame4->requisition.width - 20;
-		gtk_paned_set_position( GTK_PANED( paned ), pos );
-	}
+	/* Load interface settings or apply default ones */
+	if( ! img_load_window_settings( img_struct ) )
+		img_set_window_default_settings( img_struct );
 
 	return img_struct;
 }

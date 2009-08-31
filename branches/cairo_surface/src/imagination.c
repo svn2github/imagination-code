@@ -51,31 +51,7 @@ int main (int argc, char *argv[])
 	/* Load the transitions as plugins with GModule */
 	img_load_available_transitions(img_window);
 
-	/* Set some default values */
-	img_window->background_color[0] = 0;
-	img_window->background_color[1] = 0;
-	img_window->background_color[2] = 0;
-	img_window->slides_nr = 0;
-	img_window->distort_images = TRUE;
-
-	img_window->maxoffx = 0;
-	img_window->maxoffy = 0;
-	img_window->current_point.offx = 0;
-	img_window->current_point.offy = 0;
-	img_window->current_point.zoom = 1;
-
-	img_window->image_area_zoom = 1.0;
-	img_window->overview_zoom = 1.0;
-	img_window->low_quality = TRUE;
-	img_window->video_size[0] = 720;
-	img_window->video_size[1] = 576;
-	img_window->video_ratio = (gdouble)720 / 576;
-
-	/* Last pseudo-slide has a duration of 0 */
-	img_window->final_transition.duration = 0;
-	img_window->final_transition.render = NULL;
-	img_window->final_transition.speed = NORMAL;
-
+	gtk_widget_show( img_window->imagination_window );
 	img_set_statusbar_message(img_window,0);
 
 	/*read the project filename passed in argv*/

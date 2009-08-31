@@ -212,6 +212,8 @@ struct _img_window_struct
   	gchar		*current_dir;
 	GSList		*rotated_files;
 
+	GtkWidget   *paned; /* Main paned (used for saving/restoring geometry) */
+
 	/* Mode switching */
 	gint       mode;        /* In what mode are we in: 0 - preview
 													   1 - overview */

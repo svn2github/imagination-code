@@ -91,7 +91,7 @@
 		</sect2>
 		<sect2>
 			<title>Working Area</title>
-			<para>Starting from 2.0 release video and audio parts were spltted in two separate tabs named "Video" and "Audio". The Video part contains the following settings:</para>
+			<para>Starting from 2.0 release video and audio parts were split in two separate tabs named "Video" and "Audio". The Video part contains the following settings:</para>
 			<itemizedlist>
 				<listitem><para>Slide Settings</para></listitem>
 				<listitem><para>Slide Motion</para></listitem>
@@ -208,6 +208,17 @@
 						of each of the imported audio files along with the total time length of all the imported audio files.
 						The play button allows you to reproduce the selected audio file. The arrow buttons allows you to
 						reorder the audio files and the button with the broom deletes the selected audio files.
+					</para>
+					<para>
+						Current state of audio support in Imagination is quite
+						limited. All audio files listed are concatenated
+						together (no cross fading) and truncated to fit
+						slidwshow total length. If you wish to have nicer audio
+						in slideshows, you should probably create your slideshow
+						in three steps: 1. create slideshow without audio (this
+						will give you the total duration); 2. prepare audio file
+						that exactly fit the duration; 3. add prepared audio to
+						slideshow and export.
 					</para>
 				<figure id="audio_tab_pic">
 					<title>Audio Tab</title>

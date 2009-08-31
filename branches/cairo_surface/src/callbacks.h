@@ -126,4 +126,13 @@ void
 img_add_empty_slide( GtkMenuItem       *item,
 					 img_window_struct *img );
 
+gboolean
+img_save_window_settings( img_window_struct *img );
+
+gboolean
+img_load_window_settings( img_window_struct *img );
+
+void
+img_set_window_default_settings( img_window_struct *img );
+
 #endif

@@ -21,6 +21,7 @@
 #include "callbacks.h"
 #include "export.h"
 #include <math.h>
+#include <sys/stat.h>
 
 /* Internal structure, used for creating empty slide */
 typedef struct _ImgEmptySlide ImgEmptySlide;
@@ -463,6 +464,8 @@ gboolean img_quit_application(GtkWidget *widget, GdkEvent *event, img_window_str
 		if (response != GTK_RESPONSE_OK)
 			return TRUE;
 	}
+	if( img_save_window_settings( img_struct ) )
+		return( TRUE );
 	img_free_allocated_memory(img_struct);
 
 	/* Unloads the plugins */
@@ -2523,5 +2526,104 @@ img_gradient_move( GtkWidget      *widget,
 	gtk_widget_queue_draw( slide->preview );
 
 	return( TRUE );
+}
+
+gboolean
+img_save_window_settings( img_window_struct *img )
+{
+	GKeyFile *kf;
+	gchar    *group = "Interface settings";
+	gchar    *rc_file, *rc_path, *contents;
+	int       w, h, g; /* Width, height, gutter */
+
+	/* TODO: Add conformation dialog here */
+
+	gtk_window_get_size( GTK_WINDOW( img->imagination_window ), &w, &h );
+	g = gtk_paned_get_position( GTK_PANED( img->paned ) );
+
+	kf = g_key_file_new();
+	g_key_file_set_integer( kf, group, "width",   w );
+	g_key_file_set_integer( kf, group, "height",  h );
+	g_key_file_set_integer( kf, group, "gutter",  g );
+	g_key_file_set_integer( kf, group, "mode",    img->mode );
+	g_key_file_set_double(  kf, group, "zoom_p",  img->image_area_zoom );
+	g_key_file_set_double(  kf, group, "zoom_o",  img->overview_zoom );
+	g_key_file_set_boolean( kf, group, "quality", img->low_quality );
+
+	rc_path = g_build_filename( g_get_home_dir(), ".config",
+								"imagination", NULL );
+	rc_file = g_build_filename( rc_path, "imaginationrc", NULL );
+	contents = g_key_file_to_data( kf, NULL, NULL );
+
+	/* FIXME: Delete next two lines!! */
+	g_print( "%s\n", contents );
+	g_print( "%s\n", rc_file );
+
+	g_mkdir_with_parents( rc_path, S_IRWXU );
+	g_file_set_contents( rc_file, contents, -1, NULL );
+
+	g_free( contents );
+	g_free( rc_file );
+	g_free( rc_path );
+
+	return( FALSE );
+}
+
+gboolean
+img_load_window_settings( img_window_struct *img )
+{
+	GKeyFile *kf;
+	gchar    *group = "Interface settings";
+	gchar    *rc_file;
+	int       w, h, g, m; /* Width, height, gutter, mode */
+
+	rc_file = g_build_filename( g_get_home_dir(), ".config",
+								"imagination", "imaginationrc", NULL );
+	if( ! g_file_test( rc_file, G_FILE_TEST_EXISTS ) )
+		return( FALSE );
+
+	kf = g_key_file_new();
+	g_key_file_load_from_file( kf, rc_file, G_KEY_FILE_NONE, NULL );
+
+	w                    = g_key_file_get_integer( kf, group, "width",   NULL );
+	h                    = g_key_file_get_integer( kf, group, "height",  NULL );
+	g                    = g_key_file_get_integer( kf, group, "gutter",  NULL );
+	m                    = g_key_file_get_integer( kf, group, "mode",    NULL );
+	img->image_area_zoom = g_key_file_get_double(  kf, group, "zoom_p",  NULL );
+	img->overview_zoom   = g_key_file_get_double(  kf, group, "zoom_o",  NULL );
+	img->low_quality     = g_key_file_get_boolean( kf, group, "quality", NULL );
+
+	/* Update mode */
+	img->mode = - 1;
+	img_switch_mode( img, m );
+
+	/* Update window size and gutter position */
+	gtk_window_set_default_size( GTK_WINDOW( img->imagination_window ), w, h );
+	gtk_paned_set_position( GTK_PANED( img->paned ), g );
+
+	/* Update zoom display */
+	gtk_widget_set_size_request( img->image_area,
+								 img->video_size[0] * img->image_area_zoom,
+								 img->video_size[1] * img->image_area_zoom );
+	g_object_set( img->over_cell, "zoom", img->overview_zoom, NULL );
+
+	return( TRUE );
+}
+
+void
+img_set_window_default_settings( img_window_struct *img )
+{
+	img->image_area_zoom = 1.0;
+	img->overview_zoom = 1.0;
+	img->low_quality = TRUE;
+
+	/* Update mode */
+	img->mode = - 1;
+	img_switch_mode( img, 0 );
+
+	/* Update window size and gutter position */
+	gtk_window_set_default_size( GTK_WINDOW( img->imagination_window ),
+								 800, 600 );
+	gtk_paned_set_position( GTK_PANED( img->paned ), 500 );
 }
 
