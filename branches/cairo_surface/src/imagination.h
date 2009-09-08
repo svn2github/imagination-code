@@ -344,13 +344,11 @@ struct _img_window_struct
 	GtkWidget   *export_dialog;
 	gdouble      export_fps;        /* Frame rate for exported video */
 	gchar       *export_cmd_line;   /* ffmpeg spawn cmd line */
-	gchar       *export_audio_file; /* Full path to audio */
 	guint        export_slide;		/* Number of slide being exported */
 	GSourceFunc  export_idle_func;	/* Stored procedure for pause */
 	GPid         ffmpeg_export;     /* ffmpeg's process id */
-	GPid         sox_export;        /* sox's process id - FIXME: This will only
-									   be needed if we decide to mangle audio
-									   files using external sox binary. */
+	gchar      **exported_audio;    /* Array of input audio files */
+	gint         exported_audio_no; /* Number of files in array */
 	
 	/* Audio related stuff */
 	GtkWidget	*music_file_treeview;

@@ -20,6 +20,7 @@
 #include "export.h"
 #include "support.h"
 #include "callbacks.h"
+#include "audio.h"
 #include <glib/gstdio.h>
 
 static void
@@ -238,35 +239,17 @@ img_create_export_dialog( img_window_struct  *img,
 /*
  * img_prepare_audio:
  * @img: global img_window_struct structure
- *
- * This function represents second link in export chain. It concatenates audio
- * files into single file, trims this file and places full path into
- * img->export_audio_file.
- *
- * Currently, it simply places first audio file from store into
- * export_audio_file. This is only temporary solution, but I needed to place
- * something here in order to be able to test the whole chain. In final version,
- * this function will probably just the first of three.
- *
- * Task of this function will be to create audio preparation dialog, spawn sox
- * thread and setup and communication between threads.
- *
- * Second function will only update progress based on data sent from sox thread.
- * It'll also offer user a chance to terminate export process.
- *
- * Third function will be responsible for hiding audio dialog, finalizing ffmpeg
- * command line and linking to video export process.
- *
- * Return value: This function must always return FALSE, since we want it
- * removed from main context.
  */
 static gboolean
 img_prepare_audio( img_window_struct *img )
 {
 	GtkTreeModel *model;
 	GtkTreeIter   iter;
-	gchar        *audio_file;
 	gchar       **tmp;
+	gchar        *inputs[100]; /* 100 audio files is current limit */
+	gint          i = 0;
+	gint          channels;
+	gdouble       rate;
 
 
 	/* Set the export info */
@@ -275,38 +258,58 @@ img_prepare_audio( img_window_struct *img )
 	model = gtk_tree_view_get_model( GTK_TREE_VIEW( img->music_file_treeview ) );
 	if( gtk_tree_model_get_iter_first( model, &iter ) )
 	{
-		gchar   *path, *filename;
-		GString *audio_string;
+		gchar *path, *filename;
 
-		audio_string = g_string_new( "" );
 		do
 		{
 			gtk_tree_model_get( model, &iter, 0, &path, 1, &filename, -1 );
-			g_string_append_printf( audio_string, " -i \"%s%s%s\"",
-									path, G_DIR_SEPARATOR_S, filename );
-			
+			inputs[i] = g_strdup_printf( "%s%s%s", path,
+										 G_DIR_SEPARATOR_S, filename );
+			i++;
 			g_free( path );
 			g_free( filename );
 		}
 		while( gtk_tree_model_iter_next( model, &iter ) );
+	}
 
-		audio_file = audio_string->str;
-		g_string_free( audio_string, FALSE );
+	/* If no audio is present, simply update ffmpeg command line with -an */
+	if( i == 0 )
+	{
+		/* Replace audio place holder */
+		tmp = g_strsplit( img->export_cmd_line, "<#AUDIO#>", 0 );
+		g_free( img->export_cmd_line );
+		img->export_cmd_line = g_strjoin( NULL, tmp[0], "-an", tmp[1], NULL );
+
+		/* Chain last export step - video export */
+		g_idle_add( (GSourceFunc)img_start_export, img );
+
+		return( FALSE );
+	}
+
+	img_analyze_input_files( inputs, i, &rate, &channels );
+	if( img_eliminate_bad_files( inputs, i, rate, channels, img ) )
+	{
+		/* User accepted our proposal */
+
+		/* Replace audio place holder */
+		tmp = g_strsplit( img->export_cmd_line, "<#AUDIO#>", 0 );
+		g_free( img->export_cmd_line );
+		img->export_cmd_line = g_strdup_printf( "%s-f s16le -acodec pcm_s16le "
+				                                "-ar %f -ac %d "
+												"-i /tmp/img_a_pipe%s",
+												tmp[0], rate, channels, tmp[1] );
+
+		/* Spawn sox thread now */
+		/* TODO */
+
+		/* Chain last export step - video export */
+//		g_idle_add( (GSourceFunc)img_start_export, img );
 	}
 	else
-		/* Disable audio */
-		audio_file = g_strdup( "-an" );
-
-	/* Replace audio place holder */
-	tmp = g_strsplit( img->export_cmd_line, "<#AUDIO#>", 0 );
-	g_free( img->export_cmd_line );
-	img->export_cmd_line = g_strjoin( NULL, tmp[0], audio_file,
-									  tmp[1], NULL );
-
-	img->export_audio_file = audio_file;
-
-	/* Chain last export step - video export */
-	g_idle_add( (GSourceFunc)img_start_export, img );
+	{
+		/* User declined proposal */
+		img_stop_export( img );
+	}
 
 	return( FALSE );
 }
@@ -518,16 +521,8 @@ img_stop_export( img_window_struct *img )
 			break;
 	}
 
-	/* This will be neede when we start producing our own audio file */
-#if 0
-	/* Delete audio file it present */
-	if( strcmp( img->export_audio_file, "-an" ) )
-		g_unlink( img->export_audio_file );
-#endif
-
-	/* Free ffmpeg cmd line and audio file */
+	/* Free ffmpeg cmd line */
 	g_free( img->export_cmd_line );
-	g_free( img->export_audio_file );
 
 	/* Indicate that export is not running any more */
 	img->export_is_running = 0;

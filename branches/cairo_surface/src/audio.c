@@ -151,3 +151,168 @@ void output_message(unsigned level, const char *filename, const char *fmt, va_li
 		g_free(string);
 	}
 }
+
+/* ****************************************************************************
+ * EXPORT AUDIO
+ * ************************************************************************* */
+void
+img_analyze_input_files( gchar   **inputs,
+						 gint      no_inputs,
+						 gdouble  *rate,
+						 gint     *channels )
+{
+	gint    i, j, tmp = 1;
+	GArray *array_ra = g_array_sized_new( FALSE, FALSE, sizeof( gdouble ), 10 );
+	GArray *array_rc = g_array_sized_new( FALSE, FALSE, sizeof( gint ), 10 );
+	GArray *array_ch = g_array_sized_new( FALSE, FALSE, sizeof( gdouble ), 2 );
+	GArray *array_cc = g_array_sized_new( FALSE, FALSE, sizeof( gint ), 2 );
+
+	/* Analyze all files */
+	for( i = 0; i < no_inputs; i++ )
+	{
+		sox_format_t *in = sox_open_read( inputs[i], NULL, NULL, NULL );
+
+		/* Get rate setting and increment counter if this rate is already
+		 * present in array. */
+		for( j = 0; j < array_ra->len; j++ )
+			if( *( (gdouble *)( array_ra->data ) + j ) == in->signal.rate )
+				break;
+		if( j == array_ra->len )
+		{
+			g_array_append_val( array_ra, in->signal.rate );
+			g_array_append_val( array_rc, tmp );
+		}
+		else
+		{
+			*( (gint *)( array_rc->data ) + j ) += 1;
+		}
+
+		/* Get channels and increment counter if this number is
+		 * already present */
+		for( j = 0; j < array_ch->len; j++ )
+			if( *( (gint *)( array_ch->data ) + j ) == in->signal.channels )
+				break;
+		if( j == array_ch->len )
+		{
+			g_array_append_val( array_ch, in->signal.channels );
+			g_array_append_val( array_cc, tmp );
+		}
+		else
+		{
+			*( (gint *)( array_cc->data ) + j ) += 1;
+		}
+
+		sox_close( in );
+	}
+
+	/* Do some statistics */
+	for( i = 0, j = 0, tmp = 0; i < array_ra->len; i++ )
+	{
+		if( *( (gint *)( array_rc->data ) + i ) > tmp )
+		{
+			tmp = *( (gint *)( array_rc->data ) + i );
+			j = i;
+		}
+	}
+	*rate = *( (gdouble *)( array_ra->data ) + j );
+
+	for( i = 0, j = 0, tmp = 0; i < array_ch->len; i++ )
+	{
+		if( *( (gint *)( array_cc->data ) + i ) > tmp )
+		{
+			tmp = *( (gint *)( array_cc->data ) + i );
+			j = i;
+		}
+	}
+	*channels = *( (gint *)( array_ch->data ) + j );
+
+	/* Free data storage */
+	g_array_free( array_ra, TRUE );
+	g_array_free( array_rc, TRUE );
+	g_array_free( array_ch, TRUE );
+	g_array_free( array_cc, TRUE );
+}
+
+gboolean
+img_eliminate_bad_files( gchar             **inputs,
+						 gint                no_inputs,
+						 gdouble             rate,
+						 gint                channels,
+						 img_window_struct  *img )
+{
+	gint       i, j, reduced_out = no_inputs;
+	GString   *string;
+	gboolean   warn = FALSE, ret = TRUE;
+	GtkWidget *dialog;
+
+	string = g_string_new( "" );
+
+	/* Analyze all files */
+	for( i = 0, j = 0; i < no_inputs; i++ )
+	{
+		sox_format_t *in = sox_open_read( inputs[i], NULL, NULL, NULL );
+		if( in->signal.rate != rate )
+		{
+			gchar *base = g_path_get_basename( inputs[i] );
+
+			g_string_append_printf( string,
+									"  %s: incompatible sample rate\n",
+									base );
+			g_free( inputs[i] );
+			g_free( base );
+			inputs[i] = NULL;
+			reduced_out--;
+			warn = TRUE;
+		}
+		else if( in->signal.channels != channels )
+		{
+			gchar *base = g_path_get_basename( inputs[i] );
+
+			g_string_append_printf( string,
+									"  %s: incompatible number of channels\n",
+									base );
+			g_free( inputs[i] );
+			g_free( base );
+			inputs[i] = NULL;
+			reduced_out--;
+			warn = TRUE;
+		}
+	}
+
+	/* Present results to user */
+	if( warn )
+	{
+		dialog = gtk_message_dialog_new_with_markup(
+							GTK_WINDOW( img->imagination_window ),
+							GTK_DIALOG_MODAL,
+							GTK_MESSAGE_WARNING,
+							GTK_BUTTONS_YES_NO,
+							"<b>Bad audio files:</b>\n\n%s\n\n"
+							"<b>Do you want to continue without "
+							"these files?</b>",
+							string->str );
+		if( GTK_RESPONSE_OK != gtk_dialog_run( GTK_DIALOG( dialog ) ) )
+			ret = FALSE;
+		gtk_widget_destroy( dialog );
+	}
+	g_string_free( string, TRUE );
+
+	/* If we continue with export process, set up proper audio files array */
+	if( ret )
+	{
+		img->exported_audio = g_slice_alloc( sizeof( gchar * ) * reduced_out );
+		img->exported_audio_no = reduced_out;
+
+		for( i = 0, j = 0; i < no_inputs; i++ )
+			if( inputs[i] )
+				img->exported_audio[j++] = inputs[i];
+	}
+
+	return( ret );
+}
+
+
+/* ****************************************************************************
+ * THREAD FUNCTIONS
+ * ************************************************************************* */
+
