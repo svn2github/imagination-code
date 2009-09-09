@@ -597,9 +597,13 @@ img_scale_image( const gchar      *filename,
 											 i_ratio */
 	gboolean   transform = FALSE;  /* Flag that controls scalling */
 
+	/* MAximal distortion values */
+	gdouble max_stretch = 0.1280;
+	gdouble max_crop    = 0.8500;
+
 	/* Borderline skew values */
-	gdouble max_skew = 1.35;
-	gdouble min_skew = 0.75;
+	gdouble max_skew = ( 1 + max_stretch ) / max_crop;
+	gdouble min_skew = ( 1 - max_stretch ) * max_crop;
 
 	/* Obtain information about image being loaded */
 	if( ! gdk_pixbuf_get_file_info( filename, &i_width, &i_height ) )
@@ -665,7 +669,7 @@ img_scale_image( const gchar      *filename,
 		{
 			/* User wants images to be distorted and we're able to do it
 			 * without ruining images. */
-			if( ratio > i_ratio )
+			if( ratio < i_ratio )
 			{
 				/* Image will be distorted horizontally */
 				height = i_height;
@@ -696,17 +700,17 @@ img_scale_image( const gchar      *filename,
 		gint lw, lh;
 
 		/* Images will be loaded at slightly modified dimensions */
-		if( ratio > i_ratio )
+		if( ratio < i_ratio )
 		{
 			/* Horizontal scaling */
-			lw = (gdouble)width * ( skew + 1 ) / 2;
+			lw = (gdouble)width / ( skew + 1 ) * 2;
 			lh = height;
 		}
 		else
 		{
 			/* Vertical scaling */
 			lw = width;
-			lh = (gdouble)height / ( skew + 1 ) * 2;
+			lh = (gdouble)height * ( skew + 1 ) / 2;
 		}
 		loader = gdk_pixbuf_new_from_file_at_scale( filename, lw, lh,
 													FALSE, NULL );
