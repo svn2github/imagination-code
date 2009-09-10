@@ -993,7 +993,7 @@ img_window_struct *img_create_window (void)
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow1), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (scrolledwindow1), GTK_SHADOW_IN);
 
-	img_struct->music_file_liststore = gtk_list_store_new (4, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_INT);
+	img_struct->music_file_liststore = gtk_list_store_new (6, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_INT, G_TYPE_STRING, G_TYPE_STRING);
 	g_signal_connect (G_OBJECT (img_struct->music_file_liststore), "row-inserted",	G_CALLBACK (img_activate_remove_button_music_liststore) , img_struct);
 
 	img_struct->music_file_treeview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(img_struct->music_file_liststore));
@@ -1002,18 +1002,22 @@ img_window_struct *img_create_window (void)
 	gtk_drag_dest_set (GTK_WIDGET(img_struct->music_file_treeview),GTK_DEST_DEFAULT_ALL,drop_targets,1,GDK_ACTION_COPY | GDK_ACTION_MOVE | GDK_ACTION_LINK | GDK_ACTION_ASK);
 	g_signal_connect (G_OBJECT (img_struct->music_file_treeview),"drag-data-received",G_CALLBACK (img_on_drag_audio_data_received), img_struct);
 
-	/* First and last column aren't displayed, so we only need two columns. */
+	/* First and last three columns aren't displayed, so we
+	 * only need two columns. */
 	for (x = 1; x < 3; x++)
 	{
 		column = gtk_tree_view_column_new();
 		renderer = gtk_cell_renderer_text_new();
 		gtk_tree_view_column_pack_start(column, renderer, TRUE);
-		gtk_tree_view_column_add_attribute(column, renderer, "text", x);
+		gtk_tree_view_column_set_attributes(column, renderer, "text", x,
+															  "foreground", 4,
+															  NULL );
 		gtk_tree_view_append_column (GTK_TREE_VIEW (img_struct->music_file_treeview), column);
 	}
 
 	gtk_tree_view_set_rules_hint(GTK_TREE_VIEW(img_struct->music_file_treeview), TRUE);
 	gtk_tree_view_set_headers_visible (GTK_TREE_VIEW (img_struct->music_file_treeview), FALSE);
+	gtk_tree_view_set_tooltip_column( GTK_TREE_VIEW( img_struct->music_file_treeview ), 5 );
 	gtk_container_add (GTK_CONTAINER (scrolledwindow1), img_struct->music_file_treeview);
 
 	/* Add the total music labels and the buttons */

@@ -488,6 +488,9 @@ img_load_slideshow( img_window_struct *img,
 	
 	/* Select the first slide */
 	img_goto_first_slide(NULL, img);
+
+	/* Update incompatibilities display */
+	img_update_inc_audio_display( img );
 }
 
 static gboolean img_populate_hash_table( GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, GHashTable **table )

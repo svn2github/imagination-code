@@ -312,6 +312,9 @@ void img_select_audio_files_to_add ( GtkMenuItem* button, img_window_struct *img
 	gtk_label_set_text(GTK_LABEL(img->music_time_data), time);
 	g_free(time);
 
+	/* Update incompatibilities display */
+	img_update_inc_audio_display( img );
+
 	gtk_widget_destroy (fs);
 }
 

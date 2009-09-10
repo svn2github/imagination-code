@@ -318,6 +318,90 @@ img_eliminate_bad_files( gchar             **inputs,
 	return( ret );
 }
 
+void
+img_update_inc_audio_display( img_window_struct *img )
+{
+	GtkTreeModel *model;
+	GtkTreeIter   iter;
+	gchar        *inputs[100]; /* 100 audio files is current limit */
+	gint          i = 0;
+	gint          channels;
+	gdouble       rate;
+
+
+	model = gtk_tree_view_get_model( GTK_TREE_VIEW( img->music_file_treeview ) );
+
+	/* If no audio is present, simply return */
+	if( gtk_tree_model_get_iter_first( model, &iter ) )
+	{
+		gchar *path, *filename;
+
+		do
+		{
+			gtk_tree_model_get( model, &iter, 0, &path, 1, &filename, -1 );
+			inputs[i] = g_strdup_printf( "%s%s%s", path,
+										 G_DIR_SEPARATOR_S, filename );
+			i++;
+			g_free( path );
+			g_free( filename );
+		}
+		while( gtk_tree_model_iter_next( model, &iter ) );
+	}
+	else
+		return;
+
+	img_analyze_input_files( inputs, i, &rate, &channels );
+
+	/* Update display */
+	gtk_tree_model_get_iter_first( model, &iter );
+	do
+	{
+		gchar *path, *file;
+		gchar *full;
+
+		gtk_tree_model_get( model, &iter, 0, &path, 1, &file, -1 );
+		full = g_strdup_printf( "%s%s%s", path, G_DIR_SEPARATOR_S, file );
+		g_free( path );
+		g_free( file );
+
+		sox_format_t *in = sox_open_read( full, NULL, NULL, NULL );
+		if( in->signal.rate != rate || in->signal.channels != channels )
+		{
+			gint   bad = 0;
+			
+			bad += ( in->signal.rate != rate ? 1 : 0 );
+			bad += ( in->signal.channels != channels ? 2 : 0 );
+
+			switch( bad )
+			{
+				case 1: /* Incompatible signal rate */
+					gtk_list_store_set( GTK_LIST_STORE( model ), &iter,
+										4, "red",
+										5, "Incompatible sample rate.",
+										-1 );
+					break;
+
+				case 2: /* Incompatible number of channels */
+					gtk_list_store_set( GTK_LIST_STORE( model ), &iter,
+										4, "red",
+										5, "Incompatible number of channels.",
+										-1 );
+					break;
+
+				case 3: /* Both are incompatible */
+					gtk_list_store_set( GTK_LIST_STORE( model ), &iter,
+										4, "red",
+										5, "Incompatible sample rate and "
+										   "number of channels.",
+										-1 );
+					break;
+			}
+		}
+		sox_close( in );
+		g_free( full );
+	}
+	while( gtk_tree_model_iter_next( model, &iter ) );
+}
 
 /* ****************************************************************************
  * THREAD FUNCTIONS
