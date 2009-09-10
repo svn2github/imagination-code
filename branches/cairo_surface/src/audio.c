@@ -251,26 +251,33 @@ img_eliminate_bad_files( gchar             **inputs,
 	for( i = 0, j = 0; i < no_inputs; i++ )
 	{
 		sox_format_t *in = sox_open_read( inputs[i], NULL, NULL, NULL );
-		if( in->signal.rate != rate )
+		if( in->signal.rate != rate || in->signal.channels != channels )
 		{
 			gchar *base = g_path_get_basename( inputs[i] );
+			gint   bad = 0;
+			
+			bad += ( in->signal.rate != rate ? 1 : 0 );
+			bad += ( in->signal.channels != channels ? 2 : 0 );
 
-			g_string_append_printf( string,
-									"  %s: incompatible sample rate\n",
-									base );
-			g_free( inputs[i] );
-			g_free( base );
-			inputs[i] = NULL;
-			reduced_out--;
-			warn = TRUE;
-		}
-		else if( in->signal.channels != channels )
-		{
-			gchar *base = g_path_get_basename( inputs[i] );
+			switch( bad )
+			{
+				case 1: /* Incompatible signal rate */
+					g_string_append_printf(
+							string, "  %s: incompatible sample rate\n", base );
+					break;
 
-			g_string_append_printf( string,
-									"  %s: incompatible number of channels\n",
+				case 2: /* Incompatible number of channels */
+					g_string_append_printf(
+							string, "  %s: incompatible number of channels\n",
 									base );
+					break;
+
+				case 3: /* Both are incompatible */
+					g_string_append_printf(
+							string, "  %s: incompatible sample rate and "
+									"number of channels\n", base );
+					break;
+			}
 			g_free( inputs[i] );
 			g_free( base );
 			inputs[i] = NULL;
