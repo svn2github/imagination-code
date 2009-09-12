@@ -327,6 +327,7 @@ img_update_inc_audio_display( img_window_struct *img )
 	gint          i = 0;
 	gint          channels;
 	gdouble       rate;
+	gint          warn = 0;
 
 
 	model = gtk_tree_view_get_model( GTK_TREE_VIEW( img->music_file_treeview ) );
@@ -358,6 +359,7 @@ img_update_inc_audio_display( img_window_struct *img )
 	{
 		gchar *path, *file;
 		gchar *full;
+		gint   bad = 0;
 
 		gtk_tree_model_get( model, &iter, 0, &path, 1, &file, -1 );
 		full = g_strdup_printf( "%s%s%s", path, G_DIR_SEPARATOR_S, file );
@@ -365,45 +367,82 @@ img_update_inc_audio_display( img_window_struct *img )
 		g_free( file );
 
 		sox_format_t *in = sox_open_read( full, NULL, NULL, NULL );
-		if( in->signal.rate != rate || in->signal.channels != channels )
-		{
-			gint   bad = 0;
 			
-			bad += ( in->signal.rate != rate ? 1 : 0 );
-			bad += ( in->signal.channels != channels ? 2 : 0 );
+		bad += ( in->signal.rate != rate ? 1 : 0 );
+		bad += ( in->signal.channels != channels ? 2 : 0 );
+		if( bad )
+			warn++;
 
-			switch( bad )
-			{
-				case 1: /* Incompatible signal rate */
-					gtk_list_store_set( GTK_LIST_STORE( model ), &iter,
-										4, "red",
-										5, "Incompatible sample rate.",
-										-1 );
-					break;
+		switch( bad )
+		{
+			case 0: /* File is compatible */
+				gtk_list_store_set( GTK_LIST_STORE( model ), &iter,
+									4, NULL,
+									5, NULL,
+									-1 );
+				break;
 
-				case 2: /* Incompatible number of channels */
-					gtk_list_store_set( GTK_LIST_STORE( model ), &iter,
-										4, "red",
-										5, "Incompatible number of channels.",
-										-1 );
-					break;
+			case 1: /* Incompatible signal rate */
+				gtk_list_store_set( GTK_LIST_STORE( model ), &iter,
+									4, "red",
+									5, "Incompatible sample rate.",
+									-1 );
+				break;
 
-				case 3: /* Both are incompatible */
-					gtk_list_store_set( GTK_LIST_STORE( model ), &iter,
-										4, "red",
-										5, "Incompatible sample rate and "
-										   "number of channels.",
-										-1 );
-					break;
-			}
+			case 2: /* Incompatible number of channels */
+				gtk_list_store_set( GTK_LIST_STORE( model ), &iter,
+									4, "blue",
+									5, "Incompatible number of channels.",
+									-1 );
+				break;
+
+			case 3: /* Both are incompatible */
+				gtk_list_store_set( GTK_LIST_STORE( model ), &iter,
+									4, "orange",
+									5, "Incompatible sample rate and "
+									   "number of channels.",
+									-1 );
+				break;
 		}
 		sox_close( in );
 		g_free( full );
 	}
 	while( gtk_tree_model_iter_next( model, &iter ) );
+
+	/* Inform user that some files are incompatible and cannot be concatenated
+	 * for export. */
+	if( warn )
+	{
+		GtkWidget *dialog;
+		gchar     *message;
+
+		message = g_strconcat( 
+						ngettext( "File selection contains audio file that "
+								  "is incompatible with other ones.",
+								  "File selection contains audio files that "
+								  "are incompatible with other files.",
+								  warn ),
+						"\n\nCheck audio tab for more information.",
+						NULL );
+
+		dialog = gtk_message_dialog_new_with_markup(
+							GTK_WINDOW( img->imagination_window ),
+							GTK_DIALOG_MODAL,
+							GTK_MESSAGE_WARNING,
+							GTK_BUTTONS_OK,
+							"%s", message );
+		g_free( message );
+		gtk_dialog_run( GTK_DIALOG( dialog ) );
+		gtk_widget_destroy( dialog );
+	}
 }
 
 /* ****************************************************************************
  * THREAD FUNCTIONS
  * ************************************************************************* */
+gpointer
+img_produce_audio_data( img_window_struct *img )
+{
+	return( NULL );
+}
 

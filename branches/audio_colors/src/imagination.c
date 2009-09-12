@@ -39,6 +39,9 @@ int main (int argc, char *argv[])
   		bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
   		textdomain (GETTEXT_PACKAGE);
 	#endif
+	
+	if( g_thread_supported() )
+		g_thread_init( NULL );
 
 	gtk_set_locale ();
 	gtk_init (&argc, &argv);

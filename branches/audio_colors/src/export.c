@@ -299,11 +299,15 @@ img_prepare_audio( img_window_struct *img )
 												"-i /tmp/img_a_pipe%s",
 												tmp[0], rate, channels, tmp[1] );
 
-		/* Spawn sox thread now */
-		/* TODO */
+		/* Spawn sox thread now. We're passing a pointer to whole global
+		 * structure to the thread, but only sox_flags, exported_audio and
+		 * exported_audio_no should be accessed!!! */
+		g_atomic_int_set( &img->sox_flags, 0 );
+		img->sox = g_thread_create( (GThreadFunc)img_produce_audio_data,
+									img, TRUE, NULL );
 
 		/* Chain last export step - video export */
-//		g_idle_add( (GSourceFunc)img_start_export, img );
+		g_idle_add( (GSourceFunc)img_start_export, img );
 	}
 	else
 	{
@@ -495,30 +499,42 @@ gboolean
 img_stop_export( img_window_struct *img )
 {
 	/* Do any additional tasks */
-	switch( img->export_is_running )
+	if( img->export_is_running > 1 )
 	{
-		case 2:
-			/* Kill sox thread here and delete files */
-			g_source_remove( img->source_id );
-			break;
+		/* Kill sox thread */
+		if( img->exported_audio_no )
+		{
+			int i;
 
-		case 4:
-			kill( img->ffmpeg_export, SIGINT );
-			g_source_remove( img->source_id );
+			g_atomic_int_set( &img->sox_flags, 0 );
+			/* Wait for thread to finish */
+			g_thread_join( img->sox );
+			img->sox = NULL;
 
-			close(img->file_desc);
-			g_spawn_close_pid( img->ffmpeg_export );
+			for( i = 0; i < img->exported_audio_no; i++ )
+				g_free( img->exported_audio[i] );
+			img->exported_audio = NULL;
+			img->exported_audio_no = 0;
+		}
+	}
 
-			/* Destroy images that were used */
-			cairo_surface_destroy( img->image1 );
-			cairo_surface_destroy( img->image2 );
-			cairo_surface_destroy( img->image_from );
-			cairo_surface_destroy( img->image_to );
-			cairo_surface_destroy( img->exported_image );
+	if( img->export_is_running > 3 )
+	{
+		kill( img->ffmpeg_export, SIGINT );
+		g_source_remove( img->source_id );
 
-			/* Close export dialog */
-			gtk_widget_destroy( img->export_dialog );
-			break;
+		close(img->file_desc);
+		g_spawn_close_pid( img->ffmpeg_export );
+
+		/* Destroy images that were used */
+		cairo_surface_destroy( img->image1 );
+		cairo_surface_destroy( img->image2 );
+		cairo_surface_destroy( img->image_from );
+		cairo_surface_destroy( img->image_to );
+		cairo_surface_destroy( img->exported_image );
+
+		/* Close export dialog */
+		gtk_widget_destroy( img->export_dialog );
 	}
 
 	/* Free ffmpeg cmd line */

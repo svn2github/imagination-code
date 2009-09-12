@@ -45,4 +45,7 @@ img_eliminate_bad_files( gchar             **inputs,
 
 void
 img_update_inc_audio_display( img_window_struct *img );
+
+gpointer
+img_produce_audio_data( img_window_struct *img );
 #endif
