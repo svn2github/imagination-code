@@ -347,16 +347,15 @@ struct _img_window_struct
 	guint        export_slide;		/* Number of slide being exported */
 	GSourceFunc  export_idle_func;	/* Stored procedure for pause */
 	GPid         ffmpeg_export;     /* ffmpeg's process id */
-	/* Next three fields are shared with sox thread and should not be
-	 * manipulated during export. Use atomic operators only to
-	 * modify sox_flags field!!!! REALLY!!!! DEAD SERIOUS!!!! */
-	gint      sox_flags;         /* 0 - thread is operationg normally
-									1 - thread has finished
-									2 - force thread to finish */
-	gchar   **exported_audio;    /* Array of input audio files */
-	gint      exported_audio_no; /* Number of files in array */
+
+	/* Sox thread related variables */
+	gint      sox_flags;         /* Thread controls:
+									 0 - normal operation
+									 1 - thread must be killed */
 	GThread  *sox;               /* sox thread handler */
-	
+	gchar   **exported_audio;    /* Audio files to be exported */
+	gint      exported_audio_no; /* Number of audio files inside array */
+
 	/* Audio related stuff */
 	GtkWidget	*music_file_treeview;
 	GtkWidget	*play_audio_button;

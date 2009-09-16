@@ -437,12 +437,4 @@ img_update_inc_audio_display( img_window_struct *img )
 	}
 }
 
-/* ****************************************************************************
- * THREAD FUNCTIONS
- * ************************************************************************* */
-gpointer
-img_produce_audio_data( img_window_struct *img )
-{
-	return( NULL );
-}
 

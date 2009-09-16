@@ -21,6 +21,7 @@
 #include "support.h"
 #include "callbacks.h"
 #include "audio.h"
+#include "img_sox.h"
 #include <glib/gstdio.h>
 
 static void
@@ -291,6 +292,11 @@ img_prepare_audio( img_window_struct *img )
 	{
 		/* User accepted our proposal */
 
+		/* Thread data structure
+		 *
+		 * This structure is freed at the thread termination. */
+		ImgThreadData *tdata = g_slice_new( ImgThreadData );
+
 		/* Replace audio place holder */
 		tmp = g_strsplit( img->export_cmd_line, "<#AUDIO#>", 0 );
 		g_free( img->export_cmd_line );
@@ -299,12 +305,19 @@ img_prepare_audio( img_window_struct *img )
 												"-i /tmp/img_a_pipe%s",
 												tmp[0], rate, channels, tmp[1] );
 
-		/* Spawn sox thread now. We're passing a pointer to whole global
-		 * structure to the thread, but only sox_flags, exported_audio and
-		 * exported_audio_no should be accessed!!! */
+		/* Fill thread structure with data */
+		tdata->sox_flags = &img->sox_flags;
+		tdata->files     =  img->exported_audio;
+		tdata->no_files  =  img->exported_audio_no;
+		tdata->length    =  img->total_secs;
+
+		/* FIXME: Create FIFO here and place it's filename into
+		 * img->fifo field */
+
+		/* Spawn sox thread now. */
 		g_atomic_int_set( &img->sox_flags, 0 );
 		img->sox = g_thread_create( (GThreadFunc)img_produce_audio_data,
-									img, TRUE, NULL );
+									tdata, TRUE, NULL );
 
 		/* Chain last export step - video export */
 		g_idle_add( (GSourceFunc)img_start_export, img );
@@ -506,7 +519,7 @@ img_stop_export( img_window_struct *img )
 		{
 			int i;
 
-			g_atomic_int_set( &img->sox_flags, 0 );
+			g_atomic_int_set( &img->sox_flags, 1 );
 			/* Wait for thread to finish */
 			g_thread_join( img->sox );
 			img->sox = NULL;

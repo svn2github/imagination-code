@@ -1445,18 +1445,8 @@ static void img_activate_remove_button_music_liststore(GtkTreeModel *tree_model,
 
 static void img_quit_menu(GtkMenuItem *menuitem, img_window_struct *img)
 {
-	gboolean value;
-
-	g_signal_emit_by_name(img->imagination_window,"delete-event", img, &value);
-
-	if(value)
-		return;
-
-	/* Unloads the plugins */
-	g_slist_foreach(img->plugin_list,(GFunc)g_module_close,NULL);
-	g_slist_free(img->plugin_list);
-
-	gtk_main_quit();
+	if( ! img_quit_application( NULL, NULL, img ) )
+		gtk_main_quit();
 }
 
 void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *img)
