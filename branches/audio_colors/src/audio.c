@@ -263,19 +263,19 @@ img_eliminate_bad_files( gchar             **inputs,
 			{
 				case 1: /* Incompatible signal rate */
 					g_string_append_printf(
-							string, "  %s: incompatible sample rate\n", base );
+							string, _("%s:\nincompatible sample rate\n"), base );
 					break;
 
 				case 2: /* Incompatible number of channels */
 					g_string_append_printf(
-							string, "  %s: incompatible number of channels\n",
+							string, _("%s:\nincompatible number of channels\n"),
 									base );
 					break;
 
 				case 3: /* Both are incompatible */
 					g_string_append_printf(
-							string, "  %s: incompatible sample rate and "
-									"number of channels\n", base );
+							string, _("%s:\nincompatible sample rate and "
+									"number of channels\n"), base );
 					break;
 			}
 			g_free( inputs[i] );
@@ -294,10 +294,11 @@ img_eliminate_bad_files( gchar             **inputs,
 							GTK_DIALOG_MODAL,
 							GTK_MESSAGE_WARNING,
 							GTK_BUTTONS_YES_NO,
-							"<b>Bad audio files:</b>\n\n%s\n\n"
-							"<b>Do you want to continue without "
-							"these files?</b>",
+							_("%s\n<b>Do you want to continue without "
+							"these files?</b>"),
 							string->str );
+
+		gtk_window_set_title(GTK_WINDOW(dialog), _("Audio files mismatch:") );
 		if( GTK_RESPONSE_OK != gtk_dialog_run( GTK_DIALOG( dialog ) ) )
 			ret = FALSE;
 		gtk_widget_destroy( dialog );
