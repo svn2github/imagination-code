@@ -291,28 +291,34 @@ img_prepare_audio( img_window_struct *img )
 	if( img_eliminate_bad_files( inputs, i, rate, channels, img ) )
 	{
 		/* User accepted our proposal */
+		gchar s_rate[G_ASCII_DTOSTR_BUF_SIZE];
 
-		/* Thread data structure
-		 *
-		 * This structure is freed at the thread termination. */
+		/* Thread data structure */
 		ImgThreadData *tdata = g_slice_new( ImgThreadData );
+
+		/* FIFO path */
+		img->fifo = g_build_filename( g_get_tmp_dir(), "img_audio_fifo", NULL );
 
 		/* Replace audio place holder */
 		tmp = g_strsplit( img->export_cmd_line, "<#AUDIO#>", 0 );
 		g_free( img->export_cmd_line );
-		img->export_cmd_line = g_strdup_printf( "%s-f s16le -acodec pcm_s16le "
-				                                "-ar %f -ac %d "
-												"-i /tmp/img_a_pipe%s",
-												tmp[0], rate, channels, tmp[1] );
+		img->export_cmd_line =
+			g_strdup_printf( "%s-f s16le -acodec pcm_s16le -ar %s -ac %d -i %s%s",
+							 tmp[0], g_ascii_dtostr( s_rate,
+													 sizeof( s_rate ),
+													 rate ),
+							 channels, img->fifo, tmp[1] );
 
 		/* Fill thread structure with data */
 		tdata->sox_flags = &img->sox_flags;
 		tdata->files     =  img->exported_audio;
 		tdata->no_files  =  img->exported_audio_no;
 		tdata->length    =  img->total_secs;
+		tdata->fifo      =  img->fifo;
 
 		/* FIXME: Create FIFO here and place it's filename into
 		 * img->fifo field */
+		mkfifo( img->fifo, S_IRWXU );
 
 		/* Spawn sox thread now. */
 		g_atomic_int_set( &img->sox_flags, 0 );
@@ -519,7 +525,12 @@ img_stop_export( img_window_struct *img )
 		{
 			int i;
 
-			g_atomic_int_set( &img->sox_flags, 1 );
+			if( g_atomic_int_get( &img->sox_flags ) != 2 )
+			{
+				g_message( "CLEAN3" );
+				g_atomic_int_set( &img->sox_flags, 1 );
+			}
+
 			/* Wait for thread to finish */
 			g_thread_join( img->sox );
 			img->sox = NULL;
@@ -550,9 +561,20 @@ img_stop_export( img_window_struct *img )
 		gtk_widget_destroy( img->export_dialog );
 	}
 
+	g_message( "CLEAN2" );
+	/* If we created FIFO, we need to destroy it now */
+	if( img->fifo )
+	{
+		g_unlink( img->fifo );
+		g_free( img->fifo );
+		img->fifo = NULL;
+	}
+
+	g_message( "CLEAN1" );
 	/* Free ffmpeg cmd line */
 	g_free( img->export_cmd_line );
 
+	g_message( "CLEAN0" );
 	/* Indicate that export is not running any more */
 	img->export_is_running = 0;
 
@@ -568,6 +590,7 @@ img_stop_export( img_window_struct *img )
 		gtk_widget_queue_draw( img->image_area );
 	}
 
+	g_message( "CLEAN1" );
 	return( FALSE );
 }
 
@@ -686,9 +709,9 @@ img_run_encoder( img_window_struct *img )
 	g_print( "%s\n", img->export_cmd_line);
 
 	ret = g_spawn_async_with_pipes( NULL, argv, NULL,
-									G_SPAWN_SEARCH_PATH |
+									G_SPAWN_SEARCH_PATH /*|
 									G_SPAWN_STDOUT_TO_DEV_NULL |
-									G_SPAWN_STDERR_TO_DEV_NULL,
+									G_SPAWN_STDERR_TO_DEV_NULL*/,
 									NULL, NULL, &img->ffmpeg_export,
 									&img->file_desc, NULL, NULL, &error );
 	if( ! ret )

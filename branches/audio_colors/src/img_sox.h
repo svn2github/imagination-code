@@ -36,7 +36,7 @@ struct _ImgThreadData
 	 * terminated */
 	gchar **files;     /* Audio files that should be exported */
 	gint    no_files;  /* Number of files in files array */
-	gchar  *pipe;      /* Write output here */
+	gchar  *fifo;      /* Write output here */
 	gint    length;    /* Slideshow length */
 
 	/* All of the fields from here on are only accessed from thread */

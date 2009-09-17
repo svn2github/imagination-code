@@ -351,10 +351,12 @@ struct _img_window_struct
 	/* Sox thread related variables */
 	gint      sox_flags;         /* Thread controls:
 									 0 - normal operation
-									 1 - thread must be killed */
+									 1 - thread must be killed
+									 2 - thread finished normally */
 	GThread  *sox;               /* sox thread handler */
 	gchar   **exported_audio;    /* Audio files to be exported */
 	gint      exported_audio_no; /* Number of audio files inside array */
+	gchar    *fifo;              /* Named pipe path */
 
 	/* Audio related stuff */
 	GtkWidget	*music_file_treeview;

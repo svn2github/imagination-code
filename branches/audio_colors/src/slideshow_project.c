@@ -178,6 +178,7 @@ img_load_slideshow( img_window_struct *img,
 	gchar      *spath, *conf;
 	gdouble    *color, *font_color;
 	gboolean    old_file = FALSE;
+	gboolean    first_slide = TRUE;
 
 	/* Cretate new key file */
 	img_key_file = g_key_file_new();
@@ -289,9 +290,10 @@ img_load_slideshow( img_window_struct *img,
 					img->slides_nr++;
 
 					/* If we're loading the first slide, apply some of it's
-				 	* data to final pseudo-slide */
-					if( img->slides_nr == 1 )
+				 	 * data to final pseudo-slide */
+					if( first_slide )
 					{
+						first_slide = FALSE;
 						img->final_transition.speed  = slide_info->speed;
 						img->final_transition.render = slide_info->render;
 					}
@@ -421,9 +423,10 @@ img_load_slideshow( img_window_struct *img,
 											 font_desc, font_color, img );
 
 					/* If we're loading the first slide, apply some of it's
-				 	* data to final pseudo-slide */
-					if( img->slides_nr == 1 )
+				 	 * data to final pseudo-slide */
+					if( first_slide )
 					{
+						first_slide = FALSE;
 						img->final_transition.speed  = slide_info->speed;
 						img->final_transition.render = slide_info->render;
 					}

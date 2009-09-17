@@ -133,8 +133,8 @@ img_produce_audio_data( ImgThreadData *data )
 	encoding.reverse_bytes = SOX_OPTION_YES;
 
 	/* Output handler */
-	data->output = sox_open_write( data->pipe, &signal, &encoding,
-								   NULL, NULL, NULL );
+	data->output = sox_open_write( data->fifo, &signal, &encoding,
+								   "raw", NULL, NULL );
 
 	/* Effect chain */
 	chain = sox_create_effects_chain( &data->input->encoding, &encoding );
@@ -151,6 +151,11 @@ img_produce_audio_data( ImgThreadData *data )
 
 	/* Run chain */
 	sox_flow_effects( chain, NULL, NULL );
+
+	g_message( "THREAD RETURNS" );
+
+	/* Inform parent that we're finished */
+	g_atomic_int_set( data->sox_flags, 2 );
 
 	/* Cleanup */
 	sox_delete_effects_chain( chain );
