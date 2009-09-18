@@ -151,7 +151,11 @@ img_produce_audio_data( ImgThreadData *data )
 	sox_add_effect( chain, effect, &signal, &signal );
 
 	/* Run chain */
+#if SOX_LIB_VERSION_CODE == SOX_LIB_VERSION( 14, 2, 0 )
+	sox_flow_effects( chain, NULL );
+#else
 	sox_flow_effects( chain, NULL, NULL );
+#endif
 
 	g_message( "THREAD RETURNS" );
 
