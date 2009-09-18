@@ -299,7 +299,7 @@ img_eliminate_bad_files( gchar             **inputs,
 							string->str );
 
 		gtk_window_set_title(GTK_WINDOW(dialog), _("Audio files mismatch:") );
-		if( GTK_RESPONSE_OK != gtk_dialog_run( GTK_DIALOG( dialog ) ) )
+		if( GTK_RESPONSE_YES != gtk_dialog_run( GTK_DIALOG( dialog ) ) )
 			ret = FALSE;
 		gtk_widget_destroy( dialog );
 	}
