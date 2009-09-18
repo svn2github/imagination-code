@@ -29,17 +29,18 @@ output_flow( sox_effect_t       *effp,
 			 size_t             *isamp,
 			 size_t             *osamp )
 {
-	size_t len;
-
-	len = sox_write( global->output, ibuf, *isamp );
-	*osamp = 0;
-
-	if( g_atomic_int_get( global->sox_flags ) )
+	if( ! g_atomic_int_get( global->sox_flags ) )
 	{
-		return( SOX_EOF );
+		size_t len;
+
+		g_message( "ONE" );
+		len = sox_write( global->output, ibuf, *isamp );
+		*osamp = 0;
+		g_message( "\n>>> TERMINATION <<<\n" );
+		return( SOX_SUCCESS );
 	}
 
-	return( SOX_SUCCESS );
+	return( SOX_EOF );
 }
 
 static sox_effect_handler_t const *

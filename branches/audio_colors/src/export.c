@@ -529,11 +529,17 @@ img_stop_export( img_window_struct *img )
 			{
 				g_message( "CLEAN3" );
 				g_atomic_int_set( &img->sox_flags, 1 );
+
+				/* Export some more frames to unblock write on audio pipe */
+				for( i = 0; i < 10; i++ )
+					img_export_frame_to_ppm( img->exported_image,
+											 img->file_desc );
 			}
 
 			/* Wait for thread to finish */
 			g_thread_join( img->sox );
 			img->sox = NULL;
+				g_message( "CLEAN3" );
 
 			for( i = 0; i < img->exported_audio_no; i++ )
 				g_free( img->exported_audio[i] );
