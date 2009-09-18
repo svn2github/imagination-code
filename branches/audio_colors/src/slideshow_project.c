@@ -491,6 +491,7 @@ img_load_slideshow( img_window_struct *img,
 	
 	/* Select the first slide */
 	img_goto_first_slide(NULL, img);
+	img->project_is_modified = FALSE;
 
 	/* Update incompatibilities display */
 	img_update_inc_audio_display( img );
