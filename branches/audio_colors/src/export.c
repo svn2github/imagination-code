@@ -302,12 +302,19 @@ img_prepare_audio( img_window_struct *img )
 		/* Replace audio place holder */
 		tmp = g_strsplit( img->export_cmd_line, "<#AUDIO#>", 0 );
 		g_free( img->export_cmd_line );
+
+		/* FIXME: Remove next commented block when Giuseppe approves it. */
+#if 0
 		img->export_cmd_line =
 			g_strdup_printf( "%s-f s16le -acodec pcm_s16le -ar %s -ac %d -i %s%s",
 							 tmp[0], g_ascii_dtostr( s_rate,
 													 sizeof( s_rate ),
 													 rate ),
 							 channels, img->fifo, tmp[1] );
+#else
+		img->export_cmd_line = g_strdup_printf( "%s-f flac -i %s%s", tmp[0],
+												img->fifo, tmp[1] );
+#endif
 
 		/* Fill thread structure with data */
 		tdata->sox_flags = &img->sox_flags;
@@ -316,8 +323,6 @@ img_prepare_audio( img_window_struct *img )
 		tdata->length    =  img->total_secs;
 		tdata->fifo      =  img->fifo;
 
-		/* FIXME: Create FIFO here and place it's filename into
-		 * img->fifo field */
 		mkfifo( img->fifo, S_IRWXU );
 
 		/* Spawn sox thread now. */
@@ -1287,8 +1292,8 @@ img_exporter_vob( img_window_struct *img )
 	else
 		aspect_ratio = "16:9";
 
-	cmd_line = g_strdup_printf( "ffmpeg -f image2pipe -vcodec ppm -r %.02f -i pipe: "
-								"-aspect %s -s %dx%d <#AUDIO#> -y "
+	cmd_line = g_strdup_printf( "ffmpeg -f image2pipe -vcodec ppm -r %.02f "
+								"-aspect %s -s %dx%d -i pipe: <#AUDIO#> -y "
 								"-bf 2 -target %s-dvd \"%s.vob\"",
 								img->export_fps, aspect_ratio,
 								img->video_size[0], img->video_size[1],

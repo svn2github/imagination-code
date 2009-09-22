@@ -142,6 +142,12 @@ void output_message(unsigned level, const char *filename, const char *fmt, va_li
 
 	if (level == 1)
 	{
+		g_vprintf( fmt, ap );
+		/* Next lines are not usefull, since they won't be shown properly
+		 * during normal execution (blocking I/O on pipes makes this
+		 * useless) */
+		/* FIXME: Remove this code when Giuseppe approves it */
+#if 0
 		string = g_strdup_vprintf(fmt,ap);
 		dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, "%s", string);
 		gtk_window_set_title(GTK_WINDOW(dialog), "Imagination");
@@ -149,6 +155,7 @@ void output_message(unsigned level, const char *filename, const char *fmt, va_li
 		gtk_widget_destroy (GTK_WIDGET (dialog));
 
 		g_free(string);
+#endif
 	}
 }
 

@@ -31,12 +31,9 @@ output_flow( sox_effect_t       *effp,
 {
 	if( ! g_atomic_int_get( global->sox_flags ) )
 	{
-		size_t len;
-
-		g_message( "ONE" );
-		len = sox_write( global->output, ibuf, *isamp );
+		size_t len = sox_write( global->output, ibuf, *isamp );
 		*osamp = 0;
-		g_message( "\n>>> TERMINATION <<<\n" );
+
 		return( SOX_SUCCESS );
 	}
 
@@ -78,6 +75,7 @@ input_drain( sox_effect_t *effp,
 		{
 			global->input = sox_open_read( global->files[global->current_input],
 										   NULL, NULL, NULL );
+			global->current_input++;
 			read = sox_read( global->input, obuf, *osamp );
 		}
 		else
@@ -113,7 +111,6 @@ img_produce_audio_data( ImgThreadData *data )
 {
 	sox_effects_chain_t *chain;
 	sox_effect_t        *effect;
-	sox_encodinginfo_t   encoding;
 	sox_signalinfo_t     signal;
 	gchar               *fargs[] = { "l",   /* Logarithmic fade */
 									 "5",   /* 5 s fade-in */
@@ -128,17 +125,13 @@ img_produce_audio_data( ImgThreadData *data )
 
 	global = data;
 
-	/* Fill encoding info structure */
-	encoding.encoding = SOX_ENCODING_SIGN2;
-	encoding.bits_per_sample = 0;
-	encoding.reverse_bytes = SOX_OPTION_YES;
-
 	/* Output handler */
-	data->output = sox_open_write( data->fifo, &signal, &encoding,
-								   "raw", NULL, NULL );
+	data->output = sox_open_write( data->fifo, &data->input->signal,
+								   NULL, "flac", NULL, NULL );
 
 	/* Effect chain */
-	chain = sox_create_effects_chain( &data->input->encoding, &encoding );
+	chain = sox_create_effects_chain( &data->input->encoding,
+									  &data->output->encoding );
 
 	effect = sox_create_effect( custom_input() );
 	sox_add_effect( chain, effect, &signal, &signal );
@@ -156,8 +149,6 @@ img_produce_audio_data( ImgThreadData *data )
 #else
 	sox_flow_effects( chain, NULL, NULL );
 #endif
-
-	g_message( "THREAD RETURNS" );
 
 	/* Inform parent that we're finished */
 	g_atomic_int_set( data->sox_flags, 2 );
