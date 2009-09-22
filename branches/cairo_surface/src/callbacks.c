@@ -308,14 +308,14 @@ void img_select_audio_files_to_add ( GtkMenuItem* button, img_window_struct *img
 		g_slist_free (files);
 	}	
 
+	/* Update incompatibilities display */
+	img_update_inc_audio_display( img );
+
 	time = img_convert_seconds_to_time(img->total_music_secs);
 	gtk_label_set_text(GTK_LABEL(img->music_time_data), time);
 	g_free(time);
 
 	gtk_widget_destroy (fs);
-
-	/* Update incompatibilities display */
-	img_update_inc_audio_display( img );
 }
 
 void img_add_audio_files (gchar *filename, img_window_struct *img)
@@ -333,7 +333,6 @@ void img_add_audio_files (gchar *filename, img_window_struct *img)
 		gtk_list_store_append(img->music_file_liststore, &iter);
 		gtk_list_store_set (img->music_file_liststore, &iter, 0, path, 1, file, 2, time, 3, secs, -1);
 
-		img->total_music_secs += secs;
 		g_free(time);
 	}
 	g_free(path);

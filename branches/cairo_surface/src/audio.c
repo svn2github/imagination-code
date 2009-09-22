@@ -324,6 +324,7 @@ img_update_inc_audio_display( img_window_struct *img )
 	gint          channels;
 	gdouble       rate;
 	gint          warn = 0;
+	gint          total_time = 0;
 
 
 	model = gtk_tree_view_get_model( GTK_TREE_VIEW( img->music_file_treeview ) );
@@ -356,8 +357,12 @@ img_update_inc_audio_display( img_window_struct *img )
 		gchar *path, *file;
 		gchar *full;
 		gint   bad = 0;
+		gint   duration;
 
-		gtk_tree_model_get( model, &iter, 0, &path, 1, &file, -1 );
+		gtk_tree_model_get( model, &iter, 0, &path,
+										  1, &file,
+										  3, &duration,
+										  -1 );
 		full = g_strdup_printf( "%s%s%s", path, G_DIR_SEPARATOR_S, file );
 		g_free( path );
 		g_free( file );
@@ -376,6 +381,7 @@ img_update_inc_audio_display( img_window_struct *img )
 									4, NULL,
 									5, NULL,
 									-1 );
+				total_time += duration;
 				break;
 
 			case 1: /* Incompatible signal rate */
@@ -404,6 +410,9 @@ img_update_inc_audio_display( img_window_struct *img )
 		g_free( full );
 	}
 	while( gtk_tree_model_iter_next( model, &iter ) );
+
+	/* Update total audio length */
+	img->total_music_secs = total_time;
 
 	/* Inform user that some files are incompatible and cannot be concatenated
 	 * for export. */

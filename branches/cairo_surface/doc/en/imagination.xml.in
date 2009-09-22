@@ -203,23 +203,39 @@
 			</sect3>
 			<sect3 id="audio_tab">
 				<title>Audio Tab</title>
-					<para>
-						By clicking on the "Audio" tab the background music list is displayed. Here you can see the length
-						of each of the imported audio files along with the total time length of all the imported audio files.
-						The play button allows you to reproduce the selected audio file. The arrow buttons allows you to
-						reorder the audio files and the button with the broom deletes the selected audio files.
-					</para>
-					<para>
-						Current state of audio support in Imagination is quite
-						limited. All audio files listed are concatenated
-						together (no cross fading) and truncated to fit
-						slidwshow total length. If you wish to have nicer audio
-						in slideshows, you should probably create your slideshow
-						in three steps: 1. create slideshow without audio (this
-						will give you the total duration); 2. prepare audio file
-						that exactly fit the duration; 3. add prepared audio to
-						slideshow and export.
-					</para>
+				<para>
+					By clicking on the "Audio" tab the background music list is
+					displayed. Here you can see the length of each of the
+					imported audio files along with the total time length of all
+					the compatible audio files (see below for more information
+					about audio file compatibility). Play button allows you to
+					preview selected audio file. The arrow buttons allow you to
+					reorder the audio files and the button with the broom
+					deletes the selected audio files.
+				</para>
+				<para>
+					Not all files can be concatenated. Imagination will inform
+					you about any incompatibilities when you import your audio
+					files. More detailed information can be obtained from audio
+					files list. Files in red color have incompatible sample
+					rate, files in blue have incompatible number of channels and
+					files in orange have incompatible sample rate and number of
+					channels. If you hoover over audio file entry, you'll also
+					get some information about it. At export time, Imagination
+					will again inform you about any incompatible files in music
+					list and ask you if's OK to remove them from final product.
+				</para>
+				<para>
+					Current state of audio support in Imagination is quite
+					limited. All compatible audio files listed are concatenated
+					together (no cross fading) and truncated to fit slideshow
+					total length (truncation is gradual with 5 second fade-out).
+					If you wish to have nicer audio in slideshows, you should
+					probably create your slideshow in three steps: 1.  create
+					slideshow without audio (this will give you the total
+					duration); 2. prepare audio file that exactly fit the
+					duration; 3. add prepared audio to slideshow and export.
+				</para>
 				<figure id="audio_tab_pic">
 					<title>Audio Tab</title>
 					<graphic fileref="images/side_panel_audio.png"></graphic>
