@@ -112,8 +112,8 @@ img_produce_audio_data( ImgThreadData *data )
 	sox_effects_chain_t *chain;
 	sox_effect_t        *effect;
 	sox_signalinfo_t     signal;
-	gchar               *fargs[] = { "l",   /* Logarithmic fade */
-									 "5",   /* 5 s fade-in */
+	gchar               *fargs[] = { "t",   /* Logarithmic fade */
+									 "0",   /* 5 s fade-in */
 									 "",    /* Placeholder for total lenght */
 									 "5" }; /* 5 s fade-out */
 	fargs[2] = g_strdup_printf( "%d", data->length );
