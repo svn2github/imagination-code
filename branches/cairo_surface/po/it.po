@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-09-08 12:27+0200\n"
+"POT-Creation-Date: 2009-09-22 13:57+0200\n"
 "PO-Revision-Date: 2009-08-19 22:07+0100\n"
 "Last-Translator: \n"
 "Language-Team: Italian\n"
@@ -33,13 +33,54 @@ msgstr "Imagination"
 msgid "Playing %s..."
 msgstr "Sto riproducendo %s..."
 
-#: ../src/audio.c:126 ../src/main-window.c:1039
+#: ../src/audio.c:126 ../src/main-window.c:1043
 msgid "Play the selected file"
 msgstr "Riproduce il file selezionato"
 
 #: ../src/audio.c:134
 msgid "Stop the playback"
 msgstr "Ferma la riproduzione"
+
+#: ../src/audio.c:261
+#, c-format
+msgid ""
+"%s:\n"
+"incompatible sample rate\n"
+msgstr ""
+
+#: ../src/audio.c:266
+#, c-format
+msgid ""
+"%s:\n"
+"incompatible number of channels\n"
+msgstr ""
+
+#: ../src/audio.c:272
+#, c-format
+msgid ""
+"%s:\n"
+"incompatible sample rate and number of channels\n"
+msgstr ""
+
+#: ../src/audio.c:292
+#, c-format
+msgid ""
+"%s\n"
+"<b>Do you want to continue without these files?</b>"
+msgstr ""
+
+#: ../src/audio.c:296 ../src/audio.c:431
+#, fuzzy
+msgid "Audio files mismatch:"
+msgstr "Tutti i file audio"
+
+#: ../src/audio.c:416
+msgid ""
+"File selection contains audio file that is incompatible with other ones."
+msgid_plural ""
+"File selection contains audio files that are incompatible with other files."
+msgstr[0] ""
+msgstr[1] ""
 
 #: ../src/main-window.c:212
 msgid "_Slideshow"
@@ -75,7 +116,7 @@ msgstr "Qualità _Anteprima"
 msgid "_Low"
 msgstr "Bassa"
 
-#: ../src/main-window.c:325 ../src/export.c:1320 ../src/export.c:1476
+#: ../src/main-window.c:325 ../src/export.c:1359 ../src/export.c:1515
 msgid "High"
 msgstr "Alta"
 
@@ -169,7 +210,7 @@ msgstr "Zoom Out"
 msgid "Normal Size"
 msgstr "Dimensioni normali"
 
-#: ../src/main-window.c:530 ../src/callbacks.c:1370
+#: ../src/main-window.c:530 ../src/callbacks.c:1374
 msgid "Starts the preview"
 msgstr "Avvia l'anteprima"
 
@@ -273,7 +314,7 @@ msgstr "Cancella"
 msgid "<b>Slide Text</b>"
 msgstr "<b>Testo nella diapositiva</b>"
 
-#: ../src/main-window.c:853 ../src/main-window.c:1385
+#: ../src/main-window.c:853 ../src/main-window.c:1389
 msgid "Click to expand the area"
 msgstr "Clicca per espandere l'area"
 
@@ -314,43 +355,43 @@ msgstr "Audio"
 msgid "<b>Background Music</b>"
 msgstr "<b>Musica di sottofondo</b>"
 
-#: ../src/main-window.c:1023
+#: ../src/main-window.c:1027
 msgid "Music Duration:"
 msgstr "Durate della musica:"
 
-#: ../src/main-window.c:1047
+#: ../src/main-window.c:1051
 msgid "Delete the selected file"
 msgstr "Cancella il file selezionato"
 
-#: ../src/main-window.c:1054
+#: ../src/main-window.c:1058
 msgid "Move the selected file up"
 msgstr "Sposta sopra il file selezionato"
 
-#: ../src/main-window.c:1061
+#: ../src/main-window.c:1065
 msgid "Move the selected file down"
 msgstr "Sposta sotto il file selezionato"
 
-#: ../src/main-window.c:1068
+#: ../src/main-window.c:1072
 msgid "Clear all files"
 msgstr "Cancella tutti i file"
 
-#: ../src/main-window.c:1380
+#: ../src/main-window.c:1384
 msgid "Click to shrink the area"
 msgstr "Clicca per restringere l'area"
 
-#: ../src/main-window.c:1412 ../src/callbacks.c:1129
+#: ../src/main-window.c:1416 ../src/callbacks.c:1133
 msgid "Sorry,I could not perform the operation!"
 msgstr "Spiacente, non è stato possibile completare l'operazione"
 
-#: ../src/main-window.c:1579
+#: ../src/main-window.c:1573
 msgid "Resolution"
 msgstr "Risoluzione"
 
-#: ../src/main-window.c:1579
+#: ../src/main-window.c:1573
 msgid "Type"
 msgstr "Tipo"
 
-#: ../src/main-window.c:1901 ../src/main-window.c:1903 ../src/support.c:138
+#: ../src/main-window.c:1895 ../src/main-window.c:1897 ../src/support.c:138
 msgid "None"
 msgstr "Nessuna"
 
@@ -367,71 +408,71 @@ msgstr "Prego scegliere il nome dei file audio da importare"
 msgid "All audio files"
 msgstr "Tutti i file audio"
 
-#: ../src/callbacks.c:293 ../src/callbacks.c:364
+#: ../src/callbacks.c:293 ../src/callbacks.c:367
 msgid "All files"
 msgstr "Tutti i file"
 
-#: ../src/callbacks.c:346
+#: ../src/callbacks.c:349
 msgid "Import slides, use SHIFT key for multiple select"
 msgstr "Importazione diapositive, usa MAIUSC per la selezione multipla"
 
-#: ../src/callbacks.c:358
+#: ../src/callbacks.c:361
 msgid "All image files"
 msgstr "Tutti i file immagine"
 
-#: ../src/callbacks.c:463 ../src/callbacks.c:1473
+#: ../src/callbacks.c:466 ../src/callbacks.c:1477
 msgid "You didn't save your slideshow yet. Are you sure you want to close it?"
 msgstr ""
 "La presentazione non è stata ancora salvata, sei sicuro di volerla chiudere?"
 
-#: ../src/callbacks.c:522
+#: ../src/callbacks.c:526
 #, c-format
 msgid "%d x %d pixels"
 msgid_plural "%d x %d pixels"
 msgstr[0] "%d x %d pixel"
 msgstr[1] "%d x %d pixel"
 
-#: ../src/callbacks.c:643
+#: ../src/callbacks.c:647
 msgid "An error occurred while trying to rotate the slide:"
 msgstr "Si è verificato un errore mentre provavo a ruotare la diapositiva:"
 
-#: ../src/callbacks.c:813
+#: ../src/callbacks.c:817
 msgid "translator-credits"
 msgstr "Giuseppe Torelli <colossus73@gmail.com>"
 
-#: ../src/callbacks.c:1380
+#: ../src/callbacks.c:1384
 msgid "Stops the preview"
 msgstr "Ferma l'anteprima"
 
-#: ../src/callbacks.c:1430
+#: ../src/callbacks.c:1434
 msgid "Load an Imagination slideshow project"
 msgstr "Carica una presentazione di Imagination"
 
-#: ../src/callbacks.c:1431
+#: ../src/callbacks.c:1435
 msgid "Save an Imagination slideshow project"
 msgstr "Salva una presentazione di Imagination"
 
-#: ../src/callbacks.c:2130
+#: ../src/callbacks.c:2134
 msgid "Create new slide"
 msgstr "Crea una nuova diapositiva"
 
-#: ../src/callbacks.c:2141
+#: ../src/callbacks.c:2145
 msgid "Empty slide options:"
 msgstr "Opzioni per la diapositiva vuota:"
 
-#: ../src/callbacks.c:2151
+#: ../src/callbacks.c:2155
 msgid "Use _solid color"
 msgstr "U_sa un colore pieno"
 
-#: ../src/callbacks.c:2157
+#: ../src/callbacks.c:2161
 msgid "Use _linear gradient"
 msgstr "Usa un gradiente _lineare"
 
-#: ../src/callbacks.c:2163
+#: ../src/callbacks.c:2167
 msgid "Use _radial gradient"
 msgstr "Usa un gradiente _radiale"
 
-#: ../src/callbacks.c:2193
+#: ../src/callbacks.c:2197
 msgid "Preview"
 msgstr "Anteprima"
 
@@ -460,7 +501,7 @@ msgstr "Ridimensiona le immagini per riempire lo schermo"
 msgid "Select background color:"
 msgstr "Seleziona il colore di sfondo:"
 
-#: ../src/slideshow_project.c:203
+#: ../src/slideshow_project.c:204
 msgid "This is not an Imagination project file!"
 msgstr "Questa non è un presentazione di Imagination!"
 
@@ -491,36 +532,36 @@ msgstr ""
 msgid "Please choose the slideshow project filename"
 msgstr "Prego scegliere il nome del file della presentazione"
 
-#: ../src/export.c:207
+#: ../src/export.c:209
 msgid "<b>Export Settings</b>"
 msgstr "<b>Impostazioni Esportazione</b>"
 
-#: ../src/export.c:221
+#: ../src/export.c:223
 msgid "Filename of the slideshow:"
 msgstr "Nome del file della presentazione"
 
-#: ../src/export.c:353
+#: ../src/export.c:371
 msgid "Exporting the slideshow"
 msgstr "Esporta la presentazione"
 
-#: ../src/export.c:364
+#: ../src/export.c:382
 msgid "Preparing for export ..."
 msgstr "Preparazione esportazione..."
 
-#: ../src/export.c:375
+#: ../src/export.c:393
 msgid "Overall progress:"
 msgstr "Progresso complessivo:"
 
-#: ../src/export.c:465 ../src/export.c:821
+#: ../src/export.c:483 ../src/export.c:860
 #, c-format
 msgid "Slide %d export progress:"
 msgstr "Progresso esportazione diapositiva %d"
 
-#: ../src/export.c:676
+#: ../src/export.c:715
 msgid "Failed to launch the encoder!"
 msgstr "Non è stato possibile mandare in esecuzione l'encoder!"
 
-#: ../src/export.c:819
+#: ../src/export.c:858
 #, c-format
 msgid "Final transition export progress:"
 msgstr "Progresso esportazione diapositiva finale:"
@@ -528,47 +569,47 @@ msgstr "Progresso esportazione diapositiva finale:"
 #. This function call should be the first thing exporter does, since this
 #. * function will take some preventive measures and also switches mode into
 #. * preview if needed.
-#: ../src/export.c:1191
+#: ../src/export.c:1230
 msgid "VOB export"
 msgstr "Esporta come VOB Video"
 
-#: ../src/export.c:1203 ../src/export.c:1286
+#: ../src/export.c:1242 ../src/export.c:1325
 msgid "<b>Television Format</b>"
 msgstr "<b>Formato del televisore</b>"
 
-#: ../src/export.c:1210 ../src/export.c:1293 ../src/export.c:1410
+#: ../src/export.c:1249 ../src/export.c:1332 ../src/export.c:1449
 msgid "Normal 4:3"
 msgstr "Normale 4:3"
 
-#: ../src/export.c:1215 ../src/export.c:1298 ../src/export.c:1434
+#: ../src/export.c:1254 ../src/export.c:1337 ../src/export.c:1473
 msgid "Widescreen 16:9"
 msgstr "Widescreen 16:9"
 
 #. This function call should be the first thing exporter does, since this
 #. * function will take some preventive measures.
-#: ../src/export.c:1274
+#: ../src/export.c:1313
 msgid "OGG export"
 msgstr "Esporta come OGG"
 
-#: ../src/export.c:1304 ../src/export.c:1460
+#: ../src/export.c:1343 ../src/export.c:1499
 msgid "<b>Video Quality:</b>"
 msgstr "<b>Qualità del video</b>"
 
-#: ../src/export.c:1311 ../src/export.c:1467
+#: ../src/export.c:1350 ../src/export.c:1506
 msgid "Low"
 msgstr "Bassa"
 
-#: ../src/export.c:1315 ../src/export.c:1471
+#: ../src/export.c:1354 ../src/export.c:1510
 msgid "Medium"
 msgstr "Media"
 
 #. This function call should be the first thing exporter does, since this
 #. * function will take some preventive measures.
-#: ../src/export.c:1388
+#: ../src/export.c:1427
 msgid "FLV export"
 msgstr "Esporta come FLV"
 
-#: ../src/export.c:1400
+#: ../src/export.c:1439
 msgid "<b>Video Size</b>"
 msgstr "<b>Dimensioni del video</b>"
 
