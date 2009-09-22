@@ -1129,7 +1129,7 @@ void img_on_drag_data_received (GtkWidget *widget,GdkDragContext *context,int x,
 	pictures = gtk_selection_data_get_uris(data);
 	if (pictures == NULL)
 	{
-		dialog = gtk_message_dialog_new(GTK_WINDOW(img->imagination_window),GTK_DIALOG_MODAL,GTK_MESSAGE_ERROR,GTK_BUTTONS_OK,_("Sorry,I could not perform the operation!"));
+		dialog = gtk_message_dialog_new(GTK_WINDOW(img->imagination_window),GTK_DIALOG_MODAL,GTK_MESSAGE_ERROR,GTK_BUTTONS_OK,_("Sorry, I could not perform the operation!"));
 		gtk_window_set_title(GTK_WINDOW(dialog),"Imagination");
 		gtk_dialog_run (GTK_DIALOG (dialog));
 		gtk_widget_destroy (GTK_WIDGET (dialog));

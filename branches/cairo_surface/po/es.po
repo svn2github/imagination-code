@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-09-22 13:57+0200\n"
+"POT-Creation-Date: 2009-09-22 15:40+0200\n"
 "PO-Revision-Date: 2009-08-26 11:47-0300\n"
 "Last-Translator: elega <elega@elega.com.ar>\n"
 "Language-Team: Spanish (Spain)\n"
@@ -33,7 +33,7 @@ msgstr "Imagination"
 msgid "Playing %s..."
 msgstr "Reproduciendo %s..."
 
-#: ../src/audio.c:126 ../src/main-window.c:1043
+#: ../src/audio.c:126 ../src/main-window.c:1044
 msgid "Play the selected file"
 msgstr "Reproducir el archivo seleccionado"
 
@@ -69,12 +69,12 @@ msgid ""
 "<b>Do you want to continue without these files?</b>"
 msgstr ""
 
-#: ../src/audio.c:296 ../src/audio.c:431
+#: ../src/audio.c:296 ../src/audio.c:440
 #, fuzzy
 msgid "Audio files mismatch:"
 msgstr "Todos los archivos de audio"
 
-#: ../src/audio.c:416
+#: ../src/audio.c:425
 msgid ""
 "File selection contains audio file that is incompatible with other ones."
 msgid_plural ""
@@ -210,7 +210,7 @@ msgstr "Alejar"
 msgid "Normal Size"
 msgstr "Tamaño normal"
 
-#: ../src/main-window.c:530 ../src/callbacks.c:1374
+#: ../src/main-window.c:530 ../src/callbacks.c:1373
 msgid "Starts the preview"
 msgstr "Iniciar la previsualización"
 
@@ -314,7 +314,7 @@ msgstr "Remover"
 msgid "<b>Slide Text</b>"
 msgstr "<b>Texto de las diapositivas</b>"
 
-#: ../src/main-window.c:853 ../src/main-window.c:1389
+#: ../src/main-window.c:853 ../src/main-window.c:1390
 msgid "Click to expand the area"
 msgstr "Haga clic aquí para expandir el área"
 
@@ -355,43 +355,44 @@ msgstr "Audio"
 msgid "<b>Background Music</b>"
 msgstr "<b>Música de fondo</b>"
 
-#: ../src/main-window.c:1027
+#: ../src/main-window.c:1028
 msgid "Music Duration:"
 msgstr "Duración de la música:"
 
-#: ../src/main-window.c:1051
+#: ../src/main-window.c:1052
 msgid "Delete the selected file"
 msgstr "Borrar el archivo seleccionado"
 
-#: ../src/main-window.c:1058
+#: ../src/main-window.c:1059
 msgid "Move the selected file up"
 msgstr "Subir el archivo seleccionado"
 
-#: ../src/main-window.c:1065
+#: ../src/main-window.c:1066
 msgid "Move the selected file down"
 msgstr "Bajar el archivo seleccionado"
 
-#: ../src/main-window.c:1072
+#: ../src/main-window.c:1073
 msgid "Clear all files"
 msgstr "Borrar todos los archivos"
 
-#: ../src/main-window.c:1384
+#: ../src/main-window.c:1385
 msgid "Click to shrink the area"
 msgstr "Haga clic aquí para reducir el tamaño del área"
 
-#: ../src/main-window.c:1416 ../src/callbacks.c:1133
-msgid "Sorry,I could not perform the operation!"
+#: ../src/main-window.c:1417 ../src/callbacks.c:1132
+#, fuzzy
+msgid "Sorry, I could not perform the operation!"
 msgstr "Lo siento, ¡No puedo realizar la operación!"
 
-#: ../src/main-window.c:1573
+#: ../src/main-window.c:1574
 msgid "Resolution"
 msgstr "Resolución:"
 
-#: ../src/main-window.c:1573
+#: ../src/main-window.c:1574
 msgid "Type"
 msgstr "Tipo:"
 
-#: ../src/main-window.c:1895 ../src/main-window.c:1897 ../src/support.c:138
+#: ../src/main-window.c:1896 ../src/main-window.c:1898 ../src/support.c:138
 msgid "None"
 msgstr "Ninguna"
 
@@ -408,74 +409,74 @@ msgstr "Por favor, elija los archivos de audio a importar"
 msgid "All audio files"
 msgstr "Todos los archivos de audio"
 
-#: ../src/callbacks.c:293 ../src/callbacks.c:367
+#: ../src/callbacks.c:293 ../src/callbacks.c:366
 msgid "All files"
 msgstr "Todos los archivos"
 
-#: ../src/callbacks.c:349
+#: ../src/callbacks.c:348
 msgid "Import slides, use SHIFT key for multiple select"
 msgstr "Importar diapositivas, use la tecla MAYÚS para una selección múltiple"
 
-#: ../src/callbacks.c:361
+#: ../src/callbacks.c:360
 msgid "All image files"
 msgstr "Todas las imágenes"
 
-#: ../src/callbacks.c:466 ../src/callbacks.c:1477
+#: ../src/callbacks.c:465 ../src/callbacks.c:1476
 msgid "You didn't save your slideshow yet. Are you sure you want to close it?"
 msgstr ""
 "Usted todavía no ha guardado su presentación de diapositivas. ¿Está seguro "
 "que desea cerrarla?"
 
-#: ../src/callbacks.c:526
+#: ../src/callbacks.c:525
 #, c-format
 msgid "%d x %d pixels"
 msgid_plural "%d x %d pixels"
 msgstr[0] "%d x %d píxeles"
 msgstr[1] "%d x %d pixels"
 
-#: ../src/callbacks.c:647
+#: ../src/callbacks.c:646
 msgid "An error occurred while trying to rotate the slide:"
 msgstr "Ocurrió un error al intentar rotar la diapositiva:"
 
-#: ../src/callbacks.c:817
+#: ../src/callbacks.c:816
 msgid "translator-credits"
 msgstr ""
 "Giuseppe Torelli <colossus73@gmail.com>\n"
 "Elega <elega@elega.com.ar>"
 
-#: ../src/callbacks.c:1384
+#: ../src/callbacks.c:1383
 msgid "Stops the preview"
 msgstr "Detener la previsualización"
 
-#: ../src/callbacks.c:1434
+#: ../src/callbacks.c:1433
 msgid "Load an Imagination slideshow project"
 msgstr "Cargar un proyecto de presentación de diapositivas Imagination"
 
-#: ../src/callbacks.c:1435
+#: ../src/callbacks.c:1434
 msgid "Save an Imagination slideshow project"
 msgstr "Guardar un proyecto de presentación de diapositivas Imagination"
 
-#: ../src/callbacks.c:2134
+#: ../src/callbacks.c:2133
 msgid "Create new slide"
 msgstr "Crear una nueva diapositiva"
 
-#: ../src/callbacks.c:2145
+#: ../src/callbacks.c:2144
 msgid "Empty slide options:"
 msgstr "Opciones de la diapositiva vacía:"
 
-#: ../src/callbacks.c:2155
+#: ../src/callbacks.c:2154
 msgid "Use _solid color"
 msgstr "Usar color sólido"
 
-#: ../src/callbacks.c:2161
+#: ../src/callbacks.c:2160
 msgid "Use _linear gradient"
 msgstr "Usar gradiante _lineal"
 
-#: ../src/callbacks.c:2167
+#: ../src/callbacks.c:2166
 msgid "Use _radial gradient"
 msgstr "Usar gradiante _radial"
 
-#: ../src/callbacks.c:2197
+#: ../src/callbacks.c:2196
 msgid "Preview"
 msgstr "Previsualizar"
 
@@ -616,6 +617,10 @@ msgstr "Exportar FLV"
 #, fuzzy
 msgid "<b>Video Size</b>"
 msgstr "<b>Calidad de video:</b>"
+
+#, fuzzy
+#~ msgid "Sorry,I could not perform the operation!"
+#~ msgstr "Lo siento, ¡No puedo realizar la operación!"
 
 #~ msgid "Slide Number:"
 #~ msgstr "Número de la diapositiva:"

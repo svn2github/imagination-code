@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-09-22 13:57+0200\n"
+"POT-Creation-Date: 2009-09-22 15:40+0200\n"
 "PO-Revision-Date: 2009-02-24 11:55+0100\n"
 "Last-Translator: tadeboro <tadeboro@gmail.com>\n"
 "Language-Team: Slovenian\n"
@@ -34,7 +34,7 @@ msgstr "Domišljija"
 msgid "Playing %s..."
 msgstr "Predvajam %s ..."
 
-#: ../src/audio.c:126 ../src/main-window.c:1043
+#: ../src/audio.c:126 ../src/main-window.c:1044
 msgid "Play the selected file"
 msgstr "Predvajaj izbrano datoteko"
 
@@ -70,12 +70,12 @@ msgid ""
 "<b>Do you want to continue without these files?</b>"
 msgstr ""
 
-#: ../src/audio.c:296 ../src/audio.c:431
+#: ../src/audio.c:296 ../src/audio.c:440
 #, fuzzy
 msgid "Audio files mismatch:"
 msgstr "Vse glasbene datoteke"
 
-#: ../src/audio.c:416
+#: ../src/audio.c:425
 msgid ""
 "File selection contains audio file that is incompatible with other ones."
 msgid_plural ""
@@ -214,7 +214,7 @@ msgstr "Pomanjšaj"
 msgid "Normal Size"
 msgstr "Normalna velikost"
 
-#: ../src/main-window.c:530 ../src/callbacks.c:1374
+#: ../src/main-window.c:530 ../src/callbacks.c:1373
 msgid "Starts the preview"
 msgstr "Požene predogled"
 
@@ -318,7 +318,7 @@ msgstr "Odstrani"
 msgid "<b>Slide Text</b>"
 msgstr "<b>Besedilo diapozitiva</b>"
 
-#: ../src/main-window.c:853 ../src/main-window.c:1389
+#: ../src/main-window.c:853 ../src/main-window.c:1390
 msgid "Click to expand the area"
 msgstr "Razširi besedilno polje"
 
@@ -359,43 +359,44 @@ msgstr "Glasba"
 msgid "<b>Background Music</b>"
 msgstr "<b>Glasbena podlaga</b>"
 
-#: ../src/main-window.c:1027
+#: ../src/main-window.c:1028
 msgid "Music Duration:"
 msgstr "Trajanje glasbene podlage:"
 
-#: ../src/main-window.c:1051
+#: ../src/main-window.c:1052
 msgid "Delete the selected file"
 msgstr "Zbriši izbrane datoteke"
 
-#: ../src/main-window.c:1058
+#: ../src/main-window.c:1059
 msgid "Move the selected file up"
 msgstr "Premakni izbrano datoteko navzgor"
 
-#: ../src/main-window.c:1065
+#: ../src/main-window.c:1066
 msgid "Move the selected file down"
 msgstr "Premakni izbrano datoteko navzdol"
 
-#: ../src/main-window.c:1072
+#: ../src/main-window.c:1073
 msgid "Clear all files"
 msgstr "Počisti datoteke"
 
-#: ../src/main-window.c:1384
+#: ../src/main-window.c:1385
 msgid "Click to shrink the area"
 msgstr "Skrčni besedilno polje"
 
-#: ../src/main-window.c:1416 ../src/callbacks.c:1133
-msgid "Sorry,I could not perform the operation!"
+#: ../src/main-window.c:1417 ../src/callbacks.c:1132
+#, fuzzy
+msgid "Sorry, I could not perform the operation!"
 msgstr "Na žalost operacije ne morem izvesti!"
 
-#: ../src/main-window.c:1573
+#: ../src/main-window.c:1574
 msgid "Resolution"
 msgstr "Ločljivost"
 
-#: ../src/main-window.c:1573
+#: ../src/main-window.c:1574
 msgid "Type"
 msgstr "Tip"
 
-#: ../src/main-window.c:1895 ../src/main-window.c:1897 ../src/support.c:138
+#: ../src/main-window.c:1896 ../src/main-window.c:1898 ../src/support.c:138
 msgid "None"
 msgstr "Brez"
 
@@ -412,23 +413,23 @@ msgstr "Prosimo izberite glasbene datoteke za uvoz"
 msgid "All audio files"
 msgstr "Vse glasbene datoteke"
 
-#: ../src/callbacks.c:293 ../src/callbacks.c:367
+#: ../src/callbacks.c:293 ../src/callbacks.c:366
 msgid "All files"
 msgstr "Vse datoteke"
 
-#: ../src/callbacks.c:349
+#: ../src/callbacks.c:348
 msgid "Import slides, use SHIFT key for multiple select"
 msgstr "Uvoz diapozitivov, uporabite SHIFT za izbor večih slik"
 
-#: ../src/callbacks.c:361
+#: ../src/callbacks.c:360
 msgid "All image files"
 msgstr "Vse slikovne datoteke"
 
-#: ../src/callbacks.c:466 ../src/callbacks.c:1477
+#: ../src/callbacks.c:465 ../src/callbacks.c:1476
 msgid "You didn't save your slideshow yet. Are you sure you want to close it?"
 msgstr "Projekt ni bil shranjen. Ste prepričani da ga želite zapreti?"
 
-#: ../src/callbacks.c:526
+#: ../src/callbacks.c:525
 #, c-format
 msgid "%d x %d pixels"
 msgid_plural "%d x %d pixels"
@@ -437,47 +438,47 @@ msgstr[1] "%d x %d piki"
 msgstr[2] "%d x %d pike"
 msgstr[3] "%d x %d pik"
 
-#: ../src/callbacks.c:647
+#: ../src/callbacks.c:646
 msgid "An error occurred while trying to rotate the slide:"
 msgstr "Napaka med vrtenjem diapozitiva:"
 
-#: ../src/callbacks.c:817
+#: ../src/callbacks.c:816
 msgid "translator-credits"
 msgstr "Tadej Borovšak <tadeboro@gmail.com>"
 
-#: ../src/callbacks.c:1384
+#: ../src/callbacks.c:1383
 msgid "Stops the preview"
 msgstr "Ustavi predogled"
 
-#: ../src/callbacks.c:1434
+#: ../src/callbacks.c:1433
 msgid "Load an Imagination slideshow project"
 msgstr "Odpri Domišljijin projekt"
 
-#: ../src/callbacks.c:1435
+#: ../src/callbacks.c:1434
 msgid "Save an Imagination slideshow project"
 msgstr "Shrani Domišljijin projekt"
 
-#: ../src/callbacks.c:2134
+#: ../src/callbacks.c:2133
 msgid "Create new slide"
 msgstr "Ustvari nov diapozitiv"
 
-#: ../src/callbacks.c:2145
+#: ../src/callbacks.c:2144
 msgid "Empty slide options:"
 msgstr "Možnosti praznega diapozitiva:"
 
-#: ../src/callbacks.c:2155
+#: ../src/callbacks.c:2154
 msgid "Use _solid color"
 msgstr "Uporabi či_sto barvo"
 
-#: ../src/callbacks.c:2161
+#: ../src/callbacks.c:2160
 msgid "Use _linear gradient"
 msgstr "Uporabi _linearni gradient"
 
-#: ../src/callbacks.c:2167
+#: ../src/callbacks.c:2166
 msgid "Use _radial gradient"
 msgstr "Uporabi _radialni gradient"
 
-#: ../src/callbacks.c:2197
+#: ../src/callbacks.c:2196
 msgid "Preview"
 msgstr "Predogled"
 
@@ -618,3 +619,7 @@ msgstr "FLV izvoz"
 #, fuzzy
 msgid "<b>Video Size</b>"
 msgstr "<b>Kvaliteta videa:</b>"
+
+#, fuzzy
+#~ msgid "Sorry,I could not perform the operation!"
+#~ msgstr "Na žalost operacije ne morem izvesti!"
