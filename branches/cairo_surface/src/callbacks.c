@@ -313,6 +313,9 @@ void img_select_audio_files_to_add ( GtkMenuItem* button, img_window_struct *img
 	g_free(time);
 
 	gtk_widget_destroy (fs);
+
+	/* Update incompatibilities display */
+	img_update_inc_audio_display( img );
 }
 
 void img_add_audio_files (gchar *filename, img_window_struct *img)
@@ -471,6 +474,7 @@ gboolean img_quit_application(GtkWidget *widget, GdkEvent *event, img_window_str
 	/* Unloads the plugins */
 	g_slist_foreach(img_struct->plugin_list,(GFunc)g_module_close,NULL);
 	g_slist_free(img_struct->plugin_list);
+
 	return FALSE;
 }
 
@@ -1201,7 +1205,7 @@ img_on_expose_event( GtkWidget         *widget,
 
 	/* If we're previewing or exporting, only paint frame that is being
 	 * currently produced. */
-	if( img->preview_is_running || img->export_is_running )
+	if( img->preview_is_running || img->export_is_running > 2 )
 	{
 		gdouble factor;
 
@@ -2564,6 +2568,7 @@ img_save_window_settings( img_window_struct *img )
 								"imagination", NULL );
 	rc_file = g_build_filename( rc_path, "imaginationrc", NULL );
 	contents = g_key_file_to_data( kf, NULL, NULL );
+	g_key_file_free( kf );
 
 	g_mkdir_with_parents( rc_path, S_IRWXU );
 	g_file_set_contents( rc_file, contents, -1, NULL );
@@ -2600,6 +2605,8 @@ img_load_window_settings( img_window_struct *img )
 	img->overview_zoom   = g_key_file_get_double(  kf, group, "zoom_o",  NULL );
 	img->low_quality     = g_key_file_get_boolean( kf, group, "quality", NULL );
 	max                  = g_key_file_get_boolean( kf, group, "max",     NULL );
+
+	g_key_file_free( kf );
 
 	/* Update mode */
 	img->mode = - 1;

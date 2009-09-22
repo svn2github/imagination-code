@@ -137,17 +137,12 @@ static void img_swap_audio_files_button(img_window_struct *img, gboolean flag)
 
 void output_message(unsigned level, const char *filename, const char *fmt, va_list ap)
 {
-	GtkWidget *dialog;
 	gchar *string;
 
 	if (level == 1)
 	{
 		string = g_strdup_vprintf(fmt,ap);
-		dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, "%s", string);
-		gtk_window_set_title(GTK_WINDOW(dialog), "Imagination");
-		gtk_dialog_run (GTK_DIALOG (dialog));
-		gtk_widget_destroy (GTK_WIDGET (dialog));
-
+		g_message( "%s", string );
 		g_free(string);
 	}
 }
@@ -299,7 +294,7 @@ img_eliminate_bad_files( gchar             **inputs,
 							string->str );
 
 		gtk_window_set_title(GTK_WINDOW(dialog), _("Audio files mismatch:") );
-		if( GTK_RESPONSE_OK != gtk_dialog_run( GTK_DIALOG( dialog ) ) )
+		if( GTK_RESPONSE_YES != gtk_dialog_run( GTK_DIALOG( dialog ) ) )
 			ret = FALSE;
 		gtk_widget_destroy( dialog );
 	}
@@ -319,8 +314,123 @@ img_eliminate_bad_files( gchar             **inputs,
 	return( ret );
 }
 
+void
+img_update_inc_audio_display( img_window_struct *img )
+{
+	GtkTreeModel *model;
+	GtkTreeIter   iter;
+	gchar        *inputs[100]; /* 100 audio files is current limit */
+	gint          i = 0;
+	gint          channels;
+	gdouble       rate;
+	gint          warn = 0;
 
-/* ****************************************************************************
- * THREAD FUNCTIONS
- * ************************************************************************* */
+
+	model = gtk_tree_view_get_model( GTK_TREE_VIEW( img->music_file_treeview ) );
+
+	/* If no audio is present, simply return */
+	if( gtk_tree_model_get_iter_first( model, &iter ) )
+	{
+		gchar *path, *filename;
+
+		do
+		{
+			gtk_tree_model_get( model, &iter, 0, &path, 1, &filename, -1 );
+			inputs[i] = g_strdup_printf( "%s%s%s", path,
+										 G_DIR_SEPARATOR_S, filename );
+			i++;
+			g_free( path );
+			g_free( filename );
+		}
+		while( gtk_tree_model_iter_next( model, &iter ) );
+	}
+	else
+		return;
+
+	img_analyze_input_files( inputs, i, &rate, &channels );
+
+	/* Update display */
+	gtk_tree_model_get_iter_first( model, &iter );
+	do
+	{
+		gchar *path, *file;
+		gchar *full;
+		gint   bad = 0;
+
+		gtk_tree_model_get( model, &iter, 0, &path, 1, &file, -1 );
+		full = g_strdup_printf( "%s%s%s", path, G_DIR_SEPARATOR_S, file );
+		g_free( path );
+		g_free( file );
+
+		sox_format_t *in = sox_open_read( full, NULL, NULL, NULL );
+			
+		bad += ( in->signal.rate != rate ? 1 : 0 );
+		bad += ( in->signal.channels != channels ? 2 : 0 );
+		if( bad )
+			warn++;
+
+		switch( bad )
+		{
+			case 0: /* File is compatible */
+				gtk_list_store_set( GTK_LIST_STORE( model ), &iter,
+									4, NULL,
+									5, NULL,
+									-1 );
+				break;
+
+			case 1: /* Incompatible signal rate */
+				gtk_list_store_set( GTK_LIST_STORE( model ), &iter,
+									4, "red",
+									5, "Incompatible sample rate.",
+									-1 );
+				break;
+
+			case 2: /* Incompatible number of channels */
+				gtk_list_store_set( GTK_LIST_STORE( model ), &iter,
+									4, "blue",
+									5, "Incompatible number of channels.",
+									-1 );
+				break;
+
+			case 3: /* Both are incompatible */
+				gtk_list_store_set( GTK_LIST_STORE( model ), &iter,
+									4, "orange",
+									5, "Incompatible sample rate and "
+									   "number of channels.",
+									-1 );
+				break;
+		}
+		sox_close( in );
+		g_free( full );
+	}
+	while( gtk_tree_model_iter_next( model, &iter ) );
+
+	/* Inform user that some files are incompatible and cannot be concatenated
+	 * for export. */
+	if( warn )
+	{
+		GtkWidget *dialog;
+		gchar     *message;
+
+		message = g_strconcat( 
+						ngettext( "File selection contains audio file that "
+								  "is incompatible with other ones.",
+								  "File selection contains audio files that "
+								  "are incompatible with other files.",
+								  warn ),
+						"\n\nCheck audio tab for more information.",
+						NULL );
+
+		dialog = gtk_message_dialog_new_with_markup(
+							GTK_WINDOW( img->imagination_window ),
+							GTK_DIALOG_MODAL,
+							GTK_MESSAGE_WARNING,
+							GTK_BUTTONS_OK,
+							"%s", message );
+		g_free( message );
+		gtk_dialog_run( GTK_DIALOG( dialog ) );
+		gtk_widget_destroy( dialog );
+	}
+}
+
 

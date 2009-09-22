@@ -42,4 +42,7 @@ img_eliminate_bad_files( gchar             **inputs,
 						 gdouble             rate,
 						 gint                channels,
 						 img_window_struct  *img );
+
+void
+img_update_inc_audio_display( img_window_struct *img );
 #endif

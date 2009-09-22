@@ -21,6 +21,7 @@
 #include "support.h"
 #include "callbacks.h"
 #include "audio.h"
+#include "img_sox.h"
 #include <glib/gstdio.h>
 
 static void
@@ -289,21 +290,35 @@ img_prepare_audio( img_window_struct *img )
 	img_analyze_input_files( inputs, i, &rate, &channels );
 	if( img_eliminate_bad_files( inputs, i, rate, channels, img ) )
 	{
-		/* User accepted our proposal */
+		/* Thread data structure */
+		ImgThreadData *tdata = g_slice_new( ImgThreadData );
+
+		/* FIFO path */
+		img->fifo = g_build_filename( g_get_tmp_dir(), "img_audio_fifo", NULL );
 
 		/* Replace audio place holder */
 		tmp = g_strsplit( img->export_cmd_line, "<#AUDIO#>", 0 );
 		g_free( img->export_cmd_line );
-		img->export_cmd_line = g_strdup_printf( "%s-f s16le -acodec pcm_s16le "
-				                                "-ar %f -ac %d "
-												"-i /tmp/img_a_pipe%s",
-												tmp[0], rate, channels, tmp[1] );
 
-		/* Spawn sox thread now */
-		/* TODO */
+		img->export_cmd_line = g_strdup_printf( "%s-f flac -i %s%s", tmp[0],
+												img->fifo, tmp[1] );
+
+		/* Fill thread structure with data */
+		tdata->sox_flags = &img->sox_flags;
+		tdata->files     =  img->exported_audio;
+		tdata->no_files  =  img->exported_audio_no;
+		tdata->length    =  img->total_secs;
+		tdata->fifo      =  img->fifo;
+
+		mkfifo( img->fifo, S_IRWXU );
+
+		/* Spawn sox thread now. */
+		g_atomic_int_set( &img->sox_flags, 0 );
+		img->sox = g_thread_create( (GThreadFunc)img_produce_audio_data,
+									tdata, TRUE, NULL );
 
 		/* Chain last export step - video export */
-//		g_idle_add( (GSourceFunc)img_start_export, img );
+		g_idle_add( (GSourceFunc)img_start_export, img );
 	}
 	else
 	{
@@ -495,30 +510,59 @@ gboolean
 img_stop_export( img_window_struct *img )
 {
 	/* Do any additional tasks */
-	switch( img->export_is_running )
+	if( img->export_is_running > 1 )
 	{
-		case 2:
-			/* Kill sox thread here and delete files */
-			g_source_remove( img->source_id );
-			break;
+		/* Kill sox thread */
+		if( img->exported_audio_no )
+		{
+			int i;
 
-		case 4:
-			kill( img->ffmpeg_export, SIGINT );
-			g_source_remove( img->source_id );
+			if( g_atomic_int_get( &img->sox_flags ) != 2 )
+			{
+				g_atomic_int_set( &img->sox_flags, 1 );
 
-			close(img->file_desc);
-			g_spawn_close_pid( img->ffmpeg_export );
+				/* Export some more frames to unblock write on audio pipe */
+				for( i = 0; i < 10; i++ )
+					img_export_frame_to_ppm( img->exported_image,
+											 img->file_desc );
+			}
 
-			/* Destroy images that were used */
-			cairo_surface_destroy( img->image1 );
-			cairo_surface_destroy( img->image2 );
-			cairo_surface_destroy( img->image_from );
-			cairo_surface_destroy( img->image_to );
-			cairo_surface_destroy( img->exported_image );
+			/* Wait for thread to finish */
+			g_thread_join( img->sox );
+			img->sox = NULL;
 
-			/* Close export dialog */
-			gtk_widget_destroy( img->export_dialog );
-			break;
+			for( i = 0; i < img->exported_audio_no; i++ )
+				g_free( img->exported_audio[i] );
+			img->exported_audio = NULL;
+			img->exported_audio_no = 0;
+		}
+	}
+
+	if( img->export_is_running > 3 )
+	{
+		kill( img->ffmpeg_export, SIGINT );
+		g_source_remove( img->source_id );
+
+		close(img->file_desc);
+		g_spawn_close_pid( img->ffmpeg_export );
+
+		/* Destroy images that were used */
+		cairo_surface_destroy( img->image1 );
+		cairo_surface_destroy( img->image2 );
+		cairo_surface_destroy( img->image_from );
+		cairo_surface_destroy( img->image_to );
+		cairo_surface_destroy( img->exported_image );
+
+		/* Close export dialog */
+		gtk_widget_destroy( img->export_dialog );
+	}
+
+	/* If we created FIFO, we need to destroy it now */
+	if( img->fifo )
+	{
+		g_unlink( img->fifo );
+		g_free( img->fifo );
+		img->fifo = NULL;
 	}
 
 	/* Free ffmpeg cmd line */
@@ -1229,8 +1273,8 @@ img_exporter_vob( img_window_struct *img )
 	else
 		aspect_ratio = "16:9";
 
-	cmd_line = g_strdup_printf( "ffmpeg -f image2pipe -vcodec ppm -r %.02f -i pipe: "
-								"-aspect %s -s %dx%d <#AUDIO#> -y "
+	cmd_line = g_strdup_printf( "ffmpeg -f image2pipe -vcodec ppm -r %.02f "
+								"-aspect %s -s %dx%d -i pipe: <#AUDIO#> -y "
 								"-bf 2 -target %s-dvd \"%s.vob\"",
 								img->export_fps, aspect_ratio,
 								img->video_size[0], img->video_size[1],
@@ -1341,8 +1385,8 @@ img_exporter_ogg( img_window_struct *img )
 			break;
 	}
 
-	cmd_line = g_strdup_printf( "ffmpeg -f image2pipe -vcodec ppm -r %.02f -i pipe: "
-								"-aspect %s -s %dx%d <#AUDIO#> "
+	cmd_line = g_strdup_printf( "ffmpeg -f image2pipe -vcodec ppm -r %.02f "
+								"-aspect %s -s %dx%d -i pipe: <#AUDIO#> "
 								"-vcodec libtheora -b %dk -acodec libvorbis "
 								"-f ogg -y \"%s.ogv\"",
 								img->export_fps, aspect_ratio,
@@ -1543,11 +1587,10 @@ img_exporter_flv( img_window_struct *img )
 			break;
 	}
 
-	cmd_line = g_strdup_printf( "ffmpeg -f image2pipe -vcodec ppm -r %.02f -i pipe: "
-								"-b %dk -s %dx%d "
-								"<#AUDIO#> -f flv -vcodec flv "
-								"-acodec libmp3lame -ab 56000 -ar 22050 "
-								"-ac 1 -y \"%s.flv\"",
+	cmd_line = g_strdup_printf( "ffmpeg -f image2pipe -vcodec ppm -r %.02f "
+								"-b %dk -s %dx%d -i pipe: <#AUDIO#> -f flv "
+								"-vcodec flv -acodec libmp3lame -ab 56000 "
+								"-ar 22050 -ac 1 -y \"%s.flv\"",
 								img->export_fps, qualities[i],
 								width, height, filename );
 	img->export_cmd_line = cmd_line;
