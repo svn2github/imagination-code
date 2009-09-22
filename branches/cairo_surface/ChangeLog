@@ -1,6 +1,9 @@
 Imagination changelog
 
 xx/09/09 - 2.0:
+			- Made the audio files to be concatenated and have fade-out effect at the end.
+			- Fixed save warning dialog to appear when it shouldn't.
+			- Fixed rescale images regression.
 			- FLV export supports several video sizes.
 
 22/08/09 - 2.0b1:

@@ -418,7 +418,7 @@ img_update_inc_audio_display( img_window_struct *img )
 								  "File selection contains audio files that "
 								  "are incompatible with other files.",
 								  warn ),
-						"\n\nCheck audio tab for more information.",
+						"\n\nPlease check audio tab for more information.",
 						NULL );
 
 		dialog = gtk_message_dialog_new_with_markup(
@@ -427,6 +427,8 @@ img_update_inc_audio_display( img_window_struct *img )
 							GTK_MESSAGE_WARNING,
 							GTK_BUTTONS_OK,
 							"%s", message );
+
+		gtk_window_set_title(GTK_WINDOW(dialog), _("Audio files mismatch:") );
 		g_free( message );
 		gtk_dialog_run( GTK_DIALOG( dialog ) );
 		gtk_widget_destroy( dialog );
