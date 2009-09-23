@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: imagination 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-09-23 08:20+0200\n"
+"POT-Creation-Date: 2009-09-23 13:23+0200\n"
 "PO-Revision-Date: 2009-08-26 11:47-0300\n"
 "Last-Translator: elega <elega@elega.com.ar>\n"
 "Language-Team: Spanish (Spain)\n"
@@ -69,18 +69,37 @@ msgid ""
 "<b>Do you want to continue without these files?</b>"
 msgstr ""
 
-#: ../src/audio.c:296 ../src/audio.c:440
+#: ../src/audio.c:296 ../src/audio.c:443
 #, fuzzy
 msgid "Audio files mismatch:"
 msgstr "Todos los archivos de audio"
 
-#: ../src/audio.c:425
+#: ../src/audio.c:390
+msgid "Incompatible sample rate."
+msgstr ""
+
+#: ../src/audio.c:397
+msgid "Incompatible number of channels."
+msgstr ""
+
+#: ../src/audio.c:404
+msgid "Incompatible sample rate and number of channels."
+msgstr ""
+
+#: ../src/audio.c:426
+#, c-format
 msgid ""
-"File selection contains audio file that is incompatible with other ones."
+"File selection contains %d audio file that is incompatible with other files."
 msgid_plural ""
-"File selection contains audio files that are incompatible with other files."
+"File selection contains %d audio files that are incompatible with other "
+"files."
 msgstr[0] ""
 msgstr[1] ""
+
+#: ../src/audio.c:432
+#, fuzzy
+msgid "Please check audio tab for more information."
+msgstr "Por favor, elija los archivos de audio a importar"
 
 #: ../src/main-window.c:212
 msgid "_Slideshow"

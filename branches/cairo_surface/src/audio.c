@@ -387,22 +387,22 @@ img_update_inc_audio_display( img_window_struct *img )
 			case 1: /* Incompatible signal rate */
 				gtk_list_store_set( GTK_LIST_STORE( model ), &iter,
 									4, "red",
-									5, "Incompatible sample rate.",
+									5, _("Incompatible sample rate."),
 									-1 );
 				break;
 
 			case 2: /* Incompatible number of channels */
 				gtk_list_store_set( GTK_LIST_STORE( model ), &iter,
 									4, "blue",
-									5, "Incompatible number of channels.",
+									5, _("Incompatible number of channels."),
 									-1 );
 				break;
 
 			case 3: /* Both are incompatible */
 				gtk_list_store_set( GTK_LIST_STORE( model ), &iter,
 									4, "orange",
-									5, "Incompatible sample rate and "
-									   "number of channels.",
+									5, _("Incompatible sample rate and "
+										 "number of channels."),
 									-1 );
 				break;
 		}
@@ -419,16 +419,19 @@ img_update_inc_audio_display( img_window_struct *img )
 	if( warn )
 	{
 		GtkWidget *dialog;
-		gchar     *message;
+		gchar     *message,
+				  *count;
 
-		message = g_strconcat( 
-						ngettext( "File selection contains audio file that "
-								  "is incompatible with other ones.",
-								  "File selection contains audio files that "
-								  "are incompatible with other files.",
-								  warn ),
-						"\n\nPlease check audio tab for more information.",
-						NULL );
+		count = g_strdup_printf( 
+					ngettext( "File selection contains %d audio file that "
+							  "is incompatible with other files.",
+							  "File selection contains %d audio files that "
+							  "are incompatible with other files.",
+							  warn ), warn );
+		message = g_strconcat( count, "\n\n",
+							  _("Please check audio tab for more information."),
+							  NULL );
+		g_free( count );
 
 		dialog = gtk_message_dialog_new_with_markup(
 							GTK_WINDOW( img->imagination_window ),

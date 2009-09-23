@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-09-23 08:20+0200\n"
+"POT-Creation-Date: 2009-09-23 13:23+0200\n"
 "PO-Revision-Date: 2009-09-23 08:20+0100\n"
 "Last-Translator: Giuseppe Torelli\n"
 "Language-Team: Brazilian Portuguese <ldp-br@bazar2.conectiva.com.br>\n"
@@ -78,21 +78,49 @@ msgstr ""
 "%s\n"
 "<b>Você deseja continuar sem estes arquivos?</b>"
 
-#: ../src/audio.c:296 ../src/audio.c:440
+#: ../src/audio.c:296 ../src/audio.c:443
 msgid "Audio files mismatch:"
 msgstr "Os arquivos não coincidem:"
 
-#: ../src/audio.c:425
+#: ../src/audio.c:390
+#, fuzzy
+msgid "Incompatible sample rate."
+msgstr ""
+"%s:\n"
+"taxa incompatível de amostra\n"
+
+#: ../src/audio.c:397
+#, fuzzy
+msgid "Incompatible number of channels."
+msgstr ""
+"%s:\n"
+"número incompatível de canais\n"
+
+#: ../src/audio.c:404
+#, fuzzy
+msgid "Incompatible sample rate and number of channels."
+msgstr ""
+"%s:\n"
+"taxa incompatível de amostra e número de canais\n"
+
+#: ../src/audio.c:426
+#, fuzzy, c-format
 msgid ""
-"File selection contains audio file that is incompatible with other ones."
+"File selection contains %d audio file that is incompatible with other files."
 msgid_plural ""
-"File selection contains audio files that are incompatible with other files."
+"File selection contains %d audio files that are incompatible with other "
+"files."
 msgstr[0] ""
 "O arquivo selecionado contém um arquivo de áudio que não é compatível com os "
 "outros."
 msgstr[1] ""
 "O arquivo selecionado contém arquivos de áudio que não é compatível outros "
 "arquivos."
+
+#: ../src/audio.c:432
+#, fuzzy
+msgid "Please check audio tab for more information."
+msgstr "Por favor escolha os arquivos de áudio para importar"
 
 #: ../src/main-window.c:212
 msgid "_Slideshow"
