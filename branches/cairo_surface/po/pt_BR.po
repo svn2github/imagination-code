@@ -8,9 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-09-22 15:40+0200\n"
-"PO-Revision-Date: 2009-08-17 09:39-0400\n"
-"Last-Translator: Og Maciel <ogmaciel@gnome.org>\n"
+"POT-Creation-Date: 2009-09-23 08:20+0200\n"
+"PO-Revision-Date: 2009-09-23 08:20+0100\n"
+"Last-Translator: Giuseppe Torelli\n"
 "Language-Team: Brazilian Portuguese <ldp-br@bazar2.conectiva.com.br>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -48,6 +48,8 @@ msgid ""
 "%s:\n"
 "incompatible sample rate\n"
 msgstr ""
+"%s:\n"
+"taxa incompatível de amostra\n"
 
 #: ../src/audio.c:266
 #, c-format
@@ -55,6 +57,8 @@ msgid ""
 "%s:\n"
 "incompatible number of channels\n"
 msgstr ""
+"%s:\n"
+"número incompatível de canais\n"
 
 #: ../src/audio.c:272
 #, c-format
@@ -62,6 +66,8 @@ msgid ""
 "%s:\n"
 "incompatible sample rate and number of channels\n"
 msgstr ""
+"%s:\n"
+"taxa incompatível de amostra e número de canais\n"
 
 #: ../src/audio.c:292
 #, c-format
@@ -69,11 +75,12 @@ msgid ""
 "%s\n"
 "<b>Do you want to continue without these files?</b>"
 msgstr ""
+"%s\n"
+"<b>Você deseja continuar sem estes arquivos?</b>"
 
 #: ../src/audio.c:296 ../src/audio.c:440
-#, fuzzy
 msgid "Audio files mismatch:"
-msgstr "Todos arquivos de áudio"
+msgstr "Os arquivos não coincidem:"
 
 #: ../src/audio.c:425
 msgid ""
@@ -81,7 +88,11 @@ msgid ""
 msgid_plural ""
 "File selection contains audio files that are incompatible with other files."
 msgstr[0] ""
+"O arquivo selecionado contém um arquivo de áudio que não é compatível com os "
+"outros."
 msgstr[1] ""
+"O arquivo selecionado contém arquivos de áudio que não é compatível outros "
+"arquivos."
 
 #: ../src/main-window.c:212
 msgid "_Slideshow"
@@ -128,7 +139,7 @@ msgstr "_Ampliar"
 
 #: ../src/main-window.c:356
 msgid "Add empt_y slide"
-msgstr ""
+msgstr "Adicionar um slide va_zio"
 
 #: ../src/main-window.c:365
 msgid "Dele_te"
@@ -381,9 +392,8 @@ msgid "Click to shrink the area"
 msgstr "Clique para reduzir a área"
 
 #: ../src/main-window.c:1417 ../src/callbacks.c:1132
-#, fuzzy
 msgid "Sorry, I could not perform the operation!"
-msgstr "Desculpe, mas não foi possível efetuar a operação!"
+msgstr "Desculpe,  mas não foi possível efetuar a operação!"
 
 #: ../src/main-window.c:1574
 msgid "Resolution"
@@ -458,30 +468,28 @@ msgid "Save an Imagination slideshow project"
 msgstr "Salvar um projeto Imagination de apresentação de slides"
 
 #: ../src/callbacks.c:2133
-#, fuzzy
 msgid "Create new slide"
-msgstr "Criar uma nova apresentação de slides"
+msgstr "Criar um novo slide"
 
 #: ../src/callbacks.c:2144
 msgid "Empty slide options:"
-msgstr ""
+msgstr "Opções de slide vazio:"
 
 #: ../src/callbacks.c:2154
 msgid "Use _solid color"
-msgstr ""
+msgstr "Usar cor _sólida"
 
 #: ../src/callbacks.c:2160
 msgid "Use _linear gradient"
-msgstr ""
+msgstr "Usar gradiente _linear"
 
 #: ../src/callbacks.c:2166
 msgid "Use _radial gradient"
-msgstr ""
+msgstr "Usar gradiente _radial"
 
 #: ../src/callbacks.c:2196
-#, fuzzy
 msgid "Preview"
-msgstr "_Visualização"
+msgstr "Visualização"
 
 #. Display propert title depending on the callback that is calling this function.
 #: ../src/new_slideshow.c:63
@@ -618,13 +626,8 @@ msgid "FLV export"
 msgstr "Exportar FLV"
 
 #: ../src/export.c:1439
-#, fuzzy
 msgid "<b>Video Size</b>"
-msgstr "<b>Qualidade de vídeo:</b>"
-
-#, fuzzy
-#~ msgid "Sorry,I could not perform the operation!"
-#~ msgstr "Desculpe, mas não foi possível efetuar a operação!"
+msgstr "<b>Tamanho do vídeo</b>"
 
 #~ msgid "Slide Number:"
 #~ msgstr "Número do slide:"
