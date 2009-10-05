@@ -1254,6 +1254,88 @@ img_on_expose_event( GtkWidget         *widget,
 	return( TRUE );
 }
 
+void
+img_toggle_ken_editor( GtkToggleButton   *button,
+					   img_window_struct *img )
+{
+	static guint id = 0;
+
+	if( gtk_toggle_button_get_active( button ) )
+	{
+		/* Start Ken Editor */
+		g_signal_handlers_block_by_func( img->image_area,
+										 img_on_expose_event, img );
+		id = g_signal_connect( G_OBJECT( img->image_area ), "expose-event",
+							   G_CALLBACK( img_ken_editor_expose ), img );
+		gtk_button_set_label( GTK_BUTTON( button ), _("Stop Ken Burns Editor") );
+	}
+	else
+	{
+		/* Stop Ken editor */
+		g_signal_handlers_unblock_by_func( img->image_area,
+										   img_on_expose_event, img );
+		g_signal_handler_disconnect( img->image_area, id );
+		gtk_button_set_label( GTK_BUTTON( button ), _("Start Ken Burns Editor") );
+	}
+	gtk_widget_queue_draw( img->image_area );
+}
+
+gboolean
+img_ken_editor_expose( GtkWidget         *widget,
+					   GdkEventExpose    *event,
+					   img_window_struct *img )
+{
+	cairo_t      *cr;
+	ImgStopPoint  point = { 0, 0, 0, 1 };
+
+	if( ! img->current_image )
+		return( FALSE );
+
+	cr = gdk_cairo_create( event->window );
+
+	/* Render image fully zoomed out */
+	img_draw_image_on_surface( cr, img->image_area->allocation.width,
+							   img->current_image, &point, img );
+
+	/* Draw stop points */
+	if( img->current_slide->points )
+	{
+		GList *node;
+
+		cairo_scale( cr, img->image_area_zoom, img->image_area_zoom );
+
+		for( node = img->current_slide->points;
+			 node;
+			 node = g_list_next( node ) )
+		{
+			/* FIXME: This code will be changed in final version, since points
+			 * in new editor will be defined by center and not by offset!! */
+			ImgStopPoint *point = (ImgStopPoint *)node->data;
+			ImgStopPoint *point_prev = ( node->prev ?
+										 (ImgStopPoint *)node->prev->data :
+										 point );
+
+			gdouble cx1 = ( img->video_size[0] / 2 - point_prev->offx ) / point_prev->zoom,
+					cy1 = ( img->video_size[1] / 2 - point_prev->offy ) / point_prev->zoom,
+					cx2 = ( img->video_size[0] / 2 - point->offx ) / point->zoom,
+					cy2 = ( img->video_size[1] / 2 - point->offy ) / point->zoom;
+			
+			cairo_move_to( cr, cx1, cy1 );
+			cairo_set_source_rgb( cr, 0, 0, 0 );
+			cairo_curve_to( cr, cx1, cy1, cx2, cy2, cx2, cy2 );
+			cairo_stroke( cr );
+			cairo_arc( cr, cx2, cy2, 5., 0, G_PI * 2 );
+			cairo_stroke_preserve( cr );
+			cairo_set_source_rgb( cr, 1, 1, 1 );
+			cairo_fill( cr );
+		}
+	}
+
+	cairo_destroy( cr );
+
+	return( TRUE );
+}
+
 /*
  * img_draw_image_on_surface:
  * @cr: cairo context

@@ -62,6 +62,13 @@ gboolean img_quit_application(GtkWidget *, GdkEvent *, img_window_struct *);
 void img_move_audio_up( GtkButton *, img_window_struct * );
 void img_move_audio_down( GtkButton *, img_window_struct * );
 gboolean img_on_expose_event(GtkWidget *,GdkEventExpose *,img_window_struct *);
+void
+img_toggle_ken_editor( GtkToggleButton   *button,
+					   img_window_struct *img );
+gboolean
+img_ken_editor_expose( GtkWidget         *widget,
+					   GdkEventExpose    *event,
+					   img_window_struct *img );
 void img_ken_burns_zoom_changed( GtkRange *, img_window_struct * );
 gboolean img_image_area_button_press( GtkWidget *, GdkEventButton *, img_window_struct * );
 gboolean img_image_area_motion( GtkWidget *, GdkEventMotion *, img_window_struct * );

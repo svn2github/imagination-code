@@ -838,7 +838,9 @@ img_window_struct *img_create_window (void)
 	/* Ken Burn Editor Button Switch */
 	hbox_editor_button = gtk_hbox_new(FALSE, 5);
 	gtk_box_pack_start (GTK_BOX (vbox_slide_motion), hbox_editor_button, FALSE, FALSE, 0);
-	ken_editor_button = gtk_button_new_with_mnemonic(_("Start/Stop Ken Burns Editor"));
+	ken_editor_button = gtk_toggle_button_new_with_mnemonic(_("Start Ken Burns Editor"));
+	g_signal_connect( G_OBJECT( ken_editor_button ), "toggled",
+					  G_CALLBACK( img_toggle_ken_editor ), img_struct );
 	gtk_box_pack_start (GTK_BOX (hbox_editor_button), ken_editor_button, TRUE, TRUE, 0);
 
 	/*
