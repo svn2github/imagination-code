@@ -21,12 +21,9 @@
 #include <cairo.h>
 #include <glib.h>
 #include <stdlib.h>
-#include <math.h>
 
 #define RAND_VALS 10 /* Number of random values to use */
 
-#define POW2( val ) \
-	( ( val ) * ( val ) )
 
 /* Plug-in API */
 void
@@ -37,16 +34,13 @@ img_get_plugin_info( gchar  **group,
 
 	*group = "Misc";
 
-	*trans = g_new( gchar *, 10 );
+	*trans = g_new( gchar *, 7 );
 	(*trans)[i++] = "Cross Fade";
 	(*trans)[i++] = "img_cross_fade";
 	(*trans)[i++] = GINT_TO_POINTER( 19 );
 	(*trans)[i++] = "Dissolve";
 	(*trans)[i++] = "img_dissolve";
 	(*trans)[i++] = GINT_TO_POINTER( 67 );
-	(*trans)[i++] = "Rochade";
-	(*trans)[i++] = "img_rochade";
-	(*trans)[i++] = GINT_TO_POINTER( 68 );
 	(*trans)[i++] = NULL;
 }
 
@@ -160,73 +154,5 @@ img_dissolve( cairo_t         *cr,
 
 	/* Paint second surface */
 	cairo_mask_surface( cr, mask, 0, 0 );
-}
-
-void
-img_rochade( cairo_t         *cr,
-			 cairo_surface_t *image_from,
-			 cairo_surface_t *image_to,
-			 gdouble          progress )
-{
-	const gdouble b = 70;
-	gint          width, height;
-	gdouble       x, y, ff, ft, w2;
-
-	width  = cairo_image_surface_get_width( image_from );
-	height = cairo_image_surface_get_height( image_from );
-	w2 = width  * 0.5;
-
-	if( progress > 0.5 )
-		progress -= 1;
-
-	x = width * progress;
-	y = sqrt( ( POW2( w2 ) - POW2( x ) ) / POW2( w2 ) ) * b;
-
-	if( progress > 0 )
-	{
-		ff = 1 - 2 * ( b - y ) / height;
-		ft = 1 - 2 * ( b + y ) / height;
-	}
-	else
-	{
-		ff = 1 - 2 * ( b + y ) / height;
-		ft = 1 - 2 * ( b - y ) / height;
-	}
-
-	cairo_set_source_rgb( cr, 0, 0, 0 );
-	cairo_paint( cr );
-
-	if( progress > 0 )
-	{
-		/* image_to */
-		cairo_save( cr );
-		cairo_translate( cr, w2 * ( 1 - ft ) - x, b + y );
-		cairo_scale( cr, ft, ft );
-		cairo_set_source_surface( cr, image_to, 0, 0 );
-		cairo_paint( cr );
-		cairo_restore( cr );
-
-		/* image_from */
-		cairo_translate( cr, w2 * ( 1 - ff ) + x, b - y );
-		cairo_scale( cr, ff, ff );
-		cairo_set_source_surface( cr, image_from, 0, 0 );
-		cairo_paint( cr );
-	}
-	else
-	{
-		/* image_from */
-		cairo_save( cr );
-		cairo_translate( cr, w2 * ( 1 - ff ) - x, b + y );
-		cairo_scale( cr, ff, ff );
-		cairo_set_source_surface( cr, image_from, 0, 0 );
-		cairo_paint( cr );
-		cairo_restore( cr );
-
-		/* image_to */
-		cairo_translate( cr, w2 * ( 1 - ft ) + x, b - y );
-		cairo_scale( cr, ft, ft );
-		cairo_set_source_surface( cr, image_to, 0, 0 );
-		cairo_paint( cr );
-	}
 }
 
