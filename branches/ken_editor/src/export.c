@@ -1614,15 +1614,11 @@ img_exporter_3gp( img_window_struct *img )
 	GtkWidget      *vbox;
 
 	/* Additional options - 3GP  only */
-	GtkWidget *frame;
+	GtkWidget *frame1, *frame2;
 	GtkWidget *label;
-	GtkWidget *hbox, *vbox_normal, *vbox_wide;
-	GtkWidget *radio1, *radio2;
-	GtkWidget *normal_combo, *wide_combo;
-	GtkWidget *radios[3];
-	gint       i, width, height;
-
-	gint       qualities[] = { 192, 384, 768 };
+	GtkWidget *hbox;
+	GtkWidget *normal_combo;
+	gint       width, height;
 
 	/* This function call should be the first thing exporter does, since this
 	 * function will take some preventive measures. */
@@ -1635,25 +1631,18 @@ img_exporter_3gp( img_window_struct *img )
 		return;
 
 	/* Add any export format specific GUI elements here */
-	frame = gtk_frame_new( NULL );
-	gtk_box_pack_start( GTK_BOX( vbox ), frame, FALSE, FALSE, 0 );
+	hbox = gtk_hbox_new( TRUE, 5 );
+	gtk_container_add( GTK_CONTAINER( vbox ), hbox );
+	
+	frame1 = gtk_frame_new( NULL );
+	gtk_box_pack_start( GTK_BOX( hbox ), frame1, FALSE, FALSE, 0 );
 
 	label = gtk_label_new( _("<b>Video Size</b>") );
 	gtk_label_set_use_markup( GTK_LABEL( label ), TRUE );
-	gtk_frame_set_label_widget( GTK_FRAME( frame ), label );
-
-	hbox = gtk_hbox_new( TRUE, 5 );
-	gtk_container_add( GTK_CONTAINER( frame ), hbox );
-
-	vbox_normal = gtk_vbox_new( FALSE, 0 );
-	gtk_box_pack_start (GTK_BOX(hbox), vbox_normal, FALSE, FALSE, 0 );
-	
-	radio1 = gtk_radio_button_new_with_mnemonic( NULL, _("Normal 4:3") );
-	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( radio1 ), TRUE );
-	gtk_box_pack_start( GTK_BOX( vbox_normal ), radio1, FALSE, FALSE, 0 );
+	gtk_frame_set_label_widget( GTK_FRAME( frame1 ), label );
 
 	normal_combo = _gtk_combo_box_new_text(FALSE);
-	gtk_box_pack_start( GTK_BOX( vbox_normal ), normal_combo, FALSE, FALSE, 0 );
+	gtk_container_add (GTK_CONTAINER (frame1), normal_combo);
 	{
 		GtkTreeIter   iter;
 		GtkListStore *store = GTK_LIST_STORE( gtk_combo_box_get_model(GTK_COMBO_BOX( normal_combo ) ) );
@@ -1661,62 +1650,24 @@ img_exporter_3gp( img_window_struct *img )
 		gtk_list_store_append( store, &iter );
 		gtk_list_store_set( store, &iter, 0, "320 x 240", -1 );
 		gtk_list_store_append( store, &iter );
-		gtk_list_store_set( store, &iter, 0, "400 x 300", -1 );
+		gtk_list_store_set( store, &iter, 0, "320 x 480", -1 );
 		gtk_list_store_append( store, &iter );
-		gtk_list_store_set( store, &iter, 0, "512 x 384", -1 );
+		gtk_list_store_set( store, &iter, 0, "352 x 240", -1 );
+		gtk_list_store_append( store, &iter );
+		gtk_list_store_set( store, &iter, 0, "480 x 800", -1 );
+		gtk_list_store_append( store, &iter );
+		gtk_list_store_set( store, &iter, 0, "640 x 360", -1 );
 		gtk_list_store_append( store, &iter );
 		gtk_list_store_set( store, &iter, 0, "640 x 480", -1 );
 	}
 	gtk_combo_box_set_active( GTK_COMBO_BOX( normal_combo ), 0 );
-
-	vbox_wide = gtk_vbox_new( FALSE, 0 );
-	gtk_box_pack_start (GTK_BOX(hbox), vbox_wide, FALSE, FALSE, 0 );
-
-	radio2 = gtk_radio_button_new_with_mnemonic_from_widget(GTK_RADIO_BUTTON( radio1 ), _("Widescreen 16:9") );
-	gtk_box_pack_start( GTK_BOX( vbox_wide ), radio2, FALSE, FALSE, 0 );
-
-	wide_combo = _gtk_combo_box_new_text(FALSE);
-	gtk_box_pack_start( GTK_BOX( vbox_wide ), wide_combo, FALSE, FALSE, 0 );
 	
-	{
-		GtkTreeIter   iter;
-		GtkListStore *store = GTK_LIST_STORE( gtk_combo_box_get_model(GTK_COMBO_BOX( wide_combo ) ) );
+	frame2 = gtk_frame_new( NULL );
+	gtk_box_pack_start( GTK_BOX( hbox ), frame2, FALSE, FALSE, 0 );
 
-		gtk_list_store_append( store, &iter );
-		gtk_list_store_set( store, &iter, 0, "320 x 180", -1 );
-		gtk_list_store_append( store, &iter );
-		gtk_list_store_set( store, &iter, 0, "400 x 225", -1 );
-		gtk_list_store_append( store, &iter );
-		gtk_list_store_set( store, &iter, 0, "512 x 288", -1 );
-		gtk_list_store_append( store, &iter );
-		gtk_list_store_set( store, &iter, 0, "640 x 360", -1 );
-	}
-	gtk_combo_box_set_active( GTK_COMBO_BOX( wide_combo ), 0 );
-	g_signal_connect( G_OBJECT( normal_combo ), "changed", G_CALLBACK( img_export_flv_changed ), radio1 );
-	g_signal_connect( G_OBJECT( wide_combo ), "changed", G_CALLBACK( img_export_flv_changed ), radio2 );
-
-	frame = gtk_frame_new( NULL );
-	gtk_box_pack_start( GTK_BOX( vbox ), frame, FALSE, FALSE, 0 );
-
-	label = gtk_label_new( _("<b>Video Quality:</b>") );
+	label = gtk_label_new( _("<b>Audio Bitrate</b>") );
 	gtk_label_set_use_markup( GTK_LABEL( label ), TRUE );
-	gtk_frame_set_label_widget( GTK_FRAME( frame ), label );
-
-	hbox = gtk_hbox_new( TRUE, 5 );
-	gtk_container_add( GTK_CONTAINER( frame ), hbox );
-
-	radios[0] = gtk_radio_button_new_with_mnemonic( NULL, _("Low") );
-	gtk_box_pack_start( GTK_BOX( hbox ), radios[0], FALSE, FALSE, 0 );
-
-	radios[1] = gtk_radio_button_new_with_mnemonic_from_widget(
-				GTK_RADIO_BUTTON( radios[0] ), _("Medium") );
-	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( radios[1] ), TRUE );
-	gtk_box_pack_start( GTK_BOX( hbox ), radios[1], FALSE, FALSE, 0 );
-
-	radios[2] = gtk_radio_button_new_with_mnemonic_from_widget(
-				GTK_RADIO_BUTTON( radios[0] ), _("High") );
-	gtk_box_pack_start( GTK_BOX( hbox ), radios[2], FALSE, FALSE, 0 );
-
+	gtk_frame_set_label_widget( GTK_FRAME( frame2 ), label );
 	gtk_widget_show_all( dialog );
 
 	/* Run dialog and abort if needed */
@@ -1732,68 +1683,44 @@ img_exporter_3gp( img_window_struct *img )
 	filename = gtk_entry_get_text( entry );
 
 	/* Any additional calculation can be placed here. */
-	if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( radio1 ) ) )
+	switch(gtk_combo_box_get_active(GTK_COMBO_BOX(normal_combo)) )
 	{
-		switch(gtk_combo_box_get_active(GTK_COMBO_BOX(normal_combo)) )
-		{
-			case 0:
-			width  = 320;
-			height = 240;
-			break;
+		case 0:
+		width  = 320;
+		height = 240;
+		break;
 
-			case 1:
-			width  = 400;
-			height = 300;
-			break;
+		case 1:
+		width  = 320;
+		height = 480;
+		break;
 
-			case 2:
-			width  = 512;
-			height = 384;
-			break;
+		case 2:
+		width  = 352;
+		height = 240;
+		break;
 
-			case 3:
-			width  = 640;
-			height = 480;
-			break;
-		}
-	}
-	else
-	{
-		switch(gtk_combo_box_get_active(GTK_COMBO_BOX(wide_combo)) )
-		{
-			case 0:
-			width  = 320;
-			height = 180;
-			break;
+		case 3:
+		width  = 480;
+		height = 800;
+		break;
 
-			case 1:
-			width  = 400;
-			height = 225;
-			break;
-
-			case 2:
-			width  = 512;
-			height = 288;
-			break;
-
-			case 3:
-			width  = 640;
-			height = 360;
-			break;
-		}
+		case 4:
+		width  = 640;
+		height = 360;
+		break;
+		
+		case 5:
+		width  = 640;
+		height = 480;
+		break;
 	}
 
-	for( i = 0; i < 3; i++ )
-	{
-		if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( radios[i] ) ) )
-			break;
-	}
-//libamr_nb libfaac
 	cmd_line = g_strdup_printf( "ffmpeg -f image2pipe -vcodec ppm -r %.02f "
-								"-b %dk -s %dx%d -i pipe: <#AUDIO#> -f 3gp "
+								"-s %dx%d -i pipe: <#AUDIO#> -f 3gp "
 								"-vcodec h263 -acodec libfaac -ab 32 "
 								"-ar 8000 -ac 1 -y \"%s.3gp\"",
-								img->export_fps, qualities[i],
+								img->export_fps,
 								width, height, filename );
 	img->export_cmd_line = cmd_line;
 
