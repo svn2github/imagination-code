@@ -388,8 +388,8 @@ struct _img_window_struct
 	ImgClipboardMode	clipboard_mode;
 	
 	/* Report dialog related widgets */
-	GtkWidget	*report_dialog;
-	GSList		*report_dialog_row_slist;
+	GtkTreeStore *report_store;
+	GtkWidget    *report_dialog;
 };
 
 #endif

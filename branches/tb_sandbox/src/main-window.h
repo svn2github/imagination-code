@@ -80,4 +80,7 @@ void
 img_switch_mode( img_window_struct *img,
 				 gint               mode );
 
+gboolean
+img_update_report( img_window_struct *img );
+
 #endif
