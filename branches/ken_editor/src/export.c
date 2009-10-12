@@ -436,7 +436,7 @@ img_start_export( img_window_struct *img )
 	gtk_tree_model_get_iter_first( model, &iter );
 	gtk_tree_model_get( model, &iter, 1, &entry, -1 );
 
-	if( ! entry->filename )
+	if( ! entry->o_filename )
 	{
 		img_scale_gradient( entry->gradient, entry->g_start_point,
 							entry->g_stop_point, entry->g_start_color,
@@ -445,7 +445,7 @@ img_start_export( img_window_struct *img )
 	}
 	else
 	{
-		img_scale_image( entry->filename, img->video_ratio,
+		img_scale_image( entry->r_filename, img->video_ratio,
 						 0, 0, img->distort_images,
 						 img->background_color, NULL, &img->image2 );
 	}
@@ -622,14 +622,14 @@ img_prepare_pixbufs( img_window_struct *img,
 									g_list_last( img->work_slide->points )->data :
 									NULL );
 
-	if( gtk_tree_model_iter_next( model, &img->cur_ss_iter ) )
+	if( last_transition && gtk_tree_model_iter_next( model, &img->cur_ss_iter ) )
 	{
 		/* We have next iter, so prepare for next round */
 		cairo_surface_destroy( img->image1 );
 		img->image1 = img->image2;
 		gtk_tree_model_get( model, &img->cur_ss_iter, 1, &img->work_slide, -1 );
 
-		if( ! img->work_slide->filename )
+		if( ! img->work_slide->o_filename )
 		{
 			img_scale_gradient( img->work_slide->gradient,
 								img->work_slide->g_start_point,
@@ -640,11 +640,11 @@ img_prepare_pixbufs( img_window_struct *img,
 								img->video_size[1], NULL, &img->image2 );
 		}
 		else if( preview && img->low_quality )
-			img_scale_image( img->work_slide->filename, img->video_ratio,
+			img_scale_image( img->work_slide->r_filename, img->video_ratio,
 							 0, img->video_size[1], img->distort_images,
 							 img->background_color, NULL, &img->image2 );
 		else
-			img_scale_image( img->work_slide->filename, img->video_ratio,
+			img_scale_image( img->work_slide->r_filename, img->video_ratio,
 							 0, 0, img->distort_images,
 							 img->background_color, NULL, &img->image2 );
 
@@ -709,9 +709,9 @@ img_run_encoder( img_window_struct *img )
 	g_print( "%s\n", img->export_cmd_line);
 
 	ret = g_spawn_async_with_pipes( NULL, argv, NULL,
-									G_SPAWN_SEARCH_PATH |
+									G_SPAWN_SEARCH_PATH/* |
 									G_SPAWN_STDOUT_TO_DEV_NULL |
-									G_SPAWN_STDERR_TO_DEV_NULL,
+									G_SPAWN_STDERR_TO_DEV_NULL*/,
 									NULL, NULL, &img->ffmpeg_export,
 									&img->file_desc, NULL, NULL, &error );
 	if( ! ret )
@@ -1653,17 +1653,13 @@ img_exporter_3gp( img_window_struct *img )
 		GtkListStore *store = GTK_LIST_STORE( gtk_combo_box_get_model(GTK_COMBO_BOX( normal_combo ) ) );
 
 		gtk_list_store_append( store, &iter );
-		gtk_list_store_set( store, &iter, 0, "320 x 240", -1 );
+		gtk_list_store_set( store, &iter, 0, "128 x 96", -1 );
 		gtk_list_store_append( store, &iter );
-		gtk_list_store_set( store, &iter, 0, "320 x 480", -1 );
+		gtk_list_store_set( store, &iter, 0, "176 x 144", -1 );
 		gtk_list_store_append( store, &iter );
-		gtk_list_store_set( store, &iter, 0, "352 x 240", -1 );
+		gtk_list_store_set( store, &iter, 0, "352 x 288", -1 );
 		gtk_list_store_append( store, &iter );
-		gtk_list_store_set( store, &iter, 0, "480 x 800", -1 );
-		gtk_list_store_append( store, &iter );
-		gtk_list_store_set( store, &iter, 0, "640 x 360", -1 );
-		gtk_list_store_append( store, &iter );
-		gtk_list_store_set( store, &iter, 0, "640 x 480", -1 );
+		gtk_list_store_set( store, &iter, 0, "704 x 576", -1 );
 	}
 	gtk_combo_box_set_active( GTK_COMBO_BOX( normal_combo ), 0 );
 	
@@ -1691,38 +1687,28 @@ img_exporter_3gp( img_window_struct *img )
 	switch(gtk_combo_box_get_active(GTK_COMBO_BOX(normal_combo)) )
 	{
 		case 0:
-		width  = 320;
-		height = 240;
+		width  = 128;
+		height = 96;
 		break;
 
 		case 1:
-		width  = 320;
-		height = 480;
+		width  = 176;
+		height = 144;
 		break;
 
 		case 2:
 		width  = 352;
-		height = 240;
+		height = 288;
 		break;
 
 		case 3:
-		width  = 480;
-		height = 800;
-		break;
-
-		case 4:
-		width  = 640;
-		height = 360;
-		break;
-		
-		case 5:
-		width  = 640;
-		height = 480;
+		width  = 704;
+		height = 576;
 		break;
 	}
 
 	cmd_line = g_strdup_printf( "ffmpeg -f image2pipe -vcodec ppm -r %.02f "
-								"-s %dx%d -i pipe: <#AUDIO#> -f 3gp "
+								"-i pipe: <#AUDIO#> -f 3gp -s %dx%d "
 								"-vcodec h263 -acodec libfaac -ab 32 "
 								"-ar 8000 -ac 1 -y \"%s.3gp\"",
 								img->export_fps,
