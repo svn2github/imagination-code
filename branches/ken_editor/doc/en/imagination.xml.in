@@ -349,11 +349,14 @@
 			<sect3 id="export">
 				<title>Export</title>
 				<para>
-					This submenu allows you to export the slideshow in three
+					This submenu allows you to export the slideshow in four
 					different formats: VOB (DVD Video) OGV (Ogg Theora/Vorbis)
-					and FLV (Flash Video). Each format has its own set of
+					FLV (Flash Video) and 3GP (Mobile Phones). Each format has its own set of
 					preferences that you'll be asked about when you select any
-					of them.
+					of them. Please be sure to have all the necessary libraries
+					installed first, otherwise you'll get errors from ffmpeg, the
+					command-line encoder Imagination uses to produce the video.
+					The extension will be automatically added to the filename.
 				</para>
 			</sect3>
 			<sect3 id="quit">
@@ -373,6 +376,7 @@
 				<listitem><para>Zoom</para></listitem>
 				<listitem><para>Add empty slide</para></listitem>
 				<listitem><para>Delete</para></listitem>
+				<listitem><para>Report</para></listitem>
 				<listitem><para>Rotate clockwise</para></listitem>
 				<listitem><para>Rotate counter-clockwise</para></listitem>
 				<listitem><para>Select all</para></listitem>
@@ -447,6 +451,18 @@
 				<title>Delete</title>
 				<para>
 					This menu entry deletes the selected slides. Hold down the SHIFT key to select more than one slide at once or CTRL to select selectively. Please be aware this action cannot be undone!
+				</para>
+			</sect3>
+			<sect3 id="report">
+				<title>Report</title>
+				<figure id="slide_report">
+					<title>Slide Transitions Report dialog</title>
+					<graphic fileref="images/slide_report_dialog.png"></graphic>
+				</figure>
+				<para>
+					This menu entry shows the Slide Transitions Report dialog where you can see the number of the slides which has the same transition.
+					Click on the slide to have Imagination automatically select it. Slides whose transition is applied only once are not shown
+					here. Please give your feedback on this since we are not sure whether it's an useful feature. Thank you.
 				</para>
 			</sect3>
 			<sect3 id="rotate_clockwise">
