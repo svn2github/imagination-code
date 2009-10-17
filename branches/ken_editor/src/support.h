@@ -52,12 +52,12 @@ void img_load_available_transitions(img_window_struct *);
 void img_show_file_chooser(SexyIconEntry *, SexyIconEntryPosition, int, img_window_struct *);
 void img_select_nth_slide(img_window_struct *, gint);
 
-slide_struct *
-img_create_new_slide( void );
+ImgSlide *
+img_slide_new( ImgSlideType type );
 
 void
-img_set_slide_file_info( slide_struct *slide,
-						 const gchar  *filename );
+img_set_slide_file_info( ImgSlide    *slide,
+						 const gchar *filename );
 
 void
 img_set_slide_gradient_info( slide_struct *slide,

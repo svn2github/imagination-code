@@ -121,22 +121,6 @@ typedef enum
 }
 ImgRelPlacing;
 
-/* Structure, holding subtitle properties */
-/* FIXME: Subtitle support will be expanded after Ken Burns
- * is properly set up */
-typedef struct _ImgSubtitle ImgSubtitle;
-struct _ImgSubtitle
-{
-	gchar                *subtitle;      /* Subtitle text */
-	TextAnimationFunc     anim;          /* Animation functions */
-	gint                  anim_id;       /* Animation id */
-	gdouble               anim_duration; /* Duration of animation */
-	ImgSubPos             position;      /* Final position of subtitle */
-	ImgRelPlacing         placing;       /* Relative placing */
-	PangoFontDescription *font_desc;     /* Font description */
-	ImgColor              font_color;    /* Font color */
-};
-
 /*
  * TextAnimationFunc:
  * @cr: cairo context that should be used for drawing
@@ -166,6 +150,22 @@ typedef void (*TextAnimationFunc)( cairo_t     *cr,
 								   gint         posy,
 								   gdouble      progress,
 								   gdouble     *font_color );
+
+/* Structure, holding subtitle properties */
+/* FIXME: Subtitle support will be expanded after Ken Burns
+ * is properly set up */
+typedef struct _ImgSubtitle ImgSubtitle;
+struct _ImgSubtitle
+{
+	gchar                *subtitle;      /* Subtitle text */
+	TextAnimationFunc     anim;          /* Animation functions */
+	gint                  anim_id;       /* Animation id */
+	gdouble               anim_duration; /* Duration of animation */
+	ImgSubPos             position;      /* Final position of subtitle */
+	ImgRelPlacing         placing;       /* Relative placing */
+	PangoFontDescription *font_desc;     /* Font description */
+	ImgColor              font_color;    /* Font color */
+};
 
 
 /* ****************************************************************************
@@ -243,7 +243,7 @@ struct _ImgSlideFile
 
 	/* File info */
 	gchar    *resolution; /* Image dimensions */
-	gchar    *type;       /* Image type */
+	gchar    *image_type; /* Image type */
 	gchar    *o_filename; /* Filename of the image that slide represents */
 	gchar    *r_filename; /* o_filename, rotated according to angle */
 	ImgAngle  angle;      /* Angle of rotated image */
@@ -266,7 +266,7 @@ struct _ImgSlideFile
 	GList *subs;    /* List of all subtitles */
 	gint   no_subs; /* Number of subtitles in list */
 	gint   cur_sub; /* Currently active subtitle */
-}
+};
 
 /* Slide, representing in-memory gradient slide. */
 #define IMG_SLIDE_GRADIENT_CAPS \
@@ -303,10 +303,10 @@ struct _ImgSlideGradient
 	GList *subs;    /* List of all subtitles */
 	gint   no_subs; /* Number of subtitles in list */
 	gint   cur_sub; /* Currently active subtitle */
-}
+};
 
 /* Slide, representing video file. */
-#define IMG_SLIDE_GRADIENT_CAPS 0
+#define IMG_SLIDE_VIDEO_CAPS 0
 typedef struct _ImgSlideVideo ImgSlideVideo;
 struct _ImgSlideVideo
 {
@@ -314,7 +314,7 @@ struct _ImgSlideVideo
 	ImgSlideCaps caps; /* DO NOT MOVE THIS!!! ALIGNED WITH UNION!!! */
 
 	/* FIXME: THIS SLIDE TYPE IS NOT IMPLEMENTED RIGHT NOW */
-}
+};
 
 /* Union for simple parameter passing */
 typedef union  _ImgSlide ImgSlide;

@@ -268,34 +268,78 @@ void img_show_file_chooser(SexyIconEntry *entry, SexyIconEntryPosition icon_pos,
 	gtk_widget_destroy(file_selector);
 }
 
-slide_struct *
-img_create_new_slide( void )
+/*
+ * img_slide_new
+ * @type: type of the slide that should be created
+ *
+ * Creates new slide, filled with default values.
+ *
+ * Return value: newly allocated ImgSlide. Free this with img_slide_free().
+ */
+ImgSlide *
+img_slide_new( ImgSlideType type )
 {
-	slide_struct    *slide = NULL;
+	ImgSlide *slide = NULL;
 
-	slide = g_slice_new0( slide_struct );
-	if( slide )
+	slide = g_slice_new0( ImgSlide );
+	if( ! slide )
+		return( NULL );
+
+	/* Populate slide with default values */
+	slide->type = type;
+	switch( type )
 	{
-		/* Still part */
-		slide->duration = 1;
+		case IMG_SLIDE_TYPE_FILE:
+			{
+				ImgSlideFile *file = (ImgSlideFile *)slide;
+				
+				/* Capabilities */
+				file->caps = IMG_SLIDE_FILE_CAPS;
 
-		/* Transition */
-		slide->path = g_strdup( "0" );
-		slide->transition_id = -1;
-		slide->speed = NORMAL;
+				/* Still part */
+				file->still_duration = 1.0;
+				
+				/* Transition */
+				file->path = g_strdup( "0" );
+				file->transition_id = -1;
+				file->speed = NORMAL;
+				
+				/* Ken Burns */
+				file->cur_point = -1;
 
-		/* Ken Burns */
-		slide->cur_point = -1;
+				/* Subtitles */
+				file->cur_sub = -1;
+			}
+			break;
 
-		/* Subtitles */
-		slide->anim_duration = 1;
-		slide->position = IMG_SUB_POS_MIDDLE_CENTER;
-		slide->placing = IMG_REL_PLACING_EXPORTED_VIDEO;
-		slide->font_desc = pango_font_description_from_string( "Sans 12" );
-		slide->font_color[0] = 0; /* R */
-		slide->font_color[1] = 0; /* G */
-		slide->font_color[2] = 0; /* B */
-		slide->font_color[3] = 1; /* A */
+		case IMG_SLIDE_TYPE_GRADIENT:
+			{
+				ImgSlideGradient *grad = (ImgSlideGradient *)slide;
+
+				/* Capabilities */
+				file->caps = IMG_SLIDE_GRADIENT_CAPS;
+
+				/* Still part */
+				file->still_duration = 1.0;
+				
+				/* Transition */
+				file->path = g_strdup( "0" );
+				file->transition_id = -1;
+				file->speed = NORMAL;
+				
+				/* Ken Burns */
+				file->cur_point = -1;
+
+				/* Subtitles */
+				file->cur_sub = -1;
+			}
+			break;
+
+		case IMG_SLIDE_TYPE_VIDEO:
+			{
+				ImgSlideVideo *video = (ImgSlideVideo *)slide;
+			}
+			break;
 	}
 
 	return( slide );
