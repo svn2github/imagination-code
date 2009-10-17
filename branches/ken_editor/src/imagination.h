@@ -25,14 +25,16 @@
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
 
-/* Transition preview frame rate. I decided to use 25 fps, which
- * should be handled on time by most machines. */
-#define PREVIEW_FPS 15
+/* Preview frame rate macros */
+#define PREVIEW_FPS_INC     5
+#define PREVIEW_FPS_MIN     5
+#define PREVIEW_FPS_MAX     30
+#define PREVIEW_FPS_DEFAULT 15
 
 /* The transition speed is defined as a duration in seconds. */
-#define	FAST	1
-#define	NORMAL	4
-#define	SLOW	8
+#define	FAST   1
+#define	NORMAL 4
+#define	SLOW   8
 
 #define old_comment_string \
 	"Imagination Slideshow Project - http://imagination.sf.net"
@@ -119,6 +121,22 @@ typedef enum
 }
 ImgRelPlacing;
 
+/* Structure, holding subtitle properties */
+/* FIXME: Subtitle support will be expanded after Ken Burns
+ * is properly set up */
+typedef struct _ImgSubtitle ImgSubtitle;
+struct _ImgSubtitle
+{
+	gchar                *subtitle;      /* Subtitle text */
+	TextAnimationFunc     anim;          /* Animation functions */
+	gint                  anim_id;       /* Animation id */
+	gdouble               anim_duration; /* Duration of animation */
+	ImgSubPos             position;      /* Final position of subtitle */
+	ImgRelPlacing         placing;       /* Relative placing */
+	PangoFontDescription *font_desc;     /* Font description */
+	ImgColor              font_color;    /* Font color */
+};
+
 /*
  * TextAnimationFunc:
  * @cr: cairo context that should be used for drawing
@@ -165,15 +183,15 @@ typedef void (*ImgRender)( cairo_t *,
 typedef struct _ImgStopPoint ImgStopPoint;
 struct _ImgStopPoint
 {
-	gdouble x,          /* Center coordinates of the stop point */
-			y,
-			z,          /* Zoom level of this stop point */
-			bx1,        /* Bezier curve - control point 1 coordinates */
-			by1,
-			bx2,        /* Bezier curve - control point 2 coordinates */
-			by2,
-			still_time, /* Amount of time that slide stays still */
-			move_time;  /* Amount of time it takes to get from previous
+	gdouble x;          /* Center coordinates of the stop point */
+	gdouble y;
+	gdouble z;          /* Zoom level of this stop point */
+	gdouble bx1;        /* Bezier curve - control point 1 coordinates */
+	gdouble by1;
+	gdouble bx2;        /* Bezier curve - control point 2 coordinates */
+	gdouble by2;
+	gdouble still_time; /* Amount of time that slide stays still */
+	gdouble move_time;  /* Amount of time it takes to get from previous
 						   point to this point */
 };
 
@@ -213,14 +231,10 @@ typedef enum
 }
 ImgSlideCaps;
 
-/* Slide, representing image on disk.
- *
- * Capabilities:
- *   IMG_SLIDE_CAP_SUBTITLE |
- *   IMG_SLIDE_CAP_KEN_BURNS |
- *   IMG_SLIDE_CAP_CLIP_ART |
- *   IMG_SLIDE_CAP_ROTATE
- */
+/* Slide, representing image on disk. */
+#define IMG_SLIDE_FILE_CAPS \
+	( IMG_SLIDE_CAP_SUBTITLE | IMG_SLIDE_CAP_KEN_BURNS | \
+	  IMG_SLIDE_CAP_CLIP_ART | IMG_SLIDE_CAP_ROTATE )
 typedef struct _ImgSlideFile ImgSlideFile;
 struct _ImgSlideFile
 {
@@ -235,13 +249,13 @@ struct _ImgSlideFile
 	ImgAngle  angle;      /* Angle of rotated image */
 
 	/* Still part */
-	guint duration; /* Duration of still part */
+	gdouble still_duration; /* Duration of still part */
 
 	/* Transition params */
-	gchar     *path;          /* Transition model path to transition */
-	gint       transition_id; /* Transition id */
-	ImgRender  render;        /* Transition render function */
-	guint      speed;         /* Transition speed */ /* NOTE: sub1 */
+	gchar     *path;           /* Transition model path to transition */
+	gint       transition_id;  /* Transition id */
+	ImgRender  render;         /* Transition render function */
+	guint      trans_duration; /* Transition duration */
 
 	/* Ken Burns effect points */
 	GList *points;    /* List with stop points */
@@ -254,13 +268,10 @@ struct _ImgSlideFile
 	gint   cur_sub; /* Currently active subtitle */
 }
 
-/* Slide, representing in-memory gradient slide.
- *
- * Capabilities:
- *   IMG_SLIDE_CAP_SUBTITLE |
- *   IMG_SLIDE_CAP_KEN_BURNS |
- *   IMG_SLIDE_CAP_CLIP_ART
- */
+/* Slide, representing in-memory gradient slide. */
+#define IMG_SLIDE_GRADIENT_CAPS \
+	( IMG_SLIDE_CAP_SUBTITLE | IMG_SLIDE_CAP_KEN_BURNS | \
+	  IMG_SLIDE_CAP_CLIP_ART )
 typedef struct _ImgSlideGradient ImgSlideGradient;
 struct _ImgSlideGradient
 {
@@ -275,13 +286,13 @@ struct _ImgSlideGradient
 	gdouble g_stop_point[2];  /* x, y coordinates of stop point */
 
 	/* Still part of the slide params */
-	guint duration; /* Duration of still part */
+	gdouble still_duration; /* Duration of still part */
 
 	/* Transition params */
-	gchar     *path;          /* Transition model path to transition */
-	gint       transition_id; /* Transition id */
-	ImgRender  render;        /* Transition render function */
-	guint      speed;         /* Transition speed */ /* NOTE: sub1 */
+	gchar     *path;           /* Transition model path to transition */
+	gint       transition_id;  /* Transition id */
+	ImgRender  render;         /* Transition render function */
+	gdouble    trans_duration; /* Transition speed */ /* NOTE: sub1 */
 
 	/* Ken Burns effect variables */
 	GList *points;    /* List with stop points */
@@ -294,17 +305,15 @@ struct _ImgSlideGradient
 	gint   cur_sub; /* Currently active subtitle */
 }
 
-/* Slide, representing video file.
- *
- * Capabilities:
- *   None (maybe we can bolt on subtitle support)
- */
+/* Slide, representing video file. */
+#define IMG_SLIDE_GRADIENT_CAPS 0
 typedef struct _ImgSlideVideo ImgSlideVideo;
 struct _ImgSlideVideo
 {
 	ImgSlideType type; /* DO NOT MOVE THIS!!! ALIGNED WITH UNION!!! */
 	ImgSlideCaps caps; /* DO NOT MOVE THIS!!! ALIGNED WITH UNION!!! */
 
+	/* FIXME: THIS SLIDE TYPE IS NOT IMPLEMENTED RIGHT NOW */
 }
 
 /* Union for simple parameter passing */
@@ -381,11 +390,6 @@ struct _img_window_struct
 	GtkWidget *ken_spin_mode; /* Combo Box for Movement Mode */
 	GtkWidget *ken_zoom;     /* Zoom slider */
 	
-	/*
-	GtkWidget *ken_add;      Add stop point button
-	GtkWidget *ken_update;   Update stop point button
-	GtkWidget *ken_remove;   Remove stop point button */
-
 	/* Subtitle related controls */
 	GtkWidget *sub_textview;      /* Text view */
 	GtkWidget *sub_font;          /* Font button */
@@ -396,52 +400,60 @@ struct _img_window_struct
 	GtkWidget *sub_pos;           /* Position selector button */
 
 	/* Import slides dialog variables */
-	GtkWidget	*dim_label;
-	GtkWidget	*size_label;
-  	GtkWidget	*preview_image;
+	GtkWidget *dim_label;
+	GtkWidget *size_label;
+  	GtkWidget *preview_image;
 
 	/* Current image position parameters */
+	/* FIXME: Deprecated start */
 	gdouble       x;             /* Last button press coordinates */
 	gdouble       y;
 	gdouble       bak_offx;      /* Stored offset at button press */
 	gdouble       bak_offy;
 	gdouble       maxoffx;       /* Maximal offsets for current zoom */
 	gdouble       maxoffy;
-	ImgStopPoint  current_point; /* Data for rendering current image */
-  	slide_struct *current_slide;
+	/* FIXME: Deprecated end */
+	ImgStopPoint    *current_point;   /* Data for rendering current image */
+  	ImgSlide        *current_slide;   /* Currently displayed slide */
+	cairo_surface_t *current_image;   /* Image in preview area */
+	gdouble          image_area_zoom; /* Zoom to be applied to image area */
+	gdouble          overview_zoom;   /* Zoom to be applied in overview mode */
+	gint             preview_fps;     /* Preview frame rate */
+	gboolean         low_quality;     /* Preview quality:
+											TRUE  - preview in low-res
+											FALSE - preview in hi-res */
+
 	
 	/* Update ids */
-	gint subtitle_update_id; /* Update subtitle display */
-	gint total_dur_id;       /* Update total duration */
+	guint subtitle_update_id; /* Update subtitle display */
+	guint total_dur_id;       /* Update total duration */
 
 	/* Renderers and module stuff */
-  	gint		nr_transitions_loaded;
-  	GSList		*plugin_list;
+  	gint    nr_transitions_loaded;
+  	GSList *plugin_list;
 
 	/* Project related variables */
-	gchar       *project_filename;		// project name for saving
-	gboolean	distort_images;
-	gboolean	project_is_modified;
-	gint        video_size[2];
-	gdouble     video_ratio;
-	gdouble     background_color[3];
-  	gint		total_secs;
-	gint		total_music_secs;
-  	gint		slides_nr;
-	slide_struct final_transition;  /* Only speed, render and duration fields
-									   of this structure are used (and duration
-									   is always 0). */
+	gchar    *project_filename;    /* Filename for saving */
+	gboolean  distort_images;      /* Shall images be distorted? */
+	gboolean  project_is_modified; /* Do we need to warn user? */
+	gint      video_size[2];       /* Size fo the project (w, h) */
+	gdouble   video_ratio;         /* Aspect ration of project (w/h) */
+	ImgColor  background_color;    /* Background color */
+  	gdouble   total_secs;          /* Total slideshow duration */
+	gdouble   total_music_secs;    /* Total music duration */
+  	gint      slides_nr;           /* Total number of slides */
+	ImgSlide  final_transition;    /* Last pseudo slide - bye-bye transition */
 
 	/* Variables common to export and preview functions */
-	slide_struct    *work_slide;
-	cairo_surface_t *current_image;  /* Image in preview area */
+	ImgSlide        *work_slide1;    /* Slide that starts transition */
+	ImgSlide        *work_slide2;    /* Slide that ends transition */
 	cairo_surface_t *exported_image; /* Image being exported */
 	cairo_surface_t *image1;         /* Original images */
 	cairo_surface_t *image2;
 	cairo_surface_t *image_from;     /* Images used in transition rendering */
 	cairo_surface_t *image_to;
-	ImgStopPoint    *point1;        /* Last stop point of image1 */
-	ImgStopPoint    *point2;        /* First stop point of image2 */
+	ImgStopPoint    *point1;         /* Last stop point of image1 */
+	ImgStopPoint    *point2;         /* First stop point of image2 */
   	GtkTreeIter      cur_ss_iter;
   	guint		     source_id;
 
@@ -464,11 +476,11 @@ struct _img_window_struct
 	gint   no_text_frames; /* All text frames */
 
 	/* Preview related variables */
-  	gboolean	preview_is_running;
-  	GtkWidget	*import_slide_chooser;
-	GtkWidget	*total_stop_points_label;
-  	GtkWidget	*total_slide_number_label;
-	GtkWidget	*slide_number_entry;
+  	gboolean   preview_is_running;
+  	GtkWidget *import_slide_chooser;
+	GtkWidget *total_stop_points_label;
+  	GtkWidget *total_slide_number_label;
+	GtkWidget *slide_number_entry;
 
 	/* Export dialog related stuff */
 	gint        export_is_running;  /* 0 - export is not running
@@ -510,28 +522,21 @@ struct _img_window_struct
 	gchar    *fifo;              /* Named pipe path */
 
 	/* Audio related stuff */
-	GtkWidget	*music_file_treeview;
-	GtkWidget	*play_audio_button;
-	GtkWidget	*remove_audio_button;
+	GtkWidget    *music_file_treeview;
+	GtkWidget    *play_audio_button;
+	GtkWidget    *remove_audio_button;
 	GtkListStore *music_file_liststore;
-	GtkWidget	*music_time_data;
-	GPid		play_child_pid;
-
-	/* Application related stuff */
-	gdouble  image_area_zoom; /* Zoom to be applied to image area */
-	gdouble  overview_zoom;   /* Zoom to be applied in overview mode */
-	gboolean low_quality;     /* Preview quality:
-								  TRUE  - preview in low-res
-								  FALSE - preview in hi-res */
+	GtkWidget    *music_time_data;
+	GPid          play_child_pid;
 
 	/* Clipboard related stuff */
-	GList				*selected_paths;
-	ImgClipboardMode	clipboard_mode;
+	GList            *selected_paths;
+	ImgClipboardMode  clipboard_mode;
 	
 	/* Report dialog related widgets */
-	GtkWidget	*report_dialog;
-	GtkWidget	*vbox_slide_report_rows;
-	GSList		*report_dialog_row_slist;
+	GtkWidget *report_dialog;
+	GtkWidget *vbox_slide_report_rows;
+	GSList    *report_dialog_row_slist;
 };
 
 #endif
