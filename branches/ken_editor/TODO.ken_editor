@@ -1,0 +1,7 @@
+Tasks that will hopefully be accomplished in this branch:
+ - update Ken Burns editor
+ - prepare infrastructure for video slides
+ - prepare infrastructure for multiple subtitles per slide
+ - convert any integer based durations to floating point
+ - implement runtime configurable preview fps (should this be done in trunk??)
+ - have fun breaking Imagination;)

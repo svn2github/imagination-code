@@ -39,11 +39,64 @@
 #define comment_string \
 	"Imagination 2.0 Slideshow Project - http://imagination.sf.net"
 
+/* ****************************************************************************
+ * Conversion macros
+ * ************************************************************************* */
+/* Convert GdkColor to ImgColor (alpha is set to 1) */
+#define GDK_TO_IMG_COLOR( gdk_color, img_color ) \
+	( img_color ).red   = (gdouble)( gdk_color ).red   / 0xffff; \
+	( img_color ).green = (gdouble)( gdk_color ).green / 0xffff; \
+	( img_color ).blue  = (gdouble)( gdk_color ).blue  / 0xffff; \
+	( img_color ).alpha = 1.0
+
+/* Convert ImgColor to GdkColor (alpha is ignored) */
+#define IMG_TO_GDK_COLOR( img_color, gdk_color ) \
+	( gdk_color ).red   = (guint16)( img_color ).red   * 0xffff; \
+	( gdk_color ).green = (guint16)( img_color ).green * 0xffff; \
+	( gdk_color ).blue  = (guint16)( img_color ).blue  * 0xffff
+
+/* Set cairo source to specific color */
+#define IMG_CAIRO_SET_SOURCE_RGB( cr, color ) \
+	cairo_set_source_rgb( ( cr ), ( color ).red, \
+								  ( color ).green, \
+								  ( color ).blue )
+
+#define IMG_CAIRO_SET_SOURCE_RGBA( cr, color ) \
+	cairo_set_source_rgba( ( cr ), ( color ).red, \
+								   ( color ).green, \
+								   ( color ).blue, \
+								   ( color ).alpha )
+	
+/* ****************************************************************************
+ * Common structures
+ * ************************************************************************* */
+/* Angle enumeration, used for image rotation */
+typedef enum
+{
+	ANGLE_0 = 0,
+	ANGLE_90,
+	ANGLE_180,
+	ANGLE_270
+}
+ImgAngle;
+
+/* Cairo compatible RGB color definition */
+typedef struct _ImgColor ImgColor;
+struct _ImgColor
+{
+	gdouble red;
+	gdouble green;
+	gdouble blue;
+	gdouble alpha;
+};
+
 
 /* ****************************************************************************
  * Subtitles related definitions
  * ************************************************************************* */
 /* Enum that holds all available positions of text. */
+/* TODO: This will soon be deprecated, since we intend to implement free
+ * positioning by simply dragging text around */
 typedef enum
 {
 	IMG_SUB_POS_TOP_LEFT = 0,
@@ -65,15 +118,6 @@ typedef enum
 	IMG_REL_PLACING_ORIGINAL_IMAGE
 }
 ImgRelPlacing;
-
-typedef enum
-{
-	ANGLE_0 = 0,
-	ANGLE_90,
-	ANGLE_180,
-	ANGLE_270
-}
-ImgAngle;
 
 /*
  * TextAnimationFunc:
@@ -121,10 +165,16 @@ typedef void (*ImgRender)( cairo_t *,
 typedef struct _ImgStopPoint ImgStopPoint;
 struct _ImgStopPoint
 {
-	gint    time; /* Duration of this stop point */
-	gdouble offx; /* X and Y offsets of zoomed image */
-	gdouble offy;
-	gdouble zoom; /* Zoom level */
+	gdouble x,          /* Center coordinates of the stop point */
+			y,
+			z,          /* Zoom level of this stop point */
+			bx1,        /* Bezier curve - control point 1 coordinates */
+			by1,
+			bx2,        /* Bezier curve - control point 2 coordinates */
+			by2,
+			still_time, /* Amount of time that slide stays still */
+			move_time;  /* Amount of time it takes to get from previous
+						   point to this point */
 };
 
 /* ****************************************************************************
@@ -137,24 +187,87 @@ typedef enum
 {
 	IMG_CLIPBOARD_CUT,
 	IMG_CLIPBOARD_COPY
-} ImgClipboardMode;
+}
+ImgClipboardMode;
 
 /* ****************************************************************************
- * Common definitions that are used all over the place
+ * Slide related definitions
  * ************************************************************************* */
-typedef struct _slide_struct slide_struct;
-struct _slide_struct
+/* Slide types */
+typedef enum
 {
-	/* Common data - always filled */
-	gchar *resolution;        /* Image dimensions */
-	gchar *type;              /* Image type */
+	IMG_SLIDE_TYPE_NONE = 0, /* Slide structure is not initialized yet */
+	IMG_SLIDE_TYPE_FILE,     /* Slide represents file on disk */
+	IMG_SLIDE_TYPE_GRADIENT, /* Slide is created using gradient definitions */
+	IMG_SLIDE_TYPE_VIDEO     /* Slide represents video clip from disk */
+}
+ImgSlideType;
 
-	/* Fields that are filled when we load slide from disk */
+/* Slide capabilities (bitmask) */
+typedef enum
+{
+	IMG_SLIDE_CAP_SUBTITLE  = 1 << 0, /* Slide can have subtitles */
+	IMG_SLIDE_CAP_KEN_BURNS = 1 << 1, /* Slide can have Ken Burns effect */
+	IMG_SLIDE_CAP_CLIP_ART  = 1 << 2, /* Slide can have clip art added */
+	IMG_SLIDE_CAP_ROTATE    = 1 << 3  /* Slide can be rotated */
+}
+ImgSlideCaps;
+
+/* Slide, representing image on disk.
+ *
+ * Capabilities:
+ *   IMG_SLIDE_CAP_SUBTITLE |
+ *   IMG_SLIDE_CAP_KEN_BURNS |
+ *   IMG_SLIDE_CAP_CLIP_ART |
+ *   IMG_SLIDE_CAP_ROTATE
+ */
+typedef struct _ImgSlideFile ImgSlideFile;
+struct _ImgSlideFile
+{
+	ImgSlideType type; /* DO NOT MOVE THIS!!! ALIGNED WITH UNION!!! */
+	ImgSlideCaps caps; /* DO NOT MOVE THIS!!! ALIGNED WITH UNION!!! */
+
+	/* File info */
+	gchar    *resolution; /* Image dimensions */
+	gchar    *type;       /* Image type */
 	gchar    *o_filename; /* Filename of the image that slide represents */
 	gchar    *r_filename; /* o_filename, rotated according to angle */
 	ImgAngle  angle;      /* Angle of rotated image */
 
-	/* Fields that are filled if we create slide in memory */
+	/* Still part */
+	guint duration; /* Duration of still part */
+
+	/* Transition params */
+	gchar     *path;          /* Transition model path to transition */
+	gint       transition_id; /* Transition id */
+	ImgRender  render;        /* Transition render function */
+	guint      speed;         /* Transition speed */ /* NOTE: sub1 */
+
+	/* Ken Burns effect points */
+	GList *points;    /* List with stop points */
+	gint   no_points; /* Number of stop points in list */
+	gint   cur_point; /* Currently active stop point */
+
+	/* Subtitles */
+	GList *subs;    /* List of all subtitles */
+	gint   no_subs; /* Number of subtitles in list */
+	gint   cur_sub; /* Currently active subtitle */
+}
+
+/* Slide, representing in-memory gradient slide.
+ *
+ * Capabilities:
+ *   IMG_SLIDE_CAP_SUBTITLE |
+ *   IMG_SLIDE_CAP_KEN_BURNS |
+ *   IMG_SLIDE_CAP_CLIP_ART
+ */
+typedef struct _ImgSlideGradient ImgSlideGradient;
+struct _ImgSlideGradient
+{
+	ImgSlideType type; /* DO NOT MOVE THIS!!! ALIGNED WITH UNION!!! */
+	ImgSlideCaps caps; /* DO NOT MOVE THIS!!! ALIGNED WITH UNION!!! */
+
+	/* Gradient parameters */
 	gint    gradient;         /* Gradient type */
 	gdouble g_start_color[3]; /* RGB start color */
 	gdouble g_stop_color[3];  /* RGB stop color */
@@ -162,7 +275,7 @@ struct _slide_struct
 	gdouble g_stop_point[2];  /* x, y coordinates of stop point */
 
 	/* Still part of the slide params */
-	guint duration; /* Duration of still part */ /* NOTE: sub1 */
+	guint duration; /* Duration of still part */
 
 	/* Transition params */
 	gchar     *path;          /* Transition model path to transition */
@@ -175,15 +288,35 @@ struct _slide_struct
 	gint   no_points; /* Number of stop points in list */
 	gint   cur_point; /* Currently active stop point */
 
-	/* Subtitle variables */
-	gchar                *subtitle;      /* Subtitle text */
-	TextAnimationFunc     anim;          /* Animation functions */
-	gint                  anim_id;       /* Animation id */
-	gint                  anim_duration; /* Duration of animation */
-	ImgSubPos             position;      /* Final position of subtitle */
-	ImgRelPlacing         placing;       /* Relative placing */
-	PangoFontDescription *font_desc;     /* Font description */
-	gdouble               font_color[4]; /* Font color (RGBA format) */
+	/* Subtitles */
+	GList *subs;    /* List of all subtitles */
+	gint   no_subs; /* Number of subtitles in list */
+	gint   cur_sub; /* Currently active subtitle */
+}
+
+/* Slide, representing video file.
+ *
+ * Capabilities:
+ *   None (maybe we can bolt on subtitle support)
+ */
+typedef struct _ImgSlideVideo ImgSlideVideo;
+struct _ImgSlideVideo
+{
+	ImgSlideType type; /* DO NOT MOVE THIS!!! ALIGNED WITH UNION!!! */
+	ImgSlideCaps caps; /* DO NOT MOVE THIS!!! ALIGNED WITH UNION!!! */
+
+}
+
+/* Union for simple parameter passing */
+typedef union  _ImgSlide ImgSlide;
+union _ImgSlide
+{
+	ImgSlideType     type;
+	ImgSlideCaps     caps;
+
+	ImgSlideFile     file;
+	ImgSlideGradient gradient;
+	ImgSlideVideo    video;
 };
 
 typedef struct _img_window_struct img_window_struct;
