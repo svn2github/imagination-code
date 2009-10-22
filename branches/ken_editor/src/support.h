@@ -20,6 +20,8 @@
 #ifndef __IMAGINATION_SUPPORT_H
 #define __IMAGINATION_SUPPORT_H
 
+#define PLUGINS_INSTALLED 0
+
 #ifdef HAVE_CONFIG_H
 #  include <config.h>
 #endif
@@ -30,6 +32,7 @@
 #include <math.h>
 #include "imagination.h"
 #include "sexy-icon-entry.h"
+#include "imgcellrendereranim.h"
 
 #ifdef ENABLE_NLS
 #  include <glib/gi18n.h>
@@ -46,7 +49,7 @@
 
 GtkWidget *img_load_icon(gchar *, GtkIconSize );
 gchar *img_convert_seconds_to_time(gint );
-GtkWidget *_gtk_combo_box_new_text(gboolean);
+GtkWidget *_gtk_combo_box_new_text(gint);
 void img_set_statusbar_message(img_window_struct *, gint);
 void img_load_available_transitions(img_window_struct *);
 void img_show_file_chooser(SexyIconEntry *, SexyIconEntryPosition, int, img_window_struct *);
@@ -60,17 +63,20 @@ img_set_slide_file_info( ImgSlide    *slide,
 						 const gchar *filename );
 
 void
-img_set_slide_gradient_info( slide_struct *slide,
-							 gint          gradient,
-							 gdouble      *start_color,
-							 gdouble      *stop_color,
-							 gdouble      *start_point,
-							 gdouble      *stop_point );
+img_set_slide_gradient_info( ImgSlide *slide,
+							 gint      gradient,
+							 ImgColor  start_color,
+							 ImgColor  stop_color,
+							 ImgPoint  start_point,
+							 ImgPoint  stop_point );
 
 void
-img_set_slide_still_info( slide_struct      *slide,
-						  gint               duration,
-						  img_window_struct *img );
+img_slide_set_still_duration( ImgSlide          *slide,
+							  gint               duration,
+							  img_window_struct *img );
+
+gdouble
+img_slide_get_still_duration( ImgSlide  *slide );
 
 void
 img_set_slide_transition_info( slide_struct      *slide,

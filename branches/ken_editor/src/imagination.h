@@ -25,11 +25,12 @@
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
 
-/* Preview frame rate macros */
-#define PREVIEW_FPS_INC     5
-#define PREVIEW_FPS_MIN     5
-#define PREVIEW_FPS_MAX     30
-#define PREVIEW_FPS_DEFAULT 15
+/* Transition preview frame rate. I decided to use 25 fps, which
+ * should be handled on time by most machines. */
+#define PREVIEW_FPS_STEP       5
+#define PREVIEW_FPS_MIN        5
+#define PREVIEW_FPS_NO_PRESETS 6
+#define PREVIEW_FPS_DEFAULT    15
 
 /* The transition speed is defined as a duration in seconds. */
 #define	FAST   1
@@ -68,7 +69,7 @@
 								   ( color ).green, \
 								   ( color ).blue, \
 								   ( color ).alpha )
-	
+
 /* ****************************************************************************
  * Common structures
  * ************************************************************************* */
@@ -90,6 +91,14 @@ struct _ImgColor
 	gdouble green;
 	gdouble blue;
 	gdouble alpha;
+};
+
+/* Simple, cairo compliant point definition */
+typedef struct _ImgPoint ImgPoint;
+struct _ImgPoint
+{
+	gdouble x; /* X coordinate of the point */
+	gdouble y; /* Y coordinate of the point */
 };
 
 
@@ -183,16 +192,13 @@ typedef void (*ImgRender)( cairo_t *,
 typedef struct _ImgStopPoint ImgStopPoint;
 struct _ImgStopPoint
 {
-	gdouble x;          /* Center coordinates of the stop point */
-	gdouble y;
-	gdouble z;          /* Zoom level of this stop point */
-	gdouble bx1;        /* Bezier curve - control point 1 coordinates */
-	gdouble by1;
-	gdouble bx2;        /* Bezier curve - control point 2 coordinates */
-	gdouble by2;
-	gdouble still_time; /* Amount of time that slide stays still */
-	gdouble move_time;  /* Amount of time it takes to get from previous
-						   point to this point */
+	ImgPoint center;     /* Center coordinates of the stop point */
+	gdouble  z;          /* Zoom level of this stop point */
+	ImgPoint b1;         /* Bezier curve - control point 1 coordinates */
+	ImgPoint b2;         /* Bezier curve - control point 2 coordinates */
+	gdouble  still_time; /* Amount of time that slide stays still */
+	gdouble  move_time;  /* Amount of time it takes to get from previous
+							point to this point */
 };
 
 /* ****************************************************************************
@@ -211,10 +217,31 @@ ImgClipboardMode;
 /* ****************************************************************************
  * Slide related definitions
  * ************************************************************************* */
+/* SLIDE TYPES
+ *
+ * Slide storage has benn changed in order to be extansible. Central part of the
+ * slide system now is ImgSlide type, which is a union of all supported slide
+ * types.
+ *
+ * Eachs slide has two important properties:
+ *  - type, which is used to get exact structure type
+ *  - capabilities, which is bitfield mask
+ *
+ * Capabilities can be directly deternimed by inspecting caps filed of ImgSlide
+ * union directly. This has one advantage: procedures which enable/disable parts
+ * of the GUI that supports specific capability can wotk on any slide exactly
+ * the same (no casting is needed to determine the capabilities).
+ *
+ * Type of the slide cannot be directly determined, casting ImgSlide to
+ * ImgSlideAny, we're able to access fields that are common to all slide types.
+ * Currently, those fields are caps and type.
+ *
+ * All other fields should be accessed by castiong ImgSlide to proper type.
+ * Accessor function will most of the time take care of this. */
 /* Slide types */
 typedef enum
 {
-	IMG_SLIDE_TYPE_NONE = 0, /* Slide structure is not initialized yet */
+	IMG_SLIDE_TYPE_ANY = 0,  /* Common subset of all slides */
 	IMG_SLIDE_TYPE_FILE,     /* Slide represents file on disk */
 	IMG_SLIDE_TYPE_GRADIENT, /* Slide is created using gradient definitions */
 	IMG_SLIDE_TYPE_VIDEO     /* Slide represents video clip from disk */
@@ -231,6 +258,15 @@ typedef enum
 }
 ImgSlideCaps;
 
+/* Common subset of all slides */
+#define IMG_SLIDE_ANY_CAPS 0
+typedef struct _ImgSlideAny ImgSlideAny;
+struct _ImgSlideAny
+{
+	ImgSlideCaps caps; /* DO NOT MOVE THIS!!! ALIGNED WITH UNION!!! */
+	ImgSlideType type; /* DO NOT MOVE THIS!!! NEEDED IN ALL SLIDE TYPES!!! */
+};
+
 /* Slide, representing image on disk. */
 #define IMG_SLIDE_FILE_CAPS \
 	( IMG_SLIDE_CAP_SUBTITLE | IMG_SLIDE_CAP_KEN_BURNS | \
@@ -238,8 +274,8 @@ ImgSlideCaps;
 typedef struct _ImgSlideFile ImgSlideFile;
 struct _ImgSlideFile
 {
-	ImgSlideType type; /* DO NOT MOVE THIS!!! ALIGNED WITH UNION!!! */
 	ImgSlideCaps caps; /* DO NOT MOVE THIS!!! ALIGNED WITH UNION!!! */
+	ImgSlideType type; /* DO NOT MOVE THIS!!! NEEDED IN ALL SLIDE TYPES!!! */
 
 	/* File info */
 	gchar    *resolution; /* Image dimensions */
@@ -275,15 +311,15 @@ struct _ImgSlideFile
 typedef struct _ImgSlideGradient ImgSlideGradient;
 struct _ImgSlideGradient
 {
-	ImgSlideType type; /* DO NOT MOVE THIS!!! ALIGNED WITH UNION!!! */
 	ImgSlideCaps caps; /* DO NOT MOVE THIS!!! ALIGNED WITH UNION!!! */
+	ImgSlideType type; /* DO NOT MOVE THIS!!! NEEDED IN ALL SLIDE TYPES!!! */
 
 	/* Gradient parameters */
-	gint    gradient;         /* Gradient type */
-	gdouble g_start_color[3]; /* RGB start color */
-	gdouble g_stop_color[3];  /* RGB stop color */
-	gdouble g_start_point[2]; /* x, y coordinates of start point */
-	gdouble g_stop_point[2];  /* x, y coordinates of stop point */
+	gint     gradient;    /* Gradient type */
+	ImgColor start_color; /* RGB start color */
+	ImgColor stop_color;  /* RGB stop color */
+	ImgPoint start_point; /* x, y coordinates of start point */
+	ImgPoint stop_point;  /* x, y coordinates of stop point */
 
 	/* Still part of the slide params */
 	gdouble still_duration; /* Duration of still part */
@@ -310,8 +346,8 @@ struct _ImgSlideGradient
 typedef struct _ImgSlideVideo ImgSlideVideo;
 struct _ImgSlideVideo
 {
-	ImgSlideType type; /* DO NOT MOVE THIS!!! ALIGNED WITH UNION!!! */
 	ImgSlideCaps caps; /* DO NOT MOVE THIS!!! ALIGNED WITH UNION!!! */
+	ImgSlideType type; /* DO NOT MOVE THIS!!! NEEDED IN ALL SLIDE TYPES!!! */
 
 	/* FIXME: THIS SLIDE TYPE IS NOT IMPLEMENTED RIGHT NOW */
 };
@@ -320,12 +356,12 @@ struct _ImgSlideVideo
 typedef union  _ImgSlide ImgSlide;
 union _ImgSlide
 {
-	ImgSlideType     type;
-	ImgSlideCaps     caps;
+	ImgSlideCaps     caps;     /* Capabilities */
 
-	ImgSlideFile     file;
-	ImgSlideGradient gradient;
-	ImgSlideVideo    video;
+	ImgSlideAny      any;      /* Common fields */
+	ImgSlideFile     file;     /* File slide */
+	ImgSlideGradient gradient; /* Gradient slide */
+	ImgSlideVideo    video;    /* Video slide */
 };
 
 typedef struct _img_window_struct img_window_struct;
@@ -528,6 +564,14 @@ struct _img_window_struct
 	GtkListStore *music_file_liststore;
 	GtkWidget    *music_time_data;
 	GPid          play_child_pid;
+
+	/* Application related stuff */
+	gdouble  image_area_zoom; /* Zoom to be applied to image area */
+	gdouble  overview_zoom;   /* Zoom to be applied in overview mode */
+	gint     preview_fps;     /* Preview frame rate */
+	gboolean low_quality;     /* Preview quality:
+								  TRUE  - preview in low-res
+								  FALSE - preview in hi-res */
 
 	/* Clipboard related stuff */
 	GList            *selected_paths;

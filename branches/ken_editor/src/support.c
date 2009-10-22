@@ -20,8 +20,6 @@
 #include "support.h"
 #include <glib/gstdio.h>
 
-#define PLUGINS_INSTALLED 0
-
 static gboolean img_plugin_is_loaded(img_window_struct *, GModule *);
 
 GtkWidget *img_load_icon(gchar *filename, GtkIconSize size)
@@ -64,14 +62,19 @@ GtkWidget *_gtk_combo_box_new_text(gboolean pointer)
 
 	if (pointer)
 	{
-		tree = gtk_tree_store_new (4, GDK_TYPE_PIXBUF, G_TYPE_STRING, G_TYPE_POINTER, G_TYPE_INT);
+		tree = gtk_tree_store_new( 5, GDK_TYPE_PIXBUF,
+									  G_TYPE_STRING,
+									  G_TYPE_POINTER,
+									  G_TYPE_INT,
+									  GDK_TYPE_PIXBUF_ANIMATION );
 		model = GTK_TREE_MODEL( tree );
 
 		combo_box = gtk_combo_box_new_with_model (model);
 		g_object_unref (G_OBJECT( model ));
-		cell = gtk_cell_renderer_pixbuf_new ();
-		gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (combo_box), cell, FALSE);
-		gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (combo_box), cell, "pixbuf", 0, NULL);
+		cell = img_cell_renderer_anim_new ();
+		gtk_cell_layout_pack_start( GTK_CELL_LAYOUT( combo_box ), cell, FALSE );
+		gtk_cell_layout_add_attribute( GTK_CELL_LAYOUT (combo_box), cell,
+									   "anim", 4 );
 	}
 	else
 	{
@@ -134,37 +137,40 @@ void img_set_statusbar_message(img_window_struct *img_struct, gint selected)
 
 void img_load_available_transitions(img_window_struct *img)
 {
-	GDir          *dir;
-	const gchar   *transition_name;
-	gchar         *fname = NULL, *name, *filename;
-	gchar        **trans, **bak;
-	GModule       *module;
-	GdkPixbuf     *pixbuf;
 	GtkTreeIter    piter, citer;
 	GtkTreeStore  *model;
 	gpointer       address;
-	gchar         *search_paths[3], **path;
-	void (*plugin_set_name)(gchar **, gchar ***);
+	gchar         *search_paths[3],
+				 **path;
 
-	model = GTK_TREE_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(img->transition_type)));
+	model = GTK_TREE_STORE( gtk_combo_box_get_model(
+								GTK_COMBO_BOX( img->transition_type ) ) );
 	
 	/* Fill the combo box with no transition */
-	gtk_tree_store_append(model, &piter, NULL);
-	gtk_tree_store_set(model, &piter, 0, NULL, 1, _("None"), 2, NULL, 3, -1, -1);
-	gtk_combo_box_set_active(GTK_COMBO_BOX(img->transition_type), 0);
+	gtk_tree_store_append( model, &piter, NULL );
+	gtk_tree_store_set( model, &piter, 0, NULL,
+									   1, _("None"),
+									   2, NULL,
+									   3, -1,
+									   4, NULL,
+									   -1);
+	gtk_combo_box_set_active( GTK_COMBO_BOX( img->transition_type ), 0 );
 
 	/* Create NULL terminated array of paths that we'll be looking at */
 #if PLUGINS_INSTALLED
-	search_paths[0] = g_strconcat(PACKAGE_LIB_DIR,"/imagination",NULL);
+	search_paths[0] = g_build_path( PACKAGE_LIB_DIR, "imagination", NULL );
 #else
 	search_paths[0] = g_strdup("./transitions");
 #endif
-	search_paths[1] = g_strconcat( g_get_home_dir(), "/.imagination/plugins", NULL );
+	search_paths[1] = g_build_path( g_get_home_dir(), ".imagination",
+									"plugins", NULL );
 	search_paths[2] = NULL;
 
 	/* Search all paths listed in array */
 	for( path = search_paths; *path; path++ )
 	{
+		GDir *dir;
+
 		dir = g_dir_open( *path, 0, NULL );
 		if( dir == NULL )
 		{
@@ -174,6 +180,11 @@ void img_load_available_transitions(img_window_struct *img)
 		
 		while( TRUE )
 		{
+			const gchar  *transition_name;
+			gchar        *fname = NULL;
+			GModule      *module;
+			void (*plugin_set_name)(gchar **, gchar ***);
+
 			transition_name = g_dir_read_name( dir );
 			if ( transition_name == NULL )
 				break;
@@ -182,6 +193,10 @@ void img_load_available_transitions(img_window_struct *img)
 			module = g_module_open( fname, G_MODULE_BIND_LOCAL );
 			if( module && img_plugin_is_loaded(img, module) == FALSE )
 			{
+				gchar  *name,
+					  **trans,
+					  **bak;
+
 				/* Obtain the name from the plugin function */
 				g_module_symbol( module, "img_get_plugin_info",
 								 (void *)&plugin_set_name);
@@ -195,38 +210,65 @@ void img_load_available_transitions(img_window_struct *img)
 				/* Add transitions */
 				for( bak = trans; *trans; trans += 3 )
 				{
+					gchar              *pix_name,
+									   *anim_name,
+									   *tmp;
+					GdkPixbuf          *pixbuf;
+					GdkPixbufAnimation *anim;
+					gint                id = GPOINTER_TO_INT( trans[2] );
+
 #if PLUGINS_INSTALLED
-					filename =
-						g_strdup_printf( "%s/imagination/pixmaps/imagination-%d.png",
-										 DATADIR, GPOINTER_TO_INT( trans[2] ) );
+					tmp = g_build_filename( DATADIR, "imagination",
+											"pixmaps", NULL );
 #else /* PLUGINS_INSTALLED */
-					filename =
-						g_strdup_printf( "./pixmaps/imagination-%d.png",
-										 GPOINTER_TO_INT( trans[2] ) );
+					tmp = g_strdup( "./pixmaps" );
 #endif /* ! PLUGINS_INSTALLED */
 
-					pixbuf = gdk_pixbuf_new_from_file(filename, NULL);
+					pix_name = g_strdup_printf( "%s%simagination-%d.png",
+												tmp, G_DIR_SEPARATOR_S, id );
+					anim_name = g_strdup_printf( "%s%simagination-%d.gif",
+												 tmp, G_DIR_SEPARATOR_S, id );
+					g_free( tmp );
+
+					pixbuf = gdk_pixbuf_new_from_file( pix_name, NULL );
 
 					/* Local plugins will fail to load images from system
 					 * folder, so we'll try to load the from home folder. */
 					if( ! pixbuf )
 					{
-						g_free( filename );
-						filename =
-							g_strdup_printf( "%s/.imagination/pixmaps/imagination-%d.png",
-											 g_get_home_dir(),
-											 GPOINTER_TO_INT( trans[2] ) );
-						pixbuf = gdk_pixbuf_new_from_file( filename, NULL );
+						g_free( pixbuf );
+						g_free( anim );
+
+						tmp = g_build_filename( g_get_home_dir(),
+												".imagination",
+												"pixmaps",
+												NULL );
+
+						pix_name =
+							g_strdup_printf( "%s%simagination-%d.png",
+											 tmp, G_DIR_SEPARATOR_S, id );
+						anim_name =
+							g_strdup_printf( "%s%simagination-%d.gif",
+											 tmp, G_DIR_SEPARATOR_S, id );
+						g_free( tmp );
+
+						pixbuf = gdk_pixbuf_new_from_file( pix_name, NULL );
 					}
-					g_free( filename );
+					anim = gdk_pixbuf_animation_new_from_file( anim_name,
+															   NULL );
+					g_free( pix_name );
+					g_free( anim_name );
 					g_module_symbol( module, trans[1], &address );
 					gtk_tree_store_append( model, &citer, &piter );
 					gtk_tree_store_set( model, &citer, 0, pixbuf,
 													   1, trans[0],
 													   2, address,
-													   3, GPOINTER_TO_INT( trans[2] ),
+													   3, id,
+													   4, anim,
 													   -1 );
 					img->nr_transitions_loaded++;
+					g_object_unref( G_OBJECT( pixbuf ) );
+					g_object_unref( G_OBJECT( anim ) );
 				}
 				g_free( bak );
 			}
@@ -346,70 +388,128 @@ img_slide_new( ImgSlideType type )
 }
 
 void
-img_set_slide_file_info( slide_struct *slide,
-						 const gchar  *filename )
+img_set_slide_file_info( ImgSlide    *slide,
+						 const gchar *filename )
 {
 	GdkPixbufFormat *format;
 	gint             width,
 					 height;
+	ImgSlideFile    *file;
+
+	g_return_if_fail( slide->type == IMG_SLIDE_TYPE_FILE );
+
+	file = (ImgSlideFile *)slide;
 
 	format = gdk_pixbuf_get_file_info( filename, &width, &height );
 
-	slide->o_filename = g_strdup( filename );
-	slide->r_filename = g_strdup( filename );
-	slide->angle = 0;
+	file->o_filename = g_strdup( filename );
+	file->r_filename = g_strdup( filename );
+	file->angle = 0;
 	
-	slide->resolution = g_strdup_printf( "%d x %d", width, height );
-	slide->type = gdk_pixbuf_format_get_name( format );
+	file->resolution = g_strdup_printf( "%d x %d", width, height );
+	file->image_type = gdk_pixbuf_format_get_name( format );
 }
 
 void
-img_set_slide_gradient_info( slide_struct *slide,
-							 gint          gradient,
-							 gdouble      *start_color,
-							 gdouble      *stop_color,
-							 gdouble      *start_point,
-							 gdouble      *stop_point )
+img_set_slide_gradient_info( ImgSlide *slide,
+							 gint      gradient,
+							 ImgColor  start_color,
+							 ImgColor  stop_color,
+							 ImgColor  start_point,
+							 ImgColor  stop_point )
 {
-	gint i;
+	ImSlideGradient *grad;
 
-	slide->gradient = gradient;
-	for( i = 0; i < 3; i++ )
-	{
-		slide->g_start_color[i] = start_color[i];
-		slide->g_stop_color[i]  = stop_color[i];
-	}
-	for( i = 0; i < 2; i++ )
-	{
-		slide->g_start_point[i] = start_point[i];
-		slide->g_stop_point[i]  = stop_point[i];
-	}
+	g_return_if_fail( slide->type == IMG_SLIDE_TYPE_GRADIENT );
+
+	grad = (ImgSlideGradient *)slide;
+
+	grad->gradient     = gradient;
+	grad->start_color  = start_color;
+	grad->stop_color   = stop_color;
+	slide->start_point = start_point;
+	slide->stop_point  = stop_point;
 }
 
 void
-img_set_slide_still_info( slide_struct      *slide,
-						  gint               duration,
-						  img_window_struct *img )
+img_slide_set_still_duration( ImgSlide          *slide,
+							  gdouble            duration,
+							  img_window_struct *img )
 {
-	if( slide->duration != duration )
-	{
-		slide->duration = duration;
+	gboolean flag = FALSE;
 
-		if( ! img->total_dur_id )
-			img->total_dur_id =
-				g_idle_add( (GSourceFunc)img_set_total_slideshow_duration, img );
+	switch( slide->type )
+	{
+		case IMG_SLIDE_TYPE_FILE:
+			{
+				ImgSlideFile *file = (ImgSlideFile *)slide;
+				
+				if( file->still_duration != duration )
+				{
+					file->still_duration = duration;
+					flag = TRUE;
+				}
+			}
+			break;
+
+		case IMG_SLIDE_TYPE_GRADIENT:
+			{
+				ImgSlideGradient *grad = (ImgSlideGradient *)slide;
+				
+				if( grad->still_duration != duration )
+				{
+					grad->still_duration = duration;
+					flag = TRUE;
+				}
+			}
+			break;
+
+		default:
+			return;
+			break;
+	}
+
+	if( ! img->total_dur_id && flag )
+		img->total_dur_id =
+			g_idle_add( (GSourceFunc)img_set_total_slideshow_duration, img );
+}
+
+gdouble
+img_slide_get_still_duration( ImgSlide *slide )
+{
+	switch( slide->type )
+	{
+		case IMG_SLIDE_TYPE_FILE:
+			{
+				ImgSlideFile *file = (ImgSlideFile *)slide;
+
+				return( file->still_duration );
+			}
+			break;
+
+		case IMG_SLIDE_TYPE_GRADIENT:
+			{
+				ImgSlideGradient *grad = (ImgSlideGradient *)slide;
+
+				return( grad->still_duration );
+			}
+			break;
+
+		default:
+			return( 0.0 );
+			break;
 	}
 }
 
 void
-img_set_slide_transition_info( slide_struct      *slide,
+img_slide_set_trans_transition( ImgSlide          *slide,
 							   GtkListStore      *store,
 							   GtkTreeIter       *iter,
 							   GdkPixbuf         *pix,
 							   const gchar       *path,
 							   gint               transition_id,
 							   ImgRender          render,
-							   guint              speed,
+							   gdouble            speed,
 							   img_window_struct *img )
 {
 	/* Set transition render. */
@@ -425,7 +525,7 @@ img_set_slide_transition_info( slide_struct      *slide,
 		gtk_list_store_set( store, iter, 2, pix, -1 );
 	}
 
-	if( speed && ( slide->speed != speed ) )
+	if( speed > 0 && ( slide->speed != speed ) )
 	{
 		slide->speed = speed;
 
@@ -572,7 +672,7 @@ img_set_total_slideshow_duration( img_window_struct *img )
 {
 	gchar        *time;
 	GtkTreeIter   iter;
-	slide_struct *entry;
+	ImgSlide     *slide;
 	GtkTreeModel *model;
 
 	img->total_secs = 0;
@@ -582,11 +682,9 @@ img_set_total_slideshow_duration( img_window_struct *img )
 	{
 		do
 		{
-			gtk_tree_model_get( model, &iter, 1, &entry, -1 );
-			img->total_secs += entry->duration;
-			
-			if(entry->render)
-				img->total_secs += entry->speed;
+			gtk_tree_model_get( model, &iter, 1, &slide, -1 );
+			img->total_secs += img_slide_get_still_duration;
+			img->total_secs += img_slide_get_trans_duration;
 		}
 		while( gtk_tree_model_iter_next( model, &iter ) );
 
