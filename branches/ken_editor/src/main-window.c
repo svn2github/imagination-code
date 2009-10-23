@@ -38,11 +38,11 @@ static const GtkTargetEntry drop_targets[] =
  * ************************************************************************* */
 static void img_combo_box_transition_type_changed (GtkComboBox *, img_window_struct *);
 static void img_random_button_clicked(GtkButton *, img_window_struct *);
-static GdkPixbuf *img_set_random_transition(img_window_struct *, slide_struct *);
+static GdkPixbuf *img_set_random_transition(img_window_struct *, ImgSlide *);
 static void img_combo_box_speed_changed (GtkComboBox *,  img_window_struct *);
 static void img_spinbutton_value_changed (GtkSpinButton *, img_window_struct *);
 static void img_slide_cut(GtkMenuItem * , img_window_struct *);
-static void img_slide_copy(GtkMenuItem * , img_window_struct *);
+static void img_copy_slide(GtkMenuItem * , img_window_struct *);
 static void img_slide_paste(GtkMenuItem* , img_window_struct *);
 static void img_report_slides_transitions(img_window_struct *);
 static void img_clear_audio_files(GtkButton *, img_window_struct *);
@@ -183,25 +183,26 @@ img_window_struct *img_create_window (void)
 	img_struct = g_new0(img_window_struct, 1);
 
 	/* Set some default values */
-	img_struct->background_color[0] = 0;
-	img_struct->background_color[1] = 0;
-	img_struct->background_color[2] = 0;
+	img_struct->background_color.red   = 0;
+	img_struct->background_color.green = 0;
+	img_struct->background_color.blue  = 0;
 	img_struct->slides_nr = 0;
 	img_struct->distort_images = TRUE;
 
+#if 0
 	img_struct->maxoffx = 0;
 	img_struct->maxoffy = 0;
 	img_struct->current_point.offx = 0;
 	img_struct->current_point.offy = 0;
 	img_struct->current_point.zoom = 1;
+#endif
 
 	img_struct->video_size[0] = 720;
 	img_struct->video_size[1] = 576;
 	img_struct->video_ratio = (gdouble)720 / 576;
 
-	img_struct->final_transition.duration = 0;
 	img_struct->final_transition.render = NULL;
-	img_struct->final_transition.speed = NORMAL;
+	img_struct->final_transition.trans_duration = NORMAL;
 
 
 	/* GUI STUFF */
@@ -317,7 +318,7 @@ img_window_struct *img_create_window (void)
 
 	img_struct->copy = gtk_image_menu_item_new_from_stock (GTK_STOCK_COPY, img_struct->accel_group);
 	gtk_container_add (GTK_CONTAINER (slide_menu), img_struct->copy);
-	g_signal_connect (G_OBJECT (img_struct->copy), "activate", G_CALLBACK (img_slide_copy), img_struct);
+	g_signal_connect (G_OBJECT (img_struct->copy), "activate", G_CALLBACK (img_copy_slide), img_struct);
 
 	img_struct->paste = gtk_image_menu_item_new_from_stock (GTK_STOCK_PASTE, img_struct->accel_group);
 	gtk_container_add (GTK_CONTAINER (slide_menu), img_struct->paste);
@@ -1383,7 +1384,7 @@ static void img_slide_cut(GtkMenuItem* item, img_window_struct *img)
 	img_clipboard_cut_copy_operation(img, IMG_CLIPBOARD_CUT);
 }
 
-static void img_slide_copy(GtkMenuItem* item, img_window_struct *img)
+static void img_copy_slide(GtkMenuItem* item, img_window_struct *img)
 {
 	img_clipboard_cut_copy_operation(img, IMG_CLIPBOARD_COPY);
 }
@@ -1398,7 +1399,7 @@ static void img_slide_paste(GtkMenuItem* item, img_window_struct *img)
 	gchar *total_slides = NULL;
 	GdkPixbuf *thumb, *trans;
 	gboolean   has_sub;
-	slide_struct *pasted_slide, *info_slide;
+	ImgSlide *pasted_slide, *info_slide;
 	gint pos;
 
 	clipboard = gtk_clipboard_get(IMG_CLIPBOARD);
@@ -1440,41 +1441,10 @@ static void img_slide_paste(GtkMenuItem* item, img_window_struct *img)
 				g_object_unref( G_OBJECT( trans ) );
 
 			/* Create new slide that is exact copy of rpevious one */
-			pasted_slide = g_slice_copy( sizeof( slide_struct ), info_slide );
+			pasted_slide = img_slide_copy( info_slide );
 
 			if (pasted_slide)
 			{
-				/* Fill fields with fresh strings, since g_slice_copy cannot do
-				 * that for us. */
-				pasted_slide->o_filename = g_strdup(info_slide->o_filename);
-				pasted_slide->r_filename = g_strdup(info_slide->r_filename);
-				pasted_slide->resolution = g_strdup(info_slide->resolution);
-				pasted_slide->type = g_strdup(info_slide->type);
-				pasted_slide->path = g_strdup(info_slide->path);
-
-				/* Stop Points also need to copied by hand. */
-				if (info_slide->no_points)
-				{
-					GList *dummy_pnt = info_slide->points;
-					ImgStopPoint *point;
-
-					pasted_slide->points = NULL;
-					while (dummy_pnt)
-					{
-						point = g_slice_copy( sizeof( ImgStopPoint ),
-											  dummy_pnt->data );
-						pasted_slide->points = g_list_append(pasted_slide->points, point);
-						dummy_pnt = dummy_pnt->next;
-					}
-				}
-
-				/* Text should be duplicated if present. Font descripštion
-				 * should also be copied!! */
-				if (info_slide->subtitle)
-					pasted_slide->subtitle = g_strdup(info_slide->subtitle);
-				pasted_slide->font_desc =
-						pango_font_description_copy( info_slide->font_desc );
-
 				pos = gtk_tree_path_get_indices(where_to_paste->data)[0]+1;
 				gtk_list_store_insert_with_values(
 						GTK_LIST_STORE( model ), &iter, pos,
@@ -1483,8 +1453,6 @@ static void img_slide_paste(GtkMenuItem* item, img_window_struct *img)
 						 						 2, trans,
 						 						 3, has_sub,
 						 						 -1 );
-				
-				/* Let's update the total number of slides and the label in toolbar */
 				img->slides_nr++;
 			}
 
@@ -1596,15 +1564,20 @@ static void img_quit_menu(GtkMenuItem *menuitem, img_window_struct *img)
 		gtk_main_quit();
 }
 
-void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *img)
+void
+img_iconview_selection_changed( GtkIconView       *iconview,
+								img_window_struct *img )
 {
+	/* FIXME: This function needs total re-write to make use of slide
+	 * capabilities (now even transition combo box can be disabled event if the
+	 * slide is selected) */
 	GtkTreeModel *model;
 	GtkTreeIter iter;
 	GtkTreePath *path = NULL;
 	gint dummy, nr_selected = 0;
 	GList *selected = NULL;
 	gchar *slide_info_msg = NULL, *selected_slide_nr = NULL;
-	slide_struct *info_slide;
+	ImgSlide *info_slide;
 
 	if (img->preview_is_running || img->export_is_running)
 		return;
@@ -1660,14 +1633,12 @@ void img_iconview_selection_changed(GtkIconView *iconview, img_window_struct *im
 	gtk_tree_model_get(model,&iter,1,&info_slide,-1);
 	img->current_slide = info_slide;
 
-	/* Set the transition type */
-	model = gtk_combo_box_get_model(GTK_COMBO_BOX(img->transition_type));
-
 	/* Block "changed" signal from model to avoid rewriting the same value back into current slide. */
 	g_signal_handlers_block_by_func((gpointer)img->transition_type, (gpointer)img_combo_box_transition_type_changed, img);
 	{
 		GtkTreeIter   iter;
 		GtkTreeModel *model;
+		gchar const  *path;
 
 		model = gtk_combo_box_get_model( GTK_COMBO_BOX( img->transition_type ) );
 		gtk_tree_model_get_iter_from_string( model, &iter, info_slide->path );

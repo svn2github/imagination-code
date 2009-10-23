@@ -58,17 +58,11 @@
 	( gdk_color ).green = (guint16)( img_color ).green * 0xffff; \
 	( gdk_color ).blue  = (guint16)( img_color ).blue  * 0xffff
 
-/* Set cairo source to specific color */
-#define IMG_CAIRO_SET_SOURCE_RGB( cr, color ) \
-	cairo_set_source_rgb( ( cr ), ( color ).red, \
-								  ( color ).green, \
-								  ( color ).blue )
-
-#define IMG_CAIRO_SET_SOURCE_RGBA( cr, color ) \
-	cairo_set_source_rgba( ( cr ), ( color ).red, \
-								   ( color ).green, \
-								   ( color ).blue, \
-								   ( color ).alpha )
+/* Convenience macros to convert ImgColor into parameters for cairo */
+#define IC_TO_RGB( color ) \
+	( color ).red, ( color ).green, ( color ).blue
+#define IC_TO_RGBA( color ) \
+	( color ).red, ( color ).green, ( color ).blue, ( color ).alpha
 
 /* ****************************************************************************
  * Common structures
@@ -166,7 +160,7 @@ typedef void (*TextAnimationFunc)( cairo_t     *cr,
 typedef struct _ImgSubtitle ImgSubtitle;
 struct _ImgSubtitle
 {
-	gchar                *subtitle;      /* Subtitle text */
+	gchar                *text;          /* Subtitle text */
 	TextAnimationFunc     anim;          /* Animation functions */
 	gint                  anim_id;       /* Animation id */
 	gdouble               anim_duration; /* Duration of animation */
@@ -199,6 +193,7 @@ struct _ImgStopPoint
 	gdouble  still_time; /* Amount of time that slide stays still */
 	gdouble  move_time;  /* Amount of time it takes to get from previous
 							point to this point */
+	gboolean smooth;     /* Is Bezier curve on? */
 };
 
 /* ****************************************************************************
@@ -238,10 +233,24 @@ ImgClipboardMode;
  *
  * All other fields should be accessed by castiong ImgSlide to proper type.
  * Accessor function will most of the time take care of this. */
+
+/* Type accessor */
+#define IMG_SLIDE_GET_TYPE( slide ) \
+	( ( (ImgSlideAny *)slide )->type )
+
+/* Slide type test macros */
+#define IMG_SLIDE_IS_TYPE_FILE( slide ) \
+	( IMG_SLIDE_GET_TYPE( slide ) == IMG_SLIDE_TYPE_FILE )
+#define IMG_SLIDE_IS_TYPE_GRADIENT( slide ) \
+	( IMG_SLIDE_GET_TYPE( slide ) == IMG_SLIDE_TYPE_GRADIENT )
+#define IMG_SLIDE_IS_TYPE_VIDEO( slide ) \
+	( IMG_SLIDE_GET_TYPE( slide ) == IMG_SLIDE_TYPE_VIDEO )
+
 /* Slide types */
 typedef enum
 {
 	IMG_SLIDE_TYPE_ANY = 0,  /* Common subset of all slides */
+	IMG_SLIDE_TYPE_PSEUDO,   /* Slide of this kind only holds transition info */
 	IMG_SLIDE_TYPE_FILE,     /* Slide represents file on disk */
 	IMG_SLIDE_TYPE_GRADIENT, /* Slide is created using gradient definitions */
 	IMG_SLIDE_TYPE_VIDEO     /* Slide represents video clip from disk */
@@ -251,10 +260,12 @@ ImgSlideType;
 /* Slide capabilities (bitmask) */
 typedef enum
 {
-	IMG_SLIDE_CAP_SUBTITLE  = 1 << 0, /* Slide can have subtitles */
-	IMG_SLIDE_CAP_KEN_BURNS = 1 << 1, /* Slide can have Ken Burns effect */
-	IMG_SLIDE_CAP_CLIP_ART  = 1 << 2, /* Slide can have clip art added */
-	IMG_SLIDE_CAP_ROTATE    = 1 << 3  /* Slide can be rotated */
+	IMG_SLIDE_CAP_SUBTITLE   = 1 << 0, /* Slide can have subtitles */
+	IMG_SLIDE_CAP_KEN_BURNS  = 1 << 1, /* Slide can have Ken Burns effect */
+	IMG_SLIDE_CAP_CLIP_ART   = 1 << 2, /* Slide can have clip art added */
+	IMG_SLIDE_CAP_ROTATE     = 1 << 3, /* Slide can be rotated */
+	IMG_SLIDE_CAP_TRANSITION = 1 << 4, /* Slide can have transition applied */
+	IMG_SLIDE_CAP_DURATION   = 1 << 5  /* Slide can have duration modified */
 }
 ImgSlideCaps;
 
@@ -267,10 +278,27 @@ struct _ImgSlideAny
 	ImgSlideType type; /* DO NOT MOVE THIS!!! NEEDED IN ALL SLIDE TYPES!!! */
 };
 
+/* Pseudo slide */
+#define IMG_SLIDE_PSEUDO_CAPS \
+	( IMG_SLIDE_CAP_TRANSITION )
+typedef struct _ImgSlidePseudo ImgSlidePseudo;
+struct _ImgSlidePseudo
+{
+	ImgSlideCaps caps; /* DO NOT MOVE THIS!!! ALIGNED WITH UNION!!! */
+	ImgSlideType type; /* DO NOT MOVE THIS!!! NEEDED IN ALL SLIDE TYPES!!! */
+
+	/* Transition params */
+	gchar     *path;           /* Transition model path to transition */
+	gint       transition_id;  /* Transition id */
+	ImgRender  render;         /* Transition render function */
+	gdouble    trans_duration; /* Transition duration */
+};
+
 /* Slide, representing image on disk. */
 #define IMG_SLIDE_FILE_CAPS \
 	( IMG_SLIDE_CAP_SUBTITLE | IMG_SLIDE_CAP_KEN_BURNS | \
-	  IMG_SLIDE_CAP_CLIP_ART | IMG_SLIDE_CAP_ROTATE )
+	  IMG_SLIDE_CAP_CLIP_ART | IMG_SLIDE_CAP_ROTATE | \
+	  IMG_SLICE_CAP_TRANSITION | IMG_SLIDE_CAP_DURATION )
 typedef struct _ImgSlideFile ImgSlideFile;
 struct _ImgSlideFile
 {
@@ -291,7 +319,7 @@ struct _ImgSlideFile
 	gchar     *path;           /* Transition model path to transition */
 	gint       transition_id;  /* Transition id */
 	ImgRender  render;         /* Transition render function */
-	guint      trans_duration; /* Transition duration */
+	gdouble    trans_duration; /* Transition duration */
 
 	/* Ken Burns effect points */
 	GList *points;    /* List with stop points */
@@ -307,7 +335,8 @@ struct _ImgSlideFile
 /* Slide, representing in-memory gradient slide. */
 #define IMG_SLIDE_GRADIENT_CAPS \
 	( IMG_SLIDE_CAP_SUBTITLE | IMG_SLIDE_CAP_KEN_BURNS | \
-	  IMG_SLIDE_CAP_CLIP_ART )
+	  IMG_SLIDE_CAP_CLIP_ART | IMG_SLIDE_CAP_TRANSITION | \
+	  IMG_SLIDE_CAP_DURATION )
 typedef struct _ImgSlideGradient ImgSlideGradient;
 struct _ImgSlideGradient
 {
@@ -452,13 +481,6 @@ struct _img_window_struct
 	ImgStopPoint    *current_point;   /* Data for rendering current image */
   	ImgSlide        *current_slide;   /* Currently displayed slide */
 	cairo_surface_t *current_image;   /* Image in preview area */
-	gdouble          image_area_zoom; /* Zoom to be applied to image area */
-	gdouble          overview_zoom;   /* Zoom to be applied in overview mode */
-	gint             preview_fps;     /* Preview frame rate */
-	gboolean         low_quality;     /* Preview quality:
-											TRUE  - preview in low-res
-											FALSE - preview in hi-res */
-
 	
 	/* Update ids */
 	guint subtitle_update_id; /* Update subtitle display */
@@ -478,7 +500,9 @@ struct _img_window_struct
   	gdouble   total_secs;          /* Total slideshow duration */
 	gdouble   total_music_secs;    /* Total music duration */
   	gint      slides_nr;           /* Total number of slides */
-	ImgSlide  final_transition;    /* Last pseudo slide - bye-bye transition */
+
+	/* Bye-bye transition */
+	ImgSlidePseudo final_transition; /* Last pseudo slide */
 
 	/* Variables common to export and preview functions */
 	ImgSlide        *work_slide1;    /* Slide that starts transition */

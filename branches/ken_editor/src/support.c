@@ -310,363 +310,6 @@ void img_show_file_chooser(SexyIconEntry *entry, SexyIconEntryPosition icon_pos,
 	gtk_widget_destroy(file_selector);
 }
 
-/*
- * img_slide_new
- * @type: type of the slide that should be created
- *
- * Creates new slide, filled with default values.
- *
- * Return value: newly allocated ImgSlide. Free this with img_slide_free().
- */
-ImgSlide *
-img_slide_new( ImgSlideType type )
-{
-	ImgSlide *slide = NULL;
-
-	slide = g_slice_new0( ImgSlide );
-	if( ! slide )
-		return( NULL );
-
-	/* Populate slide with default values */
-	slide->type = type;
-	switch( type )
-	{
-		case IMG_SLIDE_TYPE_FILE:
-			{
-				ImgSlideFile *file = (ImgSlideFile *)slide;
-				
-				/* Capabilities */
-				file->caps = IMG_SLIDE_FILE_CAPS;
-
-				/* Still part */
-				file->still_duration = 1.0;
-				
-				/* Transition */
-				file->path = g_strdup( "0" );
-				file->transition_id = -1;
-				file->speed = NORMAL;
-				
-				/* Ken Burns */
-				file->cur_point = -1;
-
-				/* Subtitles */
-				file->cur_sub = -1;
-			}
-			break;
-
-		case IMG_SLIDE_TYPE_GRADIENT:
-			{
-				ImgSlideGradient *grad = (ImgSlideGradient *)slide;
-
-				/* Capabilities */
-				file->caps = IMG_SLIDE_GRADIENT_CAPS;
-
-				/* Still part */
-				file->still_duration = 1.0;
-				
-				/* Transition */
-				file->path = g_strdup( "0" );
-				file->transition_id = -1;
-				file->speed = NORMAL;
-				
-				/* Ken Burns */
-				file->cur_point = -1;
-
-				/* Subtitles */
-				file->cur_sub = -1;
-			}
-			break;
-
-		case IMG_SLIDE_TYPE_VIDEO:
-			{
-				ImgSlideVideo *video = (ImgSlideVideo *)slide;
-			}
-			break;
-	}
-
-	return( slide );
-}
-
-void
-img_set_slide_file_info( ImgSlide    *slide,
-						 const gchar *filename )
-{
-	GdkPixbufFormat *format;
-	gint             width,
-					 height;
-	ImgSlideFile    *file;
-
-	g_return_if_fail( slide->type == IMG_SLIDE_TYPE_FILE );
-
-	file = (ImgSlideFile *)slide;
-
-	format = gdk_pixbuf_get_file_info( filename, &width, &height );
-
-	file->o_filename = g_strdup( filename );
-	file->r_filename = g_strdup( filename );
-	file->angle = 0;
-	
-	file->resolution = g_strdup_printf( "%d x %d", width, height );
-	file->image_type = gdk_pixbuf_format_get_name( format );
-}
-
-void
-img_set_slide_gradient_info( ImgSlide *slide,
-							 gint      gradient,
-							 ImgColor  start_color,
-							 ImgColor  stop_color,
-							 ImgColor  start_point,
-							 ImgColor  stop_point )
-{
-	ImSlideGradient *grad;
-
-	g_return_if_fail( slide->type == IMG_SLIDE_TYPE_GRADIENT );
-
-	grad = (ImgSlideGradient *)slide;
-
-	grad->gradient     = gradient;
-	grad->start_color  = start_color;
-	grad->stop_color   = stop_color;
-	slide->start_point = start_point;
-	slide->stop_point  = stop_point;
-}
-
-void
-img_slide_set_still_duration( ImgSlide          *slide,
-							  gdouble            duration,
-							  img_window_struct *img )
-{
-	gboolean flag = FALSE;
-
-	switch( slide->type )
-	{
-		case IMG_SLIDE_TYPE_FILE:
-			{
-				ImgSlideFile *file = (ImgSlideFile *)slide;
-				
-				if( file->still_duration != duration )
-				{
-					file->still_duration = duration;
-					flag = TRUE;
-				}
-			}
-			break;
-
-		case IMG_SLIDE_TYPE_GRADIENT:
-			{
-				ImgSlideGradient *grad = (ImgSlideGradient *)slide;
-				
-				if( grad->still_duration != duration )
-				{
-					grad->still_duration = duration;
-					flag = TRUE;
-				}
-			}
-			break;
-
-		default:
-			return;
-			break;
-	}
-
-	if( ! img->total_dur_id && flag )
-		img->total_dur_id =
-			g_idle_add( (GSourceFunc)img_set_total_slideshow_duration, img );
-}
-
-gdouble
-img_slide_get_still_duration( ImgSlide *slide )
-{
-	switch( slide->type )
-	{
-		case IMG_SLIDE_TYPE_FILE:
-			{
-				ImgSlideFile *file = (ImgSlideFile *)slide;
-
-				return( file->still_duration );
-			}
-			break;
-
-		case IMG_SLIDE_TYPE_GRADIENT:
-			{
-				ImgSlideGradient *grad = (ImgSlideGradient *)slide;
-
-				return( grad->still_duration );
-			}
-			break;
-
-		default:
-			return( 0.0 );
-			break;
-	}
-}
-
-void
-img_slide_set_trans_transition( ImgSlide          *slide,
-							   GtkListStore      *store,
-							   GtkTreeIter       *iter,
-							   GdkPixbuf         *pix,
-							   const gchar       *path,
-							   gint               transition_id,
-							   ImgRender          render,
-							   gdouble            speed,
-							   img_window_struct *img )
-{
-	/* Set transition render. */
-	if( path && ( slide->transition_id != transition_id ) )
-	{
-		if( slide->path )
-			g_free( slide->path );
-
-		slide->path = g_strdup( path );
-		slide->transition_id = transition_id;
-		slide->render = render;
-
-		gtk_list_store_set( store, iter, 2, pix, -1 );
-	}
-
-	if( speed > 0 && ( slide->speed != speed ) )
-	{
-		slide->speed = speed;
-
-		if( ! img->total_dur_id )
-			img->total_dur_id =
-				g_idle_add( (GSourceFunc)img_set_total_slideshow_duration, img );
-	}
-}
-
-void
-img_set_slide_ken_burns_info( slide_struct *slide,
-							  gint          cur_point,
-							  gsize         length,
-							  gdouble      *points )
-{
-	ImgStopPoint *point;
-	gint          i,
-				  full;
-
-	if( slide->no_points )
-	{
-		g_list_free( slide->points );
-		slide->no_points = 0;
-	}
-
-	for( i = 0; i < length; i += 4 )
-	{
-		/* Create new point */
-		point = g_slice_new( ImgStopPoint );
-		point->time = (gint)( points[0 + i] + 0.5 );
-		point->offx = points[1 + i];
-		point->offy = points[2 + i];
-		point->zoom = points[3 + i];
-		
-		/* Append it to the list */
-		slide->points = g_list_append( slide->points, point );
-		slide->no_points++;
-	}
-
-	slide->cur_point = CLAMP( cur_point, -1, slide->no_points - 1 );
-
-	full = img_calc_slide_duration_points( slide->points,
-										   slide->no_points );
-	if( full )
-		slide->duration = full;
-}
-
-void
-img_set_slide_text_info( slide_struct      *slide,
-						 GtkListStore      *store,
-						 GtkTreeIter       *iter,
-						 const gchar       *subtitle,
-						 gint	            anim_id,
-						 gint               anim_duration,
-						 gint               position,
-						 gint               placing,
-						 const gchar       *font_desc,
-						 gdouble           *font_color,
-						 img_window_struct *img )
-{
-	/* Set the slide text info parameters */
-	if( store && iter )
-	{
-		gboolean flag;
-
-		if( slide->subtitle )
-			g_free( slide->subtitle );
-		slide->subtitle = g_strdup( subtitle );
-
-		flag = ( subtitle ? TRUE : FALSE );
-		gtk_list_store_set( store, iter, 3, flag, -1 );
-	}
-
-	if( ( anim_id > -1 ) && ( anim_id != slide->anim_id ) )
-	{
-		GtkTreeModel *model;
-		gchar        *path;
-		GtkTreeIter   iter;
-
-		path = g_strdup_printf( "%d", anim_id );
-		model = gtk_combo_box_get_model( GTK_COMBO_BOX( img->sub_anim ) );
-		gtk_tree_model_get_iter_from_string( model, &iter, path );
-		g_free( path );
-
-		slide->anim_id = anim_id;
-		gtk_tree_model_get( model, &iter, 1, &slide->anim, -1 );
-
-		/* Sync timings */
-		img_sync_timings( slide, img );
-	}
-
-	if( ( anim_duration > 0 ) && ( anim_duration != slide->anim_duration ) )
-	{
-		slide->anim_duration = anim_duration;
-
-		/* Synchronize timings */
-		img_sync_timings( slide, img );
-	}
-
-	if( ( position > -1 ) && ( position != slide->position ) )
-		slide->position = position;
-
-	if( ( placing > -1 ) && ( placing != slide->placing ) )
-		slide->placing = placing;
-
-	if( font_desc )
-	{
-		if( slide->font_desc )
-			pango_font_description_free( slide->font_desc );
-		slide->font_desc = pango_font_description_from_string( font_desc );
-	}
-
-	if( font_color )
-	{
-		slide->font_color[0] = font_color[0];
-		slide->font_color[1] = font_color[1];
-		slide->font_color[2] = font_color[2];
-		slide->font_color[3] = font_color[3];
-	}
-}								
-
-void
-img_free_slide_struct( slide_struct *entry )
-{
-	GList *tmp;
-
-	if( entry->angle != ANGLE_0 )
-		g_unlink( entry->r_filename );
-	g_free(entry->o_filename);
-	g_free(entry->r_filename);
-	g_free(entry->resolution);
-	g_free(entry->type);
-	
-	/* Free stop point list */
-	for( tmp = entry->points; tmp; tmp = g_list_next( tmp ) )
-		g_slice_free( ImgStopPoint, tmp->data );
-	g_list_free( entry->points );
-
-	g_slice_free( slide_struct, entry );
-}
-
 gboolean
 img_set_total_slideshow_duration( img_window_struct *img )
 {
@@ -682,15 +325,19 @@ img_set_total_slideshow_duration( img_window_struct *img )
 	{
 		do
 		{
+			gdouble tmp;
+
 			gtk_tree_model_get( model, &iter, 1, &slide, -1 );
-			img->total_secs += img_slide_get_still_duration;
-			img->total_secs += img_slide_get_trans_duration;
+			if( img_slide_get_still_duration( slide, &tmp ) )
+				img->total_secs += tmp;
+			if( img_slide_get_transition_info( slide, NULL, NULL, NULL, &tmp ) )
+				img->total_secs += tmp;
 		}
 		while( gtk_tree_model_iter_next( model, &iter ) );
 
 		/* Add time of last pseudo slide */
 		if( img->final_transition.render )
-			img->total_secs += img->final_transition.speed;
+			img->total_secs += img->final_transition.trans_duration;
 	}
 		
 	time = img_convert_seconds_to_time(img->total_secs);
@@ -700,28 +347,6 @@ img_set_total_slideshow_duration( img_window_struct *img )
 	/* This is here only to be able to add this to idle source. */
 	img->total_dur_id = 0;
 	return( FALSE );
-}
-
-gint
-img_calc_slide_duration_points( GList *list,
-								gint   length )
-{
-	GList        *tmp;
-	gint          i, duration = 0;
-	ImgStopPoint *point;
-
-	/* If we have no points, return 0 */
-	if( length == 0 )
-		return( 0 );
-
-	/* Calculate length */
-	for( tmp = list, i = 0; i < length; tmp = g_list_next( tmp ), i++ )
-	{
-		point = (ImgStopPoint *)tmp->data;
-		duration += point->time;
-	}
-
-	return( duration );
 }
 
 /*
@@ -744,7 +369,7 @@ img_scale_image( const gchar      *filename,
 				 gint              width,
 				 gint              height,
 				 gboolean          distort,
-				 gdouble          *color,
+				 ImgColor         *color,
 				 GdkPixbuf       **pixbuf,
 				 cairo_surface_t **surface )
 {
@@ -900,9 +525,9 @@ img_scale_image( const gchar      *filename,
 		GdkPixbuf *tmp_pix;   /* Pixbuf used for loading */
 		guint32    tmp_color; /* Background color */
 
-		tmp_color = ( (gint)( color[0] * 0xff ) << 24 ) |
-					( (gint)( color[1] * 0xff ) << 16 ) |
-					( (gint)( color[2] * 0xff ) <<  8 );
+		tmp_color = ( (gint)( color->red   * 0xff ) << 24 ) |
+					( (gint)( color->green * 0xff ) << 16 ) |
+					( (gint)( color->blue  * 0xff ) <<  8 );
 		tmp_pix = gdk_pixbuf_new( GDK_COLORSPACE_RGB, FALSE, 8, width, height );
 		gdk_pixbuf_fill( tmp_pix, tmp_color );
 		gdk_pixbuf_composite( loader, tmp_pix,
@@ -932,7 +557,7 @@ img_scale_image( const gchar      *filename,
 		if( ! transform )
 		{
 			/* Fill with background color */
-			cairo_set_source_rgb( cr, color[0], color[1], color[2] );
+			cairo_set_source_rgb( cr, IC_TO_RGB( *color ) );
 			cairo_paint( cr );
 		}
 		
@@ -964,36 +589,6 @@ img_set_project_mod_state( img_window_struct *img,
 	/* FIXME: Do any updates here (add "*" to window title, ...). */
 }
 
-void
-img_sync_timings( slide_struct      *slide,
-				  img_window_struct *img )
-{
-	/* If times are already synchronized, return */
-	if( slide->duration >= slide->anim_duration )
-		return;
-
-	/* Do the right thing;) */
-	if( slide->no_points )
-	{
-		gint          diff;
-		ImgStopPoint *point;
-
-		/* Calculate difference that we need to accomodate */
-		diff = slide->anim_duration - slide->duration;
-
-		/* Elongate last point */
-		point = (ImgStopPoint *)g_list_last( slide->points )->data;
-		point->time += diff;
-		
-		/* Update Ken Burns display */
-		gtk_spin_button_set_value( GTK_SPIN_BUTTON( img->ken_duration ),
-								   point->time );
-	}
-
-	/* Update display */
-	gtk_spin_button_set_value( GTK_SPIN_BUTTON( img->duration ),
-							   slide->anim_duration );
-}
 
 void img_select_nth_slide(img_window_struct *img, gint slide_to_select)
 {
@@ -1048,10 +643,10 @@ img_convert_surface_to_pixbuf( cairo_surface_t *surface )
 
 gboolean
 img_scale_gradient( gint              gradient,
-					gdouble          *p_start,
-					gdouble          *p_stop,
-					gdouble          *c_start,
-					gdouble          *c_stop,
+					ImgPoint         *p_start,
+					ImgPoint         *p_stop,
+					ImgColor         *c_start,
+					ImgColor         *c_stop,
 					gint              width,
 					gint              height,
 					GdkPixbuf       **pixbuf,
@@ -1068,37 +663,33 @@ img_scale_gradient( gint              gradient,
 	switch( gradient )
 	{
 		case 0: /* Solid color */
-			cairo_set_source_rgb( cr, c_start[0], c_start[1], c_start[2] );
+			cairo_set_source_rgb( cr, IC_TO_RGB( *c_start ) );
 			cairo_paint( cr );
 			break;
 
 		case 1: /* Linear gradient */
-			pat = cairo_pattern_create_linear( p_start[0] * width,
-											   p_start[1] * height,
-											   p_stop[0] * width,
-											   p_stop[1] * height );
-			cairo_pattern_add_color_stop_rgb( pat, 0, c_start[0],
-											  c_start[1], c_start[2] );
-			cairo_pattern_add_color_stop_rgb( pat, 1, c_stop[0],
-											  c_stop[1], c_stop[2] );
+			pat = cairo_pattern_create_linear( p_start->x * width,
+											   p_start->y * height,
+											   p_stop->x * width,
+											   p_stop->y * height );
+			cairo_pattern_add_color_stop_rgb( pat, 0, IC_TO_RGB( *c_start ) );
+			cairo_pattern_add_color_stop_rgb( pat, 1, IC_TO_RGB( *c_stop ) );
 			cairo_set_source( cr, pat );
 			cairo_paint( cr );
 			cairo_pattern_destroy( pat );
 			break;
 
 		case 2: /* Radial gradient */
-			diffx = ABS( p_start[0] - p_stop[0] ) * width;
-			diffy = ABS( p_start[1] - p_stop[1] ) * height;
+			diffx = ABS( p_start->x - p_stop->x ) * width;
+			diffy = ABS( p_start->y - p_stop->y ) * height;
 			radius = sqrt( pow( diffx, 2 ) + pow( diffy, 2 ) );
 
-			pat = cairo_pattern_create_radial( p_start[0] * width,
-											   p_start[1] * height, 0,
-											   p_start[0] * width,
-											   p_start[1] * height, radius );
-			cairo_pattern_add_color_stop_rgb( pat, 0, c_start[0],
-											  c_start[1], c_start[2] );
-			cairo_pattern_add_color_stop_rgb( pat, 1, c_stop[0],
-											  c_stop[1], c_stop[2] );
+			pat = cairo_pattern_create_radial( p_start->x * width,
+											   p_start->y * height, 0,
+											   p_start->x * width,
+											   p_start->y * height, radius );
+			cairo_pattern_add_color_stop_rgb( pat, 0, IC_TO_RGB( *c_start ) );
+			cairo_pattern_add_color_stop_rgb( pat, 1, IC_TO_RGB( *c_stop ) );
 			cairo_set_source( cr, pat );
 			cairo_paint( cr );
 			cairo_pattern_destroy( pat );

@@ -31,6 +31,7 @@
 #include <unistd.h>
 #include <math.h>
 #include "imagination.h"
+#include "slide.h"
 #include "sexy-icon-entry.h"
 #include "imgcellrendereranim.h"
 
@@ -55,68 +56,8 @@ void img_load_available_transitions(img_window_struct *);
 void img_show_file_chooser(SexyIconEntry *, SexyIconEntryPosition, int, img_window_struct *);
 void img_select_nth_slide(img_window_struct *, gint);
 
-ImgSlide *
-img_slide_new( ImgSlideType type );
-
-void
-img_set_slide_file_info( ImgSlide    *slide,
-						 const gchar *filename );
-
-void
-img_set_slide_gradient_info( ImgSlide *slide,
-							 gint      gradient,
-							 ImgColor  start_color,
-							 ImgColor  stop_color,
-							 ImgPoint  start_point,
-							 ImgPoint  stop_point );
-
-void
-img_slide_set_still_duration( ImgSlide          *slide,
-							  gint               duration,
-							  img_window_struct *img );
-
-gdouble
-img_slide_get_still_duration( ImgSlide  *slide );
-
-void
-img_set_slide_transition_info( slide_struct      *slide,
-							   GtkListStore      *store,
-							   GtkTreeIter       *iter,
-							   GdkPixbuf         *pix,
-							   const gchar       *path,
-							   gint               transition_id,
-							   ImgRender          render,
-							   guint              speed,
-							   img_window_struct *img );
-
-void
-img_set_slide_ken_burns_info( slide_struct *slide,
-							  gint          cur_point,
-							  gsize         length,
-							  gdouble      *points );
-
-void
-img_set_slide_text_info( slide_struct      *slide,
-						 GtkListStore      *store,
-						 GtkTreeIter       *iter,
-						 const gchar       *subtitle,
-						 gint	            anim_id,
-						 gint               anim_duration,
-						 gint               position,
-						 gint               placing,
-						 const gchar       *font_desc,
-						 gdouble           *font_color,
-						 img_window_struct *img );
-
-void img_free_slide_struct( slide_struct * );
-
-
 gboolean
 img_set_total_slideshow_duration( img_window_struct *img );
-
-gint
-img_calc_slide_duration_points( GList *list,
-								gint   length );
 
 gboolean
 img_scale_image( const gchar      *filename,
@@ -124,7 +65,7 @@ img_scale_image( const gchar      *filename,
 				 gint              width,
 				 gint              height,
 				 gboolean          distort,
-				 gdouble          *color,
+				 ImgColor         *color,
 				 GdkPixbuf       **pixbuf,
 				 cairo_surface_t **surface );
 
@@ -132,19 +73,15 @@ void
 img_set_project_mod_state( img_window_struct *img,
 						   gboolean           modified );
 
-void
-img_sync_timings( slide_struct      *slide,
-				  img_window_struct *img );
-
 GdkPixbuf *
 img_convert_surface_to_pixbuf( cairo_surface_t *surface );
 
 gboolean
 img_scale_gradient( gint              gradient,
-					gdouble          *p_start,
-					gdouble          *p_stop,
-					gdouble          *c_start,
-					gdouble          *c_stop,
+					ImgPoint         *p_start,
+					ImgPoint         *p_stop,
+					ImgColor         *c_start,
+					ImgColor         *c_stop,
 					gint              width,
 					gint              height,
 					GdkPixbuf       **pixbuf,
