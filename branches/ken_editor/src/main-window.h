@@ -60,13 +60,13 @@ img_subtitle_update_sensitivity( img_window_struct *img,
 
 void
 img_update_sub_properties( img_window_struct *img,
-						   TextAnimationFunc  anim,
 						   gint               anim_id,
+						   TextAnimationFunc  anim,
 						   gint               anim_duration,
 						   ImgSubPos          position,
 						   ImgRelPlacing      placing,
 						   const gchar       *desc,
-						   gdouble           *color );
+						   ImgColor          *color );
 
 void
 img_combo_box_anim_speed_changed( GtkSpinButton       *spinbutton,

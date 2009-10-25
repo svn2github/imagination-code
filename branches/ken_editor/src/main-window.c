@@ -1572,41 +1572,53 @@ img_iconview_selection_changed( GtkIconView       *iconview,
 	 * capabilities (now even transition combo box can be disabled event if the
 	 * slide is selected) */
 	GtkTreeModel *model;
-	GtkTreeIter iter;
-	GtkTreePath *path = NULL;
-	gint dummy, nr_selected = 0;
-	GList *selected = NULL;
-	gchar *slide_info_msg = NULL, *selected_slide_nr = NULL;
-	ImgSlide *info_slide;
+	GtkTreeIter   iter;
+	GtkTreePath  *path = NULL;
+	gint          dummy,
+				  nr_selected = 0;
+	GList        *selected = NULL;
+	gchar        *slide_info_msg = NULL,
+				 *selected_slide_nr = NULL;
+	ImgSlide     *slide;
+	gdouble       still_duration,
+				  trans_duration;
 
-	if (img->preview_is_running || img->export_is_running)
+	/* If preview or export is in progress, simply return */
+	if( img->preview_is_running || img->export_is_running )
 		return;
 
-	model = gtk_icon_view_get_model(iconview);
-	gtk_icon_view_get_cursor(iconview,&path,NULL);
-
-	selected = gtk_icon_view_get_selected_items(iconview);
-	nr_selected = g_list_length(selected);
-	img_set_total_slideshow_duration(img);
-
-	if (selected == NULL)
+	/* Remove any previously selected slide from storage */
+	if( img->current_image )
 	{
-		img_set_statusbar_message(img,nr_selected);
-		if( img->current_image )
-		{
-			cairo_surface_destroy( img->current_image );
-			img->current_image = NULL;
-		}
-		img->current_slide = NULL;
+		cairo_surface_destroy( img->current_image );
+		img->current_image = NULL;
+	}
+	img->current_slide = NULL;
+
+	/* Get selected items information */
+	model = gtk_icon_view_get_model( iconview );
+	gtk_icon_view_get_cursor( iconview, &path, NULL );
+	selected = gtk_icon_view_get_selected_items( iconview );
+	nr_selected = g_list_length( selected );
+
+	/* None is selected */
+	if( selected == NULL )
+	{
+		img_set_statusbar_message( img, nr_selected );
 		gtk_widget_queue_draw( img->image_area );
 
 		/* Disable slide settings */
-		gtk_widget_set_sensitive(img->trans_duration,	FALSE);
-		gtk_widget_set_sensitive(img->duration,			FALSE);
-		gtk_widget_set_sensitive(img->transition_type,	FALSE);
-		gtk_widget_set_sensitive(img->random_button,	FALSE);
-		if (img->slides_nr == 0)
-			gtk_label_set_text(GTK_LABEL (img->total_time_data),"");
+		gtk_widget_set_sensitive( img->trans_duration,  FALSE );
+		gtk_widget_set_sensitive( img->duration,        FALSE );
+		gtk_widget_set_sensitive( img->transition_type, FALSE );
+		gtk_widget_set_sensitive( img->random_button,   FALSE );
+
+		/* Update current slide selector entry */
+		gtk_entry_set_text( GTK_ENTRY( img->slide_number_entry ), "" );
+
+		/* Free cursor path */
+		if( path )
+			gtk_tree_path_free( path );
 
 		/* Disable Ken Burns controls */
 		img_ken_burns_update_sensitivity( img, FALSE, 0 );
@@ -1617,58 +1629,107 @@ img_iconview_selection_changed( GtkIconView       *iconview,
 		return;
 	}
 
-	gtk_widget_set_sensitive(img->trans_duration,	TRUE);
-	gtk_widget_set_sensitive(img->duration,			TRUE);
-	gtk_widget_set_sensitive(img->transition_type,	TRUE);
-	gtk_widget_set_sensitive(img->random_button,	TRUE);
+	dummy = gtk_tree_path_get_indices( selected->data )[0] + 1;
+	selected_slide_nr = g_strdup_printf( "%d", dummy );
+	gtk_entry_set_text( GTK_ENTRY( img->slide_number_entry ),
+						selected_slide_nr );
+	g_free( selected_slide_nr );
 
-	dummy = gtk_tree_path_get_indices(selected->data)[0]+1;
-	selected_slide_nr = g_strdup_printf("%d",dummy);
-	gtk_entry_set_text(GTK_ENTRY(img->slide_number_entry),selected_slide_nr);
-	g_free(selected_slide_nr);
+	/* Update information based on current selection.
+	 *
+	 * If the cursor is set, update based on cursor, else update to the first
+	 * element of the selected list */
+	if( path )
+	{
+		gtk_tree_model_get_iter( model, &iter, path );
+		gtk_tree_path_free( path );
+	}
+	else
+		gtk_tree_model_get_iter( model, &iter, selected->data );
 
-	gtk_tree_model_get_iter(model,&iter,selected->data);
-	g_list_foreach (selected, (GFunc)gtk_tree_path_free, NULL);
-	g_list_free (selected);
-	gtk_tree_model_get(model,&iter,1,&info_slide,-1);
-	img->current_slide = info_slide;
+	g_list_foreach( selected, (GFunc)gtk_tree_path_free, NULL );
+	g_list_free( selected );
+	gtk_tree_model_get( model, &iter, 1, &slide, -1 );
+	img->current_slide = slide;
 
-	/* Block "changed" signal from model to avoid rewriting the same value back into current slide. */
-	g_signal_handlers_block_by_func((gpointer)img->transition_type, (gpointer)img_combo_box_transition_type_changed, img);
+	/* Update transition selector.
+	 *
+	 * If slide cannot have transition, disable selector, else update it with
+	 * proper values for selected slide */
+	if( slide->caps & IMG_SLIDE_CAP_TRANSITION )
 	{
 		GtkTreeIter   iter;
 		GtkTreeModel *model;
 		gchar const  *path;
 
-		model = gtk_combo_box_get_model( GTK_COMBO_BOX( img->transition_type ) );
-		gtk_tree_model_get_iter_from_string( model, &iter, info_slide->path );
-		gtk_combo_box_set_active_iter(GTK_COMBO_BOX(img->transition_type), &iter );
+		/* Update sensitivity of the transition selectors */
+		gtk_widget_set_sensitive( img->duration,      TRUE );
+		gtk_widget_set_sensitive( img->random_button, TRUE );
+
+		/* Block "changed" signal from model to avoid rewriting the same
+		 * value back into current slide. */
+		g_signal_handlers_block_by_func( img->transition_type,
+										 img_combo_box_transition_type_changed,
+										 img);
+
+		img_slide_get_transition_info( slide, &path, NULL, NULL,
+									   &trans_duration );
+		model =
+			gtk_combo_box_get_model( GTK_COMBO_BOX( img->transition_type ) );
+		gtk_tree_model_get_iter_from_string( model, &iter, path );
+		gtk_combo_box_set_active_iter( GTK_COMBO_BOX( img->transition_type ),
+									   &iter );
+		g_signal_handlers_unblock_by_func(
+				img->transition_type,
+				img_combo_box_transition_type_changed,
+				img );
+		
+		/* Moved this piece of code below the setting the transition, since we
+		 * get false negatives in certain situations (eg.: if the previously
+		 * selected transition doesn't have transition renderer set). */
+		if( gtk_combo_box_get_active(
+					GTK_COMBO_BOX( img->transition_type ) ) == 0 )
+			gtk_widget_set_sensitive( img->trans_duration, FALSE );
+		else
+			gtk_widget_set_sensitive( img->trans_duration, TRUE );
+		
+		/* Set the transition speed */
+		/* FIXME: Duration should also probably be replaced by spin button */
+		dummy = (gint)( trans_duration + .5 );
+
+		g_signal_handlers_block_by_func( img->trans_duration,
+										 img_combo_box_speed_changed,
+										 img );
+		gtk_combo_box_set_active( GTK_COMBO_BOX( img->trans_duration ), dummy );
+		g_signal_handlers_unblock_by_func( img->trans_duration,
+										   img_combo_box_speed_changed,
+										   img );
 	}
-	g_signal_handlers_unblock_by_func((gpointer)img->transition_type, (gpointer)img_combo_box_transition_type_changed, img);
+	else /* Slide cannot have transition applied */
+	{
+		/* Update sensitivity of the transition selectors */
+		gtk_widget_set_sensitive( img->duration,       FALSE );
+		gtk_widget_set_sensitive( img->random_button,  FALSE );
+		gtk_widget_set_sensitive( img->trans_duration, FALSE );
+	}
 
-	/* Moved this piece of code below the setting the transition, since we
-	 * get false negatives in certain situations (eg.: if the previously
-	 * selected transition doesn't have transition renderer set): */
-	if (gtk_combo_box_get_active(GTK_COMBO_BOX(img->transition_type)) == 0)
-		gtk_widget_set_sensitive(img->trans_duration,FALSE);
-	else
-		gtk_widget_set_sensitive(img->trans_duration,TRUE);
+	/* Set the slide duration
+	 *
+	 * If slide cannot have it's duration modified (video slides for example),
+	 * simple disable this widget. */
+	gtk_widget_set_sensitive( img->transition_type,
+							  slide->caps & IMG_SLIDE_CAP_DURATION );
 
-	/* Set the transition speed */
-	if (info_slide->speed == FAST)
-		dummy = 0;
-	else if (info_slide->speed == NORMAL)
-		dummy = 1;
-	else
-		dummy = 2;
-	g_signal_handlers_block_by_func((gpointer)img->duration, (gpointer)img_combo_box_speed_changed, img);
-	gtk_combo_box_set_active(GTK_COMBO_BOX(img->trans_duration),dummy);
-	g_signal_handlers_block_by_func((gpointer)img->duration, (gpointer)img_combo_box_speed_changed, img);
-
-	/* Set the transition duration */
-	g_signal_handlers_block_by_func((gpointer)img->duration, (gpointer)img_spinbutton_value_changed, img);
-	gtk_spin_button_set_value(GTK_SPIN_BUTTON(img->duration), info_slide->duration);
-	g_signal_handlers_unblock_by_func((gpointer)img->duration, (gpointer)img_spinbutton_value_changed, img);
+	/* Update value */
+	g_signal_handlers_block_by_func( img->duration,
+									 img_spinbutton_value_changed,
+									 img );
+	img_slide_get_still_info( slide, &still_duration );
+	gtk_spin_button_set_value( GTK_SPIN_BUTTON( img->duration ),
+							   still_duration );
+	g_signal_handlers_unblock_by_func( img->duration,
+									   img_spinbutton_value_changed,
+									   img );
 
 	/* Update Ken Burns display */
 	img_update_stop_display( img, TRUE );
@@ -1676,37 +1737,46 @@ img_iconview_selection_changed( GtkIconView       *iconview,
 	/* Update subtitle widgets */
 	img_update_subtitles_widgets( img );
 
-	img->project_is_modified = TRUE;
-
-	if (nr_selected > 1)
+	if( nr_selected > 1 )
 	{
-		img_set_statusbar_message(img,nr_selected);
+		img_set_statusbar_message( img, nr_selected );
 		img_ken_burns_update_sensitivity( img, FALSE, 0 );
 		img_subtitle_update_sensitivity( img, 2 );
 	}
 	else
 	{
-		if (info_slide->o_filename != NULL)
+		gint no_points;
+
+		if( IMG_SLIDE_GET_TYPE( slide ) == IMG_SLIDE_TYPE_FILE )
 		{
-			slide_info_msg = g_strdup_printf("%s    %s: %s    %s: %s",info_slide->o_filename, _("Resolution"), info_slide->resolution, _("Type"), info_slide->type);
-			gtk_statusbar_push(GTK_STATUSBAR (img->statusbar), img->context_id, slide_info_msg);
-			g_free(slide_info_msg);
+			char const *filename,
+					   *res,
+					   *type;
+
+			img_slide_get_file_info( slide, &filename, NULL, &res, &type );
+			slide_info_msg = g_strdup_printf( "%s    %s: %s    %s: %s",
+											  filename, _("Resolution"),
+											  res, _("Type"), type );
+			gtk_statusbar_push( GTK_STATUSBAR( img->statusbar ),
+								img->context_id, slide_info_msg );
+			g_free( slide_info_msg );
 		}
-		img_ken_burns_update_sensitivity( img, TRUE, info_slide->no_points );
+		if( img_slide_get_ken_burns_info( slide, NULL, &no_points, NULL ) )
+			img_ken_burns_update_sensitivity( img, TRUE, no_points );
+		else
+			img_ken_burns_update_sensitivity( img, TRUE, 0 );
 		img_subtitle_update_sensitivity( img, 1 );
 	}
 
-	if( img->current_image )
-	{
-		cairo_surface_destroy( img->current_image );
-		img->current_image = NULL;
-	}
-		
 	/* This is not needed when in overview mode, since we're not displaying any
 	 * large image preview. */
 	if( img->mode == 0 )
 	{
-		if( ! info_slide->r_filename )
+		/* FIXME: Text if series needs to be moved into separate function
+		 * (something like "img_create_preview_image" seems suitable). */
+		//img->current_image = img_create_preview_image( slide );
+#if 0
+		if( IMG_SLIDE_GET_TYPE( slide ) == IMG_SLIDE_TYPE_GRADIENT )
 		{
 			img_scale_gradient( info_slide->gradient,
 								info_slide->g_start_point,
@@ -1728,17 +1798,20 @@ img_iconview_selection_changed( GtkIconView       *iconview,
 							 (gdouble)img->video_size[0] / img->video_size[1],
 							 0, 0, img->distort_images,
 							 img->background_color, NULL, &img->current_image );
+#endif
 	}
 }
 
-static void img_combo_box_transition_type_changed (GtkComboBox *combo, img_window_struct *img)
+static void
+img_combo_box_transition_type_changed( GtkComboBox       *combo,
+									   img_window_struct *img )
 {
 	GList        *selected,
 				 *bak;
 	GtkTreeIter   iter;
 	GtkTreeModel *model;
-	gpointer      address;
-	slide_struct *info_slide;
+	ImgRender     address;
+	ImgSlide     *slide;
 	gint          transition_id;
 	GtkTreePath  *p;
 	gchar        *path;
@@ -1747,7 +1820,7 @@ static void img_combo_box_transition_type_changed (GtkComboBox *combo, img_windo
 	/* Check if anything is selected and return if nothing is */
 	selected = gtk_icon_view_get_selected_items(
 					GTK_ICON_VIEW( img->active_icon ) );
-	if( selected == NULL )
+	if( ! selected )
 		return;
 
 	/* Get information about selected transition */
@@ -1792,23 +1865,18 @@ static void img_combo_box_transition_type_changed (GtkComboBox *combo, img_windo
 
 	/* Update all selected slides */
 	model = GTK_TREE_MODEL( img->thumbnail_model );
-	bak = selected;
-	while (selected)
+	for( bak = selected; selected; selected = g_list_next( selected ) )
 	{
 		gtk_tree_model_get_iter( model, &iter, selected->data );
-		gtk_tree_model_get( model, &iter, 1, &info_slide, -1 );
-		gtk_list_store_set( GTK_LIST_STORE( model ), &iter, 2, pix, -1 );
-		info_slide->render = (ImgRender)address;
-		info_slide->transition_id = transition_id;
-		g_free( info_slide->path );
-		info_slide->path = g_strdup( path );
+		gtk_tree_model_get( model, &iter, 1, &slide, -1 );
+		if( img_slide_set_transition_info( slide, path, transition_id,
+										   address, -1.0 ) )
+			gtk_list_store_set( GTK_LIST_STORE( model ), &iter, 2, pix, -1 );
 
 		/* If this is first slide, we need to copy transition
 		 * to the last pseudo-slide too. */
 		if( gtk_tree_path_get_indices( selected->data )[0] == 0 )
-			img->final_transition.render = (ImgRender)address;
-
-		selected = selected->next;
+			img->final_transition.render = address;
 	}
 	g_free( path );
 	if( pix )
@@ -1820,27 +1888,29 @@ static void img_combo_box_transition_type_changed (GtkComboBox *combo, img_windo
 	g_list_free( bak );
 }
 
-static void img_random_button_clicked(GtkButton *button, img_window_struct *img)
+static void
+img_random_button_clicked( GtkButton         *button,
+						   img_window_struct *img )
 {
 	GList        *selected,
 				 *bak;
 	GtkTreeIter   iter;
 	GtkTreeModel *model;
-	slide_struct *info_slide;
+	ImgSlide     *slide;
 	GdkPixbuf    *pixbuf;
 
 	model = GTK_TREE_MODEL( img->thumbnail_model );
-	selected = gtk_icon_view_get_selected_items(GTK_ICON_VIEW (img->active_icon));
-	if (selected == NULL)
+	selected = gtk_icon_view_get_selected_items(
+					GTK_ICON_VIEW( img->active_icon ) );
+	if( ! selected )
 		return;
 
 	/* Avoiding GList memory leak. */
-	bak = selected;
-	while (selected)
+	for( bak = selected; selected; selected = g_list_next( selected ) )
 	{
-		gtk_tree_model_get_iter(model, &iter,selected->data);
-		gtk_tree_model_get(model, &iter,1,&info_slide,-1);
-		pixbuf = img_set_random_transition(img, info_slide);
+		gtk_tree_model_get_iter( model, &iter, selected->data );
+		gtk_tree_model_get( model, &iter, 1, &slide, -1 );
+		pixbuf = img_set_random_transition( img, slide );
 		gtk_list_store_set( GTK_LIST_STORE( model ), &iter, 2, pixbuf, -1 );
 		if( pixbuf )
 			g_object_unref( G_OBJECT( pixbuf ) );
@@ -1848,25 +1918,28 @@ static void img_random_button_clicked(GtkButton *button, img_window_struct *img)
 		/* If this is first slide, copy transition to last
 		 * pseudo-slide */
 		if( gtk_tree_path_get_indices( selected->data )[0] == 0 )
-			img->final_transition.render = info_slide->render;
+		{
+			ImgRender render = NULL;
 
-		selected = selected->next;
+			img_slide_get_transition_info( slide, NULL, NULL, &render, NULL );
+			img->final_transition.render = render;
+		}
 	}
 	img->project_is_modified = TRUE;
-	g_list_foreach (bak, (GFunc)gtk_tree_path_free, NULL);
-	g_list_free(bak);
+	g_list_foreach( bak, (GFunc)gtk_tree_path_free, NULL );
+	g_list_free( bak );
 
 	/* This fixes enable/disable issue */
-	img_iconview_selection_changed(GTK_ICON_VIEW(img->active_icon), img );
+	img_iconview_selection_changed( GTK_ICON_VIEW( img->active_icon ), img );
 }
 
 static GdkPixbuf *
 img_set_random_transition( img_window_struct *img,
-						   slide_struct      *info_slide )
+						   ImgSlide          *slide )
 {
 	gint          nr;
 	gint          r1, r2;
-	gpointer      address;
+	ImgRender     address;
 	gint          transition_id;
 	GtkTreeModel *model;
 	GtkTreeIter   iter;
@@ -1893,40 +1966,37 @@ img_set_random_transition( img_window_struct *img,
 	g_snprintf( path, sizeof( path ), "%d:%d", r1, r2 );
 	gtk_tree_model_get_iter_from_string( model, &iter, path );
 
-	gtk_tree_model_get( model, &iter, 0, &pix, 2, &address, 3, &transition_id, -1 );
-	info_slide->transition_id = transition_id;
-	info_slide->render = (ImgRender)address;
+	gtk_tree_model_get( model, &iter, 0, &pix,
+									  2, &address,
+									  3, &transition_id,
+									  -1 );
+	img_slide_set_transition_info( slide, path, transition_id, address, -1.0 );
 
-	/* Prevent leak here */
-	if( info_slide->path )
-		g_free( info_slide->path );
-	info_slide->path = g_strdup( path );
-
-	/* Select proper iter in transition model */
-	g_signal_handlers_block_by_func((gpointer)img->transition_type, (gpointer)img_combo_box_transition_type_changed, img);	
-	gtk_combo_box_set_active_iter(GTK_COMBO_BOX(img->transition_type), &iter);
 	/* Update the slide dialog report in real time */
-	img_report_slides_transitions(img);
-	g_signal_handlers_unblock_by_func((gpointer)img->transition_type, (gpointer)img_combo_box_transition_type_changed, img);	
+	img_report_slides_transitions( img );
 
 	return( pix );
 }
 
-static void img_combo_box_speed_changed (GtkComboBox *combo, img_window_struct *img)
+static void
+img_combo_box_speed_changed( GtkComboBox       *combo,
+							 img_window_struct *img )
 {
-	gint speed;
-	gdouble duration;
-	GList *selected, *bak;
-	GtkTreeIter iter;
+	gint          speed;
+	gdouble       duration;
+	GList        *selected,
+				 *bak;
+	GtkTreeIter   iter;
 	GtkTreeModel *model;
-	slide_struct *info_slide;
+	ImgSlide     *slide;
 
 	model = GTK_TREE_MODEL( img->thumbnail_model );
-	selected = gtk_icon_view_get_selected_items(GTK_ICON_VIEW (img->active_icon));
-	if (selected == NULL)
+	selected = gtk_icon_view_get_selected_items(
+					GTK_ICON_VIEW( img->active_icon ) );
+	if( ! selected )
 		return;
 
-	speed = gtk_combo_box_get_active(combo);
+	speed = gtk_combo_box_get_active( combo );
 
 	if (speed == 0)
 		duration = FAST;
@@ -1936,55 +2006,51 @@ static void img_combo_box_speed_changed (GtkComboBox *combo, img_window_struct *
 		duration = SLOW;
 
 	/* Avoid memory leak */
-	bak = selected;
-	while (selected)
+	for( bak = selected; selected; selected = g_list_next( selected ) )
 	{
-		gtk_tree_model_get_iter(model, &iter,selected->data);
-		gtk_tree_model_get(model, &iter,1,&info_slide,-1);
-		info_slide->speed = duration;
+		gtk_tree_model_get_iter( model, &iter, selected->data);
+		gtk_tree_model_get( model, &iter, 1, &slide, -1);
+		img_slide_set_transition_info( slide, NULL, 0, NULL, duration );
 
 		/* If we're modifying fisr slide, we need to modify
 		 * last pseudo-slide too. */
 		if( gtk_tree_path_get_indices( selected->data )[0] == 0 )
-			img->final_transition.speed = duration;
-
-		selected = selected->next;
+			img->final_transition.trans_duration = duration;
 	}
-	img_set_total_slideshow_duration(img);
+	img_set_total_slideshow_duration( img );
 
-	g_list_foreach (bak, (GFunc)gtk_tree_path_free, NULL);
-	g_list_free(bak);
+	g_list_foreach( bak, (GFunc)gtk_tree_path_free, NULL );
+	g_list_free( bak );
 }
 
-static void img_spinbutton_value_changed (GtkSpinButton *spinbutton, img_window_struct *img)
+static void
+img_spinbutton_value_changed( GtkSpinButton     *spinbutton,
+							  img_window_struct *img)
 {
-	gint duration = 0;
-	GList *selected, *bak;
-	GtkTreeIter iter;
+	gdouble       duration;
+	GList        *selected,
+				 *bak;
+	GtkTreeIter   iter;
 	GtkTreeModel *model;
-	slide_struct *info_slide;
+	ImgSlide     *slide;
 
 	model = GTK_TREE_MODEL( img->thumbnail_model );
-	selected = gtk_icon_view_get_selected_items(GTK_ICON_VIEW(img->active_icon));
-	if (selected == NULL)
+	selected = gtk_icon_view_get_selected_items(
+					GTK_ICON_VIEW( img->active_icon ) );
+	if( ! selected )
 		return;
 
-	duration = gtk_spin_button_get_value_as_int(spinbutton);
+	duration = gtk_spin_button_get_value( spinbutton );
 	
-	bak = selected;
-	while (selected)
+	for( bak = selected; selected; selected = g_list_next( selected ) )
 	{
-		gtk_tree_model_get_iter(model, &iter,selected->data);
-		gtk_tree_model_get(model, &iter,1,&info_slide,-1);
-		img_set_slide_still_info( info_slide, duration, img );
-		selected = selected->next;
+		gtk_tree_model_get_iter( model, &iter, selected->data );
+		gtk_tree_model_get( model, &iter, 1, &slide, -1 );
+		img_slide_set_still_info( slide, duration );
 	}
 
-	g_list_foreach (bak, (GFunc)gtk_tree_path_free, NULL);
-	g_list_free(bak);
-
-	/* Sync timings */
-	img_sync_timings( img->current_slide, img );
+	g_list_foreach( bak, (GFunc)gtk_tree_path_free, NULL );
+	g_list_free( bak );
 }
 
 static void img_select_all_thumbnails(GtkMenuItem *item, img_window_struct *img)
@@ -2189,20 +2255,15 @@ img_subtitle_update( img_window_struct *img )
 	gboolean     has_subtitle;
 	GtkTreeIter  iter;
 	GList       *list;
+	gchar       *text;
 
 
 	/* Get text from buffer and store it inside slide */
-	if( img->current_slide->subtitle )
-	{
-		g_free( img->current_slide->subtitle );
-		img->current_slide->subtitle = NULL;
-	}
-
 	has_subtitle =
 			1 < gtk_text_buffer_get_char_count( img->slide_text_buffer );
-	if( has_subtitle )
-		g_object_get( G_OBJECT( img->slide_text_buffer ), "text",
-					  &img->current_slide->subtitle, NULL );
+	g_object_get( G_OBJECT( img->slide_text_buffer ), "text", &text, NULL );
+	img_slide_set_subtitle_info( img->current_slide, text, -2, NULL, -1.0,
+								 -1, -1, NULL, NULL );
 
 	list = gtk_icon_view_get_selected_items(
 				GTK_ICON_VIEW( img->active_icon ) );
@@ -2230,7 +2291,7 @@ img_text_font_set( GtkFontButton     *button,
 	
 	string = gtk_font_button_get_font_name( button );
 
-	img_update_sub_properties( img, NULL, -1, -1, -1, -1, string, NULL );
+	img_update_sub_properties( img, -1, NULL, -1, -1, -1, string, NULL );
 
 	gtk_widget_queue_draw( img->image_area );
 }
@@ -2248,7 +2309,7 @@ img_text_anim_set( GtkComboBox       *combo,
 	gtk_combo_box_get_active_iter( combo, &iter );
 	gtk_tree_model_get( model, &iter, 1, &anim, 2, &anim_id, -1 );
 
-	img_update_sub_properties( img, anim, anim_id, -1, -1, -1, NULL, NULL );
+	img_update_sub_properties( img, anim_id, anim, -1, -1, -1, NULL, NULL );
 
 	/* Speed should be disabled when None is in effect */
 	gtk_widget_set_sensitive( img->sub_anim_duration,
@@ -2261,31 +2322,28 @@ void
 img_font_color_changed( GtkColorButton    *button,
 						img_window_struct *img )
 {
-	GdkColor color;
+	GdkColor g_color;
+	ImgColor i_color;
 	guint16  alpha;
-	gdouble  font_color[4];
 
-	gtk_color_button_get_color( button, &color );
+	gtk_color_button_get_color( button, &g_color );
 	alpha = gtk_color_button_get_alpha( button  );
 
-	font_color[0] = (gdouble)color.red   / 0xffff;
-	font_color[1] = (gdouble)color.green / 0xffff;
-	font_color[2] = (gdouble)color.blue  / 0xffff;
-	font_color[3] = (gdouble)alpha       / 0xffff;
+	GDK_TO_IMG_COLOR( g_color, i_color );
+	i_color.alpha = (gdouble)alpha / G_MAXUINT16;
 
-	img_update_sub_properties( img, NULL, -1, -1, -1, -1, NULL, font_color );
+	img_update_sub_properties( img, -1, NULL, -1.0, -1, -1, NULL, &i_color );
 
 	gtk_widget_queue_draw( img->image_area );
 }
 
 void
-img_combo_box_anim_speed_changed( GtkSpinButton       *spinbutton,
+img_combo_box_anim_speed_changed( GtkSpinButton     *spinbutton,
 								  img_window_struct *img )
 {
-	gint speed;
+	gdouble duration = gtk_spin_button_get_value( spinbutton );
 
-	speed = gtk_spin_button_get_value_as_int(spinbutton);
-	img_update_sub_properties( img, NULL, -1, speed, -1, -1, NULL, NULL );
+	img_update_sub_properties( img, -1, NULL, duration, -1, -1, NULL, NULL );
 }
 
 void
@@ -2296,7 +2354,7 @@ img_text_pos_changed( ImgTableButton    *button,
 	/* NOTE: This can be done because we know how items are packed into table
 	 * button. For safety measures and future expandability, this should be
 	 * converted into switch statement. */
-	img_update_sub_properties( img, NULL, -1, -1, item, -1, NULL, NULL );
+	img_update_sub_properties( img, -1, NULL, -1.0, item, -1, NULL, NULL );
 
 	gtk_widget_queue_draw( img->image_area );
 }
@@ -2312,7 +2370,7 @@ img_placing_changed( GtkComboBox   *combo,
 	else
 		placing = IMG_REL_PLACING_ORIGINAL_IMAGE;
 
-	img_update_sub_properties( img, NULL, -1, -1, -1, placing, NULL, NULL );
+	img_update_sub_properties( img, -1, NULL, -1.0, -1, placing, NULL, NULL );
 
 	gtk_widget_queue_draw( img->image_area );
 }
@@ -2423,13 +2481,13 @@ img_subtitle_update_sensitivity( img_window_struct *img,
 
 void
 img_update_sub_properties( img_window_struct *img,
-						   TextAnimationFunc  anim,
 						   gint               anim_id,
+						   TextAnimationFunc  anim,
 						   gint               anim_duration,
 						   ImgSubPos          position,
 						   ImgRelPlacing      placing,
 						   const gchar       *desc,
-						   gdouble           *color )
+						   ImgColor          *color )
 {
 	GList        *selected,
 				 *tmp;
@@ -2446,14 +2504,14 @@ img_update_sub_properties( img_window_struct *img,
 
 	for( tmp = selected; tmp; tmp = g_list_next( tmp ) )
 	{
-		slide_struct *slide;
+		ImgSlide *slide;
 
-		gtk_tree_model_get_iter( model, &iter, (GtkTreePath *)tmp->data );
+		gtk_tree_model_get_iter( model, &iter, tmp->data );
 		gtk_tree_model_get( model, &iter, 1, &slide, -1 );
 		
-		img_set_slide_text_info( slide, NULL, NULL, NULL,
-								 anim_id, anim_duration, position,
-								 placing, desc, color, img );
+		img_slide_set_subtitle_info( slide, NULL, anim_id, anim,
+									 anim_duration, position, placing,
+									 desc, color );
 	}
 
 	g_list_foreach( selected, (GFunc)gtk_tree_path_free, NULL );
@@ -2539,7 +2597,8 @@ img_switch_mode( img_window_struct *img,
 	g_list_free( selection );
 }
 
-static void img_report_slides_transitions(img_window_struct *img)
+static void
+img_report_slides_transitions( img_window_struct *img )
 {
 	static GtkWidget *viewport;
 	GtkWidget        *label;
@@ -2612,21 +2671,23 @@ static void img_report_slides_transitions(img_window_struct *img)
 		 flag;
 		 flag = gtk_tree_model_iter_next( model, &iter ), i++ )
 	{
-		slide_struct *slide;
-		gpointer     *info;
+		ImgSlide *slide;
+		gpointer *info;
+		gint      id;
 
 		gtk_tree_model_get( model, &iter, 1, &slide, -1 );
-		if( slide->transition_id < 1 )
+		if( ! img_slide_get_transition_info( slide, NULL, &id, NULL, NULL ) )
+			continue;
+		if( id < 1 )
 			continue;
 
-		info = g_hash_table_lookup( trans_hash, GIP( slide->transition_id ) );
+		info = g_hash_table_lookup( trans_hash, GIP( id ) );
 		if( ! info )
 		{
 			/* Create new info element */
 			info = g_slice_alloc0( sizeof( gpointer ) * 3 );
-			info[0] = GIP( slide->transition_id );
-			g_hash_table_insert( trans_hash, GIP( slide->transition_id ),
-											 info );
+			info[0] = GIP( id );
+			g_hash_table_insert( trans_hash, GIP( id ), info );
 		}
 
 		/* Increment counter */

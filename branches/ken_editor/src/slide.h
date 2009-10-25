@@ -70,12 +70,12 @@ img_slide_get_gradient_info( ImgSlide *slide,
 							 ImgPoint *stop_point );
 
 gboolean
-img_slide_set_still_duration( ImgSlide *slide,
-							  gdouble   duration );
+img_slide_set_still_info( ImgSlide *slide,
+						  gdouble   duration );
 
 gboolean
-img_slide_get_still_duration( ImgSlide *slide,
-							  gdouble  *duration );
+img_slide_get_still_info( ImgSlide *slide,
+						  gdouble  *duration );
 
 gboolean
 img_slide_set_transition_info( ImgSlide    *slide,
@@ -85,17 +85,23 @@ img_slide_set_transition_info( ImgSlide    *slide,
 							   gdouble      duration );
 
 gboolean
-img_slide_get_transition_info( ImgSlide      *slide,
-							   gchar * const *path,
-							   gint          *id,
-							   ImgRender     *render,
-							   gdouble       *duration );
+img_slide_get_transition_info( ImgSlide     *slide,
+							   gchar const **path,
+							   gint         *id,
+							   ImgRender    *render,
+							   gdouble      *duration );
 
 void
 img_slide_set_ken_burns_info( ImgSlide *slide,
 							  gint      cur_point,
 							  gsize     length,
 							  gdouble  *points );
+
+gboolean
+img_slide_get_ken_burns_info( ImgSlide  *slide,
+							  GList    **points,
+							  gint      *no_points,
+							  gint      *cur_point );
 
 void
 img_slide_set_subtitle_info( ImgSlide          *slide,
@@ -106,6 +112,17 @@ img_slide_set_subtitle_info( ImgSlide          *slide,
 							 ImgSubPos          position,
 							 ImgRelPlacing      placing,
 							 const gchar       *font_desc,
+							 ImgColor          *font_color );
+
+gboolean
+img_slide_get_subtitle_info( ImgSlide          *slide,
+							 gchar const      **subtitle,
+							 gint              *anim_id,
+							 TextAnimationFunc *anim,
+							 gdouble           *anim_duration,
+							 ImgSubPos         *position,
+							 ImgRelPlacing     *placing,
+							 gchar            **font_desc,
 							 ImgColor          *font_color );
 
 gdouble

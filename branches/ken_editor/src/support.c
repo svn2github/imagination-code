@@ -328,7 +328,7 @@ img_set_total_slideshow_duration( img_window_struct *img )
 			gdouble tmp;
 
 			gtk_tree_model_get( model, &iter, 1, &slide, -1 );
-			if( img_slide_get_still_duration( slide, &tmp ) )
+			if( img_slide_get_still_info( slide, &tmp ) )
 				img->total_secs += tmp;
 			if( img_slide_get_transition_info( slide, NULL, NULL, NULL, &tmp ) )
 				img->total_secs += tmp;
@@ -589,6 +589,50 @@ img_set_project_mod_state( img_window_struct *img,
 	/* FIXME: Do any updates here (add "*" to window title, ...). */
 }
 
+void
+img_sync_timings( ImgSlide          *slide,
+				  img_window_struct *img )
+{
+	GtkAdjustment *adj;
+	gdouble        anim_duration,
+				   still_duration;
+	GList         *points;
+
+	if( ! ( slide->caps & IMG_SLIDE_CAP_SUBTITLE ) )
+		return;
+
+	adj = gtk_spin_button_get_adjustment( GTK_SPIN_BUTTON( img->duration ) );
+	if( img_slide_get_subtitle_info( slide, NULL, NULL, NULL,
+									 &anim_duration, NULL, NULL, NULL, NULL ) )
+		gtk_adjustment_set_lower( adj, anim_duration );
+	else
+		gtk_adjustment_set_lower( adj, MINIMAL_DURATION );
+
+	/* If times are already synchronized, return */
+	img_slide_get_still_info( slide, &still_duration );
+	if( still_duration >= anim_duration )
+		return;
+
+	/* Do the right thing;) */
+	if( img_slide_get_ken_burns_info( slide, &points, NULL, NULL ) && points )
+	{
+		gdouble       diff;
+		ImgStopPoint *point;
+
+		/* Calculate difference that we need to accomodate */
+		diff = anim_duration - still_duration;
+
+		/* Elongate last point */
+		point = (ImgStopPoint *)g_list_last( points )->data;
+		point->still_time += diff;
+	}
+
+	/* Update display */
+	/* FIXME: I'm not sure if adjusting lower limit of adjustment will
+	 * automatically update spin button. Test this!!! */
+//	gtk_spin_button_set_value( GTK_SPIN_BUTTON( img->duration ),
+//							   slide->anim_duration );
+}
 
 void img_select_nth_slide(img_window_struct *img, gint slide_to_select)
 {

@@ -25,6 +25,9 @@
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
 
+/* Smallest value a duration can have inside imagination */
+#define MINIMAL_DURATION 0.1
+
 /* Transition preview frame rate. I decided to use 25 fps, which
  * should be handled on time by most machines. */
 #define PREVIEW_FPS_STEP       5
@@ -47,16 +50,16 @@
  * ************************************************************************* */
 /* Convert GdkColor to ImgColor (alpha is set to 1) */
 #define GDK_TO_IMG_COLOR( gdk_color, img_color ) \
-	( img_color ).red   = (gdouble)( gdk_color ).red   / 0xffff; \
-	( img_color ).green = (gdouble)( gdk_color ).green / 0xffff; \
-	( img_color ).blue  = (gdouble)( gdk_color ).blue  / 0xffff; \
+	( img_color ).red   = (gdouble)( gdk_color ).red   / G_MAXUINT16; \
+	( img_color ).green = (gdouble)( gdk_color ).green / G_MAXUINT16; \
+	( img_color ).blue  = (gdouble)( gdk_color ).blue  / G_MAXUINT16; \
 	( img_color ).alpha = 1.0
 
 /* Convert ImgColor to GdkColor (alpha is ignored) */
 #define IMG_TO_GDK_COLOR( img_color, gdk_color ) \
-	( gdk_color ).red   = (guint16)( img_color ).red   * 0xffff; \
-	( gdk_color ).green = (guint16)( img_color ).green * 0xffff; \
-	( gdk_color ).blue  = (guint16)( img_color ).blue  * 0xffff
+	( gdk_color ).red   = (guint16)( img_color ).red   * G_MAXUINT16; \
+	( gdk_color ).green = (guint16)( img_color ).green * G_MAXUINT16; \
+	( gdk_color ).blue  = (guint16)( img_color ).blue  * G_MAXUINT16
 
 /* Convenience macros to convert ImgColor into parameters for cairo */
 #define IC_TO_RGB( color ) \

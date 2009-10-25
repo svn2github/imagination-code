@@ -409,8 +409,8 @@ img_slide_get_gradient_info( ImgSlide *slide,
 }
 
 gboolean
-img_slide_set_still_duration( ImgSlide *slide,
-							  gdouble   duration )
+img_slide_set_still_info( ImgSlide *slide,
+						  gdouble   duration )
 {
 	g_return_val_if_fail( slide->caps & IMG_SLIDE_CAP_DURATION, FALSE );
 
@@ -437,8 +437,8 @@ img_slide_set_still_duration( ImgSlide *slide,
 }
 
 gboolean
-img_slide_get_still_duration( ImgSlide *slide,
-							  gdouble  *duration )
+img_slide_get_still_info( ImgSlide *slide,
+						  gdouble  *duration )
 {
 	gboolean ret;
 
@@ -543,11 +543,11 @@ img_slide_set_transition_info( ImgSlide    *slide,
 }
 
 gboolean
-img_slide_get_transition_info( ImgSlide      *slide,
-							   gchar * const *path,
-							   gint          *id,
-							   ImgRender     *render,
-							   gdouble       *duration )
+img_slide_get_transition_info( ImgSlide     *slide,
+							   gchar const **path,
+							   gint         *id,
+							   ImgRender    *render,
+							   gdouble      *duration )
 {
 	g_return_val_if_fail( slide->caps & IMG_SLIDE_CAP_TRANSITION, FALSE );
 
@@ -683,6 +683,58 @@ img_slide_set_ken_burns_info( ImgSlide *slide,
 	}
 }
 
+gboolean
+img_slide_get_ken_burns_info( ImgSlide  *slide,
+							  GList    **points,
+							  gint      *no_points,
+							  gint      *cur_point )
+{
+	gboolean ret;
+
+	g_return_val_if_fail( slide->caps & IMG_SLIDE_CAP_KEN_BURNS, FALSE );
+
+	switch( IMG_SLIDE_GET_TYPE( slide ) )
+	{
+		case IMG_SLIDE_TYPE_FILE:
+			{
+				ImgSlideFile *file = (ImgSlideFile *)slide;
+
+				if( points )
+					*points = file->points;
+
+				if( no_points )
+					*no_points = file->no_points;
+
+				if( cur_point )
+					*cur_point = file->cur_point;
+			}
+			ret = TRUE;
+			break;
+
+		case IMG_SLIDE_TYPE_GRADIENT:
+			{
+				ImgSlideGradient *grad = (ImgSlideGradient *)slide;
+
+				if( points )
+					*points = grad->points;
+
+				if( no_points )
+					*no_points = grad->no_points;
+
+				if( cur_point )
+					*cur_point = grad->cur_point;
+			}
+			ret = TRUE;
+			break;
+
+		default:
+			ret = FALSE;
+			break;
+	}
+	
+	return( ret );
+}
+
 void
 img_slide_set_subtitle_info( ImgSlide          *slide,
 							 gchar const       *subtitle,
@@ -696,7 +748,7 @@ img_slide_set_subtitle_info( ImgSlide          *slide,
 {
 	ImgSubtitle *sub;
 
-	g_return_if_fail( slide->caps & IMG_SLIDE_CAP_SUBTITLE );
+	g_return_val_if_fail( slide->caps & IMG_SLIDE_CAP_SUBTITLE, FALSE );
 
 	switch( IMG_GET_SLIDE_TYPE( slide ) )
 	{
@@ -742,17 +794,11 @@ img_slide_set_subtitle_info( ImgSlide          *slide,
 	{
 		sub->anim = anim;
 		sub->anim_id = anim_id;
-
-		/* Sync timings */
-		img_slide_sync_timings( slide );
 	}
 
 	if( anim_duration >= 0.0 )
 	{
 		slide->anim_duration = anim_duration;
-
-		/* Synchronize timings */
-		img_slide_sync_timings( slide );
 	}
 
 	if( position > -1 )
@@ -770,7 +816,81 @@ img_slide_set_subtitle_info( ImgSlide          *slide,
 
 	if( font_color )
 		sub->font_color = *font_color;
-}								
+
+	return( TRUE );
+}
+
+gboolean
+img_slide_get_subtitle_info( ImgSlide          *slide,
+							 gchar const      **subtitle,
+							 gint              *anim_id,
+							 TextAnimationFunc *anim,
+							 gdouble           *anim_duration,
+							 ImgSubPos         *position,
+							 ImgRelPlacing     *placing,
+							 gchar            **font_desc,
+							 ImgColor          *font_color )
+{
+	ImgSubtitle *sub;
+
+	g_return_val_if_fail( slide->caps & IMG_SLIDE_CAP_SUBTITLE, FALSE );
+
+	switch( IMG_GET_SLIDE_TYPE( slide ) )
+	{
+		case IMG_SLIDE_TYPE_FILE:
+			{
+				ImgSlideFile *file = (ImgSlideFile *)slide;
+
+				if( file->no_subs )
+					sub = file->subs->data;
+				else
+				{
+					sub = g_slice_new( ImgSubtitle );
+					file->subs = g_list_append( NULL, sub );
+					img_subtitles_populate_default( sub );
+				}
+			}
+			break;
+
+		case IMG_SLIDE_TYPE_GRADIENT:
+			{
+				ImgSlideGradient *grad = (ImgSlideGradient *)slide;
+
+				if( file->no_subs )
+					sub = file->subs->data;
+				else
+				{
+					sub = g_slice_new( ImgSubtitle );
+					file->subs = g_list_append( NULL, sub );
+					img_subtitles_populate_default( sub );
+				}
+			}
+			break;
+	}
+
+	if( subtitle )
+		*subtitle = sub->text;
+
+	if( anim_id )
+		*anim_id = sub->anim_id;
+
+	if( anim_duration )
+		*anim_duration = sub->anim_duration;
+
+	if( position )
+		*position = sub->position;
+
+	if( placing )
+		*placing = sub->placing;
+
+	if( font_desc )
+		*font_desc = pango_font_description_to_string( sub->font_desc );
+
+	if( font_color )
+		*font_color = sub->font_color;
+
+	return( TRUE );
+}
 
 gdouble
 img_slide_calc_duration_from_points( GList *list,
