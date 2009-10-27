@@ -129,55 +129,57 @@ void img_project_properties(GtkMenuItem *item, img_window_struct *img_struct)
 
 void img_add_slides_thumbnails(GtkMenuItem *item, img_window_struct *img)
 {
-	GSList	*slides = NULL, *bak;
-	GdkPixbuf *thumb;
-	GtkTreeIter iter;
-	slide_struct *slide_info;
-	gint slides_cnt = 0, actual_slides = 0;
+	GSList *slides = NULL,
+		   *bak;
+	gint    slides_cnt = 0,
+			actual_slides = 0;
 
-	slides = img_import_slides_file_chooser(img);
+	slides = img_import_slides_file_chooser( img );
 
-	if (slides == NULL)
+	if( ! slides )
 		return;
 
 	actual_slides = img->slides_nr;
-	img->slides_nr += g_slist_length(slides);
-	gtk_widget_show(img->progress_bar);
+	img->slides_nr += g_slist_length( slides );
+	gtk_widget_show( img->progress_bar );
 
 	/* Remove model from thumbnail iconview for efficiency */
 	g_object_ref( G_OBJECT( img->thumbnail_model ) );
 	gtk_icon_view_set_model( GTK_ICON_VIEW( img->thumbnail_iconview ), NULL );
 	gtk_icon_view_set_model( GTK_ICON_VIEW( img->over_icon ), NULL );
 
-	bak = slides;
-	while (slides)
+	for( bak = slides; slides; slides = g_slist_next( slides ) )
 	{
+		GdkPixbuf *thumb;
+
 		if( img_scale_image( slides->data, img->video_ratio, 88, 0,
-							 img->distort_images, img->background_color,
+							 img->distort_images, &img->background_color,
 							 &thumb, NULL ) )
 		{
-			slide_info = img_create_new_slide();
-			if (slide_info)
+			ImgSlide    *slide;
+			GtkTreeIter  iter;
+
+			slide = img_slide_new( IMG_SLIDE_TYPE_FILE );
+			if( slide )
 			{
-				img_set_slide_file_info( slide_info, slides->data );
-				gtk_list_store_append (img->thumbnail_model,&iter);
-				gtk_list_store_set (img->thumbnail_model, &iter, 0, thumb,
-																 1, slide_info,
+				img_slide_set_file_info( slide, slides->data );
+				gtk_list_store_append( img->thumbnail_model, &iter );
+				gtk_list_store_set( img->thumbnail_model, &iter, 0, thumb,
+																 1, slide,
 																 2, NULL,
 																 3, FALSE,
-																 -1);
-				g_object_unref (thumb);
+																 -1 );
+				g_object_unref( thumb );
 				slides_cnt++;
 			}
-			g_free(slides->data);
+			g_free( slides->data );
 		}
-		img_increase_progressbar(img, slides_cnt);
-		slides = slides->next;
+		img_increase_progressbar( img, slides_cnt );
 	}
-	gtk_widget_hide(img->progress_bar);
-	g_slist_free(bak);
-	img_set_total_slideshow_duration(img);
-	img_set_statusbar_message(img,0);
+	gtk_widget_hide( img->progress_bar );
+	g_slist_free( bak );
+	img_set_total_slideshow_duration( img );
+	img_set_statusbar_message( img, 0 );
 	img->project_is_modified = TRUE;
 
 	gtk_icon_view_set_model( GTK_ICON_VIEW( img->thumbnail_iconview ),
@@ -187,12 +189,12 @@ void img_add_slides_thumbnails(GtkMenuItem *item, img_window_struct *img)
 	g_object_unref( G_OBJECT( img->thumbnail_model ) );
 	
 	/* Select the first slide */
-	if (actual_slides == 0)
-		img_goto_first_slide(NULL, img);
+	if( actual_slides == 0 )
+		img_goto_first_slide( NULL, img );
 
 	/* Select the first loaded slide if a previous set of slides was loaded */
 	else
-		img_select_nth_slide(img, actual_slides);
+		img_select_nth_slide( img, actual_slides );
 }
 
 void img_increase_progressbar(img_window_struct *img, gint nr)
@@ -385,53 +387,63 @@ GSList *img_import_slides_file_chooser(img_window_struct *img)
 	return slides;
 }
 
-void img_free_allocated_memory(img_window_struct *img_struct)
+void
+img_free_allocated_memory( img_window_struct *img_struct )
 {
-	GtkTreeModel *model;
 	GtkTreeIter iter;
-	slide_struct *entry;
 
 	/* Free the memory allocated the single slides one by one */
-	if (img_struct->slides_nr)
+	if( img_struct->slides_nr )
 	{
+		GtkTreeModel *model;
+
 		model = GTK_TREE_MODEL( img_struct->thumbnail_model );
 
-		gtk_tree_model_get_iter_first(model,&iter);
+		gtk_tree_model_get_iter_first( model, &iter );
 		do
 		{
-			gtk_tree_model_get(model, &iter,1,&entry,-1);
-			img_free_slide_struct( entry );
+			ImgSlide *entry;
+
+			gtk_tree_model_get( model, &iter, 1, &entry, -1 );
+			img_slide_free( entry );
 			img_struct->slides_nr--;
 		}
-		while (gtk_tree_model_iter_next (model,&iter));
-		g_signal_handlers_block_by_func((gpointer)img_struct->thumbnail_iconview, (gpointer)img_iconview_selection_changed, img_struct);
-		g_signal_handlers_block_by_func((gpointer)img_struct->over_icon, (gpointer)img_iconview_selection_changed, img_struct);
-		gtk_list_store_clear(GTK_LIST_STORE(img_struct->thumbnail_model));
-		g_signal_handlers_unblock_by_func((gpointer)img_struct->thumbnail_iconview, (gpointer)img_iconview_selection_changed, img_struct);
-		g_signal_handlers_unblock_by_func((gpointer)img_struct->over_icon, (gpointer)img_iconview_selection_changed, img_struct);
+		while( gtk_tree_model_iter_next( model,&iter ) );
+
+		g_signal_handlers_block_by_func( img_struct->thumbnail_iconview,
+										 img_iconview_selection_changed,
+										 img_struct );
+		g_signal_handlers_block_by_func( img_struct->over_icon,
+										 img_iconview_selection_changed,
+										 img_struct );
+		gtk_list_store_clear( GTK_LIST_STORE( img_struct->thumbnail_model ) );
+		g_signal_handlers_unblock_by_func( img_struct->thumbnail_iconview,
+										   img_iconview_selection_changed,
+										   img_struct );
+		g_signal_handlers_unblock_by_func( img_struct->over_icon,
+										   img_iconview_selection_changed,
+										   img_struct );
 	}
 
-	/* Unlink the possible created rotated pictures and free the GSlist */
-	/* NOTE: This is now done by img_free_slide_struct function */
-
 	/* Delete the audio files in the liststore */
-	if (gtk_tree_model_get_iter_first(GTK_TREE_MODEL(img_struct->music_file_liststore), &iter))
+	if( gtk_tree_model_get_iter_first(
+				GTK_TREE_MODEL( img_struct->music_file_liststore), &iter ) )
 	{
-		gtk_list_store_clear(img_struct->music_file_liststore);
+		gtk_list_store_clear( img_struct->music_file_liststore );
 		img_struct->total_music_secs = 0;
-		gtk_label_set_text(GTK_LABEL(img_struct->music_time_data), "");
+		gtk_label_set_text( GTK_LABEL( img_struct->music_time_data ), "" );
 	}
 	
 	/* Free gchar pointers */
-	if (img_struct->current_dir)
+	if( img_struct->current_dir )
 	{
-		g_free(img_struct->current_dir);
+		g_free( img_struct->current_dir );
 		img_struct->current_dir = NULL;
 	}
 
-	if (img_struct->project_filename)
+	if( img_struct->project_filename )
 	{
-		g_free(img_struct->project_filename);
+		g_free( img_struct->project_filename );
 		img_struct->project_filename = NULL;
 	}
 }
@@ -522,51 +534,57 @@ static void	img_update_preview_file_chooser(GtkFileChooser *file_chooser,img_win
 	gtk_file_chooser_set_preview_widget_active (file_chooser, has_preview);
 }
 
-void img_delete_selected_slides(GtkMenuItem *item,img_window_struct *img_struct)
+void
+img_delete_selected_slides( GtkMenuItem       *item,
+							img_window_struct *img_struct )
 {
-	GList *selected, *bak;
-	GtkTreeIter iter;
+	GList        *selected,
+				 *bak;
 	GtkTreeModel *model;
-	slide_struct *entry;
+	ImgSlide     *entry;
 
 	model =	GTK_TREE_MODEL( img_struct->thumbnail_model );
 	
-	selected = gtk_icon_view_get_selected_items(GTK_ICON_VIEW(img_struct->active_icon));
-	if (selected == NULL)
+	selected = gtk_icon_view_get_selected_items(
+					GTK_ICON_VIEW( img_struct->active_icon ) );
+	if( ! selected )
 		return;
 	
 	/* Free the slide struct for each slide and remove it from the iconview */
-	bak = selected;
-	g_signal_handlers_block_by_func( (gpointer)img_struct->thumbnail_iconview,
-									 (gpointer)img_iconview_selection_changed,
+	g_signal_handlers_block_by_func( img_struct->thumbnail_iconview,
+									 img_iconview_selection_changed,
 									 img_struct );
-	g_signal_handlers_block_by_func( (gpointer)img_struct->over_icon,
-									 (gpointer)img_iconview_selection_changed,
+	g_signal_handlers_block_by_func( img_struct->over_icon,
+									 img_iconview_selection_changed,
 									 img_struct );
-	while (selected)
-	{
-		gtk_tree_model_get_iter(model, &iter,selected->data);
-		gtk_tree_model_get(model, &iter,1,&entry,-1);
-		img_free_slide_struct( entry );
-		gtk_list_store_remove(GTK_LIST_STORE(img_struct->thumbnail_model),&iter);
-		img_struct->slides_nr--;
-		selected = selected->next;
-	}
-	g_signal_handlers_unblock_by_func( (gpointer)img_struct->thumbnail_iconview,
-									   (gpointer)img_iconview_selection_changed,
-									   img_struct );
-	g_signal_handlers_unblock_by_func( (gpointer)img_struct->over_icon,
-									   (gpointer)img_iconview_selection_changed,
-									   img_struct );
-	g_list_foreach (bak, (GFunc)gtk_tree_path_free, NULL);
-	g_list_free(bak);
 
-	img_set_statusbar_message(img_struct,0);
+	for( bak = selected; selected; selected = g_list_next( selected ) )
+	{
+		GtkTreeIter iter;
+
+		gtk_tree_model_get_iter( model, &iter, selected->data );
+		gtk_tree_model_get( model, &iter, 1, &entry, -1 );
+		img_slide_free( entry );
+		gtk_list_store_remove(
+				GTK_LIST_STORE( img_struct->thumbnail_model ), &iter );
+		img_struct->slides_nr--;
+	}
+	g_signal_handlers_unblock_by_func( img_struct->thumbnail_iconview,
+									   img_iconview_selection_changed,
+									   img_struct );
+	g_signal_handlers_unblock_by_func( img_struct->over_icon,
+									   img_iconview_selection_changed,
+									   img_struct );
+	g_list_foreach( bak, (GFunc)gtk_tree_path_free, NULL );
+	g_list_free( bak );
+
+	img_set_statusbar_message( img_struct, 0 );
 	cairo_surface_destroy( img_struct->current_image );
 	img_struct->current_image = NULL;
 	gtk_widget_queue_draw( img_struct->image_area );
 	img_struct->project_is_modified = TRUE;
-	img_iconview_selection_changed(GTK_ICON_VIEW(img_struct->active_icon),img_struct);
+	img_iconview_selection_changed(
+			GTK_ICON_VIEW( img_struct->active_icon ), img_struct );
 }
 
 void
@@ -592,39 +610,43 @@ img_rotate_selected_slides( img_window_struct *img,
 	GList        *selected,
 				 *bak;
 	GdkPixbuf    *thumb;
-	slide_struct *info_slide;
 
 	/* Obtain the selected slideshow filename */
 	model = GTK_TREE_MODEL( img->thumbnail_model );
 	selected = gtk_icon_view_get_selected_items(
 					GTK_ICON_VIEW( img->active_icon ) );
 
-	if( selected == NULL)
+	if( ! selected )
 		return;
 
-	gtk_widget_show(img->progress_bar);
+	gtk_widget_show( img->progress_bar );
 
-	bak = selected;
-	while (selected)
+	for( bak = selected; selected; selected = g_list_next( selected ) )
 	{
-		ImgAngle angle;
+		ImgSlide *slide;
+		ImgAngle  angle;
 
 		gtk_tree_model_get_iter( model, &iter, selected->data );
-		gtk_tree_model_get( model, &iter, 1, &info_slide, -1 );
+		gtk_tree_model_get( model, &iter, 1, &slide, -1 );
 
-		angle = ( info_slide->angle + ( clockwise ? 1 : -1 ) ) % 4;
-		img_rotate_slide( info_slide, angle, GTK_PROGRESS_BAR( img->progress_bar ) );
+		if( ! ( slide->caps & IMG_SLIDE_CAP_ROTATE ) )
+			continue;
+
+		if( ! img_slide_get_file_info( slide, NULL, &angle, NULL, NULL ) )
+			continue;
+
+		angle = ( angle + ( clockwise ? 1 : -1 ) ) % 4;
+		img_rotate_slide( slide, angle, GTK_PROGRESS_BAR( img->progress_bar ) );
 
 		/* Display the rotated image in thumbnails iconview */
 		img_scale_image( info_slide->r_filename, img->video_ratio, 88, 0,
-						 img->distort_images, img->background_color,
+						 img->distort_images, &img->background_color,
 						 &thumb, NULL );
 		gtk_list_store_set( img->thumbnail_model, &iter, 0, thumb, -1 );
-		selected = selected->next;
 	}
-	gtk_widget_hide(img->progress_bar);
-	g_list_foreach (bak, (GFunc)gtk_tree_path_free, NULL);
-	g_list_free(bak);
+	gtk_widget_hide( img->progress_bar );
+	g_list_foreach( bak, (GFunc)gtk_tree_path_free, NULL );
+	g_list_free( bak );
 
 	/* If no slide is selected currently, simply return */
 	if( ! img->current_slide )
