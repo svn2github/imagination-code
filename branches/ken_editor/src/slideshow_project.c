@@ -25,16 +25,22 @@ void
 img_save_slideshow( img_window_struct *img,
 					const gchar       *output )
 {
-	GKeyFile *img_key_file;
-	gchar *conf, *string, *path, *filename, *file, *font_desc;
-	gint count = 0;
-	gsize len;
-	GtkTreeIter iter;
-	slide_struct *entry;
+	GKeyFile     *img_key_file;
+	gchar        *conf,
+				 *string,
+				 *path,
+				 *filename,
+				 *file,
+				 *font_desc;
+	gint          count = 0;
+	gsize         len;
+	GtkTreeIter   iter;
+	ImgSlide     *entry;
 	GtkTreeModel *model;
+	gdouble       color[3];
 
 	model = GTK_TREE_MODEL( img->thumbnail_model );
-	if (!gtk_tree_model_get_iter_first (model, &iter))
+	if( ! gtk_tree_model_get_iter_first( model, &iter ) )
 		return;
 
 	img_key_file = g_key_file_new();
@@ -44,11 +50,18 @@ img_save_slideshow( img_window_struct *img,
 
 	g_key_file_set_integer( img_key_file, "slideshow settings",
 							"video format", img->video_size[1] );
+
+	color[0] = img->background_color.red;
+	color[1] = img->background_color.green;
+	color[2] = img->background_color.blue;
 	g_key_file_set_double_list( img_key_file, "slideshow settings",
 								"background color", img->background_color, 3 );
-	g_key_file_set_boolean(img_key_file,"slideshow settings", "distort images", img->distort_images);
 
-	g_key_file_set_integer(img_key_file, "slideshow settings", "number of slides", img->slides_nr);
+	g_key_file_set_boolean( img_key_file,"slideshow settings",
+							"distort images", img->distort_images );
+
+	g_key_file_set_integer( img_key_file, "slideshow settings",
+							"number of slides", img->slides_nr );
 
 	/* Slide settings */
 	do

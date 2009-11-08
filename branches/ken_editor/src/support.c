@@ -365,25 +365,25 @@ img_set_total_slideshow_duration( img_window_struct *img )
  */
 gboolean
 img_scale_image( const gchar      *filename,
-				 gdouble           ratio,
-				 gint              width,
-				 gint              height,
+				 gint              s_width,
+				 gint              s_height,
+				 gint              min_width,
+				 gint              min_height,
 				 gboolean          distort,
-				 ImgColor         *color,
+				 ImgColor const   *color,
 				 GdkPixbuf       **pixbuf,
 				 cairo_surface_t **surface )
 {
 	GdkPixbuf *loader;             /* Pixbuf used for loading */
 	gint       i_width, i_height;  /* Image dimensions */
+	gint       l_width, l_height;  /* Loader dimensions */
 	gint       offset_x, offset_y; /* Offset values for borders */
-	gdouble    i_ratio;            /* Export and image aspect ratios */
-	gdouble    skew;               /* Transformation between ratio and
-											 i_ratio */
-	gboolean   transform = FALSE;  /* Flag that controls scalling */
+	gdouble    ratio;              /* Export and image aspect ratios */
+	gboolean   preserve = TRUE;    /* Flag that controls scalling */
 
-	/* MAximal distortion values */
-	gdouble max_stretch = 0.1280;
-	gdouble max_crop    = 0.8500;
+	/* Maximal distortion values */
+	const gdouble max_stretch = 0.1280;
+	const gdouble max_crop    = 0.8500;
 
 	/* Borderline skew values */
 	gdouble max_skew = ( 1 + max_stretch ) / max_crop;
@@ -393,118 +393,64 @@ img_scale_image( const gchar      *filename,
 	if( ! gdk_pixbuf_get_file_info( filename, &i_width, &i_height ) )
 		return( FALSE );
 
-	/* How distorted images would be if we scaled them */
-	i_ratio = (gdouble)i_width / i_height;
-	skew = ratio / i_ratio;
+	/* Calculate minimal surface aspect ratio */
+	ratio = (gdouble)min_width / min_height;
 
-	/* Calculationg surface dimensions.
-	 *
-	 * In order to be as flexible as possible, this function can load images at
-	 * various sizes, but at aspect ration that matches the aspect ratio of main
-	 * preview area. How size is determined? If width argument is not -1, this
-	 * is taken as a reference dimension from which height is calculated (if
-	 * height argument also present, it's ignored). If width argument is -1,
-	 * height is taken as a reference dimension. If both width and height are
-	 * -1, surface dimensions are calculated to to fit original image.
-	 */
-	if( width > 0 )
+	/* Surface size calculation */
+	if( s_width > -1 )
+		s_height = s_width / ratio;
+	else if( s_height > -1 )
+		s_width = s_height * ratio;
+	else
+		g_error( "Width is %d and height is %d. At least one of them "
+				 "should be > -1.", s_width, s_height );
+
+	/* If requested size is smaller than minimal required size, we'll need
+	 * to scale loaded image down to properly represent real state at export. */
+	if( i_width < min_width && i_height < min_height )
 	{
-		/* Calculate height according to width */
-		height = width / ratio;
-	}
-	else if( height > 0 )
-	{
-		/* Calculate width from height */
-		width = height * ratio;
+		/* Image is too small. We'll just center it */
+		gdouble factor = MIN( (gdouble)i_width / min_width,
+							  (gdouble)i_height / min_height );
+
+		l_width  = s_width  * factor;
+		l_height = s_height * factor;
 	}
 	else
 	{
-		/* Load image at maximum quality
-		 *
-		 * If the user doesn't want to have distorted images, we create slightly
-		 * bigger surface that will hold borders too.
-		 *
-		 * If images should be distorted, we first check if we're able to fit
-		 * image without distorting it too much. If images would be largely
-		 * distorted, we simply load them undistorted.
-		 *
-		 * If we came all the way to  here, then we're able to distort image.
-		 */
-		if( ( ! distort )       || /* Don't distort */
-			( skew > max_skew ) || /* Image is too wide */
-			( skew < min_skew )  ) /* Image is too tall */
-		{
-			/* User doesn't want images to be distorted or distortion would be
-			 * too intrusive. */
-			if( ratio < i_ratio )
-			{
-				/* Borders will be added on left and right */
-				width = i_width;
-				height = width / ratio;
-			}
-			else
-			{
-				/* Borders will be added on top and bottom */
-				height = i_height;
-				width = height * ratio;
-			}
-		}
-		else
+		/* Image is large enough to be scaled */
+		gdouble i_ratio = (gdouble)i_width / i_height;
+		gdouble skew = ratio / i_ratio;
+
+		l_width  = s_width;
+		l_height = s_height;
+
+		if(   distort            || /* We're allowed to distort */
+			( skew <= max_skew ) || /* Image fits horizontally */
+			( skew >= min_skew )  ) /* Image fits vertically */
 		{
 			/* User wants images to be distorted and we're able to do it
 			 * without ruining images. */
+			preserve = FALSE;
+
 			if( ratio < i_ratio )
 			{
 				/* Image will be distorted horizontally */
-				height = i_height;
-				width = height * ratio;
+				l_height = s_height;
+				l_width  = l_height / ( skew + 1 ) * 2;
 			}
 			else
 			{
 				/* Image will be distorted vertically */
-				width = i_width;
-				height = width / ratio;
+				l_width  = s_width;
+				l_height = l_width * ( skew + 1 ) / 2;
 			}
 		}
 	}
 
-	/* Will image be disotrted?
-	 *
-	 * Conditions:
-	 *  - user allows us to do it
-	 *  - skew is in sensible range
-	 *  - image is not smaller than exported wideo size
-	 */
-	transform = distort && skew < max_skew && skew > min_skew &&
-				( i_width >= width || i_height >= height );
-
-	/* Load image into pixbuf at proper size */
-	if( transform )
-	{
-		gint lw, lh;
-
-		/* Images will be loaded at slightly modified dimensions */
-		if( ratio < i_ratio )
-		{
-			/* Horizontal scaling */
-			lw = (gdouble)width / ( skew + 1 ) * 2;
-			lh = height;
-		}
-		else
-		{
-			/* Vertical scaling */
-			lw = width;
-			lh = (gdouble)height * ( skew + 1 ) / 2;
-		}
-		loader = gdk_pixbuf_new_from_file_at_scale( filename, lw, lh,
-													FALSE, NULL );
-	}
-	else
-	{
-		/* Simply load image into pixbuf at size */
-		loader = gdk_pixbuf_new_from_file_at_size( filename, width,
-												   height, NULL );
-	}
+	/* Load image from disk */
+	loader = gdk_pixbuf_new_from_file_at_scale( filename, l_width, l_height,
+												preserve, NULL );
 	if( ! loader )
 		return( FALSE );
 
@@ -512,8 +458,8 @@ img_scale_image( const gchar      *filename,
 	i_height = gdk_pixbuf_get_height( loader );
 
 	/* Calculate offsets */
-	offset_x = ( width - i_width ) / 2;   /* CAN BE NEGATIVE!!! */
-	offset_y = ( height - i_height ) / 2; /* CAN BE NEGATIVE!!! */
+	offset_x = ( s_width - i_width ) / 2;   /* CAN BE NEGATIVE!!! */
+	offset_y = ( s_height - i_height ) / 2; /* CAN BE NEGATIVE!!! */
 
 	/* Prepare output
 	 *
@@ -522,17 +468,20 @@ img_scale_image( const gchar      *filename,
 	if( pixbuf )
 	{
 		/* Create new pixbuf with loaded image */
-		GdkPixbuf *tmp_pix;   /* Pixbuf used for loading */
+		GdkPixbuf *tmp_pix;   /* Pixbuf used for background */
 		guint32    tmp_color; /* Background color */
 
 		tmp_color = ( (gint)( color->red   * 0xff ) << 24 ) |
 					( (gint)( color->green * 0xff ) << 16 ) |
 					( (gint)( color->blue  * 0xff ) <<  8 );
-		tmp_pix = gdk_pixbuf_new( GDK_COLORSPACE_RGB, FALSE, 8, width, height );
+		tmp_pix = gdk_pixbuf_new( GDK_COLORSPACE_RGB, FALSE, 8,
+								  s_width, s_height );
 		gdk_pixbuf_fill( tmp_pix, tmp_color );
 		gdk_pixbuf_composite( loader, tmp_pix,
-							  MAX( 0, offset_x ), MAX( 0, offset_y ),
-							  MIN( i_width, width ), MIN( i_height, height ),
+							  MAX( 0, offset_x ),
+							  MAX( 0, offset_y ),
+							  MIN( i_width, s_width ),
+							  MIN( i_height, s_height ),
 							  offset_x, offset_y, 1, 1,
 							  GDK_INTERP_BILINEAR, 255 );
 
@@ -540,21 +489,17 @@ img_scale_image( const gchar      *filename,
 	}
 	if( surface )
 	{
-		/* Paint surface with loaded image
-		 * 
-		 * If image cannot be scalled, transform is FALSE. In this case, just
-		 * borders are added. If transform is not 0, than scale image before
-		 * painting it. */
+		/* Paint surface with loaded image */
 		cairo_t         *cr;       /* Cairo, used to transform image */
 		cairo_surface_t *tmp_surf; /* Surface to draw on */
 
 		/* Create image surface with proper dimensions */
 		tmp_surf = cairo_image_surface_create( CAIRO_FORMAT_RGB24,
-											   width, height );
+											   s_width, s_height );
 
 		cr = cairo_create( tmp_surf );
 		
-		if( ! transform )
+		if( preserve )
 		{
 			/* Fill with background color */
 			cairo_set_source_rgb( cr, IC_TO_RGB( *color ) );
@@ -693,13 +638,26 @@ img_scale_gradient( gint              gradient,
 					ImgColor         *c_stop,
 					gint              width,
 					gint              height,
+					gint              video_width,
+					gint              video_height,
 					GdkPixbuf       **pixbuf,
 					cairo_surface_t **surface )
 {
 	cairo_surface_t *sf;
 	cairo_t         *cr;
 	cairo_pattern_t *pat;
-	gdouble          diffx, diffy, radius;
+	gdouble          diffx,
+					 diffy,
+					 radius,
+					 ratio;
+
+	ratio = (gdouble)video_width / video_height;
+	if( width > -1 )
+		height = width * ratio;
+	else if( height > -1 )
+		width = height / ratio;
+	else
+		g_error( "No sizing parameter present!" );
 
 	sf = cairo_image_surface_create( CAIRO_FORMAT_RGB24, width, height );
 	cr = cairo_create( sf );
@@ -752,3 +710,95 @@ img_scale_gradient( gint              gradient,
 	return( TRUE );
 }
 
+cairo_surface_t *
+img_create_preview_image( ImgSlide *slide,
+						  gint      video_width,
+						  gint      video_height,
+						  gboolean  low_quality,
+						  gboolean  distort,
+						  ImgColor *background )
+{
+	cairo_surface_t *surface = NULL;
+
+	switch( IMG_SLIDE_GET_TYPE( slide ) )
+	{
+		case IMG_SLIDE_TYPE_FILE:
+			{
+				ImgSlideFile *file = &slide->file;
+
+				/* FIXME: Implement hi/low quality loading */
+				
+				img_scale_image( file->r_filename,
+								 video_width, video_height,
+								 video_width, video_height,
+								 distort, background,
+								 NULL, &surface );
+			}
+			break;
+
+		case IMG_SLIDE_TYPE_GRADIENT:
+			{
+				ImgSlideGradient *grad = &slide->gradient;
+
+				img_scale_gradient( grad->gradient,
+									&grad->start_point,
+									&grad->stop_point,
+									&grad->start_color,
+									&grad->stop_color,
+									video_width, video_height,
+									video_width, video_height,
+									NULL, &surface );
+			}
+			break;
+
+		default:
+			break;
+	}
+
+	return( surface );
+}
+
+GdkPixbuf *
+img_create_thumbnail_image( ImgSlide *slide,
+							gint      video_width,
+							gint      video_height,
+							gboolean  distort,
+							ImgColor *background )
+{
+	GdkPixbuf *pixbuf = NULL;
+
+	switch( IMG_SLIDE_GET_TYPE( slide ) )
+	{
+		case IMG_SLIDE_TYPE_FILE:
+			{
+				ImgSlideFile *file = &slide->file;
+
+				/* FIXME: Implement hi/low quality loading */
+				
+				img_scale_image( file->r_filename, 88, -1,
+								 video_width, video_height, distort,
+								 background, &pixbuf, NULL );
+			}
+			break;
+
+		case IMG_SLIDE_TYPE_GRADIENT:
+			{
+				ImgSlideGradient *grad = &slide->gradient;
+
+				img_scale_gradient( grad->gradient,
+									&grad->start_point,
+									&grad->stop_point,
+									&grad->start_color,
+									&grad->stop_color,
+									88, -1,
+									video_width, video_height,
+									&pixbuf, NULL );
+			}
+			break;
+
+		default:
+			break;
+	}
+
+	return( pixbuf );
+}

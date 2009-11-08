@@ -1753,7 +1753,8 @@ img_iconview_selection_changed( GtkIconView       *iconview,
 					   *res,
 					   *type;
 
-			img_slide_get_file_info( slide, &filename, NULL, &res, &type );
+			img_slide_get_file_info( slide, &filename, NULL, NULL,
+									 &res, &type );
 			slide_info_msg = g_strdup_printf( "%s    %s: %s    %s: %s",
 											  filename, _("Resolution"),
 											  res, _("Type"), type );
@@ -1772,33 +1773,12 @@ img_iconview_selection_changed( GtkIconView       *iconview,
 	 * large image preview. */
 	if( img->mode == 0 )
 	{
-		/* FIXME: Text if series needs to be moved into separate function
-		 * (something like "img_create_preview_image" seems suitable). */
-		//img->current_image = img_create_preview_image( slide );
-#if 0
-		if( IMG_SLIDE_GET_TYPE( slide ) == IMG_SLIDE_TYPE_GRADIENT )
-		{
-			img_scale_gradient( info_slide->gradient,
-								info_slide->g_start_point,
-								info_slide->g_stop_point,
-								info_slide->g_start_color,
-								info_slide->g_stop_color,
-								img->video_size[0],
-								img->video_size[1], NULL,
-								&img->current_image );
-		}
-		/* Respect quality settings */
-		else if( img->low_quality )
-			img_scale_image( info_slide->r_filename,
-							 (gdouble)img->video_size[0] / img->video_size[1],
-							 0, img->video_size[1], img->distort_images,
-							 img->background_color, NULL, &img->current_image );
-		else
-			img_scale_image( info_slide->r_filename,
-							 (gdouble)img->video_size[0] / img->video_size[1],
-							 0, 0, img->distort_images,
-							 img->background_color, NULL, &img->current_image );
-#endif
+		img->current_image = img_create_preview_image( slide,
+													   img->video_size[0],
+													   img->video_size[1],
+													   img->low_quality,
+													   img->distort_images,
+													   &img->background_color );
 	}
 }
 

@@ -44,11 +44,14 @@ img_slide_free( ImgSlide *slide );
 
 gboolean
 img_slide_set_file_info( ImgSlide    *slide,
-						 gchar const *filename );
+						 gchar const *o_filename,
+						 gchar const *r_filename,
+						 ImgAngle     angle );
 
 gboolean
 img_slide_get_file_info( ImgSlide     *slide,
-						 gchar const **filename,
+						 gchar const **o_filename,
+						 gchar const **r_filename,
 						 ImgAngle     *angle,
 						 gchar const **resolution,
 						 gchar const **image_type );
@@ -58,8 +61,8 @@ img_slide_set_gradient_info( ImgSlide       *slide,
 							 gint            gradient,
 							 ImgColor const *start_color,
 							 ImgColor const *stop_color,
-							 ImgColor const *start_point,
-							 ImgColor const *stop_point );
+							 ImgPoint const *start_point,
+							 ImgPoint const *stop_point );
 
 gboolean
 img_slide_get_gradient_info( ImgSlide *slide,
@@ -96,6 +99,10 @@ img_slide_set_ken_burns_info( ImgSlide *slide,
 							  gint      cur_point,
 							  gsize     length,
 							  gdouble  *points );
+
+ImgStopPoint *
+img_slide_get_nth_stop_point( ImgSlide *slide,
+							  gint      index );
 
 gboolean
 img_slide_get_ken_burns_info( ImgSlide  *slide,

@@ -190,11 +190,11 @@ img_slide_copy( ImgSlide *slide )
 
 		case IMG_SLIDE_TYPE_GRADIENT:
 			{
-				GList        *tmp;
+				GList            *tmp;
 				ImgSlideGradient *from = (ImgSlideGradient *)slide,
 								 *to   = (ImgSlideGradient *)new;
 
-				to->path       = g_strdup( from->path );
+				to->path = g_strdup( from->path );
 
 				to->points = NULL;
 				for( tmp = from->points; tmp; tmp = g_list_next( tmp ) )
@@ -281,33 +281,48 @@ img_slide_free( ImgSlide *slide )
 
 gboolean
 img_slide_set_file_info( ImgSlide    *slide,
-						 gchar const *filename )
+						 gchar const *o_filename,
+						 gchar const *r_filename,
+						 ImgAngle     angle )
 {
-	GdkPixbufFormat *format;
-	gint             width,
-					 height;
 	ImgSlideFile    *file;
 
 	g_return_val_if_fail( IMG_SLIDE_IS_TYPE_FILE( slide ), FALSE );
-	g_return_val_if_fail( filename != NULL, FALSE );
 
 	file = (ImgSlideFile *)slide;
 
-	format = gdk_pixbuf_get_file_info( filename, &width, &height );
+	if( r_filename )
+	{
+		file->r_filename = g_strdup( r_filename );
+		file->angle = angle;
+	}
 
-	file->o_filename = g_strdup( filename );
-	file->r_filename = g_strdup( filename );
-	file->angle = ANGLE_0;
+	if( o_filename )
+	{
+		GdkPixbufFormat *format;
+		gint             width,
+						 height;
+
+		format = gdk_pixbuf_get_file_info( o_filename, &width, &height );
+		
+		file->o_filename = g_strdup( o_filename );
+		file->resolution = g_strdup_printf( "%d x %d", width, height );
+		file->image_type = gdk_pixbuf_format_get_name( format );
+
+		if( file->r_filename == NULL )
+		{
+			file->r_filename = g_strdup( filename );
+			file->angle = ANGLE_0;
+		}
+	}
 	
-	file->resolution = g_strdup_printf( "%d x %d", width, height );
-	file->image_type = gdk_pixbuf_format_get_name( format );
-
 	return( TRUE );
 }
 
 gboolean
 img_slide_get_file_info( ImgSlide     *slide,
-						 gchar const **filename,
+						 gchar const **o_filename,
+						 gchar const **r_filename,
 						 ImgAngle     *angle,
 						 gchar const **resolution,
 						 gchar const **image_type )
@@ -348,8 +363,8 @@ img_slide_set_gradient_info( ImgSlide       *slide,
 							 gint            gradient,
 							 ImgColor const *start_color,
 							 ImgColor const *stop_color,
-							 ImgColor const *start_point,
-							 ImgColor const *stop_point )
+							 ImgPoint const *start_point,
+							 ImgPoint const *stop_point )
 {
 	ImSlideGradient *grad;
 
@@ -681,6 +696,39 @@ img_slide_set_ken_burns_info( ImgSlide *slide,
 			g_slice_free( ImgStopPoint, tmp->data );
 		g_list_free( free );
 	}
+}
+
+ImgStopPoint *
+img_slide_get_nth_stop_point( ImgSlide *slide,
+							  gint      index )
+{
+	GList *points;
+	gint   no_points;
+
+	g_return_val_if_fail( slide->caps & IMG_SLIDE_CAP_KEN_BURNS, NULL );
+
+	switch( IMG_SLIDE_GET_TYPE( slide ) )
+	{
+		case IMG_SLIDE_TYPE_FILE:
+			points = slide->file.points;
+			no_points = slide->file.no_points;
+			break;
+
+		case IMG_SLIDE_TYPE_GRADIENT:
+			points = slide->gradient.points;
+			no_points = slide->gradient.no_points;
+			break;
+
+		default:
+			break;
+	}
+
+	/* If index is past the end of list or < 0, instantiate it to the last
+	 * element. */
+	if( index >= no_points || index < 0 )
+		index = no_points - 1;
+
+	return( (ImgStopPoint *)g_list_nth_data( points, index ) );
 }
 
 gboolean

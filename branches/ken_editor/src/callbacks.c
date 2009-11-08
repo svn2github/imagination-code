@@ -28,17 +28,17 @@ typedef struct _ImgEmptySlide ImgEmptySlide;
 struct _ImgEmptySlide
 {
 	/* Values */
-	gdouble c_start[3];  /* Start color */
-	gdouble c_stop[3];   /* Stop color */
-	gdouble pl_start[2]; /* Linear start point */
-	gdouble pl_stop[2];  /* Linear stop point */
-	gdouble pr_start[2]; /* Radial start point */
-	gdouble pr_stop[2];  /* Radial stop point */
-	gint    drag;        /* Are we draging point:
+	ImgColor c_start;  /* Start color */
+	ImgColor c_stop;   /* Stop color */
+	ImgPoint pl_start; /* Linear start point */
+	ImgPoint pl_stop;  /* Linear stop point */
+	ImgPoint pr_start; /* Radial start point */
+	ImgPoint pr_stop;  /* Radial stop point */
+	gint     drag;        /* Are we draging point:
 							  0 - no
 							  1 - start point
 							  2 - stop point */
-	gint    gradient;    /* Gradient type:
+	gint     gradient;    /* Gradient type:
 						      0 - solid color
 							  1 - linear
 							  2 - radial */
@@ -150,19 +150,26 @@ void img_add_slides_thumbnails(GtkMenuItem *item, img_window_struct *img)
 
 	for( bak = slides; slides; slides = g_slist_next( slides ) )
 	{
+		ImgSlide  *slide;
 		GdkPixbuf *thumb;
 
-		if( img_scale_image( slides->data, img->video_ratio, 88, 0,
-							 img->distort_images, &img->background_color,
-							 &thumb, NULL ) )
+		slide = img_slide_new( IMG_SLIDE_TYPE_FILE );
+		if( ! slide )
+			continue;
+
+		img_slide_set_file_info( slide, slides->data, NULL, 0 );
+
+		thumb = img_create_thumbnail_image( slide,
+											img->video_size[0],
+											img->video_size[1],
+											img->distort_images,
+											&img->background_color );
+		if( thumb )
 		{
-			ImgSlide    *slide;
 			GtkTreeIter  iter;
 
-			slide = img_slide_new( IMG_SLIDE_TYPE_FILE );
 			if( slide )
 			{
-				img_slide_set_file_info( slide, slides->data );
 				gtk_list_store_append( img->thumbnail_model, &iter );
 				gtk_list_store_set( img->thumbnail_model, &iter, 0, thumb,
 																 1, slide,
@@ -174,6 +181,9 @@ void img_add_slides_thumbnails(GtkMenuItem *item, img_window_struct *img)
 			}
 			g_free( slides->data );
 		}
+		else
+			img_slide_free( slide );
+
 		img_increase_progressbar( img, slides_cnt );
 	}
 	gtk_widget_hide( img->progress_bar );
@@ -632,16 +642,19 @@ img_rotate_selected_slides( img_window_struct *img,
 		if( ! ( slide->caps & IMG_SLIDE_CAP_ROTATE ) )
 			continue;
 
-		if( ! img_slide_get_file_info( slide, NULL, &angle, NULL, NULL ) )
+		if( ! img_slide_get_file_info( slide, NULL, NULL, &angle, NULL, NULL ) )
 			continue;
 
 		angle = ( angle + ( clockwise ? 1 : -1 ) ) % 4;
 		img_rotate_slide( slide, angle, GTK_PROGRESS_BAR( img->progress_bar ) );
 
 		/* Display the rotated image in thumbnails iconview */
-		img_scale_image( info_slide->r_filename, img->video_ratio, 88, 0,
-						 img->distort_images, &img->background_color,
-						 &thumb, NULL );
+		thumb = img_create_thumbnail_image( slide,
+											img->video_size[0],
+											img->video_size[1],
+											img->distort_images,
+											&img->background_color );
+
 		gtk_list_store_set( img->thumbnail_model, &iter, 0, thumb, -1 );
 	}
 	gtk_widget_hide( img->progress_bar );
@@ -655,15 +668,12 @@ img_rotate_selected_slides( img_window_struct *img,
 	cairo_surface_destroy( img->current_image );
 
 	/* Respect quality settings */
-	if( img->low_quality )
-		img_scale_image( img->current_slide->r_filename, img->video_ratio,
-						 0, img->video_size[1], img->distort_images,
-						 img->background_color, NULL, &img->current_image );
-	else
-		img_scale_image( img->current_slide->r_filename, img->video_ratio,
-						 0, 0, img->distort_images,
-						 img->background_color, NULL, &img->current_image );
-
+	img->current_image = img_create_preview_image( img->current_slide,
+												   img->video_size[0],
+												   img->video_size[1],
+												   img->low_quality,
+												   img->distort_images,
+												   &img->background_color );
 	gtk_widget_queue_draw( img->image_area );
 }
 
@@ -842,31 +852,34 @@ static void img_about_dialog_activate_link(GtkAboutDialog * dialog, const gchar 
 	gtk_show_uri( NULL, link, GDK_CURRENT_TIME, NULL );
 }
 
-void img_start_stop_preview(GtkWidget *button, img_window_struct *img)
+void
+img_start_stop_preview( GtkWidget         *button,
+						img_window_struct *img )
 {
-	GtkTreeIter iter, prev;
-	GtkTreePath *path = NULL;
-	slide_struct *entry;
+	GtkTreeIter   iter,
+				  prev;
+	GtkTreePath  *path = NULL;
+	ImgSlide     *entry;
 	GtkTreeModel *model;
-	GList *list = NULL;
+	GList        *list = NULL;
 
 	/* If no images are present, abort */
 	if( img->slides_nr == 0 )
 		return;
 
-	if(img->export_is_running)
+	if( img->export_is_running )
 		return;
 
-	if (img->preview_is_running)
+	if( img->preview_is_running )
 	{
 		/* Preview is already running */
 
 		/* Remove timeout function from main loop */
-		g_source_remove(img->source_id);
+		g_source_remove( img->source_id );
 
 		/* Clean resources used by preview and prepare application for
 		 * next preview. */
-		img_clean_after_preview(img);
+		img_clean_after_preview( img );
 	}
 	else
 	{
@@ -881,13 +894,18 @@ void img_start_stop_preview(GtkWidget *button, img_window_struct *img)
 		list = gtk_icon_view_get_selected_items(
 					GTK_ICON_VIEW( img->thumbnail_iconview ) );
 		if( list )
-			gtk_icon_view_get_cursor( GTK_ICON_VIEW(img->thumbnail_iconview),
-									  &path, NULL);
-		if( list )
 		{
 			/* Start preview from this slide */
+			gtk_icon_view_get_cursor( GTK_ICON_VIEW(img->thumbnail_iconview),
+									  &path, NULL);
 			if( path )
+			{
 				gtk_tree_model_get_iter( model, &iter, path );
+				gtk_tree_path_free( path );
+			}
+			else
+				gtk_tree_model_get_iter( model, &iter, list->data );
+
 			g_list_foreach( list, (GFunc)gtk_tree_path_free, NULL );
 			g_list_free( list );
 		}
@@ -904,30 +922,17 @@ void img_start_stop_preview(GtkWidget *button, img_window_struct *img)
 
 		/* Load the first image in the pixbuf */
 		gtk_tree_model_get( model, &iter, 1, &entry, -1);
-
-		if( ! entry->o_filename )
-		{
-			img_scale_gradient( entry->gradient, entry->g_start_point,
-								entry->g_stop_point, entry->g_start_color,
-								entry->g_stop_color, img->video_size[0],
-								img->video_size[1], NULL, &img->image2 );
-		}
-		/* Respect quality settings */
-		else if( img->low_quality )
-			img_scale_image( entry->r_filename, img->video_ratio,
-							 0, img->video_size[1], img->distort_images,
-							 img->background_color, NULL, &img->image2 );
-		else
-			img_scale_image( entry->r_filename, img->video_ratio,
-							 0, 0, img->distort_images,
-							 img->background_color, NULL, &img->image2 );
+		img->image2 = img_create_preview_image( entry,
+												img->video_size[0],
+												img->video_size[1],
+												img->low_quality,
+												img->distort_images,
+												&img->background_color );
 
 		/* Load first stop point */
-		img->point2 = (ImgStopPoint *)( entry->no_points ?
-										entry->points->data :
-										NULL );
+		img->point2 = img_slide_get_nth_stop_point( entry, 0 );
 
-		img->work_slide = entry;
+		img->work_slide2 = entry;
 		img->cur_point = NULL;
 
 		/* If we started our preview from beginning, create empty pixbuf and
@@ -938,27 +943,15 @@ void img_start_stop_preview(GtkWidget *button, img_window_struct *img)
 			gtk_tree_model_get_iter( model, &prev, path );
 			gtk_tree_model_get( model, &prev, 1, &entry, -1 );
 
-			if( ! entry->o_filename )
-			{
-				img_scale_gradient( entry->gradient, entry->g_start_point,
-									entry->g_stop_point, entry->g_start_color,
-									entry->g_stop_color, img->video_size[0],
-									img->video_size[1], NULL, &img->image1 );
-			}
-			/* Respect quality settings */
-			else if( img->low_quality )
-				img_scale_image( entry->r_filename, img->video_ratio,
-								 0, img->video_size[1], img->distort_images,
-								 img->background_color, NULL, &img->image1 );
-			else
-				img_scale_image( entry->r_filename, img->video_ratio,
-								 0, 0, img->distort_images,
-								 img->background_color, NULL, &img->image1 );
-			
+			img->image1 = img_create_preview_image( entry,
+													img->video_size[0],
+													img->video_size[1],
+													img->low_quality,
+													img->distort_images,
+													&img->background_color );
+
 			/* Load last stop point */
-			img->point1 = (ImgStopPoint *)( entry->no_points ?
-											g_list_last( entry->points )->data :
-											NULL );
+			img->point1 = img_slide_get_nth_stop_point( entry, -1 );
 		}
 		else
 		{
@@ -968,9 +961,7 @@ void img_start_stop_preview(GtkWidget *button, img_window_struct *img)
 													  img->video_size[0],
 													  img->video_size[1] );
 			cr = cairo_create( img->image1 );
-			cairo_set_source_rgb( cr, img->background_color[0],
-									  img->background_color[1],
-									  img->background_color[2] );
+			cairo_set_source_rgb( cr, IC_TO_RGB( img->background_color ) );
 			cairo_paint( cr );
 			cairo_destroy( cr );
 		}
@@ -1116,62 +1107,79 @@ void img_goto_last_slide(GtkWidget *button, img_window_struct *img)
 
 void img_on_drag_data_received (GtkWidget *widget,GdkDragContext *context,int x,int y,GtkSelectionData *data,unsigned int info,unsigned int time, img_window_struct *img)
 {
-	gchar **pictures = NULL;
-	gchar *filename;
-	GtkWidget *dialog;
-	GdkPixbuf *thumb;
-	GtkTreeIter iter;
-	gint len = 0, slides_cnt = 0, actual_slides;
-	slide_struct *slide_info;
+	gchar       **pictures = NULL;
+	gchar        *filename;
+	GtkWidget    *dialog;
+	GdkPixbuf    *thumb;
+	GtkTreeIter   iter;
+	gint          len = 0,
+				  slides_cnt = 0,
+				  actual_slides;
+	ImgSlide     *slide;
 
-	pictures = gtk_selection_data_get_uris(data);
-	if (pictures == NULL)
+	pictures = gtk_selection_data_get_uris( data );
+	if( pictures == NULL )
 	{
-		dialog = gtk_message_dialog_new(GTK_WINDOW(img->imagination_window),GTK_DIALOG_MODAL,GTK_MESSAGE_ERROR,GTK_BUTTONS_OK,_("Sorry, I could not perform the operation!"));
-		gtk_window_set_title(GTK_WINDOW(dialog),"Imagination");
-		gtk_dialog_run (GTK_DIALOG (dialog));
-		gtk_widget_destroy (GTK_WIDGET (dialog));
-		gtk_drag_finish(context,FALSE,FALSE,time);
+		dialog = gtk_message_dialog_new( GTK_WINDOW( img->imagination_window ),
+										 GTK_DIALOG_MODAL,
+										 GTK_MESSAGE_ERROR,
+										 GTK_BUTTONS_OK,
+										 _("Sorry, I could not perform "
+										   "the operation!") );
+		gtk_window_set_title( GTK_WINDOW( dialog ), _("Imagination") );
+		gtk_dialog_run( GTK_DIALOG( dialog ) );
+		gtk_widget_destroy( GTK_WIDGET( dialog ) );
+		gtk_drag_finish( context, FALSE, FALSE, time );
 		return;
 	}
 	actual_slides = img->slides_nr;
-	gtk_drag_finish (context,TRUE,FALSE,time);
-	while(pictures[len])
+	gtk_drag_finish( context, TRUE, FALSE, time );
+
+	for( len = 0; pictures[len]; len++ )
 	{
+		slide = img_slide_new( IMG_SLIDE_TYPE_FILE );
+		if( ! slide )
+			continue;
+
 		filename = g_filename_from_uri (pictures[len],NULL,NULL);
-		if( img_scale_image( filename, img->video_ratio, 88, 0,
-							 img->distort_images, img->background_color,
-							 &thumb, NULL ) )
+		img_slide_set_file_info( slide, filename, NULL, 0 );
+
+		thumb = img_create_thumbnail_image( slide,
+											img->video_size[0],
+											img->video_size[1],
+											img->distort_images,
+											&img->background_color );
+		if( thumb )
 		{
-			slide_info = img_create_new_slide();
-			if (slide_info)
-			{
-				img_set_slide_file_info( slide_info, filename );
-				gtk_list_store_append (img->thumbnail_model,&iter);
-				gtk_list_store_set (img->thumbnail_model, &iter, 0, thumb, 1, slide_info, -1);
-				g_object_unref (thumb);
-				slides_cnt++;
-			}
+			gtk_list_store_append( img->thumbnail_model, &iter );
+			gtk_list_store_set( img->thumbnail_model, &iter, 0, thumb,
+															 1, slide,
+															 -1 );
+			g_object_unref( thumb );
+			slides_cnt++;
 		}
+		else
+			img_slide_free( slide );
+
 		g_free(filename);
-		len++;
 	}
-	if (slides_cnt > 0)
+
+	if( slides_cnt > 0 )
 	{
 		img->slides_nr += slides_cnt;
 		img->project_is_modified = TRUE;
-		img_set_total_slideshow_duration(img);
-		img_set_statusbar_message(img, 0);
+		img_set_total_slideshow_duration( img );
+		img_set_statusbar_message( img, 0 );
 	}
 	g_strfreev (pictures);
 
 	/* Select the first slide */
-	if (actual_slides == 0)
-		img_goto_first_slide(NULL, img);
+	if( actual_slides == 0 )
+		img_goto_first_slide( NULL, img );
 
 	/* Select the first loaded slide if a previous set of slides was loaded */
 	else
-		img_select_nth_slide(img, actual_slides);	
+		img_select_nth_slide( img, actual_slides );	
 }
 
 /*
@@ -1226,8 +1234,14 @@ img_on_expose_event( GtkWidget         *widget,
 		cr = gdk_cairo_create( widget->window );
 		
 		/* Do the drawing */
-		img_draw_image_on_surface( cr, img->image_area->allocation.width,
-								   img->current_image, &img->current_point, img );
+		/* FIXME: This function needs total overhaul, since stop point
+		 * coordinates will be handled completely different in new model. */
+#if 0
+		img_draw_image_on_surface( cr,
+								   img->image_area->allocation.width,
+								   img->current_image,
+								   &img->current_point,
+								   img );
 
 		/* Render subtitle if present */
 		if( img->current_slide->subtitle )
@@ -1245,6 +1259,7 @@ img_on_expose_event( GtkWidget         *widget,
 								 img->current_slide->font_color,
 								 img->current_slide->anim,
 								 1.0 );
+#endif
 		
 		cairo_destroy( cr );
 	}
@@ -1284,7 +1299,6 @@ img_ken_editor_expose( GtkWidget         *widget,
 					   img_window_struct *img )
 {
 	cairo_t      *cr;
-	ImgStopPoint  point = { 0, 0, 0, 1 };
 
 	if( ! img->current_image )
 		return( FALSE );
@@ -1292,6 +1306,8 @@ img_ken_editor_expose( GtkWidget         *widget,
 	cr = gdk_cairo_create( event->window );
 
 	/* Render image fully zoomed out */
+	/* FIXME: Broken render function */
+#if 0
 	img_draw_image_on_surface( cr, img->image_area->allocation.width,
 							   img->current_image, &point, img );
 
@@ -1328,6 +1344,7 @@ img_ken_editor_expose( GtkWidget         *widget,
 			cairo_fill( cr );
 		}
 	}
+#endif
 
 	cairo_destroy( cr );
 
@@ -1352,10 +1369,11 @@ img_draw_image_on_surface( cairo_t           *cr,
 						   ImgStopPoint      *point,
 						   img_window_struct *img )
 {
-	gdouble  offxr, offyr;  /* Relative offsets */
-	gdouble  factor_c;      /* Scaling factor for cairo context */
-	gdouble  factor_o;      /* Scalng factor for offset mods */
-	gint     cw;            /* Width of the surface */
+#if 0
+	gdouble offxr, offyr;  /* Relative offsets */
+	gdouble factor_c;      /* Scaling factor for cairo context */
+	gdouble factor_o;      /* Scalng factor for offset mods */
+	gint    cw;            /* Width of the surface */
 
 	cw = cairo_image_surface_get_width( surface );
 	factor_c = (gdouble)width / cw * point->zoom;
@@ -1371,6 +1389,7 @@ img_draw_image_on_surface( cairo_t           *cr,
 	cairo_set_source_surface( cr, surface, offxr, offyr );
 	cairo_paint( cr );
 	cairo_restore( cr );
+#endif
 }
 
 static gboolean img_transition_timeout(img_window_struct *img)
@@ -1551,30 +1570,33 @@ void img_choose_slideshow_filename(GtkWidget *widget, img_window_struct *img)
 
 void img_close_slideshow(GtkWidget *widget, img_window_struct *img)
 {
-	if (img->project_is_modified)
+	if( img->project_is_modified )
 	{
-		if (GTK_RESPONSE_OK != img_ask_user_confirmation(img, _("You didn't save your slideshow yet. Are you sure you want to close it?")))
+		if( GTK_RESPONSE_OK != img_ask_user_confirmation(
+									img,
+									_("You didn't save your slideshow yet. "
+									  "Are you sure you want to close it?") ) )
 			return;
 	}
 	img->project_is_modified = FALSE;
-	img_free_allocated_memory(img);
-	img_set_window_title(img,NULL);
-	img_set_statusbar_message(img,0);
+	img_free_allocated_memory( img );
+	img_set_window_title( img, NULL );
+	img_set_statusbar_message( img, 0 );
 	if( img->current_image )
 		cairo_surface_destroy( img->current_image );
 	img->current_image = NULL;
 	gtk_widget_queue_draw( img->image_area );
-	gtk_widget_set_sensitive(img->random_button, FALSE);
-	gtk_widget_set_sensitive(img->transition_type, FALSE);
-	gtk_widget_set_sensitive(img->duration, FALSE);
-	gtk_label_set_text(GTK_LABEL (img->total_time_data),"");
+	gtk_widget_set_sensitive( img->random_button, FALSE );
+	gtk_widget_set_sensitive( img->transition_type, FALSE );
+	gtk_widget_set_sensitive( img->duration, FALSE );
+	gtk_label_set_text( GTK_LABEL( img->total_time_data ), "" );
 
 	/* Reset slideshow properties */
 	img->distort_images = TRUE;
-	img->background_color[0] = 0;
-	img->background_color[1] = 0;
-	img->background_color[2] = 0;
-	img->final_transition.speed = NORMAL;
+	img->background_color.red   = 0;
+	img->background_color.green = 0;
+	img->background_color.blue  = 0;
+	img->final_transition.trans_duration = NORMAL;
 	img->final_transition.render = NULL;
 
 	/* Disable ken burns controls */
@@ -1629,6 +1651,7 @@ void img_move_audio_down( GtkButton *button, img_window_struct *img )
 		gtk_list_store_swap( GTK_LIST_STORE( model ), &iter1, &iter2 );
 }
 
+#if 0
 /*
  * img_ken_burns_zoom_changed:
  * @range: GtkRange that will provide proper value for us
@@ -1646,6 +1669,7 @@ void
 img_ken_burns_zoom_changed( GtkRange          *range,
 							img_window_struct *img )
 {
+	/* FIXME: This function will be deprecated. */
 	/* Store old zoom for calcutaions */
 	gdouble old_zoom = img->current_point.zoom;
 
@@ -1681,6 +1705,7 @@ img_ken_burns_zoom_changed( GtkRange          *range,
 
 	gtk_widget_queue_draw( img->image_area );
 }
+#endif
 
 /*
  * img_image_area_button_press:
@@ -1698,6 +1723,11 @@ img_image_area_button_press( GtkWidget         *widget,
 							 GdkEventButton    *event,
 							 img_window_struct *img )
 {
+	/* FIXME: Button press function will need to do two things:
+	 *  - move rectangles when in Ken Burns editor mode
+	 *  - move subtitles when in normal mode
+	 */
+#if 0
 	if( event->button != 1 )
 		return( FALSE );
 
@@ -1705,7 +1735,7 @@ img_image_area_button_press( GtkWidget         *widget,
 	img->y = event->y;
 	img->bak_offx = img->current_point.offx;
 	img->bak_offy = img->current_point.offy;
-
+#endif
 	return( TRUE );
 }
 
@@ -1726,6 +1756,11 @@ img_image_area_motion( GtkWidget         *widget,
 					   GdkEventMotion    *event,
 					   img_window_struct *img )
 {
+	/* FIXME: Button press function will need to do two things:
+	 *  - move rectangles when in Ken Burns editor mode
+	 *  - move subtitles when in normal mode
+	 */
+#if 0
 	gdouble deltax,
 			deltay;
 
@@ -1736,7 +1771,7 @@ img_image_area_motion( GtkWidget         *widget,
 	img->current_point.offy = CLAMP( deltay + img->bak_offy, img->maxoffy, 0 );
 
 	gtk_widget_queue_draw( img->image_area );
-
+#endif
 	return( TRUE );
 }
 
@@ -1835,6 +1870,8 @@ img_quality_toggled( GtkCheckMenuItem  *item,
 	img->low_quality = gtk_check_menu_item_get_active( item );
 }
 
+/* FIXME: Deprecated in new editor */
+#if 0
 void
 img_add_stop_point( GtkButton         *button,
 					img_window_struct *img )
@@ -1921,11 +1958,14 @@ img_delete_stop_point( GtkButton         *button,
 	/* Sync timings */
 	img_sync_timings( img->current_slide, img );
 }
+#endif
 
 void
 img_update_stop_display( img_window_struct *img,
 						 gboolean           update_pos )
 {
+	/* FIXME: This function needs to be updated when new components are set */
+#if 0
 	gchar        *string;
 	gint          full;
 
@@ -1981,11 +2021,14 @@ img_update_stop_display( img_window_struct *img,
 
 	/* Force update on preview area */
 	gtk_widget_queue_draw( img->image_area );
+#endif
 }
 
 void
 img_update_subtitles_widgets( img_window_struct *img )
 {
+	/* FIXME: Subtitles need to be redesigned, along with this function */
+#if 0
 	gchar       *string;
 	GdkColor     color;
 	gdouble     *f_colors;
@@ -2056,12 +2099,15 @@ img_update_subtitles_widgets( img_window_struct *img )
 									   img_placing_changed, img );
 	g_signal_handlers_unblock_by_func( img->sub_pos,
 									   img_text_pos_changed, img );
+#endif
 }
 
 void
 img_goto_prev_point( GtkButton         *button,
 					 img_window_struct *img )
 {
+	/* FIXME: Needs to be redesigned for new Ken Burns editor */
+#if 0
 	if( img->current_slide && img->current_slide->no_points )
 	{
 		img->current_slide->cur_point =
@@ -2070,12 +2116,15 @@ img_goto_prev_point( GtkButton         *button,
 
 		img_update_stop_display( img, TRUE );
 	}
+#endif
 }
 
 void
 img_goto_next_point( GtkButton         *button,
 					 img_window_struct *img )
 {
+	/* FIXME: Needs to be redesigned for new Ken Burns editor */
+#if 0
 	if( img->current_slide && img->current_slide->no_points )
 	{
 		img->current_slide->cur_point =
@@ -2084,12 +2133,15 @@ img_goto_next_point( GtkButton         *button,
 
 		img_update_stop_display( img, TRUE );
 	}
+#endif
 }
 
 void
 img_goto_point ( GtkEntry          *entry,
 				 img_window_struct *img )
 {
+	/* FIXME: Needs to be redesigned for new Ken Burns editor */
+#if 0
 	const gchar *string;
 	gint         number;
 
@@ -2103,6 +2155,7 @@ img_goto_point ( GtkEntry          *entry,
 
 		img_update_stop_display( img, TRUE );
 	}
+#endif
 }
 
 
@@ -2113,6 +2166,8 @@ img_calc_current_ken_point( ImgStopPoint *res,
 							gdouble       progress,
 							gint          mode )
 {
+	/* FIXME: Needs to be redesigned for new Ken Burns editor */
+#if 0
 	gdouble fracx, /* Factor for x offset */
 			fracy, /* Factor for y offset */
 			fracz; /* Factor for zoom */
@@ -2135,6 +2190,7 @@ img_calc_current_ken_point( ImgStopPoint *res,
 	res->offx = from->offx * ( 1 - fracx ) + to->offx * fracx;
 	res->offy = from->offy * ( 1 - fracy ) + to->offy * fracy;
 	res->zoom = from->zoom * ( 1 - fracz ) + to->zoom * fracz;
+#endif
 }
 
 void img_clipboard_cut_copy_operation(img_window_struct *img, ImgClipboardMode mode)
@@ -2187,8 +2243,8 @@ img_add_empty_slide( GtkMenuItem       *item,
 					 img_window_struct *img )
 {
 	/* This structure retains values across invocations */
-	static ImgEmptySlide slide = { { 0, 0, 0 },         /* Start color */
-								   { 1, 1, 1 },         /* Stop color */
+	static ImgEmptySlide slide = { { 0, 0, 0, 1 },      /* Start color */
+								   { 1, 1, 1, 1 },      /* Stop color */
 								   { 0, 0 },            /* Start point (l) */
 								   { -1, 0 },           /* Stop point (l) */
 								   { 0, 0 },            /* Start point (r) */
@@ -2225,8 +2281,10 @@ img_add_empty_slide( GtkMenuItem       *item,
 					GTK_STOCK_OK, GTK_RESPONSE_ACCEPT,
 					NULL );
 
-	gtk_button_box_set_layout (GTK_BUTTON_BOX (GTK_DIALOG (dialog)->action_area), GTK_BUTTONBOX_SPREAD);
-	gtk_dialog_set_has_separator (GTK_DIALOG (dialog), FALSE);
+	gtk_button_box_set_layout(
+		GTK_BUTTON_BOX( gtk_dialog_get_action_area( GTK_DIALOG( dialog ) ) ),
+		GTK_BUTTONBOX_SPREAD );
+	gtk_dialog_set_has_separator( GTK_DIALOG( dialog ), FALSE );
 	vbox = gtk_dialog_get_content_area( GTK_DIALOG( dialog ) );
 	
 	frame = gtk_frame_new( _("Empty slide options:") );
@@ -2262,18 +2320,14 @@ img_add_empty_slide( GtkMenuItem       *item,
 		g_signal_connect( G_OBJECT( slide.radio[i] ), "toggled",
 						  G_CALLBACK( img_gradient_toggled ), &slide );
 
-	color.red   = (gint)( slide.c_start[0] * 0xffff );
-	color.green = (gint)( slide.c_start[1] * 0xffff );
-	color.blue  = (gint)( slide.c_start[2] * 0xffff );
+	IMG_TO_GDK_COLOR( slide.c_start, color );
 	color1 = gtk_color_button_new_with_color( &color );
 	gtk_table_attach( GTK_TABLE( table ), color1, 0, 1, 3, 4,
 					  GTK_FILL, GTK_FILL, 0, 0 );
 	g_signal_connect( G_OBJECT( color1 ), "color-set",
 					  G_CALLBACK( img_gradient_color_set ), &slide );
 
-	color.red   = (gint)( slide.c_stop[0] * 0xffff );
-	color.green = (gint)( slide.c_stop[1] * 0xffff );
-	color.blue  = (gint)( slide.c_stop[2] * 0xffff );
+	IMG_TO_GDK_COLOR( slide.c_stop, color );
 	color2 = gtk_color_button_new_with_color( &color );
 	gtk_table_attach( GTK_TABLE( table ), color2, 1, 2, 3, 4,
 					  GTK_FILL, GTK_FILL, 0, 0 );
@@ -2307,73 +2361,85 @@ img_add_empty_slide( GtkMenuItem       *item,
 	/* Fill internal structure */
 	slide.color2 = color2;
 	slide.preview = preview;
-	if( slide.pl_stop[0] < 0 )
+	if( slide.pl_stop.x < 0 )
 	{
-		slide.pl_stop[0] = (gdouble)w;
-		slide.pl_stop[1] = (gdouble)h;
-		slide.pr_start[0] = w * 0.5;
-		slide.pr_start[1] = h * 0.5;
+		slide.pl_stop.x = (gdouble)w;
+		slide.pl_stop.y = (gdouble)h;
+		slide.pr_start.x = w * 0.5;
+		slide.pr_start.y = h * 0.5;
 	}
 
 	if( gtk_dialog_run( GTK_DIALOG( dialog ) ) == GTK_RESPONSE_ACCEPT )
 	{
-		GtkTreeIter   iter;
-		slide_struct *slide_info;
-		GdkPixbuf    *thumb;
+		GtkTreeIter  iter;
+		ImgSlide    *entry;
+		GdkPixbuf   *thumb;
 
-		slide_info = img_create_new_slide();
-		if( slide_info )
+		entry = img_slide_new( IMG_SLIDE_TYPE_GRADIENT );
+		if( entry )
 		{
-			gdouble p_start[2],
-					p_stop[2];
+			ImgPoint p_start,
+					 p_stop;
 
 			/* Convert gradient points into relative offsets (this enables us to
 			 * scale gradient on any surface size) */
 			if( slide.gradient < 2 ) /* solid and linear */
 			{
-				p_start[0] = slide.pl_start[0] / w;
-				p_start[1] = slide.pl_start[1] / h;
-				p_stop[0] = slide.pl_stop[0] / w;
-				p_stop[1] = slide.pl_stop[1] / h;
+				p_start.x = slide.pl_start.x / w;
+				p_start.y = slide.pl_start.y / h;
+				p_stop.x = slide.pl_stop.x / w;
+				p_stop.y = slide.pl_stop.y / h;
 			}
 			else /* Radial gradient */
 			{
-				p_start[0] = slide.pr_start[0] / w;
-				p_start[1] = slide.pr_start[1] / h;
-				p_stop[0] = slide.pr_stop[0] / w;
-				p_stop[1] = slide.pr_stop[1] / h;
+				p_start.x = slide.pr_start.x / w;
+				p_start.y = slide.pr_start.y / h;
+				p_stop.x = slide.pr_stop.x / w;
+				p_stop.y = slide.pr_stop.y / h;
 			}
 
 			/* Update slide info */
-			img_set_slide_gradient_info( slide_info, slide.gradient,
-										 slide.c_start, slide.c_stop,
-										 p_start, p_stop );
+			img_slide_set_gradient_info( entry,
+										 slide.gradient,
+										 &slide.c_start,
+										 &slide.c_stop,
+										 &p_start,
+										 &p_stop );
 
 			/* Create thumbnail */
-			img_scale_gradient( slide.gradient, p_start, p_stop,
-								slide.c_start, slide.c_stop,
-								88, 72,
-								&thumb, NULL );
+			thumb = img_create_thumbnail_image( entry,
+												img->video_size[0],
+												img->video_size[1],
+												img->distort_images,
+												NULL );
 										
 			/* Add slide to store */
-			where_to_insert	=	gtk_icon_view_get_selected_items(GTK_ICON_VIEW(img->active_icon));
-			if (where_to_insert)
+			where_to_insert	=
+				gtk_icon_view_get_selected_items(
+						GTK_ICON_VIEW( img->active_icon ) );
+
+			if( where_to_insert )
 			{
-				pos = gtk_tree_path_get_indices(where_to_insert->data)[0]+1;
-				gtk_list_store_insert_with_values(img->thumbnail_model, &iter,
-												 pos,
-												 0, thumb,
-						 						 1, slide_info,
-						 						 2, NULL,
-						 						 3, FALSE,
-						 						-1 );
-				g_list_foreach (where_to_insert, (GFunc)gtk_tree_path_free, NULL);
-				g_list_free (where_to_insert);
+				pos = gtk_tree_path_get_indices( where_to_insert->data )[0]+1;
+				gtk_list_store_insert_with_values( img->thumbnail_model,
+												   &iter, pos,
+												   0, thumb,
+												   1, entry,
+												   2, NULL,
+												   3, FALSE,
+												   -1 );
+				g_list_foreach( where_to_insert,
+								(GFunc)gtk_tree_path_free, NULL );
+				g_list_free( where_to_insert );
 			}
 			else
 			{
 				gtk_list_store_append( img->thumbnail_model, &iter );
-				gtk_list_store_set(img->thumbnail_model, &iter, 0, thumb, 1, slide_info, 2, NULL, 3, FALSE, -1 );
+				gtk_list_store_set( img->thumbnail_model, &iter, 0, thumb,
+																 1, entry,
+																 2, NULL,
+																 3, FALSE,
+																 -1 );
 			}
 			g_object_unref( G_OBJECT( thumb ) );
 			img->slides_nr++;
@@ -2410,18 +2476,16 @@ img_gradient_color_set( GtkColorButton *button,
 						ImgEmptySlide  *slide )
 {
 	GdkColor  color;
-	gdouble  *my_color;
+	ImgColor *my_color;
 
 	gtk_color_button_get_color( button, &color );
 
 	if( (GtkWidget *)button == slide->color2 )
-		my_color = slide->c_stop;
+		my_color = &slide->c_stop;
 	else
-		my_color = slide->c_start;
+		my_color = &slide->c_start;
 
-	my_color[0] = (gdouble)color.red   / 0xffff;
-	my_color[1] = (gdouble)color.green / 0xffff;
-	my_color[2] = (gdouble)color.blue  / 0xffff;
+	GDK_TO_IMG_COLOR( color, *my_color );
 
 	gtk_widget_queue_draw( slide->preview );
 }
@@ -2441,35 +2505,29 @@ img_gradient_expose( GtkWidget      *widget,
 	switch( slide->gradient )
 	{
 		case 0:
-			cairo_set_source_rgb( cr, slide->c_start[0],
-									  slide->c_start[1],
-									  slide->c_start[2] );
+			cairo_set_source_rgb( cr, IC_TO_RGB( slide->c_start ) );
 			cairo_paint( cr );
 			break;
 
 		case 1:
-			pattern = cairo_pattern_create_linear( slide->pl_start[0],
-												   slide->pl_start[1],
-												   slide->pl_stop[0],
-												   slide->pl_stop[1] );
+			pattern = cairo_pattern_create_linear( slide->pl_start.x,
+												   slide->pl_start.y,
+												   slide->pl_stop.x,
+												   slide->pl_stop.y );
 			cairo_pattern_add_color_stop_rgb( pattern, 0,
-											  slide->c_start[0],
-											  slide->c_start[1],
-											  slide->c_start[2] );
+											  IC_TO_RGB( slide->c_start ) );
 			cairo_pattern_add_color_stop_rgb( pattern, 1,
-											  slide->c_stop[0],
-											  slide->c_stop[1],
-											  slide->c_stop[2] );
+											  IC_TO_RGB( slide->c_stop ) );
 			cairo_set_source( cr, pattern );
 			cairo_paint( cr );
 			cairo_pattern_destroy( pattern );
 
 			/* Paint indicators */
-			cairo_rectangle( cr, slide->pl_start[0] - 7,
-								 slide->pl_start[1] - 7,
+			cairo_rectangle( cr, slide->pl_start.x - 7,
+								 slide->pl_start.y - 7,
 								 15, 15 );
-			cairo_rectangle( cr, slide->pl_stop[0] - 7,
-								 slide->pl_stop[1] - 7,
+			cairo_rectangle( cr, slide->pl_stop.x - 7,
+								 slide->pl_stop.y - 7,
 								 15, 15 );
 			cairo_set_source_rgb( cr, 0, 0, 0 );
 			cairo_stroke_preserve( cr );
@@ -2478,33 +2536,29 @@ img_gradient_expose( GtkWidget      *widget,
 			break;
 
 		case 2:
-			diffx = ABS( slide->pr_start[0] - slide->pr_stop[0] );
-			diffy = ABS( slide->pr_start[1] - slide->pr_stop[1] );
+			diffx = ABS( slide->pr_start.x - slide->pr_stop.x );
+			diffy = ABS( slide->pr_start.y - slide->pr_stop.y );
 			radius = sqrt( pow( diffx, 2 ) + pow( diffy, 2 ) );
-			pattern = cairo_pattern_create_radial( slide->pr_start[0],
-												   slide->pr_start[1],
+			pattern = cairo_pattern_create_radial( slide->pr_start.x,
+												   slide->pr_start.y,
 												   0,
-												   slide->pr_start[0],
-												   slide->pr_start[1],
+												   slide->pr_start.x,
+												   slide->pr_start.y,
 												   radius );
 			cairo_pattern_add_color_stop_rgb( pattern, 0,
-											  slide->c_start[0],
-											  slide->c_start[1],
-											  slide->c_start[2] );
+											  IC_TO_RGB( slide->c_start ) );
 			cairo_pattern_add_color_stop_rgb( pattern, 1,
-											  slide->c_stop[0],
-											  slide->c_stop[1],
-											  slide->c_stop[2] );
+											  IC_TO_RGB( slide->c_stop ) );
 			cairo_set_source( cr, pattern );
 			cairo_paint( cr );
 			cairo_pattern_destroy( pattern );
 
 			/* Paint indicators */
-			cairo_rectangle( cr, slide->pr_start[0] - 7,
-								 slide->pr_start[1] - 7,
+			cairo_rectangle( cr, slide->pr_start.x - 7,
+								 slide->pr_start.y - 7,
 								 15, 15 );
-			cairo_rectangle( cr, slide->pr_stop[0] - 7,
-								 slide->pr_stop[1] - 7,
+			cairo_rectangle( cr, slide->pr_stop.x - 7,
+								 slide->pr_stop.y - 7,
 								 15, 15 );
 			cairo_set_source_rgb( cr, 0, 0, 0 );
 			cairo_stroke_preserve( cr );
@@ -2528,34 +2582,34 @@ img_gradient_press( GtkWidget      *widget,
 	switch( slide->gradient )
 	{
 		case 1:
-			if( button->x < ( slide->pl_start[0] + 8 ) &&
-				button->x > ( slide->pl_start[0] - 8 ) &&
-				button->y < ( slide->pl_start[1] + 8 ) &&
-				button->y > ( slide->pl_start[1] - 8 ) )
+			if( button->x < ( slide->pl_start.x + 8 ) &&
+				button->x > ( slide->pl_start.x - 8 ) &&
+				button->y < ( slide->pl_start.y + 8 ) &&
+				button->y > ( slide->pl_start.y - 8 ) )
 			{
 				slide->drag = 1;
 			}
-			else if( button->x < ( slide->pl_stop[0] + 8 ) &&
-					 button->x > ( slide->pl_stop[0] - 8 ) &&
-					 button->y < ( slide->pl_stop[1] + 8 ) &&
-					 button->y > ( slide->pl_stop[1] - 8 ) )
+			else if( button->x < ( slide->pl_stop.x + 8 ) &&
+					 button->x > ( slide->pl_stop.x - 8 ) &&
+					 button->y < ( slide->pl_stop.y + 8 ) &&
+					 button->y > ( slide->pl_stop.y - 8 ) )
 			{
 				slide->drag = 2;
 			}
 			break;
 
 		case 2:
-			if( button->x < ( slide->pr_start[0] + 8 ) &&
-				button->x > ( slide->pr_start[0] - 8 ) &&
-				button->y < ( slide->pr_start[1] + 8 ) &&
-				button->y > ( slide->pr_start[1] - 8 ) )
+			if( button->x < ( slide->pr_start.x + 8 ) &&
+				button->x > ( slide->pr_start.x - 8 ) &&
+				button->y < ( slide->pr_start.y + 8 ) &&
+				button->y > ( slide->pr_start.y - 8 ) )
 			{
 				slide->drag = 1;
 			}
-			else if( button->x < ( slide->pr_stop[0] + 8 ) &&
-					 button->x > ( slide->pr_stop[0] - 8 ) &&
-					 button->y < ( slide->pr_stop[1] + 8 ) &&
-					 button->y > ( slide->pr_stop[1] - 8 ) )
+			else if( button->x < ( slide->pr_stop.x + 8 ) &&
+					 button->x > ( slide->pr_stop.x - 8 ) &&
+					 button->y < ( slide->pr_stop.y + 8 ) &&
+					 button->y > ( slide->pr_stop.y - 8 ) )
 			{
 				slide->drag = 2;
 			}
@@ -2591,26 +2645,26 @@ img_gradient_move( GtkWidget      *widget,
 		case 1:
 			if( slide->drag == 1 )
 			{
-				slide->pl_start[0] = CLAMP( motion->x, 0, w );
-				slide->pl_start[1] = CLAMP( motion->y, 0, h );
+				slide->pl_start.x = CLAMP( motion->x, 0, w );
+				slide->pl_start.y = CLAMP( motion->y, 0, h );
 			}
 			else
 			{
-				slide->pl_stop[0] = CLAMP( motion->x, 0, w );
-				slide->pl_stop[1] = CLAMP( motion->y, 0, h );
+				slide->pl_stop.x = CLAMP( motion->x, 0, w );
+				slide->pl_stop.y = CLAMP( motion->y, 0, h );
 			}
 			break;
 
 		case 2:
 			if( slide->drag == 1 )
 			{
-				slide->pr_start[0] = CLAMP( motion->x, 0, w );
-				slide->pr_start[1] = CLAMP( motion->y, 0, h );
+				slide->pr_start.x = CLAMP( motion->x, 0, w );
+				slide->pr_start.y = CLAMP( motion->y, 0, h );
 			}
 			else
 			{
-				slide->pr_stop[0] = CLAMP( motion->x, 0, w );
-				slide->pr_stop[1] = CLAMP( motion->y, 0, h );
+				slide->pr_stop.x = CLAMP( motion->x, 0, w );
+				slide->pr_stop.y = CLAMP( motion->y, 0, h );
 			}
 			break;
 	}
@@ -2743,14 +2797,20 @@ img_set_window_default_settings( img_window_struct *img )
 }
 
 void
-img_rotate_slide( slide_struct   *slide,
+img_rotate_slide( ImgSlide       *slide,
 				  ImgAngle        angle,
 				  GtkProgressBar *progress )
 {
-	gchar *filename;
+	gchar const *o_filename,
+				*r_filename;
+	gchar		*t_filename;
+	ImgAngle     angle_prev;
+
+	g_return_if_fail( slide->caps & IMG_SLIDE_CAP_ROTATE );
 
 	/* If this slide is gradient, do nothing */
-	if( ! slide->o_filename )
+	if( ! img_slide_get_file_info( slide, &o_filename, &r_filename,
+								   &angle_prev, NULL, NULL ) )
 		return;
 
 	/* If the angle is ANGLE_0, then simply copy original filename into rotated
@@ -2762,32 +2822,31 @@ img_rotate_slide( slide_struct   *slide,
 		gint       handle;
 		GError    *error = NULL;
 
-		image = gdk_pixbuf_new_from_file( slide->o_filename, NULL );
+		image = gdk_pixbuf_new_from_file( o_filename, NULL );
 		if( progress )
 			rotated = img_rotate_pixbuf( image, progress, angle );
 		else
 			rotated = gdk_pixbuf_rotate_simple( image, angle * 90 );
 		g_object_unref( image );
 		
-		handle = g_file_open_tmp( "img-XXXXXX.jpg", &filename, NULL );
+		handle = g_file_open_tmp( "img-XXXXXX.jpg", &t_filename, NULL );
 		close( handle );
-		if( ! gdk_pixbuf_save( rotated, filename, "jpeg", &error, NULL ) )
+		if( ! gdk_pixbuf_save( rotated, t_filename, "jpeg", &error, NULL ) )
 		{
 			g_message( "%s.", error->message );
 			g_error_free( error );
-			g_free( filename );
-			filename = g_strdup( slide->r_filename );
+			g_free( t_filename );
+			t_filename = g_strdup( r_filename );
 		}
 		g_object_unref( rotated );
 	}
 	else
-		filename = g_strdup( slide->o_filename );
+		t_filename = g_strdup( o_filename );
 
 	/* Delete any temporary image that is present from previous rotation */
-	if( slide->angle )
-		unlink( slide->r_filename );
-	g_free( slide->r_filename );
-	slide->r_filename = filename;
-	slide->angle = angle;
+	if( angle_prev )
+		unlink( r_filename );
+	img_slide_set_file_info( slide, NULL, t_filename, angle );
+	g_free( t_filename );
 }
 

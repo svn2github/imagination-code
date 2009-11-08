@@ -61,11 +61,12 @@ img_set_total_slideshow_duration( img_window_struct *img );
 
 gboolean
 img_scale_image( const gchar      *filename,
-				 gdouble           ratio,
-				 gint              width,
-				 gint              height,
+				 gint              s_width,
+				 gint              s_height,
+				 gint              min_width,
+				 gint              min_height,
 				 gboolean          distort,
-				 ImgColor         *color,
+				 ImgColor const    *color,
 				 GdkPixbuf       **pixbuf,
 				 cairo_surface_t **surface );
 
@@ -84,7 +85,23 @@ img_scale_gradient( gint              gradient,
 					ImgColor         *c_stop,
 					gint              width,
 					gint              height,
+					gint              video_width,
+					gint              video_height,
 					GdkPixbuf       **pixbuf,
 					cairo_surface_t **surface );
 
+cairo_surface_t *
+img_create_preview_image( ImgSlide *slide,
+						  gint      video_width,
+						  gint      video_height,
+						  gboolean  low_quality,
+						  gboolean  distort,
+						  ImgColor *background );
+
+GdkPixbuf *
+img_create_thumbnail_image( ImgSlide *slide,
+							gint      video_width,
+							gint      video_height,
+							gboolean  distort,
+							ImgColor *background );
 #endif

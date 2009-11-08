@@ -141,9 +141,7 @@ void img_new_slideshow_settings_dialog(img_window_struct *img, gboolean flag)
 	bg_label = gtk_label_new( _("Select background color:") );
 	gtk_box_pack_start( GTK_BOX( ex_hbox ), bg_label, FALSE, FALSE, 0 );
 
-	color.red   = img->background_color[0] * 0xffff;
-	color.green = img->background_color[1] * 0xffff;
-	color.blue  = img->background_color[2] * 0xffff;
+	IMG_TO_GDK_COLOR( img->background_color, color );
 	bg_button = gtk_color_button_new_with_color( &color );
 	gtk_box_pack_start( GTK_BOX( ex_hbox ), bg_button, FALSE, FALSE, 0 );
 
@@ -182,9 +180,7 @@ void img_new_slideshow_settings_dialog(img_window_struct *img, gboolean flag)
 
 		/* Get color settings */
 		gtk_color_button_get_color( GTK_COLOR_BUTTON( bg_button ), &new );
-		img->background_color[0] = (gdouble)new.red   / 0xffff;
-		img->background_color[1] = (gdouble)new.green / 0xffff;
-		img->background_color[2] = (gdouble)new.blue  / 0xffff;
+		GDK_TO_IMG_COLOR( new, img->background_color );
 		c_color = ( color.red   != new.red   ) ||
 				  ( color.green != new.green ) ||
 				  ( color.blue  != new.blue  );
@@ -211,7 +207,7 @@ void img_new_slideshow_settings_dialog(img_window_struct *img, gboolean flag)
 	}
 
 	/* Destroy dialog */
-	gtk_widget_destroy(dialog1);
+	gtk_widget_destroy( dialog1 );
 }
 
 
@@ -230,17 +226,17 @@ img_update_thumbs( img_window_struct *img )
 		 next;
 		 next = gtk_tree_model_iter_next( model, &iter ) )
 	{
-		slide_struct *slide;
-		GdkPixbuf    *pix;
+		ImgSlide  *slide;
+		GdkPixbuf *pix;
 
 		gtk_tree_model_get( model, &iter, 1, &slide, -1 );
-		if( img_scale_image( slide->r_filename, img->video_ratio, 88, 0,
-							 img->distort_images, img->background_color,
-							 &pix, NULL ) )
-		{
-			gtk_list_store_set( store, &iter, 0, pix, -1 );
-			g_object_unref( G_OBJECT( pix ) );
-		}
+		pix = img_create_thumbnail_image( slide,
+										  img->video_size[0],
+										  img->video_size[1],
+										  img->distort_images,
+										  &img->background_color );
+		gtk_list_store_set( store, &iter, 0, pix, -1 );
+		g_object_unref( G_OBJECT( pix ) );
 	}
 }
 
@@ -251,9 +247,12 @@ img_update_current_slide( img_window_struct *img )
 		return;
 
 	cairo_surface_destroy( img->current_image );
-	img_scale_image( img->current_slide->r_filename, img->video_ratio,
-					 0, img->video_size[1], img->distort_images,
-					 img->background_color, NULL, &img->current_image );
+	img->current_image = img_create_preview_image( img->current_slide,
+												   img->video_size[0],
+												   img->video_size[1],
+												   img->low_quality,
+												   img->distort_images,
+												   &img->background_color );
 	gtk_widget_queue_draw( img->image_area );
 }
 

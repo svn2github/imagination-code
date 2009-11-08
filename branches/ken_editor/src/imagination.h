@@ -350,8 +350,8 @@ struct _ImgSlideGradient
 	gint     gradient;    /* Gradient type */
 	ImgColor start_color; /* RGB start color */
 	ImgColor stop_color;  /* RGB stop color */
-	ImgPoint start_point; /* x, y coordinates of start point */
-	ImgPoint stop_point;  /* x, y coordinates of stop point */
+	ImgPoint start_point; /* Relative x, y coordinates of start point */
+	ImgPoint stop_point;  /* Relative x, y coordinates of stop point */
 
 	/* Still part of the slide params */
 	gdouble still_duration; /* Duration of still part */
@@ -481,7 +481,7 @@ struct _img_window_struct
 	gdouble       maxoffx;       /* Maximal offsets for current zoom */
 	gdouble       maxoffy;
 	/* FIXME: Deprecated end */
-	ImgStopPoint    *current_point;   /* Data for rendering current image */
+	ImgStopPoint     current_point;   /* Data for rendering current image */
   	ImgSlide        *current_slide;   /* Currently displayed slide */
 	cairo_surface_t *current_image;   /* Image in preview area */
 	
