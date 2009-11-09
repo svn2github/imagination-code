@@ -80,11 +80,14 @@ AC_OUTPUT([
 Makefile
 src/Makefile
 transitions/Makefile
-po/Makefile.in
 doc/Makefile
 doc/en/Makefile
 doc/en/imagination.xml
 doc/en/images/Makefile
+doc/fr/Makefile
+doc/fr/imagination.xml
+doc/fr/images/Makefile
+po/Makefile.in
 icons/Makefile
 icons/16x16/Makefile
 icons/24x24/Makefile
