@@ -347,7 +347,7 @@ static gboolean
 img_start_export( img_window_struct *img )
 {
 	GtkTreeIter   iter;
-	slide_struct *entry;
+	ImgSlide     *entry;
 	GtkTreeModel *model;
 	GtkWidget    *dialog;
 	GtkWidget    *vbox, *hbox;
@@ -425,9 +425,7 @@ img_start_export( img_window_struct *img )
 											  img->video_size[0],
 											  img->video_size[1] );
 	cr = cairo_create( img->image1 );
-	cairo_set_source_rgb( cr, img->background_color[0],
-							  img->background_color[1],
-							  img->background_color[2] );
+	cairo_set_source_rgb( cr, IC_TO_RGB( img->background_color ) );
 	cairo_paint( cr );
 	cairo_destroy( cr );
 
@@ -436,23 +434,16 @@ img_start_export( img_window_struct *img )
 	gtk_tree_model_get_iter_first( model, &iter );
 	gtk_tree_model_get( model, &iter, 1, &entry, -1 );
 
-	if( ! entry->o_filename )
-	{
-		img_scale_gradient( entry->gradient, entry->g_start_point,
-							entry->g_stop_point, entry->g_start_color,
-							entry->g_stop_color, img->video_size[0],
-							img->video_size[1], NULL, &img->image2 );
-	}
-	else
-	{
-		img_scale_image( entry->r_filename, img->video_ratio,
-						 0, 0, img->distort_images,
-						 img->background_color, NULL, &img->image2 );
-	}
+	img->image2 = img_create_preview_image( entry,
+											img->video_size[0],
+											img->video_size[1],
+											img->distort_images,
+											FALSE,
+											&img->background_color );
 
 	/* Add export idle function and set initial values */
 	img->export_is_running = 4;
-	img->work_slide = entry;
+	img->work_slide2 = entry;
 	img->total_nr_frames = img->total_secs * img->export_fps;
 	img->displayed_frame = 0;
 	img->next_slide_off = 0;
@@ -472,9 +463,7 @@ img_start_export( img_window_struct *img )
 	/* Set stop points */
 	img->cur_point = NULL;
 	img->point1 = NULL;
-	img->point2 = (ImgStopPoint *)( img->work_slide->no_points ?
-									img->work_slide->points->data :
-									NULL );
+	img->point2 = img_slide_get_nth_stop_point( img->work_slide2, 0 );
 
 	/* Set first slide */
 	gtk_tree_model_get_iter_first( GTK_TREE_MODEL( img->thumbnail_model ),
@@ -612,46 +601,34 @@ gboolean
 img_prepare_pixbufs( img_window_struct *img,
 					 gboolean           preview )
 {
+	/* FIXME: This function needs to be revisited, since now we're having 2 work
+	 * slides, img->work_slide[12], that need to be set properly. */
 	GtkTreeModel    *model;
 	static gboolean  last_transition = TRUE;
 
 	model = GTK_TREE_MODEL( img->thumbnail_model );
 
 	/* Get last stop point of current slide */
-	img->point1 = (ImgStopPoint *)( img->work_slide->no_points ?
-									g_list_last( img->work_slide->points )->data :
-									NULL );
+	img->point1 = img_slide_get_nth_stop_point( img->work_slide2, -1 );
 
 	if( last_transition && gtk_tree_model_iter_next( model, &img->cur_ss_iter ) )
 	{
 		/* We have next iter, so prepare for next round */
 		cairo_surface_destroy( img->image1 );
 		img->image1 = img->image2;
-		gtk_tree_model_get( model, &img->cur_ss_iter, 1, &img->work_slide, -1 );
+		img->work_slide1 = img->work_slide2;
+		gtk_tree_model_get( model, &img->cur_ss_iter, 1, &img->work_slide2, -1 );
 
-		if( ! img->work_slide->o_filename )
-		{
-			img_scale_gradient( img->work_slide->gradient,
-								img->work_slide->g_start_point,
-								img->work_slide->g_stop_point,
-								img->work_slide->g_start_color,
-								img->work_slide->g_stop_color,
-								img->video_size[0],
-								img->video_size[1], NULL, &img->image2 );
-		}
-		else if( preview && img->low_quality )
-			img_scale_image( img->work_slide->r_filename, img->video_ratio,
-							 0, img->video_size[1], img->distort_images,
-							 img->background_color, NULL, &img->image2 );
-		else
-			img_scale_image( img->work_slide->r_filename, img->video_ratio,
-							 0, 0, img->distort_images,
-							 img->background_color, NULL, &img->image2 );
+		img->image2 =
+				img_create_preview_image( img->work_slide2,
+										  img->video_size[0],
+										  img->video_size[1],
+										  img->distort_images,
+										  ( preview ? img->low_quality : TRUE ),
+										  &img->background_color );
 
 		/* Get first stop point */
-		img->point2 = (ImgStopPoint *)( img->work_slide->no_points ?
-										img->work_slide->points->data :
-										NULL );
+		img->point2 = img_slide_get_nth_stop_point( img->work_slide2, 0 );
 
 		return( TRUE );
 	}
@@ -670,13 +647,12 @@ img_prepare_pixbufs( img_window_struct *img,
 												  img->video_size[0],
 												  img->video_size[1] );
 		cr = cairo_create( img->image2 );
-		cairo_set_source_rgb( cr, img->background_color[0],
-								  img->background_color[1],
-								  img->background_color[2] );
+		cairo_set_source_rgb( cr, IC_TO_RGB( img->background_color ) );
 		cairo_paint( cr );
 		cairo_destroy( cr );
 
-		img->work_slide = &img->final_transition;
+		/* TODO: Check this when testing!!! */
+		img->work_slide2 = (ImgSlide *)&img->final_transition;
 		img->point2 = NULL;
 
 		return( TRUE );
@@ -753,15 +729,20 @@ guint
 img_calc_next_slide_time_offset( img_window_struct *img,
 								 gdouble            rate )
 {
-	if( img->work_slide->render )
+	gdouble still_duration,
+			trans_duration;
+
+	img_slide_get_still_info( img->work_slide2, &still_duration );
+	if( img_slide_get_transition_info( img->work_slide2,
+									   NULL, NULL, NULL,
+									   &trans_duration ) )
 	{
-		img->next_slide_off += img->work_slide->duration +
-							   img->work_slide->speed;
-		img->slide_trans_frames = img->work_slide->speed * rate;
+		img->next_slide_off += still_duration + trans_duration;
+		img->slide_trans_frames = trans_duration * rate;
 	}
 	else
 	{
-		img->next_slide_off += img->work_slide->duration;
+		img->next_slide_off += still_duration;
 		img->slide_trans_frames = 0;
 	}
 
@@ -770,11 +751,14 @@ img_calc_next_slide_time_offset( img_window_struct *img,
 	img->slide_still_frames = img->slide_nr_frames - img->slide_trans_frames;
 
 	/* Calculate subtitle frames */
+	/* FIXME: This needs to be fixed when we fix subtitles */
+#if 0
 	if( img->work_slide->subtitle )
 	{
 		img->cur_text_frame = 0;
 		img->no_text_frames = img->work_slide->anim_duration * rate;
 	}
+#endif
 
 	return( img->next_slide_off );
 }
@@ -862,8 +846,10 @@ img_export_still( img_window_struct *img )
 			img->export_slide++;
 
 			/* Make dialog more informative */
-			if( img->work_slide->duration == 0 )
-				string = g_strdup_printf( _("Final transition export progress:") );
+			if( IMG_SLIDE_GET_TYPE( img->work_slide2 ) ==
+					IMG_SLIDE_TYPE_PSEUDO )
+				string =
+					g_strdup_printf( _("Final transition export progress:") );
 			else
 				string = g_strdup_printf( _("Slide %d export progress:"),
 										  img->export_slide );
@@ -935,9 +921,18 @@ img_export_pause_unpause( GtkToggleButton   *button,
 void
 img_render_transition_frame( img_window_struct *img )
 {
-	ImgStopPoint  point = { 0, 0, 0, 1.0 }; /* Default point */
 	gdouble       progress;
 	cairo_t      *cr;
+	ImgStopPoint  point =  /* Default point */
+			{
+			  { img->video_size[0] * .5, img->video_size[1] * .5 },
+			  1.0,
+			  { .0, .0 },
+			  { .0, .0 },
+			  .0,
+			  .0,
+			  FALSE
+			};
 
 	/* Do image composing here and place result in exported_image */
 	/* Create first image */
@@ -987,7 +982,13 @@ img_render_transition_frame( img_window_struct *img )
 	progress = (gdouble)img->slide_cur_frame / ( img->slide_trans_frames - 1 );
 	cr = cairo_create( img->exported_image );
 	cairo_save( cr );
-	img->work_slide->render( cr, img->image_from, img->image_to, progress );
+	{
+		ImgRender render;
+
+		img_slide_get_transition_info( img->work_slide2, NULL,
+									   NULL, &render, NULL );
+		render( cr, img->image_from, img->image_to, progress );
+	}
 	cairo_restore( cr );
 
 	cairo_destroy( cr );
@@ -998,8 +999,17 @@ img_render_still_frame( img_window_struct *img,
 						gdouble            rate )
 {
 	cairo_t      *cr;
-	ImgStopPoint *p_draw_point;                  /* Pointer to current sp */
-	ImgStopPoint  draw_point = { 0, 0, 0, 1.0 }; /* Calculated stop point */
+	ImgStopPoint *p_draw_point; /* Pointer to current sp */
+	ImgStopPoint  draw_point =  /* Calculated stop point */
+			{
+			  { img->video_size[0] * .5, img->video_size[1] * .5 },
+			  1.0,
+			  { .0, .0 },
+			  { .0, .0 },
+			  .0,
+			  .0,
+			  FALSE
+			};
 
 	/* If no stop points are specified, we simply draw img->image2 with default
 	 * stop point on each frame.
@@ -1009,17 +1019,20 @@ img_render_still_frame( img_window_struct *img,
 	 *
 	 * If we have more than one point, we draw movement from point to point.
 	 */
-	switch( img->work_slide->no_points )
+	/* FIXME!!! */
+	switch( 0 )
 	{
 		case( 0 ): /* No stop points */
 			p_draw_point = &draw_point;
 			break;
 
 		case( 1 ): /* Single stop point */
-			p_draw_point = (ImgStopPoint *)img->work_slide->points->data;
+			p_draw_point = img_slide_get_nth_stop_point( img->work_slide2, 0 );
 			break;
 
 		default:   /* Many stop points */
+			/* FIXME: Fix this once Ken editor is up and running */
+#if 0
 			{
 				ImgStopPoint *point1,
 							 *point2;
@@ -1062,6 +1075,7 @@ img_render_still_frame( img_window_struct *img,
 				else
 					p_draw_point = point1;
 			}
+#endif
 			break;
 	}
 
@@ -1071,6 +1085,8 @@ img_render_still_frame( img_window_struct *img,
 							   p_draw_point, img );
 
 	/* Render subtitle if present */
+	/* FIXME: Fix this once subtitles are properly implemented */
+#if 0
 	if( img->work_slide->subtitle )
 	{
 		gdouble progress; /* Text animation progress */
@@ -1094,6 +1110,7 @@ img_render_still_frame( img_window_struct *img,
 							 img->work_slide->anim,
 							 progress );
 	}
+#endif
 
 	/* Destroy drawing context */
 	cairo_destroy( cr );

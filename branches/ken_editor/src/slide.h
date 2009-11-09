@@ -110,7 +110,7 @@ img_slide_get_ken_burns_info( ImgSlide  *slide,
 							  gint      *no_points,
 							  gint      *cur_point );
 
-void
+gboolean
 img_slide_set_subtitle_info( ImgSlide          *slide,
 							 gchar const       *subtitle,
 							 gint	            anim_id,

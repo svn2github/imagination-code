@@ -16,11 +16,16 @@
 ** Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
+#include "slide.h"
+#include <glib/gstdio.h>
+
 /* Create new slide and fill it with default values (those depend on the type of
  * the slide being created) */
 ImgSlide *
 img_slide_new( ImgSlideType type )
 {
+	ImgSlide *slide;
+
 	slide = g_slice_new0( ImgSlide );
 	if( ! slide )
 		return( NULL );
@@ -38,7 +43,7 @@ img_slide_new( ImgSlideType type )
 				/* Transition */
 				file->path = g_strdup( "0" );
 				file->transition_id = -1;
-				file->trans_suration = NORMAL;
+				file->trans_duration = NORMAL;
 			}
 			break;
 
@@ -78,7 +83,7 @@ img_slide_new( ImgSlideType type )
 				/* Transition */
 				grad->path = g_strdup( "0" );
 				grad->transition_id = -1;
-				grad->speed = NORMAL;
+				grad->trans_duration = NORMAL;
 				
 				/* Ken Burns */
 				grad->cur_point = -1;
@@ -95,6 +100,9 @@ img_slide_new( ImgSlideType type )
 				/* Capabilities */
 				video->caps = IMG_SLIDE_VIDEO_CAPS;
 			}
+			break;
+
+		default:
 			break;
 	}
 
@@ -215,6 +223,9 @@ img_slide_copy( ImgSlide *slide )
 				}
 			}
 			break;
+
+		default:
+			break;
 	}
 
 	return( new );
@@ -237,7 +248,7 @@ img_slide_free( ImgSlide *slide )
 					g_free( file->o_filename );
 					g_free( file->r_filename );
 					g_free( file->resolution );
-					g_free( file->imge_type );
+					g_free( file->image_type );
 				}
 				g_free( file->path );
 				
@@ -269,10 +280,7 @@ img_slide_free( ImgSlide *slide )
 			}
 			break;
 
-		case IMG_SLIDE_TYPE_VIDEO:
-			{
-				ImgSlideVideo *video = (ImgSlideVideo *)slide;
-			}
+		default:
 			break;
 	}
 
@@ -311,7 +319,7 @@ img_slide_set_file_info( ImgSlide    *slide,
 
 		if( file->r_filename == NULL )
 		{
-			file->r_filename = g_strdup( filename );
+			file->r_filename = g_strdup( o_filename );
 			file->angle = ANGLE_0;
 		}
 	}
@@ -329,14 +337,17 @@ img_slide_get_file_info( ImgSlide     *slide,
 {
 	gboolean ret;
 
-	switch( IMG_SLIDE_GET_TYPE )
+	switch( IMG_SLIDE_GET_TYPE( slide ) )
 	{
 		case IMG_SLIDE_TYPE_FILE:
 			{
 				ImgSlideFile *file = (ImgSlideFile *)slide;
 				
-				if( filename )
-					*filename = file->o_filename;
+				if( o_filename )
+					*o_filename = file->o_filename;
+
+				if( r_filename )
+					*r_filename = file->r_filename;
 				
 				if( angle )
 					*angle = file->angle;
@@ -366,7 +377,7 @@ img_slide_set_gradient_info( ImgSlide       *slide,
 							 ImgPoint const *start_point,
 							 ImgPoint const *stop_point )
 {
-	ImSlideGradient *grad;
+	ImgSlideGradient *grad;
 
 	g_return_val_if_fail(
 			IMG_SLIDE_GET_TYPE( slide ) == IMG_SLIDE_TYPE_GRADIENT, FALSE );
@@ -446,6 +457,9 @@ img_slide_set_still_info( ImgSlide *slide,
 				grad->still_duration = duration;
 			}
 			break;
+
+		default:
+			break;
 	}
 
 	return( TRUE );
@@ -494,7 +508,7 @@ img_slide_set_transition_info( ImgSlide    *slide,
 {
 	g_return_val_if_fail( slide->caps & IMG_SLIDE_CAP_TRANSITION, FALSE );
 
-	switch( IMG_GET_SLIDE_TYPE( slide ) )
+	switch( IMG_SLIDE_GET_TYPE( slide ) )
 	{
 		case IMG_SLIDE_TYPE_PSEUDO:
 			{
@@ -506,8 +520,8 @@ img_slide_set_transition_info( ImgSlide    *slide,
 						g_free( file->path );
 
 					file->path = g_strdup( path );
-					grad->transition_id = id;
-					grad->render = render;
+					file->transition_id = id;
+					file->render = render;
 				}
 
 				if( duration >= 0.0 && file->trans_duration != duration )
@@ -525,8 +539,8 @@ img_slide_set_transition_info( ImgSlide    *slide,
 						g_free( file->path );
 
 					file->path = g_strdup( path );
-					grad->transition_id = id;
-					grad->render = render;
+					file->transition_id = id;
+					file->render = render;
 				}
 
 				if( duration >= 0.0 && file->trans_duration != duration )
@@ -548,9 +562,12 @@ img_slide_set_transition_info( ImgSlide    *slide,
 					grad->render = render;
 				}
 
-				if( duration >= 0.0 && file->trans_duration != duration )
+				if( duration >= 0.0 && grad->trans_duration != duration )
 					grad->trans_duration = duration;
 			}
+			break;
+
+		default:
 			break;
 	}
 
@@ -621,7 +638,12 @@ img_slide_get_transition_info( ImgSlide     *slide,
 					*duration = grad->trans_duration;
 			}
 			break;
+
+		default:
+			break;
 	}
+
+	return( TRUE );
 }
 
 void
@@ -663,9 +685,9 @@ img_slide_set_ken_burns_info( ImgSlide *slide,
 
 	full = img_slide_calc_duration_from_points( tmp, counter );
 	if( full > 0.0 )
-		img_slide_set_still_duration( slide, full );
+		img_slide_set_still_info( slide, full );
 
-	switch( IMG_GET_SLIDE_TYPE( slide ) )
+	switch( IMG_SLIDE_GET_TYPE( slide ) )
 	{
 		case IMG_SLIDE_TYPE_FILE:
 			{
@@ -687,6 +709,9 @@ img_slide_set_ken_burns_info( ImgSlide *slide,
 				grad->no_points = counter;
 				grad->cur_point = CLAMP( cur_point, -1, counter - 1 );
 			}
+			break;
+
+		default:
 			break;
 	}
 
@@ -783,7 +808,7 @@ img_slide_get_ken_burns_info( ImgSlide  *slide,
 	return( ret );
 }
 
-void
+gboolean
 img_slide_set_subtitle_info( ImgSlide          *slide,
 							 gchar const       *subtitle,
 							 gint	            anim_id,
@@ -794,11 +819,12 @@ img_slide_set_subtitle_info( ImgSlide          *slide,
 							 const gchar       *font_desc,
 							 ImgColor          *font_color )
 {
+#if 0
 	ImgSubtitle *sub;
 
 	g_return_val_if_fail( slide->caps & IMG_SLIDE_CAP_SUBTITLE, FALSE );
 
-	switch( IMG_GET_SLIDE_TYPE( slide ) )
+	switch( IMG_SLIDE_GET_TYPE( slide ) )
 	{
 		case IMG_SLIDE_TYPE_FILE:
 			{
@@ -865,6 +891,7 @@ img_slide_set_subtitle_info( ImgSlide          *slide,
 	if( font_color )
 		sub->font_color = *font_color;
 
+#endif
 	return( TRUE );
 }
 
@@ -879,6 +906,7 @@ img_slide_get_subtitle_info( ImgSlide          *slide,
 							 gchar            **font_desc,
 							 ImgColor          *font_color )
 {
+#if 0
 	ImgSubtitle *sub;
 
 	g_return_val_if_fail( slide->caps & IMG_SLIDE_CAP_SUBTITLE, FALSE );
@@ -937,6 +965,7 @@ img_slide_get_subtitle_info( ImgSlide          *slide,
 	if( font_color )
 		*font_color = sub->font_color;
 
+#endif
 	return( TRUE );
 }
 
@@ -966,7 +995,6 @@ img_slide_calc_duration_from_subtitles( GList *list,
 										gint   length )
 {
 	GList       *tmp;
-	gint         i;
 	gdouble      duration = 0.0;
 	ImgSubtitle *sub;
 
@@ -990,7 +1018,7 @@ img_slide_sync_timings( ImgSlide *slide )
 	gdouble  duration,
 			 anim_duration;
 
-	g_return_val_if_fail( slide->caps & IMG_SLIDE_CAP_SUBTITLE );
+	g_return_val_if_fail( slide->caps & IMG_SLIDE_CAP_SUBTITLE, FALSE );
 
 	switch( IMG_SLIDE_GET_TYPE( slide ) )
 	{
@@ -1008,7 +1036,7 @@ img_slide_sync_timings( ImgSlide *slide )
 
 		case IMG_SLIDE_TYPE_GRADIENT:
 			{
-				ImgSlideGradient *file = (ImgSlideFile *)slide;
+				ImgSlideGradient *file = (ImgSlideGradient *)slide;
 				
 				points    = file->points;
 				subs      = file->subs;
@@ -1017,13 +1045,16 @@ img_slide_sync_timings( ImgSlide *slide )
 				duration  = file->still_duration;
 			}
 			break;
+
+		default:
+			break;
 	}
 
 	anim_duration = img_slide_calc_duration_from_subtitles( subs, no_subs );
 
 	/* If times are already synchronized, return */
 	if( duration >= anim_duration )
-		return;
+		return( FALSE );
 
 	/* Do the right thing;) */
 	if( no_points )
@@ -1039,5 +1070,7 @@ img_slide_sync_timings( ImgSlide *slide )
 		point->still_time += diff;
 	}
 
-	img_slide_set_still_duration( slide, anim_duration );
+	img_slide_set_still_info( slide, anim_duration );
+
+	return( TRUE );
 }

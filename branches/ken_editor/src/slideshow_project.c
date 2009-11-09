@@ -25,6 +25,8 @@ void
 img_save_slideshow( img_window_struct *img,
 					const gchar       *output )
 {
+	/* FIXME: Saving and loading will be revisited when features are coded */
+#if 0
 	GKeyFile     *img_key_file;
 	gchar        *conf,
 				 *string,
@@ -55,7 +57,7 @@ img_save_slideshow( img_window_struct *img,
 	color[1] = img->background_color.green;
 	color[2] = img->background_color.blue;
 	g_key_file_set_double_list( img_key_file, "slideshow settings",
-								"background color", img->background_color, 3 );
+								"background color", color, 3 );
 
 	g_key_file_set_boolean( img_key_file,"slideshow settings",
 							"distort images", img->distort_images );
@@ -174,12 +176,15 @@ img_save_slideshow( img_window_struct *img,
 	img->project_filename = g_strdup( output );
 
 	img->project_is_modified = FALSE;
+#endif
 }
 
 void
 img_load_slideshow( img_window_struct *img,
 					const gchar       *input )
 {
+	/* FIXME: Saving and loading will be revisited when features are coded */
+#if 0
 	GdkPixbuf *thumb;
 	slide_struct *slide_info;
 	GtkTreeIter iter;
@@ -524,6 +529,7 @@ img_load_slideshow( img_window_struct *img,
 	time = img_convert_seconds_to_time(img->total_music_secs);
 	gtk_label_set_text(GTK_LABEL(img->music_time_data), time);
 	g_free(time);
+#endif
 }
 
 static gboolean img_populate_hash_table( GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, GHashTable **table )
