@@ -56,12 +56,12 @@ rochade_la_SOURCES = rochade.c
 
 # instead of linking against all in $(GTK_LIBS), we link only against needed libs
 bar_wipe_la_LIBADD = $(PLUGINS_LIBS)
-barn_door_wipe_la_LIBADD = $(PLUGINS_LIBS)
+barn_door_wipe_la_LIBADD = $(PLUGINS_LIBS) -lm
 bow_tie_wipe_la_LIBADD = $(PLUGINS_LIBS)
 box_wipe_la_LIBADD = $(PLUGINS_LIBS)
-clock_wipe_la_LIBADD = $(PLUGINS_LIBS)
+clock_wipe_la_LIBADD = $(PLUGINS_LIBS) -lm
 diagonal_wipe_la_LIBADD = $(PLUGINS_LIBS)
-ellipse_wipe_la_LIBADD = $(PLUGINS_LIBS)
+ellipse_wipe_la_LIBADD = $(PLUGINS_LIBS) -lm
 misc_la_LIBADD = $(PLUGINS_LIBS)
 four_box_wipe_la_LIBADD = $(PLUGINS_LIBS)
 insert_la_LIBADD = $(PLUGINS_LIBS)
@@ -69,7 +69,7 @@ push_wipe_la_LIBADD = $(PLUGINS_LIBS)
 wave_la_LIBADD = $(PLUGINS_LIBS)
 misc_diagonal_wipe_la_LIBADD = $(PLUGINS_LIBS)
 misc_shape_wipe_la_LIBADD = $(PLUGINS_LIBS)
-rochade_la_LIBADD = $(PLUGINS_LIBS)
+rochade_la_LIBADD = $(PLUGINS_LIBS) -lm
 
 AM_CPPFLAGS = \
 	-DDATADIR=\"$(datadir)\" \

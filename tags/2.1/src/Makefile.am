@@ -28,4 +28,4 @@ imagination_SOURCES = \
 imagination_CFLAGS = \
 	-DDATADIR=\"$(datadir)\"
 
-imagination_LDADD = @PACKAGE_LIBS@ @SOX_LIBS@ $(INTLLIBS)
+imagination_LDADD = @PACKAGE_LIBS@ @SOX_LIBS@ $(INTLLIBS) -lm

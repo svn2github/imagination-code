@@ -7,5 +7,6 @@ src/main-window.c
 src/callbacks.c
 src/new_slideshow.c
 src/slideshow_project.c
+src/subtitles.c
 src/support.c
 src/export.c
